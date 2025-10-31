@@ -1,0 +1,2763 @@
+{
+    "bus": {
+        "806": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "800": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "828": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "mid822": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "814": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "844": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "842": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "846": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "858": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "840": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "820": {
+            "terminals": [
+                1
+            ]
+        },
+        "mid810": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "mid820": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "mid834": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "812": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "mid826": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "mid856": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "852": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "mid844": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "826": {
+            "terminals": [
+                2
+            ]
+        },
+        "mid806": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "862": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "814r": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "832": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "830": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "836": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "888": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "816": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "mid830": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "mid846": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "864": {
+            "terminals": [
+                1
+            ]
+        },
+        "mid858": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "852r": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "mid828": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "mid864": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "854": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "808": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "mid848": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "818": {
+            "terminals": [
+                1
+            ]
+        },
+        "mid840": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "824": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "834": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "822": {
+            "terminals": [
+                1
+            ]
+        },
+        "848": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "856": {
+            "terminals": [
+                2
+            ]
+        },
+        "mid860": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "838": {
+            "terminals": [
+                2
+            ]
+        },
+        "mid836": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "mid824": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "860": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "850": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "810": {
+            "terminals": [
+                2
+            ]
+        },
+        "890": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "802": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "sourcebus": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "mid838": {
+            "terminals": [
+                2,
+                4
+            ]
+        }
+    },
+    "name": "ieee34-2",
+    "voltage_source": {
+        "source": {
+            "va": [
+                29.999999999999996,
+                -90.0,
+                150.0,
+                0.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm": [
+                41.82902700278839,
+                41.82902700278839,
+                41.82902700278839,
+                0.0
+            ],
+            "bus": "sourcebus",
+            "configuration": "WYE"
+        }
+    },
+    "line": {
+        "l12b": {
+            "length": 461.772,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "mid826",
+            "t_bus": "826",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l14b": {
+            "length": 3115.0560000000005,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid830",
+            "t_bus": "830",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l23b": {
+            "length": 80.772,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid848",
+            "t_bus": "848",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l19a": {
+            "length": 131.064,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "836",
+            "t_bus": "mid840",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l8": {
+            "length": 521.208,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "816",
+            "t_bus": "818",
+            "linecode": "302",
+            "f_connections": [
+                1
+            ]
+        },
+        "l22b": {
+            "length": 554.736,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid846",
+            "t_bus": "846",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l13a": {
+            "length": 128.016,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "824",
+            "t_bus": "mid828",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l18": {
+            "length": 85.34400000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "834",
+            "t_bus": "842",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l26b": {
+            "length": 3555.4919999999997,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "mid856",
+            "t_bus": "856",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l30a": {
+            "length": 408.432,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "860",
+            "t_bus": "mid836",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l28b": {
+            "length": 246.88800000000003,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "mid864",
+            "t_bus": "864",
+            "linecode": "303",
+            "f_connections": [
+                1
+            ]
+        },
+        "l31b": {
+            "length": 740.6640000000001,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "mid838",
+            "t_bus": "838",
+            "linecode": "304",
+            "f_connections": [
+                2
+            ]
+        },
+        "l17b": {
+            "length": 307.848,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid860",
+            "t_bus": "860",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l21a": {
+            "length": 205.74,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "842",
+            "t_bus": "mid844",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l2b": {
+            "length": 263.652,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid806",
+            "t_bus": "806",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l7": {
+            "length": 3.048,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "814r",
+            "t_bus": "850",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l2a": {
+            "length": 263.652,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "802",
+            "t_bus": "mid806",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l1": {
+            "length": 786.384,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "800",
+            "t_bus": "802",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l9a": {
+            "length": 1556.0040000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "816",
+            "t_bus": "mid824",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l29a": {
+            "length": 888.4920000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "858",
+            "t_bus": "mid834",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l29b": {
+            "length": 888.4920000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid834",
+            "t_bus": "834",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l23a": {
+            "length": 80.772,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "846",
+            "t_bus": "mid848",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l16b": {
+            "length": 746.7600000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid858",
+            "t_bus": "858",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l25": {
+            "length": 3.048,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "852r",
+            "t_bus": "832",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l31a": {
+            "length": 740.6640000000001,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "862",
+            "t_bus": "mid838",
+            "linecode": "304",
+            "f_connections": [
+                2
+            ]
+        },
+        "l32": {
+            "length": 3218.688,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "888",
+            "t_bus": "890",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l12a": {
+            "length": 461.772,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "824",
+            "t_bus": "mid826",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l30b": {
+            "length": 408.432,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid836",
+            "t_bus": "836",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l9b": {
+            "length": 1556.0040000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid824",
+            "t_bus": "824",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l24": {
+            "length": 94.488,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "850",
+            "t_bus": "816",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l4a": {
+            "length": 884.5296000000001,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "808",
+            "t_bus": "mid810",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l20": {
+            "length": 85.34400000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "836",
+            "t_bus": "862",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l10b": {
+            "length": 7338.06,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "mid820",
+            "t_bus": "820",
+            "linecode": "302",
+            "f_connections": [
+                1
+            ]
+        },
+        "l21b": {
+            "length": 205.74,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid844",
+            "t_bus": "844",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l16a": {
+            "length": 746.7600000000001,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "832",
+            "t_bus": "mid858",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l26a": {
+            "length": 3555.4919999999997,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "854",
+            "t_bus": "mid856",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l3": {
+            "length": 9823.704,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "806",
+            "t_bus": "808",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l6": {
+            "length": 9061.704,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "812",
+            "t_bus": "814",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l5": {
+            "length": 11430.0,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "808",
+            "t_bus": "812",
+            "linecode": "300",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l27": {
+            "length": 11225.784,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "854",
+            "t_bus": "852",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l11a": {
+            "length": 2093.976,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "820",
+            "t_bus": "mid822",
+            "linecode": "302",
+            "f_connections": [
+                1
+            ]
+        },
+        "l4b": {
+            "length": 884.5296000000001,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "mid810",
+            "t_bus": "810",
+            "linecode": "303",
+            "f_connections": [
+                2
+            ]
+        },
+        "l17a": {
+            "length": 307.848,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "834",
+            "t_bus": "mid860",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l13b": {
+            "length": 128.016,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid828",
+            "t_bus": "828",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l10a": {
+            "length": 7338.06,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "818",
+            "t_bus": "mid820",
+            "linecode": "302",
+            "f_connections": [
+                1
+            ]
+        },
+        "l19b": {
+            "length": 131.064,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "mid840",
+            "t_bus": "840",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l11b": {
+            "length": 2093.976,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "mid822",
+            "t_bus": "822",
+            "linecode": "302",
+            "f_connections": [
+                1
+            ]
+        },
+        "l28a": {
+            "length": 246.88800000000003,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "858",
+            "t_bus": "mid864",
+            "linecode": "303",
+            "f_connections": [
+                1
+            ]
+        },
+        "l15": {
+            "length": 158.496,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "830",
+            "t_bus": "854",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l14a": {
+            "length": 3115.0560000000005,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "828",
+            "t_bus": "mid830",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l22a": {
+            "length": 554.736,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "844",
+            "t_bus": "mid846",
+            "linecode": "301",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    "transformer": {
+        "xfm1": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                500.0,
+                500.0
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "832",
+                "888"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "noloadloss": 0.0,
+            "cmag": 0.0,
+            "xsc": [
+                0.0408
+            ],
+            "source_id": "transformer.xfm1",
+            "sm_ub": 750.0,
+            "rw": [
+                0.0095,
+                0.0095
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                24.9,
+                4.16
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "subxf": {
+            "polarity": [
+                1,
+                -1
+            ],
+            "sm_nom": [
+                25000.0,
+                25000.0
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3
+                ],
+                [
+                    2,
+                    3,
+                    1,
+                    4
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "sourcebus",
+                "800"
+            ],
+            "configuration": [
+                "DELTA",
+                "WYE"
+            ],
+            "noloadloss": 0.0,
+            "cmag": 0.0,
+            "xsc": [
+                1.0e-5
+            ],
+            "source_id": "transformer.subxf",
+            "sm_ub": 37500.0,
+            "rw": [
+                5.0e-6,
+                5.0e-6
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                69.0,
+                24.9
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "reg1": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                2000.0,
+                2000.0
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.075,
+                    1.03125,
+                    1.03125
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "814",
+                "814r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "controls": {
+                "ctprim": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        100.0,
+                        100.0,
+                        100.0
+                    ]
+                ],
+                "x": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        1.6,
+                        1.6,
+                        1.6
+                    ]
+                ],
+                "r": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        2.7,
+                        2.7,
+                        2.7
+                    ]
+                ],
+                "ptratio": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        120.0,
+                        120.0,
+                        120.0
+                    ]
+                ],
+                "band": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        2.0,
+                        2.0,
+                        2.0
+                    ]
+                ],
+                "vreg": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        122.0,
+                        122.0,
+                        122.0
+                    ]
+                ]
+            },
+            "noloadloss": 0.0,
+            "xsc": [
+                0.0001
+            ],
+            "cmag": 0.0,
+            "sm_ub": 3000.0,
+            "source_id": "transformer.reg1",
+            "rw": [
+                1.0e-6,
+                1.0e-6
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    false,
+                    false,
+                    false
+                ]
+            ],
+            "vm_nom": [
+                14.376,
+                14.376
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "reg2": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                2000.0,
+                2000.0
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.08125,
+                    1.06875,
+                    1.075
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "852",
+                "852r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "controls": {
+                "ctprim": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        100.0,
+                        100.0,
+                        100.0
+                    ]
+                ],
+                "x": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        1.5,
+                        1.5,
+                        1.5
+                    ]
+                ],
+                "r": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        2.5,
+                        2.5,
+                        2.5
+                    ]
+                ],
+                "ptratio": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        120.0,
+                        120.0,
+                        120.0
+                    ]
+                ],
+                "band": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        2.0,
+                        2.0,
+                        2.0
+                    ]
+                ],
+                "vreg": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        124.0,
+                        124.0,
+                        124.0
+                    ]
+                ]
+            },
+            "noloadloss": 0.0,
+            "xsc": [
+                0.0001
+            ],
+            "cmag": 0.0,
+            "sm_ub": 3000.0,
+            "source_id": "transformer.reg2",
+            "rw": [
+                1.0e-6,
+                1.0e-6
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    false,
+                    false,
+                    false
+                ]
+            ],
+            "vm_nom": [
+                14.376,
+                14.376
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        }
+    },
+    "shunt": {
+        "c844": {
+            "connections": [
+                1,
+                2,
+                3
+            ],
+            "gs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "bus": "844",
+            "bs": [
+                [
+                    0.000483863163497363,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.000483863163497363,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.000483863163497363
+                ]
+            ],
+            "configuration": "WYE"
+        },
+        "c848": {
+            "connections": [
+                1,
+                2,
+                3
+            ],
+            "gs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "bus": "848",
+            "bs": [
+                [
+                    0.0007257947452460444,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0007257947452460444,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0007257947452460444
+                ]
+            ],
+            "configuration": "WYE"
+        }
+    },
+    "load": {
+        "d808_810b": {
+            "qd_nom": [
+                8.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                16.0
+            ],
+            "bus": "mid810",
+            "configuration": "WYE"
+        },
+        "s830c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                25.0
+            ],
+            "bus": "830",
+            "configuration": "DELTA"
+        },
+        "d818_820a": {
+            "qd_nom": [
+                17.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                34.0
+            ],
+            "bus": "mid820",
+            "configuration": "WYE"
+        },
+        "s860": {
+            "qd_nom": [
+                16.0,
+                16.0,
+                16.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm_nom": 14.376021702821681,
+            "pd_nom": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "bus": "860",
+            "configuration": "WYE"
+        },
+        "d816_824b": {
+            "qd_nom": [
+                2.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                5.0
+            ],
+            "bus": "mid824",
+            "configuration": "DELTA"
+        },
+        "d860_836a": {
+            "qd_nom": [
+                15.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                30.0
+            ],
+            "bus": "mid836",
+            "configuration": "DELTA"
+        },
+        "d846_848b": {
+            "qd_nom": [
+                11.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                23.0
+            ],
+            "bus": "mid848",
+            "configuration": "WYE"
+        },
+        "d860_836c": {
+            "qd_nom": [
+                22.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                42.0
+            ],
+            "bus": "mid836",
+            "configuration": "DELTA"
+        },
+        "d842_844a": {
+            "qd_nom": [
+                5.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                9.0
+            ],
+            "bus": "mid844",
+            "configuration": "WYE"
+        },
+        "s840": {
+            "qd_nom": [
+                7.0,
+                7.0,
+                7.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm_nom": 14.376021702821681,
+            "pd_nom": [
+                9.0,
+                9.0,
+                9.0
+            ],
+            "bus": "840",
+            "configuration": "WYE"
+        },
+        "s830a": {
+            "qd_nom": [
+                5.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                10.0
+            ],
+            "bus": "830",
+            "configuration": "DELTA"
+        },
+        "d862_838b": {
+            "qd_nom": [
+                14.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                28.0
+            ],
+            "bus": "mid838",
+            "configuration": "WYE"
+        },
+        "d858_864a": {
+            "qd_nom": [
+                1.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                2.0
+            ],
+            "bus": "mid864",
+            "configuration": "WYE"
+        },
+        "d824_828c": {
+            "qd_nom": [
+                2.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                4.0
+            ],
+            "bus": "mid828",
+            "configuration": "WYE"
+        },
+        "d858_834a": {
+            "qd_nom": [
+                2.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                4.0
+            ],
+            "bus": "mid834",
+            "configuration": "DELTA"
+        },
+        "d854_856b": {
+            "qd_nom": [
+                2.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                4.0
+            ],
+            "bus": "mid856",
+            "configuration": "WYE"
+        },
+        "d802_806c": {
+            "qd_nom": [
+                14.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                25.0
+            ],
+            "bus": "mid806",
+            "configuration": "WYE"
+        },
+        "s830b": {
+            "qd_nom": [
+                5.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                10.0
+            ],
+            "bus": "830",
+            "configuration": "DELTA"
+        },
+        "d834_860a": {
+            "qd_nom": [
+                8.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                16.0
+            ],
+            "bus": "mid860",
+            "configuration": "DELTA"
+        },
+        "d844_846b": {
+            "qd_nom": [
+                12.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                25.0
+            ],
+            "bus": "mid846",
+            "configuration": "WYE"
+        },
+        "d832_858c": {
+            "qd_nom": [
+                3.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                6.0
+            ],
+            "bus": "mid858",
+            "configuration": "DELTA"
+        },
+        "d860_836b": {
+            "qd_nom": [
+                6.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                10.0
+            ],
+            "bus": "mid836",
+            "configuration": "DELTA"
+        },
+        "d820_822a": {
+            "qd_nom": [
+                70.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                135.0
+            ],
+            "bus": "mid822",
+            "configuration": "WYE"
+        },
+        "d832_858a": {
+            "qd_nom": [
+                3.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                7.0
+            ],
+            "bus": "mid858",
+            "configuration": "DELTA"
+        },
+        "s848": {
+            "qd_nom": [
+                16.0,
+                16.0,
+                16.0
+            ],
+            "connections": [
+                1,
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "bus": "848",
+            "configuration": "DELTA"
+        },
+        "d832_858b": {
+            "qd_nom": [
+                1.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                2.0
+            ],
+            "bus": "mid858",
+            "configuration": "DELTA"
+        },
+        "d844_846c": {
+            "qd_nom": [
+                11.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "mid846",
+            "configuration": "WYE"
+        },
+        "d858_834b": {
+            "qd_nom": [
+                8.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                15.0
+            ],
+            "bus": "mid834",
+            "configuration": "DELTA"
+        },
+        "d828_830a": {
+            "qd_nom": [
+                3.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                7.0
+            ],
+            "bus": "mid830",
+            "configuration": "WYE"
+        },
+        "s890": {
+            "qd_nom": [
+                75.0,
+                75.0,
+                75.0
+            ],
+            "connections": [
+                1,
+                2,
+                3
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                150.0,
+                150.0,
+                150.0
+            ],
+            "bus": "890",
+            "configuration": "DELTA"
+        },
+        "d834_860c": {
+            "qd_nom": [
+                55.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                110.0
+            ],
+            "bus": "mid860",
+            "configuration": "DELTA"
+        },
+        "d836_840b": {
+            "qd_nom": [
+                11.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                22.0
+            ],
+            "bus": "mid840",
+            "configuration": "DELTA"
+        },
+        "d802_806b": {
+            "qd_nom": [
+                15.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                30.0
+            ],
+            "bus": "mid806",
+            "configuration": "WYE"
+        },
+        "d824_826b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 14.376,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "mid826",
+            "configuration": "WYE"
+        },
+        "d858_834c": {
+            "qd_nom": [
+                7.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                13.0
+            ],
+            "bus": "mid834",
+            "configuration": "DELTA"
+        },
+        "d836_840a": {
+            "qd_nom": [
+                9.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                18.0
+            ],
+            "bus": "mid840",
+            "configuration": "DELTA"
+        },
+        "d834_860b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 24.9,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "mid860",
+            "configuration": "DELTA"
+        },
+        "s844": {
+            "qd_nom": [
+                105.0,
+                105.0,
+                105.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm_nom": 14.376021702821681,
+            "pd_nom": [
+                135.0,
+                135.0,
+                135.0
+            ],
+            "bus": "844",
+            "configuration": "WYE"
+        }
+    },
+    "linecode": {
+        "300": {
+            "b_fr": [
+                [
+                    0.004396572029199475,
+                    -0.001261943907480315,
+                    -0.0008194023556430446
+                ],
+                [
+                    -0.001261943907480315,
+                    0.004201177985564305,
+                    -0.0005119307480314961
+                ],
+                [
+                    -0.0008194023556430446,
+                    -0.0005119307480314961,
+                    0.004028199453740157
+                ]
+            ],
+            "rs": [
+                [
+                    0.0008306490091863517,
+                    0.00013055008858267717,
+                    0.00013235206364829396
+                ],
+                [
+                    0.00013055008858267717,
+                    0.0008225711843832021,
+                    0.00012837528871391076
+                ],
+                [
+                    0.00013235206364829396,
+                    0.00012837528871391076,
+                    0.0008260508628608923
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0008290955807086615,
+                    0.00035909041338582677,
+                    0.00031161765419947506
+                ],
+                [
+                    0.00035909041338582677,
+                    0.0008431385695538057,
+                    0.0002852715157480315
+                ],
+                [
+                    0.00031161765419947506,
+                    0.0002852715157480315,
+                    0.0008370491338582677
+                ]
+            ],
+            "b_to": [
+                [
+                    0.004396572029199475,
+                    -0.001261943907480315,
+                    -0.0008194023556430446
+                ],
+                [
+                    -0.001261943907480315,
+                    0.004201177985564305,
+                    -0.0005119307480314961
+                ],
+                [
+                    -0.0008194023556430446,
+                    -0.0005119307480314961,
+                    0.004028199453740157
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "301": {
+            "b_fr": [
+                [
+                    0.004219967458989502,
+                    -0.0011837368438320209,
+                    -0.0007748185613517059
+                ],
+                [
+                    -0.0011837368438320209,
+                    0.004042621197506562,
+                    -0.000490421745406824
+                ],
+                [
+                    -0.0007748185613517059,
+                    -0.000490421745406824,
+                    0.003885959840879265
+                ]
+            ],
+            "rs": [
+                [
+                    0.001199246400918635,
+                    0.00014459307742782152,
+                    0.00014658146325459317
+                ],
+                [
+                    0.00014459307742782152,
+                    0.0011903607939632546,
+                    0.0001421697276902887
+                ],
+                [
+                    0.00014658146325459317,
+                    0.0001421697276902887,
+                    0.0011942132939632545
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.000877065436351706,
+                    0.00040028732283464567,
+                    0.00035362234580052493
+                ],
+                [
+                    0.00040028732283464567,
+                    0.0008873802001312336,
+                    0.00032547422900262466
+                ],
+                [
+                    0.00035362234580052493,
+                    0.00032547422900262466,
+                    0.0008829063254593175
+                ]
+            ],
+            "b_to": [
+                [
+                    0.004219967458989502,
+                    -0.0011837368438320209,
+                    -0.0007748185613517059
+                ],
+                [
+                    -0.0011837368438320209,
+                    0.004042621197506562,
+                    -0.000490421745406824
+                ],
+                [
+                    -0.0007748185613517059,
+                    -0.000490421745406824,
+                    0.003885959840879265
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "302": {
+            "b_fr": [
+                [
+                    0.0034819061679790026
+                ]
+            ],
+            "rs": [
+                [
+                    0.001739527559055118
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0009230479002624672
+                ]
+            ],
+            "b_to": [
+                [
+                    0.0034819061679790026
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        },
+        "303": {
+            "b_fr": [
+                [
+                    0.0034819061679790026
+                ]
+            ],
+            "rs": [
+                [
+                    0.001739527559055118
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0009230479002624672
+                ]
+            ],
+            "b_to": [
+                [
+                    0.0034819061679790026
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        },
+        "304": {
+            "b_fr": [
+                [
+                    0.0035961286089238845
+                ]
+            ],
+            "rs": [
+                [
+                    0.0011940879265091864
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0008830938320209973
+                ]
+            ],
+            "b_to": [
+                [
+                    0.0035961286089238845
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        }
+    }
+}

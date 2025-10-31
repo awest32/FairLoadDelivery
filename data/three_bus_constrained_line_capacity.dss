@@ -1,0 +1,45 @@
+Clear
+New Circuit.3Bus_example
+~ basekv=0.4   pu=0.9959  MVAsc1=1e3  MVAsc3=1e6 basemva=0.5
+
+New linecode.556MCM nphases=3 basefreq=50
+~ rmatrix = ( 0.1000 | 0.0400    0.1000 |  0.0400    0.0400    0.1000)
+~ xmatrix = ( 0.0583 |  0.0233    0.0583 | 0.0233    0.0233    0.0583)
+~ cmatrix = (50.92958178940651  | -0  50.92958178940651 | -0 -0 50.92958178940651  )
+
+New linecode.4/0QUAD nphases=3 basefreq=50
+~ rmatrix = ( 0.1167 | 0.0467    0.1167 | 0.0467    0.0467    0.1167)
+~ xmatrix = (0.0667  |  0.0267    0.0667  |  0.0267    0.0267    0.0667 )
+~ cmatrix = (50.92958178940651  | -0  50.92958178940651 | -0 -0 50.92958178940651  )
+
+! CRITICAL: Add very restrictive line code for bus A connection
+New linecode.WEAK nphases=3 basefreq=50
+~ rmatrix = ( 5.0 | 2.0    5.0 |  2.0    2.0    5.0)  ! High resistance
+~ xmatrix = ( 2.0 |  0.8    2.0 | 0.8    0.8    2.0)  ! High reactance
+~ cmatrix = (1.0  | -0  1.0 | -0 -0 1.0  )
+
+New Line.OHLine  bus1=sourcebus.1.2.3  Primary.1.2.3  linecode = 556MCM   length=1
+New Line.Quad    Bus1=Primary.1.2.3  Secondary.1.2.3  linecode = 4/0QUAD  length=1
+
+! Switch to bus A uses WEAK line (bottleneck)
+New Line.Switch1 bus1=Primary.1.2.3 bus2=Loadbusa.1.2.3 linecode = WEAK length=1 switch=y normamps=10 emergamps=12 enabled=y
+
+! Switch to bus B uses normal line
+New Line.Switch2 bus1=Primary.1.2.3 bus2=loadbusb.1.2.3 linecode = 4/0QUAD length=1 switch=y enabled=y
+
+! Add line to connect bus A and B to create a cycle
+New Line.Switch3 bus1=loadbusa.1.2.3 bus2=loadbusb.1.2.3 linecode = 4/0QUAD length=1 switch=y enabled=y
+
+New Load.L1 phases=1  loadbusa.1.0   ( 0.4 3 sqrt / )   kW=9   kvar=3  model=1
+New Load.L2 phases=1  Loadbusa.2.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
+New Load.L3 phases=1  Loadbusa.3.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
+
+New Load.L4 phases=1  loadbusb.1.0   ( 0.4 3 sqrt / )   kW=20   kvar=3  model=1
+New Load.L5 phases=1  loadbusb.2.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
+New Load.L6 phases=1  loadbusb.3.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
+
+Set voltagebases=[0.4]
+Set tolerance=0.000001
+set defaultbasefreq=50
+Calcvoltagebases
+Solve

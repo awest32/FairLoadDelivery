@@ -1,0 +1,71 @@
+! ========================================================================
+! SIMPLE NETWORK WITH INSUFFICIENT GENERATION
+! ========================================================================
+
+! Very weak voltage source (essentially negligible contribution)
+New Circuit.Insufficient_Gen
+~ basekv=0.4 pu=1.0 MVAsc1=0.01 MVAsc3=0.01
+
+! ========================================================================
+! SINGLE GENERATOR - TOTAL CAPACITY: 30 kW
+! ========================================================================
+
+New Generator.Gen1 bus1=Primary phases=1 kV=0.4 
+~ kW=100 kvar=45 
+~ kVA=105             ! Hard capacity limit
+~ Xdp=0.3
+~ model=1 status=fixed
+~ Vminpu=0.9 Vmaxpu=1.1
+
+! ========================================================================
+! LINE CODES
+! ========================================================================
+
+New linecode.Main nphases=3 basefreq=50
+~ rmatrix=(0.08|0.032 0.08|0.032 0.032 0.08)
+~ xmatrix=(0.047|0.019 0.047|0.019 0.019 0.047)
+~ cmatrix=(50.93|0 50.93|0 0 50.93)
+
+! ========================================================================
+! NETWORK TOPOLOGY
+! ========================================================================
+
+! Weak connection from source to generator bus
+New Line.SlackLine bus1=sourcebus.1.2.3 bus2=Primary.1.2.3 
+~ linecode=Main length=100 R1=100 X1=100  ! Very high impedance
+
+! Switches to load buses
+New Line.Switch1 bus1=Primary.1.2.3 bus2=BusA.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+New Line.Switch2 bus1=Primary.1.2.3 bus2=BusB.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+New Line.Switch3 bus1=BusA.1.2.3 bus2=BusB.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+! ========================================================================
+! LOADS - TOTAL: 70 kW (exceeds 30 kW generation by 40 kW!)
+! ========================================================================
+
+! Bus A - 73 kW total
+New Load.L1 phases=1 bus1=BusA.1.0 kV=(0.4 3 sqrt /) kW=50 kvar=15 model=1
+!New Load.L2 phases=1 bus1=BusA.2.0 kV=(0.4 3 sqrt /) kW=12 kvar=4 model=1
+!New Load.L3 phases=1 bus1=BusA.3.0 kV=(0.4 3 sqrt /) kW=11 kvar=3 model=1
+
+! Bus B - 35 kW total
+New Load.L4 phases=1 bus1=BusB.1.0 kV=(0.4 3 sqrt /) kW=12 kvar=4 model=1
+!New Load.L5 phases=1 bus1=BusB.2.0 kV=(0.4 3 sqrt /) kW=12 kvar=4 model=1
+!New Load.L6 phases=1 bus1=BusB.3.0 kV=(0.4 3 sqrt /) kW=11 kvar=3 model=1
+
+! ========================================================================
+! SUMMARY
+! ========================================================================
+! Total Load:       70 kW
+! Total Generation: 30 kW (hard limit via kVA rating)
+! Required Shed:    40 kW (57% of load must be shed!)
+! ========================================================================
+
+Set voltagebases=[0.4]
+Calcv
+Solve

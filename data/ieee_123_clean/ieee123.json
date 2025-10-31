@@ -1,0 +1,6358 @@
+{
+    "bus": {
+        "32": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "29": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "1": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "109": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "81": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "101": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "54": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "2": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "78": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "150r": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "74": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "41": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "3": {
+            "terminals": [
+                3
+            ]
+        },
+        "9r": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "65": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "53": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "51": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "106": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "160r": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "27": {
+            "terminals": [
+                1,
+                3
+            ]
+        },
+        "75": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "42": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "33": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "28": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "52": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "50": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "111": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "63": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "92": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "88": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "93": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "26": {
+            "terminals": [
+                1,
+                3
+            ]
+        },
+        "10": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "250": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "77": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "24": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "87": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "58": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "25": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "114": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "23": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "160": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "450": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "149": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "49": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "61s": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "59": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "31": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "5": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "89": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "62": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "43": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "90": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "39": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "112": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "34": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "44": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "150": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "94": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "55": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "86": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "17": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "99": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "71": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "152": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "47": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "37": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "9": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "73": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "82": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "25r": {
+            "terminals": [
+                1,
+                3,
+                4
+            ]
+        },
+        "79": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "12": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "20": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "6": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "84": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "80": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "104": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "98": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "113": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "110": {
+            "terminals": [
+                1
+            ]
+        },
+        "70": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "14": {
+            "terminals": [
+                1
+            ]
+        },
+        "7": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "96": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "57": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "610": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "8": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "300": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "64": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "19": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "91": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "107": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "102": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "69": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "60": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "97": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "4": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "22": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "11": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "35": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "13": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "197": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "15": {
+            "terminals": [
+                3
+            ]
+        },
+        "61": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "67": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "108": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "16": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "100": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "40": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "38": {
+            "terminals": [
+                2,
+                4
+            ]
+        },
+        "46": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "72": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "21": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "83": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "151": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "45": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "68": {
+            "terminals": [
+                1,
+                4
+            ]
+        },
+        "56": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "95": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "66": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "76": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "36": {
+            "terminals": [
+                1,
+                2
+            ]
+        },
+        "85": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "135": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "48": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "103": {
+            "terminals": [
+                3,
+                4
+            ]
+        },
+        "18": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        },
+        "30": {
+            "terminals": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        "105": {
+            "terminals": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    "name": "ieee123",
+    "voltage_source": {
+        "source": {
+            "va": [
+                0.0,
+                -119.99999999999999,
+                120.00000000000001,
+                0.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm": [
+                2.4017771198288433,
+                2.4017771198288433,
+                2.4017771198288433,
+                0.0
+            ],
+            "bus": "150",
+            "configuration": "WYE"
+        }
+    },
+    "line": {
+        "l97": {
+            "length": 0.55,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "98",
+            "t_bus": "99",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l108": {
+            "length": 1.0,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "108",
+            "t_bus": "300",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l101": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "101",
+            "t_bus": "105",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l56": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "55",
+            "t_bus": "56",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l100": {
+            "length": 0.225,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "101",
+            "t_bus": "102",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "sw2": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "13",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "152",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l71": {
+            "length": 0.275,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "70",
+            "t_bus": "71",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l16": {
+            "length": 0.375,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "15",
+            "t_bus": "16",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l9": {
+            "length": 0.225,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "8",
+            "t_bus": "9",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l98": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "99",
+            "t_bus": "100",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "sw6": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "61",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "61s",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l10": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "8",
+            "t_bus": "13",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l67": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "67",
+            "t_bus": "72",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l22": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "21",
+            "t_bus": "23",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l36": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "35",
+            "t_bus": "40",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l72": {
+            "length": 0.275,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "72",
+            "t_bus": "73",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l93": {
+            "length": 0.275,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "93",
+            "t_bus": "94",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l8": {
+            "length": 0.225,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "8",
+            "t_bus": "12",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l81": {
+            "length": 0.175,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "80",
+            "t_bus": "81",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l53": {
+            "length": 0.125,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "53",
+            "t_bus": "54",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l14": {
+            "length": 0.25,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "14",
+            "t_bus": "11",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l73": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "72",
+            "t_bus": "76",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l105": {
+            "length": 0.325,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "105",
+            "t_bus": "108",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l23": {
+            "length": 0.55,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "23",
+            "t_bus": "24",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l34": {
+            "length": 0.1,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "34",
+            "t_bus": "15",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l39": {
+            "length": 0.325,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "38",
+            "t_bus": "39",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l89": {
+            "length": 0.25,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "89",
+            "t_bus": "90",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l13": {
+            "length": 0.825,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "13",
+            "t_bus": "18",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l112": {
+            "length": 0.525,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "112",
+            "t_bus": "113",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l26": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "25",
+            "t_bus": "28",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l59": {
+            "length": 0.25,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "58",
+            "t_bus": "59",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l18": {
+            "length": 0.25,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "18",
+            "t_bus": "19",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l113": {
+            "length": 0.325,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "113",
+            "t_bus": "114",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l61": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "60",
+            "t_bus": "62",
+            "linecode": "12",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l91": {
+            "length": 0.3,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "91",
+            "t_bus": "92",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l86": {
+            "length": 0.45,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "86",
+            "t_bus": "87",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l103": {
+            "length": 0.7,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "103",
+            "t_bus": "104",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l94": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "93",
+            "t_bus": "95",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l111": {
+            "length": 0.125,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "110",
+            "t_bus": "112",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l30": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "28",
+            "t_bus": "29",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "sw4": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "60",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "160",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l12": {
+            "length": 0.15,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "13",
+            "t_bus": "34",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l55": {
+            "length": 0.35,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "54",
+            "t_bus": "57",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l7": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "7",
+            "t_bus": "8",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l57": {
+            "length": 0.25,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "57",
+            "t_bus": "58",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l17": {
+            "length": 0.35,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "15",
+            "t_bus": "17",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l64": {
+            "length": 0.425,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "64",
+            "t_bus": "65",
+            "linecode": "12",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l60": {
+            "length": 0.55,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "60",
+            "t_bus": "61",
+            "linecode": "5",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l75": {
+            "length": 0.4,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "74",
+            "t_bus": "75",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l78": {
+            "length": 0.1,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "77",
+            "t_bus": "78",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l109": {
+            "length": 0.3,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "109",
+            "t_bus": "110",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l45": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "44",
+            "t_bus": "47",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l117": {
+            "length": 0.35,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "160r",
+            "t_bus": "67",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l95": {
+            "length": 0.2,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "95",
+            "t_bus": "96",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l40": {
+            "length": 0.325,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "40",
+            "t_bus": "41",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l1": {
+            "length": 0.175,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "1",
+            "t_bus": "2",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l115": {
+            "length": 0.4,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "149",
+            "t_bus": "1",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l33": {
+            "length": 0.3,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "31",
+            "t_bus": "32",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l63": {
+            "length": 0.35,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "63",
+            "t_bus": "64",
+            "linecode": "12",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l54": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "54",
+            "t_bus": "55",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l4": {
+            "length": 0.2,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "3",
+            "t_bus": "4",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "sw3": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "18",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "135",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l50": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "50",
+            "t_bus": "51",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l38": {
+            "length": 0.25,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "36",
+            "t_bus": "38",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l102": {
+            "length": 0.325,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "102",
+            "t_bus": "103",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l114": {
+            "length": 0.375,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "135",
+            "t_bus": "35",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l49": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "49",
+            "t_bus": "50",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l107": {
+            "length": 0.45,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "108",
+            "t_bus": "109",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l32": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "30",
+            "t_bus": "250",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l80": {
+            "length": 0.475,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "78",
+            "t_bus": "80",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l25": {
+            "length": 0.35,
+            "t_connections": [
+                1,
+                3
+            ],
+            "f_bus": "25r",
+            "t_bus": "26",
+            "linecode": "7",
+            "f_connections": [
+                1,
+                3
+            ]
+        },
+        "l76": {
+            "length": 0.4,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "76",
+            "t_bus": "77",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l99": {
+            "length": 0.8,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "100",
+            "t_bus": "450",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l28": {
+            "length": 0.225,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "26",
+            "t_bus": "31",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l84": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "82",
+            "t_bus": "83",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l47": {
+            "length": 0.15,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "47",
+            "t_bus": "48",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l52": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "52",
+            "t_bus": "53",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l88": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "87",
+            "t_bus": "89",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l46": {
+            "length": 0.3,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "45",
+            "t_bus": "46",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l24": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "23",
+            "t_bus": "25",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l44": {
+            "length": 0.2,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "44",
+            "t_bus": "45",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l70": {
+            "length": 0.325,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "69",
+            "t_bus": "70",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l20": {
+            "length": 0.325,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "19",
+            "t_bus": "20",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l96": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "97",
+            "t_bus": "98",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l37": {
+            "length": 0.3,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "36",
+            "t_bus": "37",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l85": {
+            "length": 0.475,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "84",
+            "t_bus": "85",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l51": {
+            "length": 0.5,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "51",
+            "t_bus": "151",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "sw1": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "150r",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "149",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l3": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "1",
+            "t_bus": "7",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l35": {
+            "length": 0.65,
+            "t_connections": [
+                1,
+                2
+            ],
+            "f_bus": "35",
+            "t_bus": "36",
+            "linecode": "8",
+            "f_connections": [
+                1,
+                2
+            ]
+        },
+        "l6": {
+            "length": 0.25,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "5",
+            "t_bus": "6",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l58": {
+            "length": 0.75,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "57",
+            "t_bus": "60",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l104": {
+            "length": 0.225,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "105",
+            "t_bus": "106",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l83": {
+            "length": 0.675,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "81",
+            "t_bus": "84",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l5": {
+            "length": 0.325,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "3",
+            "t_bus": "5",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l116": {
+            "length": 0.4,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "152",
+            "t_bus": "52",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l65": {
+            "length": 0.325,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "65",
+            "t_bus": "66",
+            "linecode": "12",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l27": {
+            "length": 0.275,
+            "t_connections": [
+                1,
+                3
+            ],
+            "f_bus": "26",
+            "t_bus": "27",
+            "linecode": "7",
+            "f_connections": [
+                1,
+                3
+            ]
+        },
+        "l11": {
+            "length": 0.425,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "9r",
+            "t_bus": "14",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l68": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "67",
+            "t_bus": "97",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l48": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "47",
+            "t_bus": "49",
+            "linecode": "4",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l79": {
+            "length": 0.225,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "78",
+            "t_bus": "79",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "sw5": {
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "f_connections": [
+                1,
+                2,
+                3
+            ],
+            "length": 0.001,
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "97",
+            "b_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "t_bus": "197",
+            "b_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "rs": [
+                [
+                    0.001,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.001,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.001
+                ]
+            ]
+        },
+        "l90": {
+            "length": 0.225,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "89",
+            "t_bus": "91",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l2": {
+            "length": 0.25,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "1",
+            "t_bus": "3",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l106": {
+            "length": 0.575,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "106",
+            "t_bus": "107",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l29": {
+            "length": 0.5,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "27",
+            "t_bus": "33",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l77": {
+            "length": 0.7,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "76",
+            "t_bus": "86",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l82": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "81",
+            "t_bus": "82",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l15": {
+            "length": 0.25,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "14",
+            "t_bus": "10",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l42": {
+            "length": 0.5,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "42",
+            "t_bus": "43",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l19": {
+            "length": 0.3,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "18",
+            "t_bus": "21",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l62": {
+            "length": 0.175,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "62",
+            "t_bus": "63",
+            "linecode": "12",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l41": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "40",
+            "t_bus": "42",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l21": {
+            "length": 0.525,
+            "t_connections": [
+                2
+            ],
+            "f_bus": "21",
+            "t_bus": "22",
+            "linecode": "10",
+            "f_connections": [
+                2
+            ]
+        },
+        "l74": {
+            "length": 0.35,
+            "t_connections": [
+                3
+            ],
+            "f_bus": "73",
+            "t_bus": "74",
+            "linecode": "11",
+            "f_connections": [
+                3
+            ]
+        },
+        "l110": {
+            "length": 0.575,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "110",
+            "t_bus": "111",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l66": {
+            "length": 0.2,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "67",
+            "t_bus": "68",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l69": {
+            "length": 0.275,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "68",
+            "t_bus": "69",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l118": {
+            "length": 0.25,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "197",
+            "t_bus": "101",
+            "linecode": "3",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l31": {
+            "length": 0.35,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "29",
+            "t_bus": "30",
+            "linecode": "2",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l43": {
+            "length": 0.2,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "42",
+            "t_bus": "44",
+            "linecode": "1",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        },
+        "l87": {
+            "length": 0.175,
+            "t_connections": [
+                1
+            ],
+            "f_bus": "87",
+            "t_bus": "88",
+            "linecode": "9",
+            "f_connections": [
+                1
+            ]
+        },
+        "l92": {
+            "length": 0.225,
+            "t_connections": [
+                1,
+                2,
+                3
+            ],
+            "f_bus": "91",
+            "t_bus": "93",
+            "linecode": "6",
+            "f_connections": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    "transformer": {
+        "reg4": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                2000.0,
+                2000.0
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.05,
+                    1.00625,
+                    1.03125
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "160",
+                "160r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "noloadloss": 0.0,
+            "xsc": [
+                0.0001
+            ],
+            "cmag": 0.0,
+            "sm_ub": 3000.0,
+            "source_id": "transformer.reg4",
+            "rw": [
+                5.0000000000000004e-8,
+                0.002
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                2.402,
+                2.402
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "xfm1": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                150.0,
+                150.0
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3
+                ],
+                [
+                    1,
+                    2,
+                    3
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "61s",
+                "610"
+            ],
+            "configuration": [
+                "DELTA",
+                "DELTA"
+            ],
+            "noloadloss": 0.0,
+            "cmag": 0.0,
+            "xsc": [
+                0.027200000000000002
+            ],
+            "source_id": "transformer.xfm1",
+            "sm_ub": 225.0,
+            "rw": [
+                0.00635,
+                0.00635
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                4.16,
+                0.48
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "reg3": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                2000.0,
+                2000.0
+            ],
+            "connections": [
+                [
+                    1,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    3,
+                    4
+                ]
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.0,
+                    0.99375
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "25",
+                "25r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "noloadloss": 0.0,
+            "xsc": [
+                0.0001
+            ],
+            "cmag": 0.0,
+            "sm_ub": 3000.0,
+            "source_id": "transformer.reg3",
+            "rw": [
+                5.0000000000000004e-8,
+                0.002
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                2.402,
+                2.402
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1
+                ]
+            ]
+        },
+        "reg2": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                2000.0,
+                2000.0
+            ],
+            "connections": [
+                [
+                    1,
+                    4
+                ],
+                [
+                    1,
+                    4
+                ]
+            ],
+            "tm_lb": [
+                [
+                    0.9
+                ],
+                [
+                    0.9
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0
+                ],
+                [
+                    0.99375
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125
+                ],
+                [
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "9",
+                "9r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "noloadloss": 0.0,
+            "xsc": [
+                0.0001
+            ],
+            "cmag": 0.0,
+            "sm_ub": 3000.0,
+            "source_id": "transformer.reg2",
+            "rw": [
+                5.0000000000000004e-8,
+                0.002
+            ],
+            "tm_fix": [
+                [
+                    true
+                ],
+                [
+                    true
+                ]
+            ],
+            "vm_nom": [
+                2.402,
+                2.402
+            ],
+            "tm_ub": [
+                [
+                    1.1
+                ],
+                [
+                    1.1
+                ]
+            ]
+        },
+        "reg1a": {
+            "polarity": [
+                1,
+                1
+            ],
+            "sm_nom": [
+                5000.0,
+                5000.0
+            ],
+            "tm_lb": [
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ],
+                [
+                    0.9,
+                    0.9,
+                    0.9
+                ]
+            ],
+            "connections": [
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            ],
+            "tm_set": [
+                [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                [
+                    1.04375,
+                    1.04375,
+                    1.04375
+                ]
+            ],
+            "tm_step": [
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ],
+                [
+                    0.03125,
+                    0.03125,
+                    0.03125
+                ]
+            ],
+            "bus": [
+                "150",
+                "150r"
+            ],
+            "configuration": [
+                "WYE",
+                "WYE"
+            ],
+            "controls": {
+                "ctprim": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        700.0,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "x": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        7.5,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "r": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        3.0,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "ptratio": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        20.0,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "band": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        2.0,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "vreg": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        120.0,
+                        0.0,
+                        0.0
+                    ]
+                ]
+            },
+            "noloadloss": 0.0,
+            "cmag": 0.0,
+            "xsc": [
+                1.0e-5
+            ],
+            "source_id": "transformer.reg1a",
+            "sm_ub": 7500.0,
+            "rw": [
+                5.0000000000000004e-8,
+                0.002
+            ],
+            "tm_fix": [
+                [
+                    true,
+                    true,
+                    true
+                ],
+                [
+                    false,
+                    true,
+                    true
+                ]
+            ],
+            "vm_nom": [
+                4.16,
+                4.16
+            ],
+            "tm_ub": [
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ],
+                [
+                    1.1,
+                    1.1,
+                    1.1
+                ]
+            ]
+        }
+    },
+    "shunt": {
+        "c83": {
+            "connections": [
+                1,
+                2,
+                3
+            ],
+            "gs": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "bus": "83",
+            "bs": [
+                [
+                    0.03467085798816568,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.03467085798816568,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.03467085798816568
+                ]
+            ],
+            "configuration": "WYE"
+        },
+        "c88a": {
+            "connections": [
+                1
+            ],
+            "gs": [
+                [
+                    0.0
+                ]
+            ],
+            "bus": "88",
+            "bs": [
+                [
+                    0.008666106027380735
+                ]
+            ],
+            "configuration": "WYE"
+        },
+        "c90b": {
+            "connections": [
+                2
+            ],
+            "gs": [
+                [
+                    0.0
+                ]
+            ],
+            "bus": "90",
+            "bs": [
+                [
+                    0.008666106027380735
+                ]
+            ],
+            "configuration": "WYE"
+        },
+        "c92c": {
+            "connections": [
+                3
+            ],
+            "gs": [
+                [
+                    0.0
+                ]
+            ],
+            "bus": "92",
+            "bs": [
+                [
+                    0.008666106027380735
+                ]
+            ],
+            "configuration": "WYE"
+        }
+    },
+    "load": {
+        "s106b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "106",
+            "configuration": "WYE"
+        },
+        "s92c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "92",
+            "configuration": "WYE"
+        },
+        "s73c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "73",
+            "configuration": "WYE"
+        },
+        "s86b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "86",
+            "configuration": "WYE"
+        },
+        "s65a": {
+            "qd_nom": [
+                25.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                35.0
+            ],
+            "bus": "65",
+            "configuration": "DELTA"
+        },
+        "s58b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "58",
+            "configuration": "WYE"
+        },
+        "s75c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "75",
+            "configuration": "WYE"
+        },
+        "s103c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "103",
+            "configuration": "WYE"
+        },
+        "s70a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "70",
+            "configuration": "WYE"
+        },
+        "s24c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "24",
+            "configuration": "WYE"
+        },
+        "s43b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "43",
+            "configuration": "WYE"
+        },
+        "s68a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "68",
+            "configuration": "WYE"
+        },
+        "s9a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "9",
+            "configuration": "WYE"
+        },
+        "s19a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "19",
+            "configuration": "WYE"
+        },
+        "s95b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "95",
+            "configuration": "WYE"
+        },
+        "s53a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "53",
+            "configuration": "WYE"
+        },
+        "s83c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "83",
+            "configuration": "WYE"
+        },
+        "s7a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "7",
+            "configuration": "WYE"
+        },
+        "s29a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "29",
+            "configuration": "WYE"
+        },
+        "s31c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "31",
+            "configuration": "WYE"
+        },
+        "s34c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "34",
+            "configuration": "WYE"
+        },
+        "s51a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "51",
+            "configuration": "WYE"
+        },
+        "s82a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "82",
+            "configuration": "WYE"
+        },
+        "s35a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "35",
+            "configuration": "DELTA"
+        },
+        "s52a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "52",
+            "configuration": "WYE"
+        },
+        "s55a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "55",
+            "configuration": "WYE"
+        },
+        "s76c": {
+            "qd_nom": [
+                50.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                70.0
+            ],
+            "bus": "76",
+            "configuration": "DELTA"
+        },
+        "s48": {
+            "qd_nom": [
+                50.0,
+                50.0,
+                50.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm_nom": 2.4017771198288433,
+            "pd_nom": [
+                70.0,
+                70.0,
+                70.0
+            ],
+            "bus": "48",
+            "configuration": "WYE"
+        },
+        "s59b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "59",
+            "configuration": "WYE"
+        },
+        "s76b": {
+            "qd_nom": [
+                50.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                70.0
+            ],
+            "bus": "76",
+            "configuration": "DELTA"
+        },
+        "s38b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "38",
+            "configuration": "WYE"
+        },
+        "s111a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "111",
+            "configuration": "WYE"
+        },
+        "s33a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "33",
+            "configuration": "WYE"
+        },
+        "s74c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "74",
+            "configuration": "WYE"
+        },
+        "s1a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "1",
+            "configuration": "WYE"
+        },
+        "s90b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "90",
+            "configuration": "WYE"
+        },
+        "s32c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "32",
+            "configuration": "WYE"
+        },
+        "s99b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "99",
+            "configuration": "WYE"
+        },
+        "s5c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "5",
+            "configuration": "WYE"
+        },
+        "s88a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "88",
+            "configuration": "WYE"
+        },
+        "s45a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "45",
+            "configuration": "WYE"
+        },
+        "s16c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "16",
+            "configuration": "WYE"
+        },
+        "s94a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "94",
+            "configuration": "WYE"
+        },
+        "s62c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "62",
+            "configuration": "WYE"
+        },
+        "s30c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "30",
+            "configuration": "WYE"
+        },
+        "s65c": {
+            "qd_nom": [
+                50.0
+            ],
+            "connections": [
+                3,
+                1
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                70.0
+            ],
+            "bus": "65",
+            "configuration": "DELTA"
+        },
+        "s69a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "69",
+            "configuration": "WYE"
+        },
+        "s20a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "20",
+            "configuration": "WYE"
+        },
+        "s65b": {
+            "qd_nom": [
+                25.0
+            ],
+            "connections": [
+                2,
+                3
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                35.0
+            ],
+            "bus": "65",
+            "configuration": "DELTA"
+        },
+        "s80b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "80",
+            "configuration": "WYE"
+        },
+        "s42a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "42",
+            "configuration": "WYE"
+        },
+        "s102c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "102",
+            "configuration": "WYE"
+        },
+        "s41c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "41",
+            "configuration": "WYE"
+        },
+        "s10a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "10",
+            "configuration": "WYE"
+        },
+        "s63a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "63",
+            "configuration": "WYE"
+        },
+        "s79a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "79",
+            "configuration": "WYE"
+        },
+        "s96b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "96",
+            "configuration": "WYE"
+        },
+        "s28a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "28",
+            "configuration": "WYE"
+        },
+        "s114a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "114",
+            "configuration": "WYE"
+        },
+        "s112a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "112",
+            "configuration": "WYE"
+        },
+        "s60a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "60",
+            "configuration": "WYE"
+        },
+        "s98a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "98",
+            "configuration": "WYE"
+        },
+        "s17c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "17",
+            "configuration": "WYE"
+        },
+        "s113a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "113",
+            "configuration": "WYE"
+        },
+        "s56b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "56",
+            "configuration": "WYE"
+        },
+        "s109a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "109",
+            "configuration": "WYE"
+        },
+        "s46a": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "46",
+            "configuration": "WYE"
+        },
+        "s47": {
+            "qd_nom": [
+                25.0,
+                25.0,
+                25.0
+            ],
+            "connections": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vm_nom": 2.4017771198288433,
+            "pd_nom": [
+                35.0,
+                35.0,
+                35.0
+            ],
+            "bus": "47",
+            "configuration": "WYE"
+        },
+        "s66c": {
+            "qd_nom": [
+                35.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                75.0
+            ],
+            "bus": "66",
+            "configuration": "WYE"
+        },
+        "s2b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "2",
+            "configuration": "WYE"
+        },
+        "s100c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "100",
+            "configuration": "WYE"
+        },
+        "s49c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                35.0
+            ],
+            "bus": "49",
+            "configuration": "WYE"
+        },
+        "s76a": {
+            "qd_nom": [
+                80.0
+            ],
+            "connections": [
+                1,
+                2
+            ],
+            "vm_nom": 4.16,
+            "pd_nom": [
+                105.0
+            ],
+            "bus": "76",
+            "configuration": "DELTA"
+        },
+        "s12b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "12",
+            "configuration": "WYE"
+        },
+        "s6c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "6",
+            "configuration": "WYE"
+        },
+        "s64b": {
+            "qd_nom": [
+                35.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                75.0
+            ],
+            "bus": "64",
+            "configuration": "WYE"
+        },
+        "s77b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "77",
+            "configuration": "WYE"
+        },
+        "s87b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "87",
+            "configuration": "WYE"
+        },
+        "s37a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "37",
+            "configuration": "WYE"
+        },
+        "s85c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "85",
+            "configuration": "WYE"
+        },
+        "s4c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "4",
+            "configuration": "WYE"
+        },
+        "s71a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "71",
+            "configuration": "WYE"
+        },
+        "s22b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "22",
+            "configuration": "WYE"
+        },
+        "s49a": {
+            "qd_nom": [
+                25.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                35.0
+            ],
+            "bus": "49",
+            "configuration": "WYE"
+        },
+        "s104c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "104",
+            "configuration": "WYE"
+        },
+        "s49b": {
+            "qd_nom": [
+                50.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                70.0
+            ],
+            "bus": "49",
+            "configuration": "WYE"
+        },
+        "s50c": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "50",
+            "configuration": "WYE"
+        },
+        "s107b": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "107",
+            "configuration": "WYE"
+        },
+        "s39b": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                2,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "39",
+            "configuration": "WYE"
+        },
+        "s11a": {
+            "qd_nom": [
+                20.0
+            ],
+            "connections": [
+                1,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                40.0
+            ],
+            "bus": "11",
+            "configuration": "WYE"
+        },
+        "s84c": {
+            "qd_nom": [
+                10.0
+            ],
+            "connections": [
+                3,
+                4
+            ],
+            "vm_nom": 2.4,
+            "pd_nom": [
+                20.0
+            ],
+            "bus": "84",
+            "configuration": "WYE"
+        }
+    },
+    "linecode": {
+        "4": {
+            "b_fr": [
+                [
+                    1.35567378,
+                    0.2925056265,
+                    -0.175377783
+                ],
+                [
+                    0.2925056265,
+                    1.502315931,
+                    -0.4601468935
+                ],
+                [
+                    -0.175377783,
+                    -0.4601468935,
+                    1.425855036
+                ]
+            ],
+            "rs": [
+                [
+                    0.087405303,
+                    0.029924242,
+                    0.02907197
+                ],
+                [
+                    0.029924242,
+                    0.088371212,
+                    0.029545455
+                ],
+                [
+                    0.02907197,
+                    0.029545455,
+                    0.086666667
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.201723485,
+                    0.080227273,
+                    0.072897727
+                ],
+                [
+                    0.080227273,
+                    0.198522727,
+                    0.095018939
+                ],
+                [
+                    0.072897727,
+                    0.095018939,
+                    0.204166667
+                ]
+            ],
+            "b_to": [
+                [
+                    1.35567378,
+                    0.2925056265,
+                    -0.175377783
+                ],
+                [
+                    0.2925056265,
+                    1.502315931,
+                    -0.4601468935
+                ],
+                [
+                    -0.175377783,
+                    -0.4601468935,
+                    1.425855036
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "1": {
+            "b_fr": [
+                [
+                    1.425855036,
+                    -0.4601468935,
+                    -0.175377783
+                ],
+                [
+                    -0.4601468935,
+                    1.502315931,
+                    -0.2925056265
+                ],
+                [
+                    -0.175377783,
+                    -0.2925056265,
+                    1.35567378
+                ]
+            ],
+            "rs": [
+                [
+                    0.086666667,
+                    0.029545455,
+                    0.02907197
+                ],
+                [
+                    0.029545455,
+                    0.088371212,
+                    0.029924242
+                ],
+                [
+                    0.02907197,
+                    0.029924242,
+                    0.087405303
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.204166667,
+                    0.095018939,
+                    0.072897727
+                ],
+                [
+                    0.095018939,
+                    0.198522727,
+                    0.080227273
+                ],
+                [
+                    0.072897727,
+                    0.080227273,
+                    0.201723485
+                ]
+            ],
+            "b_to": [
+                [
+                    1.425855036,
+                    -0.4601468935,
+                    -0.175377783
+                ],
+                [
+                    -0.4601468935,
+                    1.502315931,
+                    -0.2925056265
+                ],
+                [
+                    -0.175377783,
+                    -0.2925056265,
+                    1.35567378
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "12": {
+            "b_fr": [
+                [
+                    16.885750745,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    16.885750745,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    16.885750745
+                ]
+            ],
+            "rs": [
+                [
+                    0.288049242,
+                    0.09844697,
+                    0.093257576
+                ],
+                [
+                    0.09844697,
+                    0.29032197,
+                    0.09844697
+                ],
+                [
+                    0.093257576,
+                    0.09844697,
+                    0.288049242
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.142443182,
+                    0.052556818,
+                    0.040852273
+                ],
+                [
+                    0.052556818,
+                    0.135643939,
+                    0.052556818
+                ],
+                [
+                    0.040852273,
+                    0.052556818,
+                    0.142443182
+                ]
+            ],
+            "b_to": [
+                [
+                    16.885750745,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    16.885750745,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    16.885750745
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "2": {
+            "b_fr": [
+                [
+                    1.502315931,
+                    -0.2925056265,
+                    -0.4601468935
+                ],
+                [
+                    -0.2925056265,
+                    1.35567378,
+                    -0.175377783
+                ],
+                [
+                    -0.4601468935,
+                    -0.175377783,
+                    1.425855036
+                ]
+            ],
+            "rs": [
+                [
+                    0.088371212,
+                    0.02992424,
+                    0.029545455
+                ],
+                [
+                    0.02992424,
+                    0.087405303,
+                    0.02907197
+                ],
+                [
+                    0.029545455,
+                    0.02907197,
+                    0.086666667
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.198522727,
+                    0.080227273,
+                    0.095018939
+                ],
+                [
+                    0.080227273,
+                    0.201723485,
+                    0.072897727
+                ],
+                [
+                    0.095018939,
+                    0.072897727,
+                    0.204166667
+                ]
+            ],
+            "b_to": [
+                [
+                    1.502315931,
+                    -0.2925056265,
+                    -0.4601468935
+                ],
+                [
+                    -0.2925056265,
+                    1.35567378,
+                    -0.175377783
+                ],
+                [
+                    -0.4601468935,
+                    -0.175377783,
+                    1.425855036
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "6": {
+            "b_fr": [
+                [
+                    1.425855036,
+                    -0.175377783,
+                    -0.4601468935
+                ],
+                [
+                    -0.175377783,
+                    1.35567378,
+                    -0.2925056265
+                ],
+                [
+                    -0.4601468935,
+                    -0.2925056265,
+                    1.502315931
+                ]
+            ],
+            "rs": [
+                [
+                    0.086666667,
+                    0.02907197,
+                    0.029545455
+                ],
+                [
+                    0.02907197,
+                    0.087405303,
+                    0.029924242
+                ],
+                [
+                    0.029545455,
+                    0.029924242,
+                    0.088371212
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.204166667,
+                    0.072897727,
+                    0.095018939
+                ],
+                [
+                    0.072897727,
+                    0.201723485,
+                    0.080227273
+                ],
+                [
+                    0.095018939,
+                    0.080227273,
+                    0.198522727
+                ]
+            ],
+            "b_to": [
+                [
+                    1.425855036,
+                    -0.175377783,
+                    -0.4601468935
+                ],
+                [
+                    -0.175377783,
+                    1.35567378,
+                    -0.2925056265
+                ],
+                [
+                    -0.4601468935,
+                    -0.2925056265,
+                    1.502315931
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "11": {
+            "b_fr": [
+                [
+                    1.135183064
+                ]
+            ],
+            "rs": [
+                [
+                    0.251742424
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.255208333
+                ]
+            ],
+            "b_to": [
+                [
+                    1.135183064
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        },
+        "5": {
+            "b_fr": [
+                [
+                    1.502315931,
+                    -0.4601468935,
+                    -0.2925056265
+                ],
+                [
+                    -0.4601468935,
+                    1.425855036,
+                    -0.175377783
+                ],
+                [
+                    -0.2925056265,
+                    -0.175377783,
+                    1.35567378
+                ]
+            ],
+            "rs": [
+                [
+                    0.088371212,
+                    0.029545455,
+                    0.029924242
+                ],
+                [
+                    0.029545455,
+                    0.086666667,
+                    0.02907197
+                ],
+                [
+                    0.029924242,
+                    0.02907197,
+                    0.087405303
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.198522727,
+                    0.095018939,
+                    0.080227273
+                ],
+                [
+                    0.095018939,
+                    0.204166667,
+                    0.072897727
+                ],
+                [
+                    0.080227273,
+                    0.072897727,
+                    0.201723485
+                ]
+            ],
+            "b_to": [
+                [
+                    1.502315931,
+                    -0.4601468935,
+                    -0.2925056265
+                ],
+                [
+                    -0.4601468935,
+                    1.425855036,
+                    -0.175377783
+                ],
+                [
+                    -0.2925056265,
+                    -0.175377783,
+                    1.35567378
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "7": {
+            "b_fr": [
+                [
+                    1.284914798,
+                    -0.264975685
+                ],
+                [
+                    -0.264975685,
+                    1.2987300055
+                ]
+            ],
+            "rs": [
+                [
+                    0.086666667,
+                    0.02907197
+                ],
+                [
+                    0.02907197,
+                    0.087405303
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.204166667,
+                    0.072897727
+                ],
+                [
+                    0.072897727,
+                    0.201723485
+                ]
+            ],
+            "b_to": [
+                [
+                    1.284914798,
+                    -0.264975685
+                ],
+                [
+                    -0.264975685,
+                    1.2987300055
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "8": {
+            "b_fr": [
+                [
+                    1.284914798,
+                    -0.264975685
+                ],
+                [
+                    -0.264975685,
+                    1.2987300055
+                ]
+            ],
+            "rs": [
+                [
+                    0.086666667,
+                    0.02907197
+                ],
+                [
+                    0.02907197,
+                    0.087405303
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.204166667,
+                    0.072897727
+                ],
+                [
+                    0.072897727,
+                    0.201723485
+                ]
+            ],
+            "b_to": [
+                [
+                    1.284914798,
+                    -0.264975685
+                ],
+                [
+                    -0.264975685,
+                    1.2987300055
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0
+                ]
+            ]
+        },
+        "10": {
+            "b_fr": [
+                [
+                    1.135183064
+                ]
+            ],
+            "rs": [
+                [
+                    0.251742424
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.255208333
+                ]
+            ],
+            "b_to": [
+                [
+                    1.135183064
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        },
+        "9": {
+            "b_fr": [
+                [
+                    1.135183064
+                ]
+            ],
+            "rs": [
+                [
+                    0.251742424
+                ]
+            ],
+            "cm_ub": [
+                600.0
+            ],
+            "xs": [
+                [
+                    0.255208333
+                ]
+            ],
+            "b_to": [
+                [
+                    1.135183064
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0
+                ]
+            ]
+        },
+        "3": {
+            "b_fr": [
+                [
+                    1.35567378,
+                    -0.175377783,
+                    -0.2925056265
+                ],
+                [
+                    -0.175377783,
+                    1.425855036,
+                    -0.4601468935
+                ],
+                [
+                    -0.2925056265,
+                    -0.4601468935,
+                    1.502315931
+                ]
+            ],
+            "rs": [
+                [
+                    0.087405303,
+                    0.02907197,
+                    0.029924242
+                ],
+                [
+                    0.02907197,
+                    0.086666667,
+                    0.029545455
+                ],
+                [
+                    0.029924242,
+                    0.029545455,
+                    0.088371212
+                ]
+            ],
+            "cm_ub": [
+                600.0,
+                600.0,
+                600.0
+            ],
+            "xs": [
+                [
+                    0.201723485,
+                    0.072897727,
+                    0.080227273
+                ],
+                [
+                    0.072897727,
+                    0.204166667,
+                    0.095018939
+                ],
+                [
+                    0.080227273,
+                    0.095018939,
+                    0.198522727
+                ]
+            ],
+            "b_to": [
+                [
+                    1.35567378,
+                    -0.175377783,
+                    -0.2925056265
+                ],
+                [
+                    -0.175377783,
+                    1.425855036,
+                    -0.4601468935
+                ],
+                [
+                    -0.2925056265,
+                    -0.4601468935,
+                    1.502315931
+                ]
+            ],
+            "g_to": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ],
+            "g_fr": [
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            ]
+        }
+    }
+}
