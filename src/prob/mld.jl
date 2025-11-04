@@ -371,30 +371,30 @@ end
 
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
-    _PMD.variable_mc_switch_state(pm; relax=true)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_switch_state(pm; relax=false)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
     # The on-off variable is making the solution error at the report statement in the variable function
-    # _PMD.variable_mc_storage_indicator(pm, relax=true)
-   	# _PMD.variable_mc_storage_power_mi_on_off(pm, relax=true)
+    #_PMD.variable_mc_storage_indicator(pm, relax=false)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=false)
     # Using the snapshot variable definition for now
-    # _PMD.variable_mc_storage_power_mi(pm, relax=true)
+    #_PMD.variable_mc_storage_power_mi(pm, relax=true)
 
-     #_PMD.variable_mc_load_indicator(pm; relax=true)
-    variable_mc_demand_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
+    #variable_mc_demand_indicator(pm; relax=false)
 
 
-    variable_block_indicator(pm; relax=true)
+    variable_block_indicator(pm; relax=false)
     variable_mc_fair_load_weights(pm)
 
 
@@ -405,8 +405,8 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
          _PMD.constraint_mc_theta_ref(pm, i)
      end
 
-      _PMD.constraint_mc_bus_voltage_on_off(pm)
-    # # # #constraint_mc_bus_voltage_magnitude_sqr_block_on_off(pm)
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+    # # # # #constraint_mc_bus_voltage_magnitude_sqr_block_on_off(pm)
     
      
     for i in _PMD.ids(pm, :gen)
@@ -417,26 +417,26 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :bus)
         _PMD.constraint_mc_power_balance_shed(pm, i)
     end
-    # # for (i,bus) in _PMD.ref(pm, :bus)
-    # #     if bus["name"] == "646"
-    # #        println("Going to fix bus 646 mismatch")
-    # #         constraint_fix_bus_terminal_mismatch(pm,i)
-    # #     end
-    # # end
+    # for (i,bus) in _PMD.ref(pm, :bus)
+    #     if bus["name"] == "646"
+    #        println("Going to fix bus 646 mismatch")
+    #         constraint_fix_bus_terminal_mismatch(pm,i)
+    #     end
+    # end
 
     for i in _PMD.ids(pm, :storage)
         _PMD.constraint_storage_state(pm, i)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        #_PMD.constraint_mc_storage_on_off(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
         _PMD.constraint_mc_power_losses(pm, i)
-        _PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
+        #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
         constraint_mc_model_voltage_magnitude_difference_fld(pm,i)
-        #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
+        # #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
         _PMD.constraint_mc_voltage_angle_difference(pm, i)
 
         _PMD.constraint_mc_thermal_limit_from(pm, i)
@@ -444,11 +444,10 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     end
 
     for i in _PMD.ids(pm, :switch)
-        constraint_mc_switch_state_on_off_top(pm, i)
-        #_PMD.constraint_mc_switch_state_on_off(pm, i)
+        _PMD.constraint_mc_switch_state_on_off(pm,i)
         # The switch thermal limit is not implemented in PowerModelsDistribution yet
         _PMD.constraint_mc_switch_thermal_limit(pm, i)
-        # The ampacity constraint is similar but instead of p^2 + q^2 <= w * s^2, it is p^2 + q^2 <= z * w * s^2
+        # # The ampacity constraint is similar but instead of p^2 + q^2 <= w * s^2, it is p^2 + q^2 <= z * w * s^2
         constraint_mc_switch_ampacity(pm, i)
         constraint_mc_model_switch_voltage_magnitude_difference_fld(pm, i)
     end
@@ -458,8 +457,8 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     end
 
     constraint_mc_isolate_block(pm)
-    #constraint_radial_topology(pm)
-    constraint_mc_radiality(pm)
+    constraint_radial_topology(pm)
+    #constraint_mc_radiality(pm)
     constraint_mc_block_energization_consistency_bigm(pm)
 
     constraint_block_budget(pm)
@@ -473,15 +472,14 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     constraint_connect_block_voltage(pm)
     constraint_connect_block_shunt(pm)
     constraint_connect_block_storage(pm)
-    #constraint_open_switches(pm)
-    #constraint_gen_event_simple(pm, ls_percent=0.5)
+    # #constraint_open_switches(pm)
+    # #constraint_gen_event_simple(pm, ls_percent=0.5)
  
 
     
     #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
     #_PMD.objective_mc_min_fuel_cost(pm)
     #objective_mc_min_fuel_cost_pwl_voll(pm)
-    #objective_max_load_served(pm)
     objective_fairly_weighted_max_load_served(pm)
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)

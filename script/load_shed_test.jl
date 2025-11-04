@@ -23,9 +23,9 @@ juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_pmd_mod.dss"
-#case = "three_bus_constrained_line_capacity.dss"
-#case = "three_bus_constrained_generation.dss"
 case = "load_shed_test_single_phase.dss"
+#case = "control_case.dss"
+#case = "load_shed_test_three_phase.dss"
 casepath = "data/$case"
 file = joinpath(dir, "..", casepath)
 
@@ -69,35 +69,24 @@ end
 
 # Create the critical load set
 #critical_load = ["645", "652", "675a", "675b", "675c"]
-# critical_load = ["l1"]
-# for (i,load) in math["load"]
-# 	if load["name"] in critical_load
-# 		load["critical"] = 1
-# 		load["weight"] = 20
-# 		println("Load $(load["name"]) at math load node $(i) is critical.")
-# 	else
-# 		load["critical"] = 0
-# 		load["weight"] = 10
-# 		println("Load $(load["name"]) at math load node $(i) is not critical.")
+critical_load = ["l4"]
+for (i,load) in math["load"]
+	if load["name"] in critical_load
+		load["critical"] = 1
+		load["weight"] = 1000
+		println("Load $(load["name"]) at math load node $(i) is critical.")
+	else
+		load["critical"] = 0
+		load["weight"] = 10
+		println("Load $(load["name"]) at math load node $(i) is not critical.")
 
-# 	end
-# end
-
-for (id, load) in math["load"]
-    if occursin("Critical", load["name"])
-        load["critical"] = 1.0  # Highest
-        load["weight"] = 10
-    elseif occursin("Medium", load["name"])
-        load["weight"] = 10
-        load["critical"] = 0  # Medium
-    else
-        load["weight"] = 10 # Lowest - shed first
-        load["critical"] = 0
-    end
+	end
 end
 
+
+
 for (switch_id, switch) in enumerate(math["switch"])
-    math["switch"][string(switch_id)]["state"] = 0
+   # math["switch"][string(switch_id)]["state"] = 0
     math["switch"][string(switch_id)]["branch_id"] = 0
     for (branch_id, branch) in enumerate(math["branch"])
         # println("Branch $branch_id")
@@ -109,23 +98,19 @@ for (switch_id, switch) in enumerate(math["switch"])
             end
     end
 end
-math["switch"]["1"]["state"] = 0
-math["switch"]["2"]["state"] = 1
-math["switch"]["3"]["state"] = 0
+# math["switch"]["1"]["state"] = 0
+# math["switch"]["2"]["state"] = 1
+# math["switch"]["3"]["state"] = 0
 
 math["block"] = Dict{String,Any}()
 for (block, loads) in enumerate(lbs)
 	math["block"][string(block)] = Dict("id"=>block, "state"=>0)
 end
-math["block"]["1"]["state"] = 1
-math["block"]["2"]["state"] = 0
-math["block"]["3"]["state"] = 1
+# math["block"]["1"]["state"] = 1
+# math["block"]["2"]["state"] = 0
+# math["block"]["3"]["state"] = 1
 
 
-
-# Ensure that all branches have some bounds. Currently, they are infinite
-# this produces an error for the constraint_mc_switch_power_on_off, because
-# the switch power variable is unbounded, when the reference bounds are infinite
 
 
 #pm_acopf_soln = solve_mc_opf(math, ACPUPowerModel, ipopt)
@@ -140,14 +125,14 @@ math["block"]["3"]["state"] = 1
 #pm_pf_soln = FairLoadDelivery.solve_mc_pf_aw(math, ipopt)#; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 # pm_mld_soln = solve_mc_mld(math, LinDist3FlowPowerModel, ipopt)
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-set_optimizer(mld_model.model, ipopt)
+set_optimizer(mld_model.model, gurobi)
 optimize!(mld_model.model)
 con_ref = mld_model.con[:it][:pmd][:nw][0]
 var = mld_model.var[:it][:pmd][:nw][0]
 soln_ref = mld_model.sol[:it][:pmd][:nw][0]
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
-pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, ipopt)
+pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, gurobi)
 res = pm_mld_soln["solution"]
 # println("Load served: $(sum(load["pd"] for load in math["load"] if load["critical"] == 1))")
 load_ref = sum(load["pd"] for (i,load) in ref[:load])

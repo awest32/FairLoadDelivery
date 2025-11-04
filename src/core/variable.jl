@@ -84,11 +84,17 @@ function variable_mc_demand_indicator(pm::_PMD.AbstractUnbalancedPowerModel; nw:
     _PMD.var(pm, nw)[:z_demand] = Dict(l => z_demand[load_block_map[l]] for l in _PMD.ids(pm, nw, :load))
 
     # expressions for pd and qd
-    pd = _PMD.var(pm, nw)[:pd] = Dict(i => _PMD.var(pm, nw)[:z_demand][i].*_PMD.ref(pm, nw, :load, i)["pd"] for i in _PMD.ids(pm, nw, :load))
+    @info z_demand
+   
+    _PMD.var(pm, nw)[:pd] = Dict(i => _PMD.var(pm, nw)[:z_demand][i].*_PMD.ref(pm, nw, :load, i)["pd"] for i in _PMD.ids(pm, nw, :load))
+    pd = Dict(i => _PMD.var(pm, nw)[:z_demand][i].*_PMD.ref(pm, nw, :load, i)["pd"] for i in _PMD.ids(pm, nw, :load))
     qd = _PMD.var(pm, nw)[:qd] = Dict(i => _PMD.var(pm, nw)[:z_demand][i].*_PMD.ref(pm, nw, :load, i)["qd"] for i in _PMD.ids(pm, nw, :load))
     pd0 = _PMD.var(pm, nw)[:pd] = Dict(i => _PMD.ref(pm, nw, :load, i)["pd"] for i in _PMD.ids(pm, nw, :load))
     qd0 = _PMD.var(pm, nw)[:qd] = Dict(i => _PMD.ref(pm, nw, :load, i)["qd"] for i in _PMD.ids(pm, nw, :load))
-  
+    @info pd
+    @info _PMD.var(pm, nw, :pd)
+    @info _PMD.var(pm, nw)[:pd]
+
     load_to_lb = Dict(i => load_block_map[i] for i in _PMD.ids(pm, nw, :load))
     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :load, :load_block,  _PMD.ids(pm, nw, :load), load_to_lb)
 
@@ -106,7 +112,7 @@ function variable_mc_bus_voltage_magnitude_on_off(pm::_PMD.AbstractUBFModels; nw
     terminals = Dict(i => bus["terminals"] for (i,bus) in ref(pm, nw, :bus))
     vm = var(pm, nw)[:vm] = Dict(i => JuMP.@variable(pm.model,
         [t in terminals[i]], base_name="vm_$(i)",
-        start = comp_start_value(ref(pm, nw, :bus, i), ["vm_start", "vm", "vmin"], t, 1.0)
+        start = _PMD.comp_start_value(ref(pm, nw, :bus, i), ["vm_start", "vm", "vmin"], t, 1.0)
     ) for i in ids(pm, nw, :bus))
 
     if bounded
@@ -132,7 +138,7 @@ function variable_mc_bus_voltage_magnitude_sqr(pm::_PMD.AbstractUBFModels; nw::I
     w = var(pm, nw)[:w] = Dict(i => JuMP.@variable(pm.model,
             [t in terminals[i]], base_name="w_$(i)",
             lower_bound = 0.0,
-            start = comp_start_value(ref(pm, nw, :bus, i), "w_start", t, comp_start_value(ref(pm, nw, :bus, i), ["vm_start", "vm"], t, 1.0)^2)
+            start = _PMD.comp_start_value(ref(pm, nw, :bus, i), "w_start", t, _PMD.comp_start_value(ref(pm, nw, :bus, i), ["vm_start", "vm"], t, 1.0)^2)
         ) for i in ids(pm, nw, :bus)
     )
 
@@ -179,3 +185,206 @@ function variable_mc_load_shed(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw
     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :load, :pshed, _PMD.ids(pm, nw, :load), pshed)
     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :load, :qshed, _PMD.ids(pm, nw, :load), qshed)
 end   
+
+# function variable_mc_storage_power_mi_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, relax::Bool=false, bounded::Bool=true, report::Bool=true)
+#     variable_mc_storage_power_real_on_off(pm; nw=nw, bounded=bounded, report=report)
+#     variable_mc_storage_power_imaginary_on_off(pm; nw=nw, bounded=bounded, report=report)
+#     variable_mc_storage_power_control_imaginary_on_off(pm; nw=nw, bounded=bounded, report=report)
+#     variable_mc_storage_indicator(pm; nw=nw, report=report)
+#     variable_storage_energy(pm; nw=nw, bounded=bounded, report=report)
+#     variable_storage_charge(pm; nw=nw, bounded=bounded, report=report)
+#     variable_storage_discharge(pm; nw=nw, bounded=bounded, report=report)
+#     variable_storage_complementary_indicator(pm; nw=nw, relax=relax, report=report)
+# end
+
+# "Create variables for `active` and `reactive` storage injection"
+# function variable_mc_storage_power_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     variable_mc_storage_power_real_on_off(pm; nw=nw, bounded=bounded, report=report)
+#     variable_mc_storage_power_imaginary_on_off(pm; nw=nw, bounded=bounded, report=report)
+# end
+
+
+# "Create variables for `active` storage injection"
+# function variable_mc_storage_power_real_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     connections = Dict(i => strg["connections"] for (i,strg) in _PMD.ref(pm, nw, :storage))
+#     ps = _PMD.var(pm, nw)[:ps] = Dict(i => JuMP.@variable(pm.model,
+#         [c in connections[i]], base_name="$(nw)_ps_$(i)",
+#         start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "ps_start", c, 0.0)
+#     ) for i in _PMD.ids(pm, nw, :storage))
+
+#     if bounded
+#         inj_lb, inj_ub = _PMD.ref_calc_storage_injection_bounds(_PMD.ref(pm, nw, :storage), _PMD.ref(pm, nw, :bus))
+#         for (i, strg) in _PMD.ref(pm, nw, :storage)
+#             for (idx, c) in enumerate(connections[i])
+#                 FairLoadDelivery.set_lower_bound(ps[i][c], min(inj_lb[i][idx], 0.0))
+#                 FairLoadDelivery.set_upper_bound(ps[i][c], max(inj_ub[i][idx], 0.0))
+#             end
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :ps, _PMD.ids(pm, nw, :storage), ps)
+# end
+
+# """
+# a reactive power slack variable that enables the storage device to inject or
+# consume reactive power at its connecting bus, subject to the injection limits
+# of the device.
+# """
+# function variable_mc_storage_power_control_imaginary_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     qsc = _PMD.var(pm, nw)[:qsc] = JuMP.@variable(pm.model,
+#         [i in ids(pm, nw, :storage)], base_name="$(nw)_qsc_$(i)",
+#         start = comp_start_value(ref(pm, nw, :storage, i), "qsc_start")
+#     )
+
+#     if bounded
+#         inj_lb, inj_ub = _PMD.ref_calc_storage_injection_bounds(_PMD.ref(pm, nw, :storage), ref(pm, nw, :bus))
+#         for (i,storage) in ref(pm, nw, :storage)
+#             if !isinf(sum(inj_lb[i])) || haskey(storage, "qmin")
+#                 lb = max(sum(inj_lb[i]), sum(get(storage, "qmin", -Inf)))
+#                 _PMD.set_lower_bound(qsc[i], min(lb, 0.0))
+#             end
+#             if !isinf(sum(inj_ub[i])) || haskey(storage, "qmax")
+#                 ub = min(sum(inj_ub[i]), sum(get(storage, "qmax", Inf)))
+#                 _PMD.set_upper_bound(qsc[i], max(ub, 0.0))
+#             end
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :qsc, ids(pm, nw, :storage), qsc)
+# end
+
+
+
+# "Create variables for `reactive` storage injection"
+# function variable_mc_storage_power_imaginary_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     connections = Dict(i => strg["connections"] for (i,strg) in _PMD.ref(pm, nw, :storage))
+#     qs = _PMD.var(pm, nw)[:qs] = Dict(i => JuMP.@variable(pm.model,
+#         [c in connections[i]], base_name="$(nw)_qs_$(i)",
+#         start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "qs_start", c, 0.0)
+#     ) for i in _PMD.ids(pm, nw, :storage))
+
+#     if bounded
+#         for (i, strg) in _PMD.ref(pm, nw, :storage)
+#             if haskey(strg, "qmin")
+#                 for (idx, c) in enumerate(connections[i])
+#                     FairLoadDelivery.set_lower_bound(qs[i][c], min(strg["qmin"], 0.0))
+#                 end
+#             end
+
+#             if haskey(strg, "qmax")
+#                 for (idx, c) in enumerate(connections[i])
+#                     FairLoadDelivery.set_upper_bound(qs[i][c], max(strg["qmax"], 0.0))
+#                 end
+#             end
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :qs, _PMD.ids(pm, nw, :storage), qs)
+# end
+
+
+# "Create variables for storage status"
+# function variable_mc_storage_indicator(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, relax::Bool=false, report::Bool=true)
+#     if !relax
+#         z_storage = _PMD.var(pm, nw)[:z_storage] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)-z_storage",
+#             binary = true,
+#             start = _PMD.comp_start_value(ref(pm, nw, :storage, i), "z_storage_start", 1.0)
+#         )
+#     else
+#         z_storage = _PMD.var(pm, nw)[:z_storage] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_z_storage",
+#             lower_bound = 0,
+#             upper_bound = 1,
+#             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "z_storage_start", 1.0)
+#         )
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :status, ids(pm, nw, :storage), z_storage)
+# end
+
+# ""
+# function variable_storage_energy(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     se = _PMD.var(pm, nw)[:se] = JuMP.@variable(pm.model,
+#         [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_se",
+#         lower_bound = 0.0,
+#         start = _PMD.comp_start_value(ref(pm, nw, :storage, i), ["se_start", "se", "energy"], 0.0)
+#     )
+
+#     if bounded
+#         for (i, storage) in _PMD.ref(pm, nw, :storage)
+#             FairLoadDelivery.set_upper_bound(se[i], storage["energy_rating"])
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :se, _PMD.ids(pm, nw, :storage), se)
+# end
+
+
+# ""
+# function variable_storage_charge(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     sc = _PMD.var(pm, nw)[:sc] = JuMP.@variable(pm.model,
+#         [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sc",
+#         lower_bound = 0.0,
+#         start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), ["sc_start", "sc"], 1)
+#     )
+
+#     if bounded
+#         for (i, storage) in _PMD.ref(pm, nw, :storage)
+#             FairLoadDelivery.set_upper_bound(sc[i], storage["charge_rating"])
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :sc, _PMD.ids(pm, nw, :storage), sc)
+# end
+
+
+# ""
+# function variable_storage_discharge(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+#     sd = var(pm, nw)[:sd] = JuMP.@variable(pm.model,
+#         [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sd",
+#         lower_bound = 0.0,
+#         start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), ["sd_start", "sd"], 0.0)
+#     )
+
+#     if bounded
+#         for (i, storage) in _PMD.ref(pm, nw, :storage)
+#             FairLoadDelivery.set_upper_bound(sd[i], storage["discharge_rating"])
+#         end
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :sd, _PMD.ids(pm, nw, :storage), sd)
+# end
+
+
+# ""
+# function variable_storage_complementary_indicator(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, relax::Bool=false, report::Bool=true)
+#     if !relax
+#         sc_on = _PMD.var(pm, nw)[:sc_on] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sc_on",
+#             binary = true,
+#             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "sc_on_start", 0)
+#         )
+#         sd_on = _PMD.var(pm, nw)[:sd_on] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sd_on",
+#             binary = true,
+#             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "sd_on_start", 0)
+#         )
+#     else
+#         sc_on = _PMD.var(pm, nw)[:sc_on] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sc_on",
+#             lower_bound = 0,
+#             upper_bound = 1,
+#             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "sc_on_start", 0)
+#         )
+#         sd_on = _PMD.var(pm, nw)[:sd_on] = JuMP.@variable(pm.model,
+#             [i in _PMD.ids(pm, nw, :storage)], base_name="$(nw)_sd_on",
+#             lower_bound = 0,
+#             upper_bound = 1,
+#             start = _PMD.comp_start_value(_PMD.ref(pm, nw, :storage, i), "sd_on_start", 0)
+#         )
+#     end
+
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :sc_on, _PMD.ids(pm, nw, :storage), sc_on)
+#     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :storage, :sd_on, _PMD.ids(pm, nw, :storage), sd_on)
+# end

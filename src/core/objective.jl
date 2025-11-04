@@ -209,6 +209,8 @@ function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPo
     for d in _PMD.ids(pm, nw, :load)
         push!(weighted_load_served, sum(fair_load_weights[d].*_PMD.var(pm, nw, :pd)[d]))
     end
+    @info fair_load_weights
+    @info _PMD.var(pm, nw, :pd)
     return JuMP.@objective(pm.model, Max,
     sum(weighted_load_served))
 end

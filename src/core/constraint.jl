@@ -314,13 +314,13 @@ end
 
 
 function constraint_switch_budget(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
-    max_switch = sum(1 for s in _PMD.ids(pm, nw, :switch))
+    max_switch = length(_PMD.ids(pm, nw, :switch))
     JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :switch_state, s) for s in _PMD.ids(pm, nw, :switch_dispatchable)) <= max_switch)
     JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :switch_state, s) for s in _PMD.ids(pm, nw, :switch_dispatchable)) >= 1)
 end
 
 function constraint_block_budget(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
-    max_blocks = sum(1 for b in _PMD.ids(pm, nw, :blocks))
+    max_blocks = length(_PMD.ids(pm, nw, :blocks))
     JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :z_block, b) for b in _PMD.ids(pm, nw, :blocks)) <= max_blocks)
     JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :z_block, b) for b in _PMD.ids(pm, nw, :blocks)) >= 1)
 end
@@ -366,16 +366,16 @@ function constraint_mc_switch_state_on_off_top(pm::_PMD.AbstractUnbalancedPowerM
 
     f_idx = (i, f_bus, t_bus)
 
-    if switch["dispatchable"] != 0
+    #if switch["dispatchable"] != 0
         FairLoadDelivery.constraint_mc_switch_state_on_off(pm, nw, i, f_bus, t_bus, switch["f_connections"], switch["t_connections"]; relax=relax)
         FairLoadDelivery.constraint_mc_switch_power_on_off(pm, nw, f_idx; relax=relax)
-    else
-        if switch["state"] != 0
-            _PMD.constraint_mc_switch_state_closed(pm, nw, f_bus, t_bus, switch["f_connections"], switch["t_connections"])
-        else
-            _PMD.constraint_mc_switch_state_open(pm, nw, f_idx)
-        end
-    end
+    #else
+    #     if switch["state"] != 0
+    #         _PMD.constraint_mc_switch_state_closed(pm, nw, f_bus, t_bus, switch["f_connections"], switch["t_connections"])
+    #     else
+    #         _PMD.constraint_mc_switch_state_open(pm, nw, f_idx)
+    #     end
+    # end
     nothing
 end
 
@@ -383,13 +383,13 @@ function constraint_mc_switch_state_on_off(pm::_PMD.AbstractUnbalancedWModels, n
     w_fr = _PMD.var(pm, nw, :w, f_bus)
     w_to = _PMD.var(pm, nw, :w, t_bus)
 
-    z = _PMD.var(pm, nw, :switch_state, i)
+    z_switch = _PMD.var(pm, nw, :switch_state, i)
     M = 1e6
 
     for (fc, tc) in zip(f_connections, t_connections)
         if relax
-            JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] <=  M * (1-z))
-            JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] >= -M * (1-z))
+            JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] <=  M * (1-z_switch))
+            JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] >= -M * (1-z_switch))
         else
             JuMP.@constraint(pm.model, z => {w_fr[fc] == w_to[tc]})
         end
@@ -551,7 +551,7 @@ end
 
 function constraint_connect_block_storage(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
     for (i, strg) in _PMD.ref(pm, nw, :storage)
-        z_strg = _PMD.var(pm, nw, :z_strg, i)
+        z_strg = _PMD.var(pm, nw, :z_storage, i)
         z_block = _PMD.var(pm, nw, :z_block, _PMD.ref(pm, nw, :storage_block_map, i))
 
         JuMP.@constraint(pm.model, z_strg == z_block)
@@ -830,13 +830,13 @@ function constraint_mc_radiality(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=
         end
     end
     
-    if report
-        _PMD.sol(pm, nw)[:radiality_beta_switch] = _PMD.con(pm, nw)[:radiality_beta_switch]
-        _PMD.sol(pm, nw)[:radiality_beta_nonswitchable] = _PMD.con(pm, nw)[:radiality_beta_nonswitchable]
-        _PMD.sol(pm, nw)[:radiality_no_parent_for_root] = _PMD.con(pm, nw)[:radiality_no_parent_for_root]
-        _PMD.sol(pm, nw)[:radiality_substation_parent] = _PMD.con(pm, nw)[:radiality_substation_parent]
-        _PMD.sol(pm, nw)[:radiality_one_parent] = _PMD.con(pm, nw)[:radiality_one_parent]
-    end
+    # if report
+    # _PMD.sol(pm, nw)[:radiality_beta_switch] = _PMD.con(pm, nw)[:radiality_beta_switch]
+    # _PMD.sol(pm, nw)[:radiality_beta_nonswitchable] = _PMD.con(pm, nw)[:radiality_beta_nonswitchable]
+    # _PMD.sol(pm, nw)[:radiality_no_parent_for_root] = _PMD.con(pm, nw)[:radiality_no_parent_for_root]
+    # _PMD.sol(pm, nw)[:radiality_substation_parent] = _PMD.con(pm, nw)[:radiality_substation_parent]
+    # _PMD.sol(pm, nw)[:radiality_one_parent] = _PMD.con(pm, nw)[:radiality_one_parent]
+    # end
 end
 
 function constraint_radial_topology_gr(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, relax::Bool=false)
@@ -1192,12 +1192,12 @@ function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LP
             for (idx, (fc, tc)) in enumerate(zip(f_connections, t_connections))
                 JuMP.@constraint(pm.model, 
                     w_to[tc] <= w_fr[fc] - sum(MP[idx, j] * p_s_fr[j] for j in 1:N) - sum(MQ[idx, j] * q_s_fr[j] for j in 1:N) 
-                    + M * (2 - z_block_fr - z_block_to - z_switch + 1)
+                    + M * (1 - z_switch )
                 )
                 
                 JuMP.@constraint(pm.model, 
                     w_to[tc] >= w_fr[fc] - sum(MP[idx, j] * p_s_fr[j] for j in 1:N) - sum(MQ[idx, j] * q_s_fr[j] for j in 1:N) 
-                    - M * (2 - z_block_fr - z_block_to - z_switch + 1)
+                    - M * (1 - z_switch )
                 )
             end
         end
@@ -1216,6 +1216,7 @@ function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LP
         end
     end
 end
+
 """
 The thermal limit constraints p^2 + q^2 ≤ S^2 for each branch, for both the "from" and "to" side of the branch.
 The power models parser creates seperate branches for switches and the other branches in the branch dictionary are not switches.

@@ -1,0 +1,78 @@
+! ========================================================================
+! SIMPLE THREE-PHASE NETWORK WITH SUFFICIENT GENERATION
+! ========================================================================
+
+! Very weak voltage source (essentially negligible contribution)
+New Circuit.Insufficient_Gen
+~ basekv=0.4 pu=1.0 phases=3 MVAsc1=0.01 MVAsc3=0.01
+
+! ========================================================================
+! SINGLE GENERATOR - Increased to account for line losses
+! ========================================================================
+
+New Generator.Gen1 bus1=Primary.1.2.3 phases=3 kV=0.4 
+~ kW=70 kvar=15 
+~ kVA=75             ! Hard capacity limit (increased to cover losses)
+~ Xdp=0.3
+~ model=1 status=fixed
+~ Vminpu=0.9 Vmaxpu=1.1
+
+! ========================================================================
+! LINE CODES
+! ========================================================================
+
+New linecode.Main nphases=3 basefreq=50
+~ rmatrix=(0.08|0.032 0.08|0.032 0.032 0.08)
+~ xmatrix=(0.047|0.019 0.047|0.019 0.019 0.047)
+~ cmatrix=(50.93|0 50.93|0 0 50.93)
+~ normamps=200  ! Normal continuous current rating (Amps)
+~ emergamps=250 ! Emergency current rating (Amps)
+
+! ========================================================================
+! NETWORK TOPOLOGY
+! ========================================================================
+
+! Weak connection from source to generator bus
+New Line.SlackLine bus1=sourcebus.1.2.3 bus2=Primary.1.2.3 
+~ linecode=Main length=100 R1=100 X1=100  ! Very high impedance
+
+! Switches to load buses
+New Line.Switch1 bus1=Primary.1.2.3 bus2=BusA.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+New Line.Switch2 bus1=Primary.1.2.3 bus2=BusB.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+New Line.Switch3 bus1=BusA.1.2.3 bus2=BusB.1.2.3 
+~ linecode=Main length=0.5 switch=yes enabled=yes
+
+! ========================================================================
+! LOADS - TOTAL: 62 kW
+! ========================================================================
+
+! Bus A - 50 kW total (distributed across phases)
+New Load.L1 phases=1 bus1=BusA.1.0 kV=(0.4 3 sqrt /) kW=17 kvar=5 model=1
+New Load.L2 phases=1 bus1=BusA.2.0 kV=(0.4 3 sqrt /) kW=17 kvar=5 model=1
+New Load.L3 phases=1 bus1=BusA.3.0 kV=(0.4 3 sqrt /) kW=16 kvar=5 model=1
+
+! Bus B - 12 kW total (distributed across phases)
+New Load.L4 phases=1 bus1=BusB.1.0 kV=(0.4 3 sqrt /) kW=4 kvar=1.5 model=1
+New Load.L5 phases=1 bus1=BusB.2.0 kV=(0.4 3 sqrt /) kW=4 kvar=1.5 model=1
+New Load.L6 phases=1 bus1=BusB.3.0 kV=(0.4 3 sqrt /) kW=4 kvar=1 model=1
+
+! ========================================================================
+! SUMMARY
+! ========================================================================
+! Total Load:       62 kW (50 kW at BusA + 12 kW at BusB)
+! Line Losses:      ~3-5 kW (due to impedance)
+! Total Generation: 70 kW (hard limit 75 kVA)
+! Line Capacity:    200 A normal, 250 A emergency
+! Margin:           Generator can serve all load + losses
+! 
+! At 0.4 kV, 200 A per phase = ~138 kW three-phase capacity
+! Current load draws ~90 A per phase, well within limits
+! ========================================================================
+
+Set voltagebases=[0.4]
+Calcv
+Solve
