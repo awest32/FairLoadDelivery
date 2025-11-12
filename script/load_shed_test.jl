@@ -22,10 +22,14 @@ juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_
 ## Main loop
 dir = dirname(@__FILE__)
 
-#case = "ieee_13_pmd_mod.dss"
-case = "load_shed_test_single_phase.dss"
+#case = "ieee_13_clean/ieee13.dss"
+#case = "13_bus_load_shed_test.dss"
+case = "ieee_aw.dss"
+#case = "load_shed_test_single_phase.dss"
 #case = "control_case.dss"
 #case = "load_shed_test_three_phase.dss"
+#case = "Master.dss"
+#casepath = "data/network_10/Feeder_1/$case"
 casepath = "data/$case"
 file = joinpath(dir, "..", casepath)
 
@@ -40,9 +44,11 @@ eng["voltage_source"]["source"]["rs"] *=0
 eng["voltage_source"]["source"]["xs"] *=0
 eng["voltage_source"]["source"]["vm"] *=vscale
 
+# add_switch!(eng,"119120", "119.1.2.3", "120.1.2.3",[1,2,3], [1,2,3]; linecode="LC1")
+# add_generator!(eng, "new_gen", "119", [1,2,3,4]; cost_pg_parameters=[0.0, 1.2, 0])
 
 "Ensure use the reduce lines function in Fred's basecase script"
-PowerModelsDistribution.reduce_line_series!(eng)
+#PowerModelsDistribution.reduce_line_series!(eng)
 
 math = PowerModelsDistribution.transform_data_model(eng)
 lbs = PowerModelsDistribution.identify_load_blocks(math)
@@ -54,95 +60,131 @@ for (i,bus) in math["bus"]
 		bus["vmin"][:] .= 0.9
 end
 
+# Save for the relaxed version when using nonlinear terms in objective
+#add_start_vrvi!(math)
+
+# Add a switch 
+#add_switch!(eng,"646611", "646.1.2.3", "611.1.2.3",[1,2,3], [1,2,3]; linecode="mtx601")
+
+p = powerplot(eng, bus    = (:data=>"bus_type", :data_type=>"nominal"),
+                    branch = (:data=>"index", :data_type=>"ordinal"),
+                    gen    = (:data=>"pmax", :data_type=>"quantitative"),
+                    load   = (:data=>"pd",  :data_type=>"quantitative"),
+                    width = 300, height=300
+)
+ save("powerplot.pdf", p)
 # Ensure the generation from the source bus is less than the max load
 # First calculate the total load
-# ls_percent = .39 # ensure not inf
-# for (i,gen) in math["gen"]
-# 	if gen["source_id"] == "voltage_source.source"
-# 		gen["pmax"] .= ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-# 		gen["qmax"] .= ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-# 		gen["pmin"] .= -ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-# 		gen["qmin"] .= -ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-
-# 	end
-# end
-
-# Create the critical load set
-#critical_load = ["645", "652", "675a", "675b", "675c"]
-critical_load = ["l4"]
-for (i,load) in math["load"]
-	if load["name"] in critical_load
-		load["critical"] = 1
-		load["weight"] = 1000
-		println("Load $(load["name"]) at math load node $(i) is critical.")
-	else
-		load["critical"] = 0
-		load["weight"] = 10
-		println("Load $(load["name"]) at math load node $(i) is not critical.")
-
-	end
-end
-
-
-
-for (switch_id, switch) in enumerate(math["switch"])
-   # math["switch"][string(switch_id)]["state"] = 0
-    math["switch"][string(switch_id)]["branch_id"] = 0
-    for (branch_id, branch) in enumerate(math["branch"])
-        # println("Branch $branch_id")
-        # println("Branch dict $(branch[2]["source_id"])")
-        # println("Branch dict $(math["switch"][string(switch_id)]["source_id"])")
-        # println(" Switch dict $(switch[2]["source_id"])")
-            if branch[2]["source_id"] == switch[2]["source_id"]
-                switch[2]["branch_id"] = branch_id  # Assuming you have this mapping
-            end
+#ls_percent = 0. # ensure not inf
+served = [] #Dict{Any,Any}()
+for ls_percent in LinRange(0,1,11)
+    tot_pd = sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+    tot_qd = sum(load["qd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+    println(tot_pd)
+    for (i,gen) in math["gen"]
+        if gen["source_id"] == "voltage_source.source"
+            gen["pmax"] .= ls_percent*(tot_pd/3)# ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+            gen["qmax"] .= ls_percent*(tot_qd/3)#sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+            gen["pmin"] .= -ls_percent*(tot_pd/3) #ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+            gen["qmin"] .= -ls_percent*(tot_qd/3)#ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+        end
     end
+
+    # Create the critical load set
+    #critical_load = ["645", "652", "675a", "675b", "675c"]
+    critical_load = ["l4"]
+    for (i,load) in math["load"]
+        if load["name"] in critical_load
+            load["critical"] = 1
+            load["weight"] = 10
+            println("Load $(load["name"]) at math load node $(i) is critical.")
+        else
+            load["critical"] = 0
+            load["weight"] = 10
+            println("Load $(load["name"]) at math load node $(i) is not critical.")
+
+        end
+    end
+
+    for (switch_id, switch) in enumerate(math["switch"])
+    # math["switch"][string(switch_id)]["state"] = 0
+        math["switch"][string(switch_id)]["branch_id"] = 0
+        for (branch_id, branch) in enumerate(math["branch"])
+            # println("Branch $branch_id")
+            # println("Branch dict $(branch[2]["source_id"])")
+            # println("Branch dict $(math["switch"][string(switch_id)]["source_id"])")
+            # println(" Switch dict $(switch[2]["source_id"])")
+                if branch[2]["source_id"] == switch[2]["source_id"]
+                    switch[2]["branch_id"] = branch_id  # Assuming you have this mapping
+                end
+        end
+    end
+    # math["switch"]["1"]["state"] = 0
+    # math["switch"]["2"]["state"] = 0
+    # math["switch"]["3"]["state"] = 0
+
+    math["block"] = Dict{String,Any}()
+    for (block, loads) in enumerate(lbs)
+        math["block"][string(block)] = Dict("id"=>block, "state"=>0)
+    end
+    # math["block"]["1"]["state"] = 0
+    # math["block"]["2"]["state"] = 0
+    #math["block"]["3"]["state"] = 0
+
+    mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+    mld = mld_model.model
+    set_optimizer(mld, gurobi)
+    optimize!(mld)
+    con_ref = mld_model.con[:it][:pmd][:nw][0]
+    var = mld_model.var[:it][:pmd][:nw][0]
+    soln_ref = mld_model.sol[:it][:pmd][:nw][0]
+    ref = mld_model.ref[:it][:pmd][:nw][0]
+
+
+    pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, gurobi)
+    res = pm_mld_soln["solution"]
+    # println("Load served: $(sum(load["pd"] for load in math["load"] if load["critical"] == 1))")
+    #load_ref = sum(load["pd"][idx] for (idx, con) in enumerate(load["connections"]) for (i,load) in ref[:load] )
+    load_ref = []
+    for (i, load) in ref[:load]
+        cons = load["connections"]
+        for idx in 1:length(cons)
+            push!(load_ref, load["pd"][idx])
+        end
+    end
+    load_ref_sum = sum(load_ref)
+    println("Total load in reference: $load_ref_sum")
+    gen_ref = []# sum(gen["pg"] for (i,gen) in ref[:gen])
+    for (i, gen) in ref[:gen]
+        cons = gen["connections"]
+        for idx in 1:length(cons)
+            push!(gen_ref, gen["pg"][idx])
+        end
+    end
+    gen_ref_sum = sum(gen_ref)
+    println("Total generation in reference: $gen_ref_sum")
+    gen_soln = []# sum(gen["pg"] for (i,gen) in ref[:gen])
+    for (i, gen) in res["gen"]
+        for idx in 1:length(gen["pg"])
+            push!(gen_soln, gen["pg"][idx])
+        end
+    end
+    gen_soln_sum = sum(gen_soln)
+    println("Total generation in solution: $gen_soln_sum")
+    #load_served = sum((load["pd"]) for (i,load) in res["load"])
+    load_served = []
+    for (i, load) in res["load"]
+        for idx in 1:length(load["pd"])
+            push!(load_served, load["pd"][idx])
+        end
+    end
+    load_served_sum = sum(load_served)
+    println("Total load served in MLD solution: $load_served_sum")
+    println("Load served percentage: $(load_served_sum/load_ref_sum*100) %")
+    push!(served, (load_served_sum/load_ref_sum)*100)
 end
-# math["switch"]["1"]["state"] = 0
-# math["switch"]["2"]["state"] = 1
-# math["switch"]["3"]["state"] = 0
+println(served)
 
-math["block"] = Dict{String,Any}()
-for (block, loads) in enumerate(lbs)
-	math["block"][string(block)] = Dict("id"=>block, "state"=>0)
-end
-# math["block"]["1"]["state"] = 1
-# math["block"]["2"]["state"] = 0
-# math["block"]["3"]["state"] = 1
-
-
-
-
-#pm_acopf_soln = solve_mc_opf(math, ACPUPowerModel, ipopt)
-
-#pm_mld = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-# JuMP.set_optimizer(pm_mld.model, Ipopt.Optimizer)
-# JuMP.optimize!(pm_mld.model)
-#reference = pm_mld.ref[:it][:pmd][:nw][0]    
-
-#pm_pf = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_pf_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-#ref_pf = pm_pf.ref[:it][:pmd][:nw][0]    
-#pm_pf_soln = FairLoadDelivery.solve_mc_pf_aw(math, ipopt)#; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-# pm_mld_soln = solve_mc_mld(math, LinDist3FlowPowerModel, ipopt)
-mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-set_optimizer(mld_model.model, gurobi)
-optimize!(mld_model.model)
-con_ref = mld_model.con[:it][:pmd][:nw][0]
-var = mld_model.var[:it][:pmd][:nw][0]
-soln_ref = mld_model.sol[:it][:pmd][:nw][0]
-ref = mld_model.ref[:it][:pmd][:nw][0]
-
-pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, gurobi)
-res = pm_mld_soln["solution"]
-# println("Load served: $(sum(load["pd"] for load in math["load"] if load["critical"] == 1))")
-load_ref = sum(load["pd"] for (i,load) in ref[:load])
-println("Total load in reference solution: $load_ref")
-gen_ref = sum(gen["pg"] for (i,gen) in ref[:gen])
-println("Total generation in reference solution: $gen_ref")
-load_served = sum((load["pd"]) for (i,load) in res["load"])
-println("Total load served in MLD solution: $load_served")
-println("Load served percentage: $(load_served/load_ref*100) %")
-# After optimize!(pm.model)
 
 function diagnose_infeasibility(mld_model, ref, var, con_ref)
     println("\n" * "="^60)

@@ -384,14 +384,12 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-    # The on-off variable is making the solution error at the report statement in the variable function
-    #_PMD.variable_mc_storage_indicator(pm, relax=false)
+    # # The on-off variable is making the solution error at the report statement in the variable function
    	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=false)
-    # Using the snapshot variable definition for now
-    #_PMD.variable_mc_storage_power_mi(pm, relax=true)
+ 
 
     _PMD.variable_mc_load_indicator(pm; relax=false)
-    #variable_mc_demand_indicator(pm; relax=false)
+    # #variable_mc_demand_indicator(pm; relax=false)
 
 
     variable_block_indicator(pm; relax=false)
@@ -406,16 +404,16 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
      end
 
     _PMD.constraint_mc_bus_voltage_on_off(pm)
-    # # # # #constraint_mc_bus_voltage_magnitude_sqr_block_on_off(pm)
+    # # # # # #constraint_mc_bus_voltage_magnitude_sqr_block_on_off(pm)
     
      
     for i in _PMD.ids(pm, :gen)
-        #_PMD.constraint_mc_generator_power(pm, i)
-        constraint_mc_gen_power_on_off(pm, i)
+        _PMD.constraint_mc_generator_power(pm, i)
+        #constraint_mc_gen_power_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :bus)
-        _PMD.constraint_mc_power_balance_shed(pm, i)
+        constraint_mc_power_balance_shed(pm, i)
     end
     # for (i,bus) in _PMD.ref(pm, :bus)
     #     if bus["name"] == "646"
@@ -458,14 +456,15 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
 
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
-    #constraint_mc_radiality(pm)
+    # #constraint_mc_radiality(pm)
     constraint_mc_block_energization_consistency_bigm(pm)
 
-    constraint_block_budget(pm)
-    constraint_switch_budget(pm)
+    # Must be disabled if there is no generation in the network
+    #constraint_block_budget(pm)
+    #constraint_switch_budget(pm)
 
-    # constraint_set_block_state_rounded(pm)
-    # constraint_set_switch_state_rounded(pm)
+    # # constraint_set_block_state_rounded(pm)
+    # # constraint_set_switch_state_rounded(pm)
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)

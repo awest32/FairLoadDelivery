@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dcterms:dc xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://purl.org/dc/elements/1.1/ https://dublincore.org/schemas/xmls/qdc/2008/02/11/dcterms.xsd">
+  <dc:title>Four-wire low voltage power network dataset</dc:title>
+  <dc:creator>Rahmat Heidarihaei</dc:creator>
+  <dc:subject>Electrical energy transmission, networks and systems</dc:subject>
+  <dc:subject>Electrical circuits and systems</dc:subject>
+  <dc:description>In most existing low voltage network datasets, the impedance data is approximate, with the following two approximations being commonly applied:
+1. a Kron-reduction, which assumes that the neutral wire is grounded everywhere;
+2. discarding off-diagonal elements of the series impedance matrix in sequence coordinates.
+
+This dataset, contains four-wire variants of low voltage networks for power flow simulation purposes. This means the impedance matrices associate with the lines have size 4x4 and are defined in the wire coordinate space.
+
+Furthermore, it contains approximations derived from the four-wire network models, with 3x3 impedance matrices, including Kron-reduced, phase-to-neutral, and modified-phase-to-neutral transformations.</dc:description>
+  <dc:publisher>CSIRO</dc:publisher>
+  <dc:contributor>Frederik Geth</dc:contributor>
+  <dc:contributor>Claeys Sander</dc:contributor>
+  <dc:type />
+  <dc:format />
+  <dc:identifier>https://doi.org/10.25919/jaae-vc35</dc:identifier>
+  <dc:language />
+  <dcterms:temporal xsi:type="dcterms:Period">start=2020-01-01; end=2021-12-31</dcterms:temporal>
+  <dc:rights />
+</dcterms:dc>
