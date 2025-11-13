@@ -44,13 +44,47 @@ eng["voltage_source"]["source"]["rs"] *=0
 eng["voltage_source"]["source"]["xs"] *=0
 eng["voltage_source"]["source"]["vm"] *=vscale
 
-# add_switch!(eng,"119120", "119.1.2.3", "120.1.2.3",[1,2,3], [1,2,3]; linecode="LC1")
-# add_generator!(eng, "new_gen", "119", [1,2,3,4]; cost_pg_parameters=[0.0, 1.2, 0])
-
 "Ensure use the reduce lines function in Fred's basecase script"
 #PowerModelsDistribution.reduce_line_series!(eng)
 
+# Add a switch 
+#add_switch!(eng,"632633", "632.1.2.3", "633.1.2.3", [1,2,3], [1,2,3]; linecode="mtx601")
+#eng["switch"]["632671"]["dispatchable"] = "YES"
+
+# Make a deepcopy of the switch and change the fields
+# Make a deepcopy of a line and change the fields, make this line have the same buses
+
+ function add_gens!(math4w)
+        gen_counter = 2
+        for (d, load) in math4w["load"]
+            if p[!,pen][load["index"]]
+                phases = length(load["connections"])-1
+                math4w["gen"]["$gen_counter"] = deepcopy(math4w["gen"]["1"])
+                math4w["gen"]["$gen_counter"]["name"] = "$gen_counter"
+                math4w["gen"]["$gen_counter"]["index"] = gen_counter
+                math4w["gen"]["$gen_counter"]["cost"] = 1.0 #*math4w["gen"]["1"]["cost"]
+                math4w["gen"]["$gen_counter"]["gen_bus"] = load["load_bus"]
+                math4w["gen"]["$gen_counter"]["pmax"] = 5.0*ones(phases)
+                math4w["gen"]["$gen_counter"]["pmin"] = 0.0*ones(phases)
+                math4w["gen"]["$gen_counter"]["qmax"] = 5.0*ones(phases)
+                math4w["gen"]["$gen_counter"]["qmin"] = -5.0*ones(phases)
+                math4w["gen"]["$gen_counter"]["connections"] = load["connections"]
+                gen_counter = gen_counter + 1
+            end
+        end
+        @show "added $(gen_counter-1) PV systems at penetration $(pen) for $(length(math4w["load"])) loads"
+
+    end
+    add_gens!(math4w)
+
 math = PowerModelsDistribution.transform_data_model(eng)
+
+
+   
+# Remove the lines parallel to the switches
+# Look up the correct branch
+# Use the delete! command in julia to remove from the math dictionary
+
 lbs = PowerModelsDistribution.identify_load_blocks(math)
 get(eng, "time_series", Dict())
 
@@ -63,8 +97,6 @@ end
 # Save for the relaxed version when using nonlinear terms in objective
 #add_start_vrvi!(math)
 
-# Add a switch 
-#add_switch!(eng,"646611", "646.1.2.3", "611.1.2.3",[1,2,3], [1,2,3]; linecode="mtx601")
 
 p = powerplot(eng, bus    = (:data=>"bus_type", :data_type=>"nominal"),
                     branch = (:data=>"index", :data_type=>"ordinal"),
