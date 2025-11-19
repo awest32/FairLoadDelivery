@@ -500,42 +500,36 @@ computes the connected components of the network graph
 returns a set of sets of bus ids, each set is a connected component
 """
 function calc_connected_components(data::Dict{String,<:Any}; edges::Union{Missing, Vector{String}}=missing, type::Union{Missing,String}=missing, check_enabled::Bool=true)::Set{Set}
-    pmd_data = get_pmd_data(data)
+    pmd_data = _PMD.get_pmd_data(data)
 
-    if ismultinetwork(pmd_data)
-        error("multinetwork data is not yet supported, recommend to use on each subnetwork independently")
-    end
-
-    if get(pmd_data, "data_model", MATHEMATICAL) == ENGINEERING
-        return _calc_connected_components_eng(pmd_data; edges=ismissing(edges) ? _eng_edge_elements : edges, type=type, check_enabled=check_enabled)
-    elseif get(pmd_data, "data_model", MATHEMATICAL) == MATHEMATICAL
-        return _calc_connected_components_math(pmd_data; edges=ismissing(edges) ? _math_edge_elements : edges, type=type, check_enabled=check_enabled)
-    else
-        error("data_model `$(get(pmd_data, "data_model", MATHEMATICAL))` is unrecongized")
-    end
-end
-
-function _calc_connected_components_math(data::Dict{String,<:Any}; edges::Vector{<:String}=_math_edge_elements, type::Union{Missing,String}=missing, check_enabled::Bool=true)::Set{Set{Int}}
-    @assert get(data, "data_model", MATHEMATICAL) == MATHEMATICAL
-
-    active_bus = Dict{String,Dict{String,Any}}(x for x in data["bus"] if x.second[pmd_math_component_status["bus"]] != pmd_math_component_status_inactive["bus"] || !check_enabled)
+    active_bus = Dict{String,Dict{String,Any}}(x for x in data["bus"] if x.second[_PMD.pmd_math_component_status["bus"]] != _PMD.pmd_math_component_status_inactive["bus"] || !check_enabled)
     active_bus_ids = Set{Int}([parse(Int,i) for (i,bus) in active_bus])
-
+    
+    edges = isnothing(edges) || edges === missing ? _PMD._math_edge_elements : edges
+    #@info edges
     neighbors = Dict{Int,Vector{Int}}(i => [] for i in active_bus_ids)
     for edge_type in edges
+        #@info edge_type
         for (id, edge_obj) in get(data, edge_type, Dict{Any,Dict{String,Any}}())
-            if edge_obj[pmd_math_component_status[edge_type]] != pmd_math_component_status_inactive[edge_type] || !check_enabled
+            #println("The edge id is: ", id)
+            #@info edge_obj
+            #@info type
+            if edge_obj[_PMD.pmd_math_component_status[edge_type]] != _PMD.pmd_math_component_status_inactive[edge_type] || !check_enabled
                 if edge_type == "switch" && !ismissing(type)
+                    #println("The switch name is: ", edge_obj["name"])
                     if type == "load_blocks"
+                        #println("The switch state is: ", edge_obj["state"])
                         if edge_obj["state"] == 1
                             push!(neighbors[edge_obj["f_bus"]], edge_obj["t_bus"])
                             push!(neighbors[edge_obj["t_bus"]], edge_obj["f_bus"])
+                         #   println("Switch from bus ", edge_obj["f_bus"], " to bus ", edge_obj["t_bus"], " is closed and added to neighbors.")
                         end
-                    elseif type == "blocks"
-                        if edge_obj["state"] != 0
-                            push!(neighbors[edge_obj["f_bus"]], edge_obj["t_bus"])
-                            push!(neighbors[edge_obj["t_bus"]], edge_obj["f_bus"])
-                        end
+                        @info neighbors
+                #     elseif type == "blocks"
+                #         if edge_obj["state"] != 0
+                #             push!(neighbors[edge_obj["f_bus"]], edge_obj["t_bus"])
+                #             push!(neighbors[edge_obj["t_bus"]], edge_obj["f_bus"])
+                #         end
                     end
                 else
                     push!(neighbors[edge_obj["f_bus"]], edge_obj["t_bus"])
@@ -546,7 +540,9 @@ function _calc_connected_components_math(data::Dict{String,<:Any}; edges::Vector
     end
 
     component_lookup = Dict(i => Set{Int}([i]) for i in active_bus_ids)
+    @info component_lookup
     touched = Set{Int}()
+    @info active_bus_ids
 
     for i in active_bus_ids
         if !(i in touched)
@@ -561,6 +557,7 @@ end
 "DFS on a graph"
 function _cc_dfs(i::T, neighbors::Dict{T,Vector{T}}, component_lookup::Dict{T,Set{T}}, touched::Set{T})::Nothing where T <: Union{String,Int}
     push!(touched, i)
+    @info touched
     for j in neighbors[i]
         if !(j in touched)
             for k in  component_lookup[j]
@@ -575,20 +572,7 @@ function _cc_dfs(i::T, neighbors::Dict{T,Vector{T}}, component_lookup::Dict{T,Se
 
     nothing
 end
-# function _ref_add_critical_block!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})#, critical_load_loc::Vector)
-#     #ref[:critical_load_block_map] = Dict{Int,Int}(load => l for (l,block) in ref[:blocks] for load in block)
-#   	load_block_map = Dict{Int,Int}()
 
-#     for (l,load) in get(data, "load", Dict())
-# 		for (b,block) in ref[:blocks]
-# 			if load["load_bus"] in block
-#                 if load["load_bus"] == critical_load_loc
-# 				load_block_map[parse(Int,l)] = b
-# 			end
-# 		end
-# 	end
-#     #ref[:critical_load_block_map] = load_block_map
-# end
 
 """
 general relaxation of binlinear term (McCormick)

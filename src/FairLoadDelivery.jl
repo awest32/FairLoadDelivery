@@ -15,6 +15,7 @@ import Random
 import DiffOpt
 import Plots
 import FrankWolfe
+import PowerPlots
 
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer

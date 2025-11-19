@@ -8,6 +8,7 @@ using Distributions
 using DiffOpt
 using JuMP
 using LinearAlgebra,SparseArrays
+using PowerPlots
 # using DataFrames
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
@@ -23,8 +24,9 @@ juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_clean/ieee13.dss"
+case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr.dss"
 #case = "13_bus_load_shed_test.dss"
-case = "ieee_aw.dss"
+#case = "ieee_aw.dss"
 #case = "load_shed_test_single_phase.dss"
 #case = "control_case.dss"
 #case = "load_shed_test_three_phase.dss"
@@ -54,37 +56,64 @@ eng["voltage_source"]["source"]["vm"] *=vscale
 # Make a deepcopy of the switch and change the fields
 # Make a deepcopy of a line and change the fields, make this line have the same buses
 
- function add_gens!(math4w)
-        gen_counter = 2
-        for (d, load) in math4w["load"]
-            if p[!,pen][load["index"]]
-                phases = length(load["connections"])-1
-                math4w["gen"]["$gen_counter"] = deepcopy(math4w["gen"]["1"])
-                math4w["gen"]["$gen_counter"]["name"] = "$gen_counter"
-                math4w["gen"]["$gen_counter"]["index"] = gen_counter
-                math4w["gen"]["$gen_counter"]["cost"] = 1.0 #*math4w["gen"]["1"]["cost"]
-                math4w["gen"]["$gen_counter"]["gen_bus"] = load["load_bus"]
-                math4w["gen"]["$gen_counter"]["pmax"] = 5.0*ones(phases)
-                math4w["gen"]["$gen_counter"]["pmin"] = 0.0*ones(phases)
-                math4w["gen"]["$gen_counter"]["qmax"] = 5.0*ones(phases)
-                math4w["gen"]["$gen_counter"]["qmin"] = -5.0*ones(phases)
-                math4w["gen"]["$gen_counter"]["connections"] = load["connections"]
-                gen_counter = gen_counter + 1
-            end
-        end
-        @show "added $(gen_counter-1) PV systems at penetration $(pen) for $(length(math4w["load"])) loads"
+ #function add_gens!(eng)
+        #for (d, load) in eng["load"]
+            #if p[!,pen][load["index"]]
+                #phases = length(load["connections"])-1
+          
+            #     switch_name = 632671
+            #     eng["switch"]["$switch_name"] = deepcopy(eng["switch"]["671692"])
+            #    eng["switch"]["$switch_name"]["f_bus"] = "632"#.1.2.3"
+            #     eng["switch"]["$switch_name"]["t_bus"] = "671"# .1.2.3"
+            
+            # switch_name = 632645
+            #     eng["switch"]["$switch_name"] = deepcopy(eng["switch"]["671692"])
+            #    eng["switch"]["$switch_name"]["f_bus"] = "632"#.1.2.3"
+            #     eng["switch"]["$switch_name"]["t_bus"] = "645"# .1.2.3"
+    #end
+        #end
+       # @show "added $(switch_counter-1) PV systems at penetration $(pen) for $(length(eng["load"])) loads"
 
-    end
-    add_gens!(math4w)
+    # end
+    # add_gens!(eng)
+
+#function add_gens!(eng)
+        #for (d, load) in eng["load"]
+            #if p[!,pen][load["index"]]
+                #phases = length(load["connections"])-1
+                
+                # line_name = 632671
+                # eng["line"]["$line_name"] = deepcopy(eng["line"]["671680"])
+                # eng["line"]["$line_name"]["f_bus"] = "632"#.1.2.3"
+                # eng["line"]["$line_name"]["t_bus"] = "671"# .1.2.3"
+                
+                # # line_name = 632645
+                # eng["line"]["$line_name"] = deepcopy(eng["line"]["671680"])
+                # eng["line"]["$line_name"]["f_bus"] = "632"#.1.2.3"
+                # eng["line"]["$line_name"]["t_bus"] = "645"# .1.2.3"
+            #end
+        #end
+       # @show "added $(switch_counter-1) PV systems at penetration $(pen) for $(length(eng["load"])) loads"
+
+    # end
+    # add_gens!(eng)
 
 math = PowerModelsDistribution.transform_data_model(eng)
-
-
+# for (i,branch) in math["branch"]
+#     if branch["name"] == "632671"
+#         delete!(math["branch"],string(i))
+#     end
+#     # if branch["name"] == "632645"
+#     #     delete!(math["branch"],string(i))
+#     # end
+# end
    
 # Remove the lines parallel to the switches
 # Look up the correct branch
 # Use the delete! command in julia to remove from the math dictionary
-
+for (idx, switch) in math["switch"]
+    switch["state"] = 1
+end
 lbs = PowerModelsDistribution.identify_load_blocks(math)
 get(eng, "time_series", Dict())
 
@@ -109,16 +138,44 @@ p = powerplot(eng, bus    = (:data=>"bus_type", :data_type=>"nominal"),
 # First calculate the total load
 #ls_percent = 0. # ensure not inf
 served = [] #Dict{Any,Any}()
-for ls_percent in LinRange(0,1,11)
+ls_percent = 1
+#for ls_percent in LinRange(0,1,11)
     tot_pd = sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
     tot_qd = sum(load["qd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
     println(tot_pd)
     for (i,gen) in math["gen"]
         if gen["source_id"] == "voltage_source.source"
-            gen["pmax"] .= ls_percent*(tot_pd/3)# ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-            gen["qmax"] .= ls_percent*(tot_qd/3)#sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-            gen["pmin"] .= -ls_percent*(tot_pd/3) #ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-            gen["qmin"] .= -ls_percent*(tot_qd/3)#ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+            pd_phase1=0
+            pd_phase2=0
+            pd_phase3=0
+            qd_phase1=0
+            qd_phase2=0
+            qd_phase3=0
+            for (ind, d) in math["load"]
+                @info d
+                @info d["connections"]
+                for (idx, con) in enumerate(d["connections"])
+                    @info "Load at connection $(d["connections"][idx]) has pd=$(d["pd"][idx]) and qd=$(d["qd"][idx])"
+                    if 1 == con# d["connections"] 
+                        pd_phase1 += d["pd"][idx]
+                        qd_phase1 += d["qd"][idx]
+                    end
+                    if 2 == con
+                        pd_phase2 += d["pd"][idx]
+                        qd_phase2 += d["qd"][idx]
+                    end 
+                    if 3 == con
+                        pd_phase3 += d["pd"][idx]
+                        qd_phase3 += d["qd"][idx]
+                    end
+                end
+            end
+            gen["pmax"][1] = pd_phase1 * ls_percent
+            gen["qmax"][1] = qd_phase1 * ls_percent
+            gen["pmax"][2] = pd_phase2 * ls_percent
+            gen["qmax"][2] = qd_phase2 * ls_percent
+            gen["pmax"][3] = pd_phase3 * ls_percent
+            gen["qmax"][3] = qd_phase3 * ls_percent
         end
     end
 
@@ -214,8 +271,8 @@ for ls_percent in LinRange(0,1,11)
     println("Total load served in MLD solution: $load_served_sum")
     println("Load served percentage: $(load_served_sum/load_ref_sum*100) %")
     push!(served, (load_served_sum/load_ref_sum)*100)
-end
-println(served)
+#end
+#println(served)
 
 
 function diagnose_infeasibility(mld_model, ref, var, con_ref)

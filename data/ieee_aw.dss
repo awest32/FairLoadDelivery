@@ -33,17 +33,20 @@ New Transformer.XFM1 Phases=3 Windings=2 XHL=2
 New linecode.mtx601 nphases=3 BaseFreq=60
 ~ rmatrix = (0.3465 | 0.1560 0.3375 | 0.1580 0.1535 0.3414 )
 ~ xmatrix = (1.0179 | 0.5017 1.0478 | 0.4236 0.3849 1.0348 )
+~ Cmatrix=[0  |0  0  |0  0  0  ]
 ~ units=mi
 
 New linecode.mtx602 nphases=3 BaseFreq=60
 ~ rmatrix = (0.7526 | 0.1580 0.7475 | 0.1560 0.1535 0.7436 )
 ~ xmatrix = (1.1814 | 0.4236 1.1983 | 0.5017 0.3849 1.2112 )
+~ Cmatrix=[0  |0  0  |0  0  0  ]
 ~ units=mi
 
 New Linecode.mtx606 nphases=3 Units=mi
 ~ Rmatrix=[0.791721 |0.318476 0.781649 |0.28345 0.318476 0.791721 ]
 ~ Xmatrix=[0.438352 |0.0276838 0.396697 |-0.0184204 0.0276838 0.438352 ]
-~ Cmatrix=[383.948 |0 383.948 |0 0 383.948 ]
+~ Cmatrix=[0  |0  0  |0  0  0  ]
+~ units=mi
 
 !LOAD DEFINITIONS - ALL CONVERTED TO BALANCED 3-PHASE WYE
 ! Original total: ~3466 kW, distributed across buses
@@ -52,7 +55,7 @@ New Linecode.mtx606 nphases=3 Units=mi
 New Load.671 Bus1=671.1.2.3 Phases=3 Conn=Wye Model=1 kV=4.16 kW=1155 kvar=660 vminpu=0.6 vmaxpu=1.4
 
 ! Bus 634 - Original: 160+120+120=400 kW (single phase) -> Now: 400 kW (3-phase)
-New Load.634 Bus1=634.1.2.3 Phases=3 Conn=Wye Model=1 kV=4.16 kW=400 kvar=290 vminpu=0.6 vmaxpu=1.4
+New Load.634 Bus1=634.1.2.3 Phases=3 Conn=Wye Model=1 kV=0.48 kW=400 kvar=290 vminpu=0.6 vmaxpu=1.4
 
 ! Bus 645 - Original: 170 kW (single phase) -> Now: 170 kW (3-phase)
 New Load.645 Bus1=645.1.2.3 Phases=3 Conn=Wye Model=1 kV=4.16 kW=170 kvar=125 vminpu=0.6 vmaxpu=1.4
@@ -100,7 +103,7 @@ Set Voltagebases=[115, 4.16, .48]
 calcv
 
 ! Set regulator taps
-!Transformer.Reg1.Taps=[1.0 1.0625]
+! Transformer.Reg1.Taps=[1.0 1.0625]
 
 Set Controlmode=OFF
 Set tolerance=0.001

@@ -162,6 +162,7 @@ function determine_branch_locs(ref, hops, sourcebus)
         node_locs = []
         for i in sourcebus
            push!(node_locs, i)
+           println("Starting at sourcebus node: $i")
         end
         unique!(node_locs)
         
@@ -175,9 +176,12 @@ function determine_branch_locs(ref, hops, sourcebus)
                 if ref[:branch][i]["f_bus"] in node_locs
                     push!(new_node_locs, ref[:branch][i]["t_bus"])
                     push!(branch_locs, i)  # Add branch index
+                    println("Branch locations so far: $branch_locs")
+                    @info "Found branch $i from f_bus $(ref[:branch][i]["f_bus"]) to t_bus $(ref[:branch][i]["t_bus"])"
                 elseif ref[:branch][i]["t_bus"] in node_locs
                     push!(new_node_locs, ref[:branch][i]["f_bus"])
                     push!(branch_locs, i)  # Add branch index
+                    @info "Found branch $i from t_bus $(ref[:branch][i]["t_bus"]) to f_bus $(ref[:branch][i]["f_bus"])"
                 end
             end
             # Iterate through switches in their original order
@@ -185,30 +189,38 @@ function determine_branch_locs(ref, hops, sourcebus)
                 if ref[:switch][i]["f_bus"] in node_locs
                     push!(new_node_locs, ref[:switch][i]["t_bus"])
                     push!(branch_locs, i)  # Add switch index
+                    println("Switch locations so far: $branch_locs")
+                    @info "Found switch $i from f_bus $(ref[:switch][i]["f_bus"]) to t_bus $(ref[:switch][i]["t_bus"])"
                 elseif ref[:switch][i]["t_bus"] in node_locs
                     push!(new_node_locs, ref[:switch][i]["f_bus"])
                     push!(branch_locs, i)  # Add switch index
+                    @info "Found switch $i from t_bus $(ref[:switch][i]["t_bus"]) to f_bus $(ref[:switch][i]["f_bus"])"
                 end
             end
             
             for j in new_node_locs
                 push!(node_locs, j)
+                @info "Found node $j into node_locs $node_locs"
             end
             unique!(node_locs)
+            @info "After hop $node_search, node_locs: $node_locs"
             unique!(branch_locs)  # Remove duplicate branches
+            @info "After hop $node_search, branch_locs: $branch_locs"
             node_search = node_search + 1
+            @info "Hops: $node_search, Nodes found: $(length(node_locs)), Branches found: $(length(branch_locs))"
         end
         unique!(branch_locs)
     end
     return branch_locs
 end
  
-max_hops = 6
+max_hops = 15
 branch_locations = Dict{Int,Any}()
 for i in 1:max_hops
+    println("Determining branch locations for hop $i")
     branch_locations[i] = determine_branch_locs(ref, i, sourcebus)
 end
-#println(branch_locations)
+println(branch_locations)
 
 exclusive_branch_hops = Dict{Int,Any}()
 for i in 1:max_hops
@@ -218,14 +230,14 @@ for i in 1:max_hops
         exclusive_branch_hops[i] = filter(x -> !(x in branch_locations[i-1]), branch_locations[i])
     end
 end
-#println(exclusive_branch_hops)
+println(exclusive_branch_hops)
  
 max_hops = 6
 node_locations = Dict{Int,Any}()
 for i in 1:max_hops
     node_locations[i] = determine_node_locs(ref, i, sourcebus)
 end
-#println(node_locations)
+println(node_locations)
 exclusive_hops = Dict{Int,Any}()
 for i in 1:max_hops
     if i == 1
@@ -234,7 +246,7 @@ for i in 1:max_hops
         exclusive_hops[i]= filter(x -> !(x in node_locations[i-1]), node_locations[i])
     end
 end
-#println(exclusive_hops)
+println(exclusive_hops)
 
 # Collect all voltage data
 global x_ind = 0

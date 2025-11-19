@@ -1,0 +1,86 @@
+SetProp, 1E050,   -1E050, 1E050, -1E050, 16777215, 16777215, 0, 4
+NoScales,
+Caption, "Transformer.SUB Currents"
+ChartCaption, "Transformer.SUB Currents"
+Rect, 100, 10, 200, 60
+Label, 150, 15, 0, "Transformer.SUB", 0
+BoldLabel, 1
+Width, 7
+DataColor, 8421504
+Move, 0, 0
+Draw, 300, 0
+DataColor, 0
+Width, 3
+FStyle, 0
+Move, 0, 50
+Draw, 100, 50
+Center,  15, 52, 10, "17.9455"
+Center,  60, 52, 10, " /_    -0.61"
+Center,  90, 52, 10, " ->"
+FStyle, 0
+Move, 0, 40
+Draw, 100, 40
+Center,  15, 42, 10, "19.7916"
+Center,  60, 42, 10, " /_  -108.34"
+Center,  90, 42, 10, " ->"
+FStyle, 0
+Move, 0, 30
+Draw, 100, 30
+Center,  15, 32, 10, "22.3046"
+Center,  60, 32, 10, " /_   121.69"
+Center,  90, 32, 10, " ->"
+Width, 1
+FStyle, 0
+Move, 0, 20
+Draw, 100, 20
+Center,  15, 22, 10, "0"
+Center,  60, 22, 10, " /_     0.00"
+Center,  90, 22, 10, " ->"
+FStyle, 0
+Move, 0, -10
+Draw, 100, -10
+Center,  15, -8, 10, "5.99991E-011"
+Center,  60, -8, 10, " /_   165.96"
+Center,  90, -8, 10, " ->"
+Width, 7
+Move, -5, 5
+Draw, -5, 55
+Center,  25, 60, 10, "SOURCEBUS"
+Width, 3
+FStyle, 0
+Move, 300, 50
+Draw, 200, 50
+Center,  210, 52, 10, "<- "
+Center,  240, 52, 10, "593.415"
+Center,  280, 52, 10, " /_   151.42"
+FStyle, 0
+Move, 300, 40
+Draw, 200, 40
+Center,  210, 42, 10, "<- "
+Center,  240, 42, 10, "435.611"
+Center,  280, 42, 10, " /_    39.09"
+FStyle, 0
+Move, 300, 30
+Draw, 200, 30
+Center,  210, 32, 10, "<- "
+Center,  240, 32, 10, "626.12"
+Center,  280, 32, 10, " /_   -86.34"
+Width, 1
+FStyle, 0
+Move, 300, 20
+Draw, 200, 20
+Center,  210, 22, 10, "<- "
+Center,  240, 22, 10, "157.678"
+Center,  280, 22, 10, " /_    24.86"
+FStyle, 0
+Move, 300, -10
+Draw, 200, -10
+Center,  210, -8, 10, "<- "
+Center,  240, -8, 10, "6.45659E-009"
+Center,  280, -8, 10, " /_    25.64"
+Width, 7
+Move, 305, 5
+Draw, 305, 55
+Center,  275, 60, 10, "650"
+Caption, " Currents"
+PctRim, 5
