@@ -24,7 +24,7 @@ juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_clean/ieee13.dss"
-case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr.dss"
+case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
 #case = "13_bus_load_shed_test.dss"
 #case = "ieee_aw.dss"
 #case = "load_shed_test_single_phase.dss"
@@ -140,9 +140,9 @@ p = powerplot(eng, bus    = (:data=>"bus_type", :data_type=>"nominal"),
 served = [] #Dict{Any,Any}()
 ls_percent = 1
 #for ls_percent in LinRange(0,1,11)
-    tot_pd = sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-    tot_qd = sum(load["qd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-    println(tot_pd)
+    # tot_pd = sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+    # tot_qd = sum(load["qd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
+    # println(tot_pd)
     for (i,gen) in math["gen"]
         if gen["source_id"] == "voltage_source.source"
             pd_phase1=0
@@ -152,10 +152,10 @@ ls_percent = 1
             qd_phase2=0
             qd_phase3=0
             for (ind, d) in math["load"]
-                @info d
-                @info d["connections"]
+                # @info d
+                # @info d["connections"]
                 for (idx, con) in enumerate(d["connections"])
-                    @info "Load at connection $(d["connections"][idx]) has pd=$(d["pd"][idx]) and qd=$(d["qd"][idx])"
+                   # @info "Load at connection $(d["connections"][idx]) has pd=$(d["pd"][idx]) and qd=$(d["qd"][idx])"
                     if 1 == con# d["connections"] 
                         pd_phase1 += d["pd"][idx]
                         qd_phase1 += d["qd"][idx]
@@ -180,12 +180,12 @@ ls_percent = 1
     end
 
     # Create the critical load set
-    #critical_load = ["645", "652", "675a", "675b", "675c"]
-    critical_load = ["l4"]
+    critical_load = ["675a"]
+    #critical_load = ["l4"]
     for (i,load) in math["load"]
         if load["name"] in critical_load
             load["critical"] = 1
-            load["weight"] = 10
+            load["weight"] = 1000
             println("Load $(load["name"]) at math load node $(i) is critical.")
         else
             load["critical"] = 0

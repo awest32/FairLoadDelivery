@@ -1,0 +1,18 @@
+
+LOSSES REPORT
+
+Power Delivery Element Loss Report
+
+Element                  kW Losses    % of Power   kvar Losses
+
+"Line.SWITCH1"     0.00818,     0.02     0.0098173
+"Line.SWITCH2"     0.00162,     0.01     0.00194492
+"Line.SWITCH3"     0.00255,     0.01     0.00305929
+
+LINE LOSSES=                         0.0 kW
+TRANSFORMER LOSSES=                  0.0 kW
+
+TOTAL LOSSES=                        0.0 kW
+
+TOTAL LOAD POWER =                  53.0 kW
+Percent Losses for Circuit =      0.02 %

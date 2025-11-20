@@ -1,0 +1,6 @@
+New "Load.l1" phases=1 bus1=busa.1.0 kV=0.23094010767585 kW=17 kvar=5 model=1
+New "Load.l2" phases=1 bus1=busa.2.0 kV=0.23094010767585 kW=17 kvar=5 model=1
+New "Load.l3" phases=1 bus1=busa.3.0 kV=0.23094010767585 kW=16 kvar=5 model=1
+New "Load.l4" phases=1 bus1=busb.1.0 kV=0.23094010767585 kW=1 kvar=1.5 model=1
+New "Load.l5" phases=1 bus1=busb.2.0 kV=0.23094010767585 kW=1 kvar=1.5 model=1
+New "Load.l6" phases=1 bus1=busb.3.0 kV=0.23094010767585 kW=1 kvar=1 model=1

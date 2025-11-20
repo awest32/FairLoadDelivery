@@ -3,7 +3,7 @@
 # RESULTS
 #
 #######################################################################
-test_condition = "case_13_bus_constrained_generation_switchable_mld"
+test_condition = "case_13_bus_meshed"
 # Find the load served and load shed per bus
 load_shed = Dict()
 generation = Dict()
