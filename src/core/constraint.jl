@@ -1137,8 +1137,16 @@ function constraint_mc_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiag
     end
 end
 
-function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, i::Int; nw::Int=nw_id_default)::Nothing
+function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, j::Int; nw::Int=nw_id_default)::Nothing
     n = nw
+    i=1
+   # @info _PMD.ref(pm, nw, :branch)
+    for i_out in keys(_PMD.ref(pm, nw, :branch))
+        if _PMD.ref(pm, nw, :switch, j)["source_id"] == _PMD.ref(pm, nw, :branch, i_out)["source_id"]
+            i = i_out
+            break
+        end
+    end
     branch = _PMD.ref(pm, nw, :branch, i)
     f_bus = branch["f_bus"]
     t_bus = branch["t_bus"]

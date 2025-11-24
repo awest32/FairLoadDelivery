@@ -24,7 +24,8 @@ juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_clean/ieee13.dss"
-case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
+#case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
+case = "ieee_13_aw_edit/motivation_b.dss"
 #case = "13_bus_load_shed_test.dss"
 #case = "ieee_aw.dss"
 #case = "load_shed_test_single_phase.dss"
@@ -49,68 +50,10 @@ eng["voltage_source"]["source"]["vm"] *=vscale
 "Ensure use the reduce lines function in Fred's basecase script"
 #PowerModelsDistribution.reduce_line_series!(eng)
 
-# Add a switch 
-#add_switch!(eng,"632633", "632.1.2.3", "633.1.2.3", [1,2,3], [1,2,3]; linecode="mtx601")
-#eng["switch"]["632671"]["dispatchable"] = "YES"
-
-# Make a deepcopy of the switch and change the fields
-# Make a deepcopy of a line and change the fields, make this line have the same buses
-
- #function add_gens!(eng)
-        #for (d, load) in eng["load"]
-            #if p[!,pen][load["index"]]
-                #phases = length(load["connections"])-1
-          
-            #     switch_name = 632671
-            #     eng["switch"]["$switch_name"] = deepcopy(eng["switch"]["671692"])
-            #    eng["switch"]["$switch_name"]["f_bus"] = "632"#.1.2.3"
-            #     eng["switch"]["$switch_name"]["t_bus"] = "671"# .1.2.3"
-            
-            # switch_name = 632645
-            #     eng["switch"]["$switch_name"] = deepcopy(eng["switch"]["671692"])
-            #    eng["switch"]["$switch_name"]["f_bus"] = "632"#.1.2.3"
-            #     eng["switch"]["$switch_name"]["t_bus"] = "645"# .1.2.3"
-    #end
-        #end
-       # @show "added $(switch_counter-1) PV systems at penetration $(pen) for $(length(eng["load"])) loads"
-
-    # end
-    # add_gens!(eng)
-
-#function add_gens!(eng)
-        #for (d, load) in eng["load"]
-            #if p[!,pen][load["index"]]
-                #phases = length(load["connections"])-1
-                
-                # line_name = 632671
-                # eng["line"]["$line_name"] = deepcopy(eng["line"]["671680"])
-                # eng["line"]["$line_name"]["f_bus"] = "632"#.1.2.3"
-                # eng["line"]["$line_name"]["t_bus"] = "671"# .1.2.3"
-                
-                # # line_name = 632645
-                # eng["line"]["$line_name"] = deepcopy(eng["line"]["671680"])
-                # eng["line"]["$line_name"]["f_bus"] = "632"#.1.2.3"
-                # eng["line"]["$line_name"]["t_bus"] = "645"# .1.2.3"
-            #end
-        #end
-       # @show "added $(switch_counter-1) PV systems at penetration $(pen) for $(length(eng["load"])) loads"
-
-    # end
-    # add_gens!(eng)
 
 math = PowerModelsDistribution.transform_data_model(eng)
-# for (i,branch) in math["branch"]
-#     if branch["name"] == "632671"
-#         delete!(math["branch"],string(i))
-#     end
-#     # if branch["name"] == "632645"
-#     #     delete!(math["branch"],string(i))
-#     # end
-# end
-   
-# Remove the lines parallel to the switches
-# Look up the correct branch
-# Use the delete! command in julia to remove from the math dictionary
+
+
 for (idx, switch) in math["switch"]
     switch["state"] = 1
 end
@@ -138,11 +81,8 @@ p = powerplot(eng, bus    = (:data=>"bus_type", :data_type=>"nominal"),
 # First calculate the total load
 #ls_percent = 0. # ensure not inf
 served = [] #Dict{Any,Any}()
-ls_percent = 1
+ls_percent = 0.98
 #for ls_percent in LinRange(0,1,11)
-    # tot_pd = sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-    # tot_qd = sum(load["qd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-    # println(tot_pd)
     for (i,gen) in math["gen"]
         if gen["source_id"] == "voltage_source.source"
             pd_phase1=0
@@ -199,10 +139,6 @@ ls_percent = 1
     # math["switch"][string(switch_id)]["state"] = 0
         math["switch"][string(switch_id)]["branch_id"] = 0
         for (branch_id, branch) in enumerate(math["branch"])
-            # println("Branch $branch_id")
-            # println("Branch dict $(branch[2]["source_id"])")
-            # println("Branch dict $(math["switch"][string(switch_id)]["source_id"])")
-            # println(" Switch dict $(switch[2]["source_id"])")
                 if branch[2]["source_id"] == switch[2]["source_id"]
                     switch[2]["branch_id"] = branch_id  # Assuming you have this mapping
                 end
@@ -273,6 +209,56 @@ ls_percent = 1
     push!(served, (load_served_sum/load_ref_sum)*100)
 #end
 #println(served)
+
+# Print the following fairness indices: Gini index, Jain's index, Palma Ratio, Alpha fairness for alpha=1
+#Gini index
+function gini_index(x)
+    n = length(x)
+    mean_x = mean(x)
+    sum_diff = sum(abs(x[i] - x[j]) for i in 1:n for j in 1:n)
+    return sum_diff / (2 * n^2 * mean_x)
+end
+
+#Jain's index
+function jains_index(x)
+    n = length(x)
+    sum_x = sum(x)
+    sum_x2 = sum(xi^2 for xi in x)
+    return (sum_x^2) / (n * sum_x2)
+end
+
+#Palma Ratio
+function palma_ratio(x)
+    x=load_served
+    sorted_x = sort(x)
+    n = length(x)
+    top_10_percent = sum(sorted_x[ceil(Int, 0.9n):end])
+    bottom_40_percent = sum(sorted_x[1:floor(Int, 0.4n)])
+    return top_10_percent / bottom_40_percent
+end
+#Alpha fairness for alpha=1
+function alpha_fairness(x, alpha=1)
+    if alpha == 1
+        return sum(log(xi) for xi in x)
+    else
+        return sum((xi^(1 - alpha)) / (1 - alpha) for xi in x)
+    end
+end
+
+# Calculate and print fairness indices
+served_array = collect(load_served)
+println("Gini Index: ", gini_index(served_array))
+println("Jain's Index: ", jains_index(served_array))    
+println("Palma Ratio: ", palma_ratio(served_array))
+println("Alpha Fairness (alpha=1): ", alpha_fairness(served_array, 1))
+println("Alpha Fairness (alpha=0.5): ", alpha_fairness(served_array, 0.5))
+println("Alpha Fairness (alpha=5): ", alpha_fairness(served_array, 5))
+
+# Make the fairness results into a dataframe and save as csv
+using DataFrames, CSV
+fairness_df = DataFrame(Gini_Index=gini_index(served_array), Jains_Index=jains_index(served_array), Palma_Ratio=palma_ratio(served_array), Alpha_Fairness_1=alpha_fairness(served_array, 1), Alpha_Fairness_0_5=alpha_fairness(served_array, 0.5), Alpha_Fairness_5=alpha_fairness(served_array, 5))
+#fairness_df.Alpha_Fairness_5 = alpha_fairness(served_array, 5)
+CSV.write("fairness_results.csv", fairness_df)
 
 
 function diagnose_infeasibility(mld_model, ref, var, con_ref)

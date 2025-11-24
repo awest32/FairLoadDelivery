@@ -3,7 +3,7 @@
 # RESULTS
 #
 #######################################################################
-test_condition = "case_13_bus_meshed"
+test_condition = "case_13_bus_meshed_model"
 # Find the load served and load shed per bus
 load_shed = Dict()
 generation = Dict()
@@ -66,44 +66,15 @@ if !isdir(switch_folder)
 end
 
 
-
-# Create a bar plot for the generation per bus
-#bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)
-lp = bar(collect(keys(expected_load)), collect(values(expected_load)), label="Expected Load", linestyle=:dash, color=:black, alpha=0.15)
-bar!(collect(keys(load_served)), collect(values(load_served)), label="Load Served",linestyle=:solid, color=:green, alpha=0.25)
-bar!(collect(keys(load_shed)), collect(values(load_shed)), label="Load Shed",linestyle=:solid, color=:red, alpha=0.5)
-xlabel!("Bus")
-ylabel!("Power (MW)")
-title!("Active Power Delivered per Bus")			
-
-# Create a grouped bar chart to show each load component per bus side by side
-bar_width = 0.25
-x_positions = collect(keys(expected_load))
-
-
-# Save this figure in the power folder
-savefig(lp, "$(power_folder)/power_delivered_per_bus_$test_condition.png")
-#savefig(lp_grouped, "$(power_folder)/grouped_power_delivered_per_bus_$test_condition.svg")
-# Create a separate plot for the generation per bus
-gp = bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)
-xlabel!("Generator")
-ylabel!("Power (MW)")
-title!("Active Power Generated per Generator")
-
-
-# Save the figure
-savefig(gp, "$(power_folder)/generation_per_bus_$test_condition.png")
-
-# Create and save a figure with the power delivered and generated per bus as two subfigures
-p = plot(lp, gp, layout=(2, 1))
-savefig(p, "$(power_folder)/power_delivered_and_generated_per_bus_$test_condition.png")
-
-
 # Simple approach: plot all voltage values for each bus
 bus_data = res["bus"]
+gen_data = res["gen"]
+load_data = res["load"]
 bus_ref_data = ref[:bus]
 all_bus_ids = Float64[]
 all_v_mags = Float64[]
+all_gen_mags = Float64[]
+all_load_mags = Float64[]
 phase_labels = String[]
 
 # identify the sourcebus from the bus_data
@@ -133,13 +104,13 @@ function determine_node_locs(ref, hops, sourcebus)
                     push!(new_node_locs, ref[:branch][i]["f_bus"])
                 end
             end
-            for (i,switch) in sort(ref[:switch])
-                if ref[:switch][i]["f_bus"] in node_locs
-                    push!(new_node_locs, ref[:switch][i]["t_bus"])
-                elseif ref[:switch][i]["t_bus"] in node_locs
-                    push!(new_node_locs, ref[:switch][i]["f_bus"])
-                end
-            end
+            # for (i,switch) in sort(ref[:switch])
+            #     if ref[:switch][i]["f_bus"] in node_locs
+            #         push!(new_node_locs, ref[:switch][i]["t_bus"])
+            #     elseif ref[:switch][i]["t_bus"] in node_locs
+            #         push!(new_node_locs, ref[:switch][i]["f_bus"])
+            #     end
+            # end
             
             for j in new_node_locs
                 push!(node_locs, j)
@@ -214,24 +185,24 @@ function determine_branch_locs(ref, hops, sourcebus)
     return branch_locs
 end
  
-max_hops = 15
-branch_locations = Dict{Int,Any}()
-for i in 1:max_hops
-    println("Determining branch locations for hop $i")
-    branch_locations[i] = determine_branch_locs(ref, i, sourcebus)
-end
-println(branch_locations)
+# max_hops = 15
+# branch_locations = Dict{Int,Any}()
+# for i in 1:max_hops
+#     println("Determining branch locations for hop $i")
+#     branch_locations[i] = determine_branch_locs(ref, i, sourcebus)
+# end
+# println(branch_locations)
 
-exclusive_branch_hops = Dict{Int,Any}()
-for i in 1:max_hops
-    if i == 1
-        exclusive_branch_hops[i] = branch_locations[i]
-    else
-        exclusive_branch_hops[i] = filter(x -> !(x in branch_locations[i-1]), branch_locations[i])
-    end
-end
-println(exclusive_branch_hops)
- 
+# exclusive_branch_hops = Dict{Int,Any}()
+# for i in 1:max_hops
+#     if i == 1
+#         exclusive_branch_hops[i] = branch_locations[i]
+#     else
+#         exclusive_branch_hops[i] = filter(x -> !(x in branch_locations[i-1]), branch_locations[i])
+#     end
+# end
+#println(exclusive_branch_hops)
+ exclusive_branch_hops = [8,1,12,14,5,4,13,11,15,10,3,9,6,7]
 max_hops = 6
 node_locations = Dict{Int,Any}()
 for i in 1:max_hops
@@ -251,12 +222,13 @@ println(exclusive_hops)
 # Collect all voltage data
 global x_ind = 0
 #sorted_buses = Dict{Int,Any,Any}()
-for buses in sort(exclusive_hops)
+exclusive_hops = [8,13,14,4,1,12,7,6]#only loads
+for (idx, buses) in enumerate(exclusive_hops)
     hops = buses
     #println(hops[1])
-    buses_in_hop = hops[2]
+    buses_in_hop = hops
     #println(buses_in_hop)
-    x_ind = hops[1]
+    x_ind = idx
     #println(x_ind)
     y_ind = 0
     for index in buses_in_hop
@@ -266,6 +238,17 @@ for buses in sort(exclusive_hops)
         bus = bus_data[string(index)]
         #v_values = bus["vm"][:]
         v_values = bus["w"][:]
+        # if ref[:bus_gens][buses] >= 1
+        #     gen_values = []
+        #     for gen_id in ref[:bus_gens][buses]
+        #         gen = ref[:gen][gen_id]
+        #         gen_mag = res["gen"][string(gen_id)]["pg"]
+        #         append!(gen_values, gen_mag)
+        #     end
+        # else
+        #     gen_values = zeros(length(bus["w"]))
+        # end
+        
         for (i, v_val) in enumerate(v_values)
             push!(all_bus_ids, index)
             push!(all_v_mags, v_val)
@@ -275,44 +258,43 @@ for buses in sort(exclusive_hops)
         end
     end
 end
-# Use the same bus ordering as the scatter plot
-# unique_bus_ids = unique(all_bus_ids)  # This should match the scatter plot ordering
 
-# # Create dictionaries for the ordered data
-# ordered_expected_load = [get(expected_load, bus_id, 0.0) for bus_id in unique_bus_ids]
-# ordered_load_served = [get(load_served, bus_id, 0.0) for bus_id in unique_bus_ids]
-# ordered_load_shed = [get(load_shed, bus_id, 0.0) for bus_id in unique_bus_ids]
+# Create a bar plot for the generation per bus
+#bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)
+lp = bar(collect(keys(expected_load)), collect(values(expected_load)), label="Expected Load", linestyle=:dash, color=:black, alpha=0.15)
+bar!(collect(keys(load_served)), collect(values(load_served)), label="Load Served",linestyle=:solid, color=:green, alpha=0.25)
+bar!(collect(keys(load_shed)), collect(values(load_shed)), label="Load Shed",linestyle=:solid, color=:red, alpha=0.5)
+xlabel!("Bus")
+ylabel!("Power (MW)")
+title!("Active Power Delivered per Bus")			
 
-# # Create position indices for x-axis
-# position_values = 1:length(unique_bus_ids)
+# Create a grouped bar chart to show each load component per bus side by side
+bar_width = 0.25
+x_positions = collect(keys(expected_load))
 
-# # Create bar plot with ordered buses
-# lp = bar(position_values, ordered_expected_load, 
-#     label="Expected Load", 
-#     linestyle=:dash, 
-#     color=:black, 
-#     alpha=0.15)
-# bar!(position_values, ordered_load_served, 
-#     label="Load Served",
-#     linestyle=:solid, 
-#     color=:green, 
-#     alpha=0.25)
-# bar!(position_values, ordered_load_shed, 
-#     label="Load Shed",
-#     linestyle=:solid, 
-#     color=:red, 
-#     alpha=0.5)
 
-# # Set x-axis ticks to show bus IDs (same as scatter plot)
-# xticks!(lp, position_values, string.(Int.(unique_bus_ids)))
-# xlabel!("Bus (sorted by distance from source)")
-# ylabel!("Power (MW)")
-# title!("Active Power Delivered per Bus")
+# Save this figure in the power folder
+savefig(lp, "$(power_folder)/power_delivered_per_bus_$test_condition.png")
+#savefig(lp_grouped, "$(power_folder)/grouped_power_delivered_per_bus_$test_condition.svg")
+# Create a separate plot for the generation per bus
+gp = bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)
+xlabel!("Generator")
+ylabel!("Power (MW)")
+title!("Active Power Generated per Generator")
+
+
+# Save the figure
+savefig(gp, "$(power_folder)/generation_per_bus_$test_condition.png")
+
+# Create and save a figure with the power delivered and generated per bus as two subfigures
+p = plot(lp, gp, layout=(2, 1))
+savefig(p, "$(power_folder)/power_delivered_and_generated_per_bus_$test_condition.png")
 
 # Create scatter plot grouped by phase
 using Plots
 svm = scatter()
-unique_bus_ids = unique(all_bus_ids)
+#unique_bus_ids = unique(all_bus_ids)
+unique_bus_ids = exclusive_hops
 bus_to_position = Dict(bus_id => i for (i, bus_id) in enumerate(unique_bus_ids))
 all_positions = [bus_to_position[id] for id in all_bus_ids]
 # Group by phase and hops away from the source, then plot
@@ -334,7 +316,7 @@ for (i, phase) in enumerate(unique_phases)
             markersize=6)
 end
 #end
-unique_bus_ids = unique(all_bus_ids)
+#unique_bus_ids = unique(all_bus_ids)
 xticks!(svm, unique_bus_ids, string.(unique_bus_ids))
 xlabel!(svm, "Buses sorted by distance from the sourcebus")
 ylabel!(svm, "Voltage Magnitude (p.u.)")
@@ -376,7 +358,7 @@ all_node_ids = []
 phase_labels_node = []
 all_power_balance = []
 # Iterate through exclusive_hops to get branches in order
-for (hop, branches) in sort(collect(exclusive_branch_hops))
+for (hop, branches) in enumerate(exclusive_branch_hops)
     for branch_id in branches
         if haskey(ref[:branch], branch_id)
             branch = ref[:branch][branch_id]
@@ -478,7 +460,7 @@ title!(spf, "Power Flow by Branch and Phase")
 savefig(spf,"$(power_folder)/branch_limits_inf_$test_condition.png")
 
 # Iterate through exclusive_hops to get nodes in order
-for (hop, buses) in sort(exclusive_hops)
+for (hop, buses) in enumerate(exclusive_hops)
     for bus_id in buses
         bus = ref[:bus][bus_id]
         
@@ -667,6 +649,8 @@ for (ind, z) in res["load"]
 end
 
 sd = bar(collect(keys(z_demand)), collect(values(z_demand)), label="Demand States")
+xticks!(sd, collect(keys(z_demand)), string.(Int.(collect(keys(z_demand)))))
+
 xlabel!("Demand")
 ylabel!("State")
 title!("Demand States")
