@@ -13,7 +13,7 @@ function solve_mc_opf_ld3f(data::Union{Dict{String,<:Any},String}, solver; kwarg
 end
 
 function solve_mc_opf_acp(data::Union{Dict{String,<:Any},String}, solver; kwargs...)
-    return _PMD.solve_mc_model(data, _PMD.ACPUPowerModel, solver, build_mc_opf_ac; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!],kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.ACRUPowerModel, solver, build_mc_opf_ac; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!],kwargs...)
 end
 
 """
@@ -29,6 +29,7 @@ function build_mc_opf_ac(pm::_PMD.AbstractUnbalancedPowerModel)
     _PMD.variable_mc_transformer_power(pm)
     _PMD.variable_mc_switch_power(pm)
     #_PMD.variable_mc_switch_state(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
     _PMD.variable_mc_generator_power(pm)
     _PMD.variable_mc_load_power(pm)
     _PMD.variable_mc_load_indicator(pm; relax=true)
@@ -83,10 +84,12 @@ function build_mc_opf_ac(pm::_PMD.AbstractUnbalancedPowerModel)
     for i in _PMD.ids(pm, :transformer)
         _PMD.constraint_mc_transformer_power(pm, i)
     end
-     constraint_connect_block_load(pm)
-     constraint_mc_isolate_block_ref(pm)
+    #constraint_set_switch_state_rounded(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_mc_isolate_block_ref(pm)
     #_PMD.objective_mc_min_fuel_cost(pm)
-    objective_weighted_max_load_served(pm)
+    #objective_weighted_max_load_served(pm)
 
 end
 

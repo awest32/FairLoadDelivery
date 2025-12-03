@@ -209,8 +209,8 @@ function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPo
     for d in _PMD.ids(pm, nw, :load)
         push!(weighted_load_served, sum(fair_load_weights[d].*_PMD.var(pm, nw, :pd)[d]))
     end
-    @info fair_load_weights
-    @info _PMD.var(pm, nw, :pd)
+    #@info fair_load_weights
+    #@info _PMD.var(pm, nw, :pd)
     return JuMP.@objective(pm.model, Max,
     sum(weighted_load_served))
 end
@@ -250,6 +250,40 @@ function objective_jain_fairness(pm::JuMP.Model; report::Bool=true)
     )
 end
 
+function objective_fair_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel, fair::String; nw::Int=_IM.nw_id_default, report::Bool=true)
+    weighted_load_served = []
+    load_served = []
+    load_ref = []
+    for d in _PMD.ids(pm, nw, :load)
+        push!(weighted_load_served, sum((1-_PMD.var(pm, nw, :z_demand, d)) * _PMD.var(pm, nw, :pd)[d]))
+        push!(load_served, sum(((_PMD.var(pm, nw, :z_demand, d)) * _PMD.var(pm, nw, :pd)[d])))
+        push!(load_ref, sum(_PMD.ref(pm, nw, :load, d)["pd"]))
+    end
+
+    served_array = collect(load_served./load_ref)    
+    jain = jains_index(served_array)    
+    proportional = alpha_fairness(served_array, 1)
+    gini = gini_index(served_array) # Placeholder for Gini index calculation
+    efficiency = alpha_fairness(served_array, 0.5)
+
+    if fair == "jain"
+        return JuMP.@objective(pm.model, Max,
+        sum(weighted_load_served) + jain)
+    else 
+        if fair == "proportional"
+            return JuMP.@objective(pm.model, Max,
+      		  proportional + sum(weighted_load_served))
+        else 
+            if fair == "gini"
+            return JuMP.@objective(pm.model, Max,
+      		  gini + sum(weighted_load_served))
+            else
+                error("Fairness criterion $(fair) not recognized.")
+            end
+        end
+    end
+end
+
 function objective_fairly_weighted_max_load_served_with_penalty(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true)
    fair_load_weights = _PMD.var(pm, nw, :fair_load_weights)
    z_demand = _PMD.var(pm, nw, :z_demand)
@@ -265,3 +299,36 @@ function objective_fairly_weighted_max_load_served_with_penalty(pm::_PMD.Abstrac
     sum(weighted_load_served) + penalty_weight * binary_penalty)
 end
 
+function gini_index(x)
+    n = length(x)
+    x = sort(x)
+    n = length(x)
+    gini = (2 * sum(i * x[i] for i in 1:n) / (n * sum(x))) - ((n + 1)/n)
+    return gini
+end
+
+#Jain's index
+function jains_index(x)
+    n = length(x)
+    sum_x = sum(x)
+    sum_x2 = sum(xi^2 for xi in x)
+    return (sum_x^2) / (n * sum_x2)
+end
+
+#Palma Ratio
+function palma_ratio(x)
+    x = load_served ./ load_ref
+    sorted_x = sort(x)
+    n = length(x)
+    top_10_percent = sum(sorted_x[ceil(Int, 0.9n):end])
+    bottom_40_percent = sum(sorted_x[1:floor(Int, 0.4n)])
+    return top_10_percent / bottom_40_percent
+end
+#Alpha fairness for alpha=1
+function alpha_fairness(x, alpha)
+if alpha == 1
+    return sum(log(xi) for xi in x)
+    else
+        return sum((xi^(1 - alpha)) / (1 - alpha) for xi in x)
+    end
+end

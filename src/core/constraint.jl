@@ -358,23 +358,14 @@ function constraint_open_switches(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int
         JuMP.@constraint(pm.model, _PMD.var(pm, nw, :switch_state, s) == 0 )
     end
 end
-function constraint_mc_switch_state_on_off_top(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default, relax::Bool=true)::Nothing
+function constraint_switch_state_on_off(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default, relax::Bool=true)::Nothing
     switch = _PMD.ref(pm, nw, :switch, i)
     f_bus = switch["f_bus"]
     t_bus = switch["t_bus"]
 
     f_idx = (i, f_bus, t_bus)
 
-    #if switch["dispatchable"] != 0
-        FairLoadDelivery.constraint_mc_switch_state_on_off(pm, nw, i, f_bus, t_bus, switch["f_connections"], switch["t_connections"]; relax=relax)
-        FairLoadDelivery.constraint_mc_switch_power_on_off(pm, nw, f_idx; relax=relax)
-    #else
-    #     if switch["state"] != 0
-    #         _PMD.constraint_mc_switch_state_closed(pm, nw, f_bus, t_bus, switch["f_connections"], switch["t_connections"])
-    #     else
-    #         _PMD.constraint_mc_switch_state_open(pm, nw, f_idx)
-    #     end
-    # end
+    FairLoadDelivery.constraint_mc_switch_state_on_off(pm, nw, i, f_bus, t_bus, switch["f_connections"], switch["t_connections"]; relax=relax)
     nothing
 end
 
@@ -383,14 +374,14 @@ function constraint_mc_switch_state_on_off(pm::_PMD.AbstractUnbalancedWModels, n
     w_to = _PMD.var(pm, nw, :w, t_bus)
 
     z_switch = _PMD.var(pm, nw, :switch_state, i)
-    M = 1*10^3
+    M = .9
 
     for (fc, tc) in zip(f_connections, t_connections)
         if relax
             JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] <=  M * (1-z_switch))
             JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] >= -M * (1-z_switch))
         else
-            JuMP.@constraint(pm.model, z => {w_fr[fc] == w_to[tc]})
+            JuMP.@constraint(pm.model, z_switch => {w_fr[fc] == w_to[tc]})
         end
     end
 end
@@ -402,7 +393,7 @@ function constraint_mc_switch_power_on_off(pm::_PMD.AbstractUnbalancedPowerModel
     qsw = _PMD.var(pm, nw, :qsw, f_idx)
 
     z = _PMD.var(pm, nw, :switch_state, i)
-    M = 1*10^3
+    M = 700
     connections = _PMD.ref(pm, nw, :switch, i)["f_connections"]
     # determine rating
        if haskey(_PMD.ref(pm, nw, :switch, i), "current_rating")
@@ -539,7 +530,6 @@ function constraint_connect_block_load(pm::_PMD.AbstractUnbalancedPowerModel; nw
 end
 
 function constraint_connect_block_gen(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
-    M = 1*10^3
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         z_gen = _PMD.var(pm, nw, :z_gen, i)
         z_block = _PMD.var(pm, nw, :z_block, _PMD.ref(pm, nw, :gen_block_map, i))
@@ -939,7 +929,7 @@ function constraint_radial_topology_gr(pm::_PMD.AbstractUnbalancedPowerModel; nw
 end
 
 
-function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbol,Any}, switch_state)
+function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbol,Any}, switch_state;bern ::Bool=false)
     f = Dict{Tuple{Int,Int,Int},JuMP.VariableRef}()
     lambda = Dict{Tuple{Int,Int},JuMP.VariableRef}()
     beta = Dict{Tuple{Int,Int},JuMP.VariableRef}()
@@ -996,7 +986,15 @@ function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbo
 		
 		switch_lookup[key] = switch_ids
 	end
-    println("The switch lookup is: $switch_lookup")
+    #println("The switch lookup is: $switch_lookup")
+    # if bern
+    #     for ((i,j), switches) in switch_lookup
+    #         @info switches
+    #         alpha[(i,j)] = JuMP.@expression(model, sum(switch_state[s] for s in switches[1]))
+    #         JuMP.@constraint(model, alpha[(i,j)] == sum(switch_state[s] for s in switches))
+    #         JuMP.@constraint(model, alpha[(i,j)] <= 1)
+    #     end
+    # else
     for ((i,j), switches) in switch_lookup
         alpha[(i,j)] = JuMP.@expression(model, sum(switch_state[s] for s in switches))
         JuMP.@constraint(model, alpha[(i,j)] <= 1)
@@ -1074,12 +1072,12 @@ function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbo
     end
 end
 
-"""
-    constraint_mc_model_voltage_magnitude_difference(pm::AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)::Nothing
+# """
+#     constraint_mc_model_voltage_magnitude_difference(pm::AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)::Nothing
 
-Template function for constraints for modeling voltage magnitude difference across branches
-"""
-function constraint_mc_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, i::Int; nw::Int=nw_id_default)::Nothing
+# Template function for constraints for modeling voltage magnitude difference across branches
+# """
+function constraint_model_voltage_magnitude_difference_fld(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)
     n = nw
     branch = _PMD.ref(pm, nw, :branch, i)
     f_bus = branch["f_bus"]
@@ -1111,7 +1109,7 @@ function constraint_mc_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiag
     MQ = 2 * (real(Gamma) .* x - imag(Gamma) .* r)
 
     N = length(f_connections)
-    M = 1*10^3
+    M = .5
     
     # Get block indices for from and to buses
     block_fr = _PMD.ref(pm, n, :bus_block_map)[f_bus]
@@ -1137,7 +1135,7 @@ function constraint_mc_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiag
     end
 end
 
-function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, j::Int; nw::Int=nw_id_default)::Nothing
+function constraint_model_switch_voltage_magnitude_difference_fld(pm::_PMD.AbstractUnbalancedPowerModel, j::Int; nw::Int=nw_id_default)::Nothing
     n = nw
     i=1
    # @info _PMD.ref(pm, nw, :branch)
@@ -1176,7 +1174,7 @@ function constraint_mc_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LP
     MQ = 2 * (real(Gamma) .* x - imag(Gamma) .* r)
 
     N = length(f_connections)
-    M = 1*10^3
+    M = .5
     
     # Get block status variables
     block_fr = _PMD.ref(pm, n, :bus_block_map)[f_bus]

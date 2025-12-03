@@ -10,6 +10,7 @@ end
 
 function solve_mc_mld_shed_random_round(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_random_rounding; ref_extensions=[ref_add_rounded_load_blocks!], kwargs...)
+    #return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_random_rounding; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
 
 function solve_mc_mld_shed_implicit_diff(data::Dict{String,<:Any}, solver; kwargs...)
@@ -193,12 +194,15 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     constraint_block_budget(pm)
     constraint_switch_budget(pm)
 
+    #constraint_set_block_state_rounded(pm)
+    constraint_set_switch_state_rounded(pm)
+
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     constraint_connect_block_load(pm)
     constraint_connect_block_voltage(pm)
     constraint_connect_block_gen(pm)
-    constraint_mc_block_energization_consistency_bigm(pm)
+    #constraint_mc_block_energization_consistency_bigm(pm)
     #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
     #_PMD.objective_mc_min_fuel_cost(pm)
     #objective_mc_min_fuel_cost_pwl_voll(pm)
@@ -371,28 +375,28 @@ end
 
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
-    _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=false)
+    _PMD.variable_mc_switch_state(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=false)
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
     _PMD.variable_mc_generator_power_on_off(pm)
 
     # # The on-off variable is making the solution error at the report statement in the variable function
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=false)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
  
 
-    _PMD.variable_mc_load_indicator(pm; relax=false)
-    # #variable_mc_demand_indicator(pm; relax=false)
+    _PMD.variable_mc_load_indicator(pm; relax=true)
+    # #variable_mc_demand_indicator(pm; relax=true)
 
 
-    variable_block_indicator(pm; relax=false)
+    variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
 
 
@@ -433,8 +437,8 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :branch)
         _PMD.constraint_mc_power_losses(pm, i)
         #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
-        constraint_mc_model_voltage_magnitude_difference_fld(pm,i)
-        # #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
         _PMD.constraint_mc_voltage_angle_difference(pm, i)
 
         _PMD.constraint_mc_thermal_limit_from(pm, i)
@@ -442,12 +446,12 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     end
 
     for i in _PMD.ids(pm, :switch)
-        _PMD.constraint_mc_switch_state_on_off(pm,i)
-        # The switch thermal limit is not implemented in PowerModelsDistribution yet
-        _PMD.constraint_mc_switch_thermal_limit(pm, i)
+        constraint_switch_state_on_off(pm,i; relax=true)
+         # The switch thermal limit is not implemented in PowerModelsDistribution yet
+         _PMD.constraint_mc_switch_thermal_limit(pm, i)
         # # The ampacity constraint is similar but instead of p^2 + q^2 <= w * s^2, it is p^2 + q^2 <= z * w * s^2
         constraint_mc_switch_ampacity(pm, i)
-        constraint_mc_model_switch_voltage_magnitude_difference_fld(pm, i)
+        constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
     end
 
     for i in _PMD.ids(pm, :transformer)
@@ -460,11 +464,10 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
-    #constraint_block_budget(pm)
-    #constraint_switch_budget(pm)
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
 
-    # # constraint_set_block_state_rounded(pm)
-    # # constraint_set_switch_state_rounded(pm)
+   
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
@@ -480,6 +483,7 @@ function build_mc_mld_switchable(pm::_PMD.AbstractUBFModels)
     #_PMD.objective_mc_min_fuel_cost(pm)
     #objective_mc_min_fuel_cost_pwl_voll(pm)
     objective_fairly_weighted_max_load_served(pm)
+    #objective_fair_max_load_served(pm,"jain")
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)
 

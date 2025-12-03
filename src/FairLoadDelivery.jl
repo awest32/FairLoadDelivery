@@ -1,12 +1,14 @@
 module FairLoadDelivery
 
 import Revise
+import MKL
 import InfrastructureModels
 import PowerModels
 import PowerModelsDistribution
 import JuMP
 import StatsFuns
 import Ipopt, Gurobi, HiGHS, Juniper
+import HSL_jll
 import Memento
 import Distributions
 import Graphs
@@ -16,6 +18,8 @@ import DiffOpt
 import Plots
 import FrankWolfe
 import PowerPlots
+import DataFrames
+import CSV
 
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
@@ -47,9 +51,9 @@ include("prob/pf.jl")
 include("prob/opf.jl")
 include("prob/mld.jl")
 
-export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!
-export solve_mc_opf_acp, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
-export build_mc_opf_ldf, build_mc_opf_ac, build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable
+export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!, ref_add_rounded_load_blocks!
+export solve_mc_opf_acp, solve_mc_pf_aw, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
+export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable
 export ipopt, gurobi, highs, juniper
 
 end #module FairLoadDelivery

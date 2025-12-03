@@ -1,7 +1,9 @@
 using Revise
+using MKL
 using FairLoadDelivery
 using PowerModelsDistribution, PowerModels
 using Ipopt, Gurobi, HiGHS, Juniper
+using HSL_jll
 using Plots
 using Random
 using Distributions
@@ -12,18 +14,21 @@ using LinearAlgebra,SparseArrays
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
 
-ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
-highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
+ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)#
+#highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 # To make a bilevel JuMP model, we need to create a BilevelJuMP model here 
-juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>highs)
+#juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>highs)
+
+global solver = ipopt
 
 ## Main loop
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_pmd_mod.dss"
 #case = "three_bus_constrained_line_capacity.dss"
-case = "three_bus_constrained_generation.dss"
+#case = "three_bus_constrained_generation.dss"
+case = "ieee_13_aw_edit/motivation_b.dss"
 casepath = "data/$case"
 file = joinpath(dir, "..", casepath)
 
@@ -54,37 +59,80 @@ end
 
 # Ensure the generation from the source bus is less than the max load
 # First calculate the total load
-ls_percent = .39 # ensure not inf
+ls_percent = 10
 for (i,gen) in math["gen"]
-	if gen["source_id"] == "voltage_source.source"
-		gen["pmax"] .= ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-		gen["qmax"] .= ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-		gen["pmin"] .= -ls_percent*sum(load["pd"][idx] for (i,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-		gen["qmin"] .= -ls_percent*sum(load["qd"][idx] for (j,load) in math["load"] for (idx,c) in enumerate(load["connections"]))
-
-	end
+    if gen["source_id"] == "voltage_source.source"
+        pd_phase1=0
+        pd_phase2=0
+        pd_phase3=0
+        qd_phase1=0
+        qd_phase2=0
+        qd_phase3=0
+        for (ind, d) in math["load"]
+            # @info d
+            # @info d["connections"]
+            for (idx, con) in enumerate(d["connections"])
+                # @info "Load at connection $(d["connections"][idx]) has pd=$(d["pd"][idx]) and qd=$(d["qd"][idx])"
+                if 1 == con# d["connections"] 
+                    pd_phase1 += d["pd"][idx]
+                    qd_phase1 += d["qd"][idx]
+                end
+                if 2 == con
+                    pd_phase2 += d["pd"][idx]
+                    qd_phase2 += d["qd"][idx]
+                end 
+                if 3 == con
+                    pd_phase3 += d["pd"][idx]
+                    qd_phase3 += d["qd"][idx]
+                end
+            end
+        end
+        gen["pmax"][1] = pd_phase1 * ls_percent
+        gen["qmax"][1] = qd_phase1 * ls_percent
+        gen["pmax"][2] = pd_phase2 * ls_percent
+        gen["qmax"][2] = qd_phase2 * ls_percent
+        gen["pmax"][3] = pd_phase3 * ls_percent
+        gen["qmax"][3] = qd_phase3 * ls_percent
+        
+		gen["pmin"][1] = -pd_phase1 * ls_percent
+        gen["qmin"][1] = qd_phase1 * ls_percent
+        gen["pmin"][2] = pd_phase2 * ls_percent
+        gen["qmin"][2] = qd_phase2 * ls_percent
+        gen["pmin"][3] = pd_phase3 * ls_percent
+        gen["qmin"][3] = qd_phase3 * ls_percent
+    end
 end
 
 # Create the critical load set
-#critical_load = ["645", "652", "675a", "675b", "675c"]
-critical_load = ["l6"]
+critical_load = ["675a"]
+#critical_load = ["l4"]
 for (i,load) in math["load"]
-	if load["name"] in critical_load
-		load["critical"] = 1
-		load["weight"] = 20
-		println("Load $(load["name"]) at math load node $(i) is critical.")
-	else
-		load["critical"] = 0
-		load["weight"] = 10
-		println("Load $(load["name"]) at math load node $(i) is not critical.")
+    if load["name"] in critical_load
+        load["critical"] = 1
+        load["weight"] = 10
+        println("Load $(load["name"]) at math load node $(i) is critical.")
+    else
+        load["critical"] = 0
+        load["weight"] = 10
+        println("Load $(load["name"]) at math load node $(i) is not critical.")
 
-	end
+    end
+end
+
+for (switch_id, switch) in enumerate(math["switch"])
+    math["switch"][string(switch_id)]["branch_id"] = 0
+    for (branch_id, branch) in enumerate(math["branch"])
+            if branch[2]["source_id"] == switch[2]["source_id"]
+                switch[2]["branch_id"] = branch_id  # Assuming you have this mapping
+            end
+    end
 end
 
 math["block"] = Dict{String,Any}()
 for (block, loads) in enumerate(lbs)
-	math["block"][string(block)] = Dict("id"=>block, "state"=>0)
+    math["block"][string(block)] = Dict("id"=>block, "state"=>0)
 end
+   
 
 # Ensure that all branches have some bounds. Currently, they are infinite
 # this produces an error for the constraint_mc_switch_power_on_off, because
@@ -116,7 +164,7 @@ res = pm_mld_soln
 	The goal is to generate integer solutions that are uniformly distributed 
 """
 
-function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Dict{String,Any}, reference::Dict{Symbol,Any}, math::Dict{String,Any}, bern_trade_off, bern_trade_off_max::Float64=2.0, max_iter::Int=10)
+function random_rounding( z_switch::Dict{String,Any}; z_block::Dict{String,Any}, reference::Dict{Symbol,Any}, net_data::Dict{String,Any}, bern_trade_off, bern_trade_off_max::Float64=2.0, max_iter::Int=10)
 	opt_switch_vals = Dict{Int,Any}()
 	opt_switch_val_vec =[]
 	opt_switch_obj_vec = []
@@ -144,26 +192,26 @@ function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Di
 			push!(z_bn_switch, Int64(bern_switch[ind]))
 		end
 
-		bern_block = Dict()
-		z_bn_block = []
-		for (ind, lb) in z_block
-			block_val = lb["status"]
-			trade_off = rand(bern_trade_off)
-			bern_prob = minimum([i * block_val, 1.0])
-			if bern_prob > 1.0 || bern_prob < 0.0
-				p_block = clamp(bern_prob, 0.0, 1.0)
-			else
-				p_block	 = bern_prob
-			end
-			bern_block[ind] = Bernoulli(p_block)  # Initial probability of rounding up
-			# Sample from the Bernoulli distribution and compare
-			bern_sample = rand(bern_block[ind])
-			bern_block[ind] = rand(Bernoulli(p_block))  # Initial probability of rounding up
-			println(bern_block)
-			# Sample from the Bernoulli distribution and compare
-			push!(z_bn_block, Int64(bern_block[ind]))
-		end
-		z_bern_block = Dict(parse.(Int,collect(keys(z_block))) .=> values(z_bn_block))
+		# bern_block = Dict()
+		# z_bn_block = []
+		# for (ind, lb) in z_block
+		# 	block_val = lb["status"]
+		# 	trade_off = rand(bern_trade_off)
+		# 	bern_prob = minimum([i * block_val, 1.0])
+		# 	if bern_prob > 1.0 || bern_prob < 0.0
+		# 		p_block = clamp(bern_prob, 0.0, 1.0)
+		# 	else
+		# 		p_block	 = bern_prob
+		# 	end
+		# 	bern_block[ind] = Bernoulli(p_block)  # Initial probability of rounding up
+		# 	# Sample from the Bernoulli distribution and compare
+		# 	bern_sample = rand(bern_block[ind])
+		# 	bern_block[ind] = rand(Bernoulli(p_block))  # Initial probability of rounding up
+		# 	println(bern_block)
+		# 	# Sample from the Bernoulli distribution and compare
+		# 	push!(z_bn_block, Int64(bern_block[ind]))
+		#end
+		# z_bern_block = Dict(parse.(Int,collect(keys(z_block))) .=> values(z_bn_block))
 		z_bern_switch = Dict(parse.(Int,collect(keys(z_switch))) .=> z_bn_switch)
 
 		"""
@@ -171,21 +219,21 @@ function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Di
 		"""
 		# Create the radiality constrained problem
 		model = JuMP.Model()
-
+		set_attribute(model, "hsllib", HSL_jll)
+		set_attribute(model, "linear_solver", "ma27")
 		# Create the variables for the Bernoulli switch states
 		bern_switch = Dict{Int,Any}()
-		bern_block = Dict{Int,Any}()
+		#bern_block = Dict{Int,Any}()
 		bern_switch = JuMP.@variable(model, bern_switch[i in collect(keys(z_bern_switch))], base_name="bern_switch",
 				lower_bound = 0,
 				upper_bound = 1,
-				start = 0.0
-			)
+				start = 0.0)
 
-		bern_block = JuMP.@variable(model, bern_block[i in collect(keys(z_bern_block))], base_name="bern_block",
-				lower_bound = 0,
-				upper_bound = 1,
-				start = 0.0
-			)
+		# bern_block = JuMP.@variable(model, bern_block[i in collect(keys(z_bern_block))], base_name="bern_block",
+		# 		lower_bound = 0,
+		# 		upper_bound = 1,
+		# 		start = 0.0
+		# 	)
 
 		"""
 			Assign the rounded values to the switch states
@@ -193,9 +241,9 @@ function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Di
 			for s in collect(keys(z_bern_switch))
 					JuMP.@constraint(model, bern_switch[s] == z_bern_switch[s])
 			end
-			for b in collect(keys(z_bern_block))
-					JuMP.@constraint(model, bern_block[b] == z_bern_block[b])
-			end
+			# for b in collect(keys(z_bern_block))
+			# 		JuMP.@constraint(model, bern_block[b] == z_bern_block[b])
+			# end
 
 			FairLoadDelivery.constraint_radial_topology_jump(model,reference,bern_switch)
 
@@ -203,38 +251,42 @@ function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Di
 			Objective to minimize the distance from the rounded solution to the relaxed solution
 		"""
 		switch_dist = sum( (bern_switch[s] - z_switch[string(s)]["state"])^2 for s in keys(z_bern_switch))
-		block_dist = sum( (bern_block[b] - z_block[string(b)]["status"])^2 for b in keys(z_bern_block))
-		JuMP.@NLobjective(model, Min, switch_dist + block_dist)
+		#block_dist = sum( (bern_block[b] - z_block[string(b)]["status"])^2 for b in keys(z_bern_block))
+		JuMP.@NLobjective(model, Min, switch_dist)#+ block_dist)
 
-
-		JuMP.set_optimizer(model, ipopt)
+			#print(model)
+		JuMP.set_optimizer(model, solver)
 		optimize!(model)
 		if JuMP.termination_status(model) == MOI.OPTIMAL || JuMP.termination_status(model) == MOI.LOCALLY_SOLVED
 			println("Rounded solution is feasible for radiality constraints at iteration $iter")
-			println("The switch states are:  $(value.(bern_switch))")
+			println("The switch state variable values are:  $(value.(bern_switch))")
 			
 			"""
 			Check for ACOPF feasibility with chosen switch values
 			"""
 			# Create a copy of the data file to use for the acopf problem
-			math_cp = math
+			math_copy = deepcopy(net_data)
 
 			# Change the switch data in the copy to match the rounded switch values
 			# If status==0, set math["switch"][i]["status"]=0, math["switch"][i]["dispatchable"]=1
 			# If status==1, set math["switch"][i]["status"]=1, math["switch"][i]["dispatchable"]=0
 			for (i,switch) in z_bern_switch
-				math_cp["switch"][string(i)]["state"] = switch
+				println("The switch state for switch $i is:  $switch")
+				math_copy["switch"][string(i)]["state"] = switch
+				math_copy["switch"][string(i)]["status"] = switch
 			end
-			for (i,block) in z_bern_block
-				math_cp["block"][string(i)]["state"] = block
-			end
+			#@info math_copy["switch"]
+			# for (i,block) in z_bern_block
+			# 	math_cp["block"][string(i)]["state"] = block
+			# end
 
-			pm_acopf_soln = solve_mc_opf_acp(math_cp, ipopt)
-			#@info pm_acopf_soln["termination_status"] typeof(pm_acopf_soln["termination_status"])
+			#pm_acopf_soln = solve_mc_opf_acp(math_cp, solver)
+			pm_acopf_soln = solve_mc_pf(math_copy, IVRUPowerModel, solver)
+			@info pm_acopf_soln["termination_status"] typeof(pm_acopf_soln["termination_status"])
 			if pm_acopf_soln["termination_status"] == MOI.OPTIMAL || pm_acopf_soln["termination_status"] == MOI.LOCALLY_SOLVED ||  pm_acopf_soln["termination_status"] == MOI.ALMOST_LOCALLY_SOLVED
-				println("ACOPF solution is feasible at iteration $iter")
+				println("IVRUPF solution is feasible at iteration $iter")
 		
-				pm_mld_shed_soln = solve_mc_mld_shed_random_round(math_cp,ipopt)
+				pm_mld_shed_soln = solve_mc_mld_shed_random_round(math_copy,solver)
 				if pm_mld_shed_soln["termination_status"] == MOI.OPTIMAL || pm_mld_shed_soln["termination_status"] == MOI.LOCALLY_SOLVED #||  pm_mld_shed_soln["termination_status"] == MOI.ALMOST_LOCALLY_SOLVED
 					obj_val = pm_mld_shed_soln["objective"]	
 					println("MLD solution is objective value is $obj_val at iteration $iter")
@@ -248,7 +300,7 @@ function random_rounding(pm::JuMP.Model; z_switch::Dict{String,Any}, z_block::Di
 				### Store the set of switches for this solution and the objective value
 				### Compare the new solution objective with the old objective if second time or greater in this loop
 			else
-				println("ACOPF solution is infeasible at iteration $iter")
+				println("IVRUPF solution is infeasible at iteration $iter")
 				println("Checking a new Bernoulli value")
 			end
 		else
@@ -463,7 +515,7 @@ function build_max_fairness_problem(ref::Dict{Symbol,Any}, pshed_update; report:
 	constraint_critical_load_weights(model, ref)
 	#objective_maxmin_fairness(model, pshed_update)
 	objective_jain_fairness_pshed(model, pshed_update, ref=ref)
-	JuMP.set_optimizer(model, ipopt)
+	JuMP.set_optimizer(model, solver)
 	return model
 end
 
@@ -473,18 +525,22 @@ end
 """
 # Update the sensitivites with the change in fairness weighted
 
-K = 5  # Frank-Wolfe iterations
-function frank_wolfe(ref::Dict{Symbol,Any}, math::Dict{String,Any}; K::Int=5)
+K = 1  # Frank-Wolfe iterations
+function frank_wolfe(ref::Dict{Symbol,Any}, net_data::Dict{String,Any}; K::Int=5)
 	
 	fair_model_out = JuMP.Model()
+	set_attribute(fair_model_out, "hsllib", HSL_jll)
+	set_attribute(fair_model_out, "linear_solver", "ma27")
 	mld_mod_out = JuMP.Model()
+	set_attribute(mld_mod_out, "hsllib", HSL_jll)
+	set_attribute(mld_mod_out, "linear_solver", "ma27")
 	mld_rr_out = JuMP.Model()
 	n_loads = length(ref[:load_weights])
 	load_ids = sort(collect(keys(ref[:load])))
 
 	# gather the network data file for changes later 
-	math_weight_update = math
-	math_switch_update = math
+	math_weight_update = net_data
+	math_switch_update = net_data
 	# Initialize storage
 	flw_prev = Dict{Int, Vector{Float64}}()
 	pshed_new = Dict{Int, Vector{Float64}}()
@@ -495,7 +551,7 @@ function frank_wolfe(ref::Dict{Symbol,Any}, math::Dict{String,Any}; K::Int=5)
 
 	# Rounding settings
 	Random.seed!(1234) # Sets the seed to 1234
-	bern_trade_off_max = 2
+	bern_trade_off_max = 1
 	max_iter = 10
 	bern_trade_off = range(0.0, stop=bern_trade_off_max, length=max_iter)
 	# Frank-Wolfe loop
@@ -510,18 +566,19 @@ function frank_wolfe(ref::Dict{Symbol,Any}, math::Dict{String,Any}; K::Int=5)
 		end
 
 		# Solve the MLD with the updated fairness priorization weights
-		pm_mld_shed_soln = solve_mc_mld_switch(math_weight_update, ipopt)
+		pm_mld_shed_soln = FairLoadDelivery.solve_mc_mld_switch(math_weight_update, solver)
 		z_switch = pm_mld_shed_soln["solution"]["switch"]
 		z_block = pm_mld_shed_soln["solution"]["block"]
 		######################################################################################
 		# --- Random Rounding to get integer switch values ---
 		# Force the switch values to be integer using random rounding 
-		pm_mld_random_round = instantiate_mc_model(math_weight_update, LinDist3FlowPowerModel, build_mc_mld_shedding_random_rounding; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+		pm_mld_random_round = PowerModelsDistribution.instantiate_mc_model(math_weight_update, LinDist3FlowPowerModel, build_mc_mld_shedding_random_rounding; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 		mld_round_ref = pm_mld_random_round.ref[:it][:pmd][:nw][0]
 		######################################################################################
 		# TODO: Round for the load blocks too, add it to the distance objective and set the data accordingly
 		######################################################################################
-		(opt_switch_val_vec, opt_switch_obj_vec, opt_switch_iter_vec) = random_rounding(pm_mld_random_round.model; z_switch=z_switch, z_block=z_block, reference=mld_round_ref, math=math_switch_update, bern_trade_off=bern_trade_off)
+		(opt_switch_val_vec, opt_switch_obj_vec, opt_switch_iter_vec) = random_rounding(z_switch; z_block=z_block, reference=mld_round_ref, net_data=math_switch_update, bern_trade_off=bern_trade_off)
+		@info opt_switch_obj_vec
 		max_idx = argmax(opt_switch_obj_vec)
 		# Get the corresponding values
 		max_obj_val = opt_switch_obj_vec[max_idx]
@@ -537,7 +594,7 @@ function frank_wolfe(ref::Dict{Symbol,Any}, math::Dict{String,Any}; K::Int=5)
 		end
 
 		# Solve the MLD using the rounded switch values and the fair weight parameter
-		pm_mld_implicit_diff = instantiate_mc_model(math_switch_update, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
+		pm_mld_implicit_diff = PowerModelsDistribution.instantiate_mc_model(math_switch_update, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
 		ref = pm_mld_implicit_diff.ref[:it][:pmd][:nw][0]
 		modmod = pm_mld_implicit_diff
 		mld_mod_out = modmod.model
@@ -575,7 +632,7 @@ function frank_wolfe(ref::Dict{Symbol,Any}, math::Dict{String,Any}; K::Int=5)
 		end
 
 		objective_jain_fairness_pshed(fair_mod, pshed_update, ref=ref)
-		JuMP.set_optimizer(fair_mod, ipopt)
+		JuMP.set_optimizer(fair_mod, solver)
 		fair_model_out = fair_mod
 		optimize!(fair_mod)
 		weights_new = JuMP.value.(weights)

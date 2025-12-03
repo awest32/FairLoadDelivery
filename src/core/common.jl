@@ -524,7 +524,7 @@ function calc_connected_components(data::Dict{String,<:Any}; edges::Union{Missin
                             push!(neighbors[edge_obj["t_bus"]], edge_obj["f_bus"])
                          #   println("Switch from bus ", edge_obj["f_bus"], " to bus ", edge_obj["t_bus"], " is closed and added to neighbors.")
                         end
-                        @info neighbors
+                        #@info neighbors
                 #     elseif type == "blocks"
                 #         if edge_obj["state"] != 0
                 #             push!(neighbors[edge_obj["f_bus"]], edge_obj["t_bus"])
@@ -540,9 +540,9 @@ function calc_connected_components(data::Dict{String,<:Any}; edges::Union{Missin
     end
 
     component_lookup = Dict(i => Set{Int}([i]) for i in active_bus_ids)
-    @info component_lookup
+    #@info component_lookup
     touched = Set{Int}()
-    @info active_bus_ids
+    #@info active_bus_ids
 
     for i in active_bus_ids
         if !(i in touched)
@@ -557,7 +557,7 @@ end
 "DFS on a graph"
 function _cc_dfs(i::T, neighbors::Dict{T,Vector{T}}, component_lookup::Dict{T,Set{T}}, touched::Set{T})::Nothing where T <: Union{String,Int}
     push!(touched, i)
-    @info touched
+    #@info touched
     for j in neighbors[i]
         if !(j in touched)
             for k in  component_lookup[j]
