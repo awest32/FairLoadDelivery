@@ -327,9 +327,9 @@ end
 function constraint_rounded_switch_states(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, z_bern::Dict{Int,Int})
     for s in _PMD.ids(pm, nw, :switch)
        # println("The switch id is $s")
-        if s in collect(keys(z_bern))
-            JuMP.@constraint(pm.model, _PMD.var(pm, nw, :switch_state, s) == z_bern[s])
-        end
+        #if s in collect(keys(z_bern))
+            JuMP.@constraint(pm.model, _PMD.var(pm, nw, :switch_state, s) == _PMD.ref(pm, nw, :switch, s)["state"])
+        #end
     end
 end
 
@@ -344,7 +344,7 @@ end
 
 function constraint_rounded_block_states(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, z_bern::Dict{Int,Int})
     for (b, block) in _PMD.ref(pm, nw, :blocks)
-        JuMP.@constraint(pm.model, _PMD.var(pm, nw, :z_block, b) == z_bern[b])
+        JuMP.@constraint(pm.model, _PMD.var(pm, nw, :z_block, b) == _PMD.ref(pm, nw, :blocks, b)["status"])
     end
 end
 function constraint_rounded_block_states_f(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, z_bern::Dict{Int,Float64})
@@ -1077,7 +1077,7 @@ end
 
 # Template function for constraints for modeling voltage magnitude difference across branches
 # """
-function constraint_model_voltage_magnitude_difference_fld(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)
+function constraint_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, i::Int; nw::Int=nw_id_default)
     n = nw
     branch = _PMD.ref(pm, nw, :branch, i)
     f_bus = branch["f_bus"]
@@ -1135,7 +1135,7 @@ function constraint_model_voltage_magnitude_difference_fld(pm::_PMD.AbstractUnba
     end
 end
 
-function constraint_model_switch_voltage_magnitude_difference_fld(pm::_PMD.AbstractUnbalancedPowerModel, j::Int; nw::Int=nw_id_default)::Nothing
+function constraint_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagModel, j::Int; nw::Int=nw_id_default)::Nothing
     n = nw
     i=1
    # @info _PMD.ref(pm, nw, :branch)
@@ -1281,5 +1281,149 @@ function constraint_mc_switch_ampacity(pm::_PMD.LPUBFDiagModel, nw::Int, f_idx::
 
     if _IM.report_duals(pm)
         _PMD.sol(pm, nw, :switch, f_idx[1])[:mu_cm_fr] = mu_cm_fr
+    end
+end
+
+"""
+    constraint_mc_current_balance(pm::AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)::Nothing
+
+Template function for KCL constraints in current-voltage variable space
+"""
+function constraint_mc_current_balance_shed(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)::Nothing
+    bus = _PMD.ref(pm, nw, :bus, i)
+    bus_arcs = _PMD.ref(pm, nw, :bus_arcs_conns_branch, i)
+    bus_arcs_sw = _PMD.ref(pm, nw, :bus_arcs_conns_switch, i)
+    bus_arcs_trans = _PMD.ref(pm, nw, :bus_arcs_conns_transformer, i)
+    bus_gens = _PMD.ref(pm, nw, :bus_conns_gen, i)
+    bus_storage = _PMD.ref(pm, nw, :bus_conns_storage, i)
+    bus_loads = _PMD.ref(pm, nw, :bus_conns_load, i)
+    bus_shunts = _PMD.ref(pm, nw, :bus_conns_shunt, i)
+
+    constraint_mc_current_balance_shed(pm, nw, i, bus["terminals"], bus["grounded"], bus_arcs, bus_arcs_sw, bus_arcs_trans, bus_gens, bus_storage, bus_loads, bus_shunts)
+    nothing
+end
+
+"""
+Kirchhoff's current law applied to buses
+`sum(cr + im*ci) = 0`
+"""
+function constraint_mc_current_balance_shed(pm::_PMD.AbstractUnbalancedIVRModel, nw::Int, i::Int, terminals::Vector{Int}, grounded::Vector{Bool}, bus_arcs::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_sw::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_arcs_trans::Vector{Tuple{Tuple{Int,Int,Int},Vector{Int}}}, bus_gens::Vector{Tuple{Int,Vector{Int}}}, bus_storage::Vector{Tuple{Int,Vector{Int}}}, bus_loads::Vector{Tuple{Int,Vector{Int}}}, bus_shunts::Vector{Tuple{Int,Vector{Int}}})
+    vr = _PMD.var(pm, nw, :vr, i)
+    vi = _PMD.var(pm, nw, :vi, i)
+
+    cr    = get(_PMD.var(pm, nw),    :cr, Dict()); _PMD._check_var_keys(cr, bus_arcs, "real current", "branch")
+    ci    = get(_PMD.var(pm, nw),    :ci, Dict()); _PMD._check_var_keys(ci, bus_arcs, "imaginary current", "branch")
+    crd   = get(_PMD.var(pm, nw),   :crd_bus, Dict()); _PMD._check_var_keys(crd, bus_loads, "real current", "load")
+    cid   = get(_PMD.var(pm, nw),   :cid_bus, Dict()); _PMD._check_var_keys(cid, bus_loads, "imaginary current", "load")
+    crg   = get(_PMD.var(pm, nw),   :crg_bus, Dict()); _PMD._check_var_keys(crg, bus_gens, "real current", "generator")
+    cig   = get(_PMD.var(pm, nw),   :cig_bus, Dict()); _PMD._check_var_keys(cig, bus_gens, "imaginary current", "generator")
+    crs   = get(_PMD.var(pm, nw),   :crs, Dict()); _PMD._check_var_keys(crs, bus_storage, "real currentr", "storage")
+    cis   = get(_PMD.var(pm, nw),   :cis, Dict()); _PMD._check_var_keys(cis, bus_storage, "imaginary current", "storage")
+    crsw  = get(_PMD.var(pm, nw),  :crsw, Dict()); _PMD._check_var_keys(crsw, bus_arcs_sw, "real current", "switch")
+    cisw  = get(_PMD.var(pm, nw),  :cisw, Dict()); _PMD._check_var_keys(cisw, bus_arcs_sw, "imaginary current", "switch")
+    crt   = get(_PMD.var(pm, nw),   :crt, Dict()); _PMD._check_var_keys(crt, bus_arcs_trans, "real current", "transformer")
+    cit   = get(_PMD.var(pm, nw),   :cit, Dict()); _PMD._check_var_keys(cit, bus_arcs_trans, "imaginary current", "transformer")
+
+    z_demand = _PMD.var(pm, nw, :z_demand)
+    z_shunt  = _PMD.var(pm, nw, :z_shunt)
+
+    Gt, Bt = _PMD._build_bus_shunt_matrices(pm, nw, terminals, bus_shunts)
+
+    ungrounded_terminals = [(idx,t) for (idx,t) in enumerate(terminals) if !grounded[idx]]
+
+    for (idx, t) in ungrounded_terminals
+        JuMP.@constraint(pm.model,
+                                      sum(cr[a][t] for (a, conns) in bus_arcs if t in conns)
+                                    + sum(crsw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
+                                    + sum(crt[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
+                                    ==
+                                      sum(crg[g][t]         for (g, conns) in bus_gens if t in conns)
+                                    - sum(crs[s][t]         for (s, conns) in bus_storage if t in conns)
+                                    - sum(crd[d][t]*z_demand[d]        for (d, conns) in bus_loads if t in conns)
+                                    - sum( (Gt[idx,jdx]*vr[u] -Bt[idx,jdx]*vi[u]) for (jdx,u) in ungrounded_terminals) # shunts
+                                    )      
+
+        JuMP.@constraint(pm.model,
+                                      sum(ci[a][t] for (a, conns) in bus_arcs if t in conns)
+                                    + sum(cisw[a_sw][t] for (a_sw, conns) in bus_arcs_sw if t in conns)
+                                    + sum(cit[a_trans][t] for (a_trans, conns) in bus_arcs_trans if t in conns)
+                                    ==
+                                      sum(cig[g][t]         for (g, conns) in bus_gens if t in conns)
+                                    - sum(cis[s][t]         for (s, conns) in bus_storage if t in conns)
+                                    - sum(cid[d][t]*z_demand[d]       for (d, conns) in bus_loads if t in conns)
+                                    - sum( (Gt[idx,jdx]*vi[u] +Bt[idx,jdx]*vr[u]) for (jdx,u) in ungrounded_terminals) # shunts
+                                    )
+    end
+end
+"""
+```math
+sn_a = v_a.conj(i_a)
+    = v_a.conj(i_ab-i_ca)
+    = v_a.conj(conj(s_ab/v_ab) - conj(s_ca/v_ca))
+    = v_a.(s_ab/(v_a-v_b) - s_ca/(v_c-v_a))
+```
+
+So for delta, sn is constrained indirectly.
+"""
+function constraint_mc_load_power(pm::_PMD.AbstractUnbalancedPowerModel, id::Int; nw::Int=nw_id_default, report::Bool=true)::Nothing
+    load = _PMD.ref(pm, nw, :load, id)
+    bus = _PMD.ref(pm, nw,:bus, load["load_bus"])
+
+    configuration = load["configuration"]
+
+    a, alpha, b, beta = _PMD._load_expmodel_params(load, bus)
+
+    #if configuration==WYE
+        constraint_mc_load_power_wye(pm, nw, id, load["load_bus"], load["connections"], a, alpha, b, beta; report=report)
+    #else
+     #   constraint_mc_load_power_delta(pm, nw, id, load["load_bus"], load["connections"], a, alpha, b, beta; report=report)
+    #end
+    nothing
+end
+
+function constraint_mc_load_power_wye(pm::_PMD.IVRUPowerModel, nw::Int, id::Int, bus_id::Int, connections::Vector{Int}, a::Vector{<:Real}, alpha::Vector{<:Real}, b::Vector{<:Real}, beta::Vector{<:Real}; report::Bool=true)
+    vr = _PMD.var(pm, nw, :vr, bus_id)
+    vi = _PMD.var(pm, nw, :vi, bus_id)
+
+    crd = JuMP.NonlinearExpr[]
+    cid = JuMP.NonlinearExpr[]
+
+    z_demand = _PMD.var(pm, nw, :z_demand)
+
+    for (idx, c) in enumerate(connections)
+        push!(crd, JuMP.@expression(pm.model,
+             a[idx]*vr[c]*(vr[c]^2+vi[c]^2)^(alpha[idx]/2-1)
+            +b[idx]*vi[c]*(vr[c]^2+vi[c]^2)^(beta[idx]/2 -1)
+        ))
+        push!(cid, JuMP.@expression(pm.model,
+             a[idx]*vi[c]*(vr[c]^2+vi[c]^2)^(alpha[idx]/2-1)
+            -b[idx]*vr[c]*(vr[c]^2+vi[c]^2)^(beta[idx]/2 -1)
+        ))
+    end
+
+    _PMD.var(pm, nw, :crd_bus)[id] = JuMP.Containers.DenseAxisArray(crd, connections)
+    _PMD.var(pm, nw, :cid_bus)[id] = JuMP.Containers.DenseAxisArray(cid, connections)
+
+    if report
+        pd_bus = JuMP.NonlinearExpr[]
+        qd_bus = JuMP.NonlinearExpr[]
+        for (idx,c) in enumerate(connections)
+            push!(pd_bus, JuMP.@expression(pm.model,  (vr[c]*crd[idx]+vi[c]*cid[idx])*z_demand[id]))
+            push!(qd_bus, JuMP.@expression(pm.model, (-vr[c]*cid[idx]+vi[c]*crd[idx])*z_demand[id]))
+        end
+
+        _PMD.sol(pm, nw, :load, id)[:pd_bus] = JuMP.Containers.DenseAxisArray(pd_bus, connections)
+        _PMD.sol(pm, nw, :load, id)[:qd_bus] = JuMP.Containers.DenseAxisArray(qd_bus, connections)
+
+        _PMD.sol(pm, nw, :load, id)[:crd_bus] = JuMP.Containers.DenseAxisArray(crd, connections)
+        _PMD.sol(pm, nw, :load, id)[:cid_bus] = JuMP.Containers.DenseAxisArray(cid, connections)
+        pd = JuMP.NonlinearExpr[]
+        qd = JuMP.NonlinearExpr[]
+        for (idx, c) in enumerate(connections)
+            push!(pd, JuMP.@expression(pm.model, (a[idx]*(vr[c]^2+vi[c]^2)^(alpha[idx]/2))*z_demand[id] ))
+            push!(qd, JuMP.@expression(pm.model, (b[idx]*(vr[c]^2+vi[c]^2)^(beta[idx]/2))*z_demand[id]  ))
+        end
+        _PMD.sol(pm, nw, :load, id)[:pd] = JuMP.Containers.DenseAxisArray(pd, connections)
+        _PMD.sol(pm, nw, :load, id)[:qd] = JuMP.Containers.DenseAxisArray(qd, connections)
     end
 end

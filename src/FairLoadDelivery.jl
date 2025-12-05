@@ -47,6 +47,8 @@ include("core/objective.jl")
 include("core/variable.jl")
 include("core/constraint.jl")
 
+include("core/random_rounding.jl")
+
 include("prob/pf.jl")
 include("prob/opf.jl")
 include("prob/mld.jl")

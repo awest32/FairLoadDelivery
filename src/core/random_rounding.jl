@@ -1,0 +1,121 @@
+"""
+    solve_mld_relaxed(data::Dict{String, Any}; optimizer=Ipopt.Optimizer)
+
+Solve the MLD problem with relaxed integer variables using parsed network data.
+Returns the result dictionary with continuous switch variables.
+"""
+function solve_mld_relaxed(data::Dict{String, Any}; optimizer=Ipopt.Optimizer)
+    soln = FairLoadDelivery.solve_mc_mld_switch(data, optimizer)
+    # Build the MLD problem with relaxed integers (NLP formulation)
+    pm = instantiate_mc_model(
+        data, 
+        LinDist3FlowPowerModel,
+        build_mc_mld_switchable;
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
+    )
+    ref = pm.ref[:it][:pmd][:nw][0]
+    # Set optimizer
+    set_optimizer(pm.model, optimizer)
+    set_optimizer_attribute(pm.model, "print_level", 0)
+    # Solve the relaxed problem
+    optimize!(pm.model)
+
+    # Extract results
+    result = Dict{String, Any}()
+    # result["termination_status"] = termination_status(pm.model)
+    # result["objective"] = objective_value(pm.model)
+    # result["solve_time"] = solve_time(pm.model)
+    result["switch"] = soln["solution"]["switch"]
+
+    # Extract switch states (relaxed values)
+    result["switch_states"] = Dict{Int, Any}()
+    for (i, var) in result["switch"]
+        result["switch_states"][parse(Int,i)] = var["state"]
+    end
+    # Store the full power model for potential warm-starting
+    return result,ref
+end
+
+"""
+    generate_bernoulli_samples(switch_states::Dict{Int, Float64}; 
+                               n_samples=10, 
+                               seed=nothing)
+
+Generate sets of Bernoulli variables based on relaxed switch probabilities.
+Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
+Returns an array of sample dictionaries.
+"""
+function generate_bernoulli_samples(switch_states::Dict{Int, Any}; 
+                                   n_samples=10, 
+                                   seed=nothing)
+    if !isnothing(seed)
+        Random.seed!(seed)
+    end
+    
+    samples = Vector{Dict{Int, Float64}}()
+    
+    for sample_idx in 1:n_samples
+        sample = Dict{Int, Float64}()
+        for (switch_id, p) in switch_states
+            # Generate Bernoulli random variable with probability p
+            sample[switch_id] = Float64(rand(Bernoulli(p)))
+        end
+        push!(samples, sample)
+    end
+    
+    return samples
+end
+
+# Test the acpf feasibility for the new set of switches that passed radiality
+function ac_feasibility_test(math::Dict{String, Any}, 
+                          bernoulli_selection_exp::Any,
+                          switch_ids::Vector{Int};
+                          optimizer=Ipopt.Optimizer)
+    ac_bernoulli = Any[]
+    ac_bernoulli_val = Any[]# Vector{Dict{Int, Float64
+    math_round = deepcopy(math)
+    for (set_id, bernoulli_set) in enumerate(bernoulli_selection_exp)
+        for s in switch_ids
+            math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
+        end
+        #pm_ivr_soln_round = solve_mc_pf(math_round, IVRUPowerModel, optimizer)
+        pf_ivrup_aw = solve_mc_pf_aw(math_round, ipopt)
+        term_status = pf_ivrup_aw["termination_status"]
+        if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED
+            push!(ac_bernoulli,bernoulli_set)
+            push!(ac_bernoulli_val, value.(bernoulli_set[s] for s in switch_ids))
+        else
+           # println("Optimization did not converge to optimality for sample $set_id. Status: $term_status")
+        end
+    end
+    return ac_bernoulli, ac_bernoulli_val
+end
+
+# Find the set of switches with best mld objective value among feasible ac solutions
+function find_best_switch_set(math::Dict{String, Any}, 
+                          ac_bernoulli::Vector{Any},
+                          switch_ids::Vector{Int};
+                          optimizer=Ipopt.Optimizer)
+    best_obj = -Inf
+    best_sample_idx = 0
+    best_switch_config = Dict{Int, Float64}()
+    math_round = deepcopy(math)
+    for (set_id, bernoulli_set) in enumerate(ac_bernoulli)
+        for s in switch_ids
+            math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
+        end
+        mld_rounded_soln = solve_mc_mld_shed_random_round(math_round, optimizer)
+        obj_val = mld_rounded_soln["objective"]
+        term_status = mld_rounded_soln["termination_status"]
+        @info "Sample $set_id: Objective = $obj_val, Status = $term_status"
+        if (term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED) && obj_val > best_obj
+            best_obj = obj_val
+            best_sample_idx = set_id
+            for s in switch_ids
+                best_switch_config[s] = value(bernoulli_set[s])
+            end
+        end
+    end
+
+    return best_sample_idx, best_switch_config
+end

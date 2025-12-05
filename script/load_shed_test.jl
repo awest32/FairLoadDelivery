@@ -88,7 +88,7 @@ end
 # First calculate the total load
 #ls_percent = 0. # ensure not inf
 served = [] #Dict{Any,Any}()
-ls_percent = 1
+ls_percent = 10
 for (i,gen) in math["gen"]
     if gen["source_id"] == "voltage_source.source"
         pd_phase1=0
@@ -158,9 +158,13 @@ math["block"] = Dict{String,Any}()
 for (block, loads) in enumerate(lbs)
     math["block"][string(block)] = Dict("id"=>block, "state"=>0)
 end
-pm_ivr_soln = solve_mc_pf(math, IVRUPowerModel, ipopt)
-pm_ivr_opf_soln = solve_mc_opf(math, IVRUPowerModel, ipopt)
-pf_ivrup_aw = solve_mc_pf_aw(math, ipopt)
+# math["block"]["1"]["state"] = 0 # Open the switch to force load shedding
+# math["block"]["2"]["state"] = 1 # Open the switch to force load shedding
+# math["block"]["3"]["state"] = 1 
+#pm_ivr_soln = solve_mc_pf(math, IVRUPowerModel, ipopt)
+# pm_ivr_opf_soln = solve_mc_opf(math, IVRUPowerModel, ipopt)
+#pf_ivrup_aw = solve_mc_pf_aw(math, ipopt)
+#ivrup_aw_mod = instantiate_mc_model(math, IVRUPowerModel, build_mc_pf_switch; ref_extensions=[ref_add_load_blocks!])
 
 # pm_acrup_mld_feas = FairLoadDelivery.solve_mc_opf_acp(math, ipopt)
 # pm_acopf_soln = solve_mc_opf(math, ACRUPowerModel, ipopt)
@@ -181,12 +185,13 @@ con_ref = mld_model.con[:it][:pmd][:nw][0]
 var = mld_model.var[:it][:pmd][:nw][0]
 soln_ref = mld_model.sol[:it][:pmd][:nw][0]
 ref = mld_model.ref[:it][:pmd][:nw][0]
-pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, solver)
-
+pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, gurobi)
+mld_round_soln = FairLoadDelivery.solve_mc_mld_shed_random_round(math, ipopt)
 ##############################################
 # Extract results
 ##############################################
-res = pm_mld_soln["solution"]
+#res = pf_ivrup_aw["solution"]
+res = mld_round_soln["solution"]
 # println("Load served: $(sum(load["pd"] for load in math["load"] if load["critical"] == 1))")
 #load_ref = sum(load["pd"][idx] for (idx, con) in enumerate(load["connections"]) for (i,load) in ref[:load] )
 load_ref = []
@@ -198,6 +203,7 @@ for (i, load) in sort(ref[:load])
 end
 load_ref_sum = sum(load_ref)
 println("Total load in reference: $load_ref_sum")
+
 gen_ref = []# sum(gen["pg"] for (i,gen) in ref[:gen])
 for (i, gen) in ref[:gen]
     cons = gen["connections"]
@@ -207,6 +213,7 @@ for (i, gen) in ref[:gen]
 end
 gen_ref_sum = sum(gen_ref)
 println("Total generation in reference: $gen_ref_sum")
+
 gen_soln = []# sum(gen["pg"] for (i,gen) in ref[:gen])
 for (i, gen) in res["gen"]
     for idx in 1:length(gen["pg"])
@@ -215,6 +222,7 @@ for (i, gen) in res["gen"]
 end
 gen_soln_sum = sum(gen_soln)
 println("Total generation in solution: $gen_soln_sum")
+
 #load_served = sum((load["pd"]) for (i,load) in res["load"])
 load_served = []
 idxs = sort(parse.(Int,collect(keys(res["load"]))))
@@ -225,6 +233,7 @@ for i in 1:length(idxs)
     end
 end
 load_served_sum = sum(load_served)
+
 println("Total load served in MLD solution: $load_served_sum")
 println("Load served percentage: $(load_served_sum/load_ref_sum*100) %")
 push!(served, (load_served_sum/load_ref_sum)*100)
