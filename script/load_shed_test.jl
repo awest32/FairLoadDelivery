@@ -24,7 +24,7 @@ highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 # To make a bilevel JuMP model, we need to create a BilevelJuMP model here 
 juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>highs)
 
-global solver = ipopt
+global solver = gurobi
 
 ## Main loop
 dir = dirname(@__FILE__)
@@ -163,7 +163,7 @@ end
 # math["block"]["3"]["state"] = 1 
 #pm_ivr_soln = solve_mc_pf(math, IVRUPowerModel, ipopt)
 # pm_ivr_opf_soln = solve_mc_opf(math, IVRUPowerModel, ipopt)
-#pf_ivrup_aw = solve_mc_pf_aw(math, ipopt)
+pf_ivrup_aw = solve_mc_pf_aw(math, ipopt)
 #ivrup_aw_mod = instantiate_mc_model(math, IVRUPowerModel, build_mc_pf_switch; ref_extensions=[ref_add_load_blocks!])
 
 # pm_acrup_mld_feas = FairLoadDelivery.solve_mc_opf_acp(math, ipopt)
@@ -173,7 +173,8 @@ end
 ##################################
 # Build and solve the MLD model
 ##################################
-mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+pf_model = instantiate_mc_model(math, IVRUPowerModel, build_mc_pf_switch; ref_extensions=[ref_add_load_blocks!])
 mld = mld_model.model
 set_optimizer(mld, solver)
 if solver == ipopt
@@ -184,14 +185,15 @@ optimize!(mld)
 con_ref = mld_model.con[:it][:pmd][:nw][0]
 var = mld_model.var[:it][:pmd][:nw][0]
 soln_ref = mld_model.sol[:it][:pmd][:nw][0]
-ref = mld_model.ref[:it][:pmd][:nw][0]
-pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch(math, gurobi)
+#ref = mld_model.ref[:it][:pmd][:nw][0]
+ref = pf_model.ref[:it][:pmd][:nw][0]
+pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
 mld_round_soln = FairLoadDelivery.solve_mc_mld_shed_random_round(math, ipopt)
 ##############################################
 # Extract results
 ##############################################
-#res = pf_ivrup_aw["solution"]
-res = mld_round_soln["solution"]
+res = pf_ivrup_aw["solution"]
+#res = mld_round_soln["solution"]
 # println("Load served: $(sum(load["pd"] for load in math["load"] if load["critical"] == 1))")
 #load_ref = sum(load["pd"][idx] for (idx, con) in enumerate(load["connections"]) for (i,load) in ref[:load] )
 load_ref = []
@@ -225,16 +227,19 @@ println("Total generation in solution: $gen_soln_sum")
 
 #load_served = sum((load["pd"]) for (i,load) in res["load"])
 load_served = []
+load_shed = []
 idxs = sort(parse.(Int,collect(keys(res["load"]))))
 for i in 1:length(idxs)
     load = res["load"][string(i)]
     for idx in 1:length(load["pd"])
         push!(load_served, load["pd"][idx])
     end
+     push!(load_shed, load["pshed"])
 end
 load_served_sum = sum(load_served)
 
-println("Total load served in MLD solution: $load_served_sum")
+println("Total load served in ACPF solution: $load_served_sum")
+println("Total load shed in ACPF solution: $(sum(load_shed))")
 println("Load served percentage: $(load_served_sum/load_ref_sum*100) %")
 push!(served, (load_served_sum/load_ref_sum)*100)
 #end

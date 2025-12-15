@@ -17,11 +17,12 @@ function build_mc_pf_switch(pm::_PMD.AbstractUnbalancedIVRModel)
     _PMD.variable_mc_shunt_indicator(pm; relax=true)
     _PMD.variable_mc_transformer_current(pm, bounded = false)
     _PMD.variable_mc_generator_current(pm, bounded = false)
-    #_PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
     #_PMD.variable_mc_generator_power_on_off(pm)
     _PMD.variable_mc_load_current(pm, bounded = false)
     _PMD.variable_mc_load_indicator(pm; relax=true)
 
+    variable_mc_load_shed(pm)
 
     FairLoadDelivery.variable_block_indicator(pm; relax=true)
     #FairLoadDelivery.variable_mc_fair_load_weights(pm)
@@ -78,19 +79,23 @@ function build_mc_pf_switch(pm::_PMD.AbstractUnbalancedIVRModel)
     for i in _PMD.ids(pm, :transformer)
         _PMD.constraint_mc_transformer_power(pm, i)
     end
-    constraint_mc_block_energization_consistency_bigm(pm)
+
+    constraint_mc_isolate_block(pm)
+
+   # constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)
     constraint_switch_budget(pm)
 
-   
+    constraint_load_shed_definition(pm)
+
    
     constraint_connect_block_load(pm)
-    #constraint_connect_block_gen(pm)
+    constraint_connect_block_gen(pm)
     constraint_connect_block_voltage(pm)
-    #constraint_connect_block_shunt(pm)
-    #constraint_connect_block_storage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
     # for i in _PMD.ids(pm, :switch)
     #     _PMD.constraint_mc_switch_state(pm, i)
     # end

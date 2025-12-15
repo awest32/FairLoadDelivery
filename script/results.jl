@@ -3,15 +3,18 @@
 # RESULTS
 #
 #######################################################################
-test_condition = "case_13_bus_meshed_model"
+test_condition = "case_13_bus_meshed_model_acpf"
 # Find the load served and load shed per bus
+#res = mld_paramed_soln["solution"]
 load_shed = Dict()
+pshed_var = Dict()
 generation = Dict()
 load_served = Dict()
 expected_load = Dict()
 total_power_generated =  []
 total_load = []
 total_load_shed = []
+total_pshed_var = []
 total_power_gen_capacity = 0
 
 total_ref_load = []
@@ -23,7 +26,8 @@ for i in keys(res["load"])
 	load_served[i] = sum(res["load"][i]["pd"])#+sum(res["load"][i]["qd"].^2))
 	expected_load[i] = sum(ref[:load][parse(Int,i)]["pd"])#sum(res["load"][i]["pd0"])
     load_shed[i] =  expected_load[i]-load_served[i]
-	push!(total_load, load_served[i])
+	pshed_var[i] = res["load"][i]["pshed"]
+    push!(total_load, load_served[i])
 	push!(total_load_shed, load_shed[i])
 	push!(total_ref_load, expected_load[i])
 end
@@ -223,41 +227,41 @@ println(exclusive_hops)
 global x_ind = 0
 #sorted_buses = Dict{Int,Any,Any}()
 exclusive_hops = [8,13,14,4,1,12,7,6]#only loads
-for (idx, buses) in enumerate(exclusive_hops)
-    hops = buses
-    #println(hops[1])
-    buses_in_hop = hops
-    #println(buses_in_hop)
-    x_ind = idx
-    #println(x_ind)
-    y_ind = 0
-    for index in buses_in_hop
-        #println(index)
-        # y_ind += 1#0.10
-        # println(x_ind+y_ind)
-        bus = bus_data[string(index)]
-        #v_values = bus["vm"][:]
-        v_values = bus["w"][:]
-        # if ref[:bus_gens][buses] >= 1
-        #     gen_values = []
-        #     for gen_id in ref[:bus_gens][buses]
-        #         gen = ref[:gen][gen_id]
-        #         gen_mag = res["gen"][string(gen_id)]["pg"]
-        #         append!(gen_values, gen_mag)
-        #     end
-        # else
-        #     gen_values = zeros(length(bus["w"]))
-        # end
+# for (idx, buses) in enumerate(exclusive_hops)
+#     hops = buses
+#     #println(hops[1])
+#     buses_in_hop = hops
+#     #println(buses_in_hop)
+#     x_ind = idx
+#     #println(x_ind)
+#     y_ind = 0
+#     for index in buses_in_hop
+#         #println(index)
+#         # y_ind += 1#0.10
+#         # println(x_ind+y_ind)
+#         bus = bus_data[string(index)]
+#         #v_values = bus["vm"][:]
+#         v_values = bus["w"][:]
+#         # if ref[:bus_gens][buses] >= 1
+#         #     gen_values = []
+#         #     for gen_id in ref[:bus_gens][buses]
+#         #         gen = ref[:gen][gen_id]
+#         #         gen_mag = res["gen"][string(gen_id)]["pg"]
+#         #         append!(gen_values, gen_mag)
+#         #     end
+#         # else
+#         #     gen_values = zeros(length(bus["w"]))
+#         # end
         
-        for (i, v_val) in enumerate(v_values)
-            push!(all_bus_ids, index)
-            push!(all_v_mags, v_val)
-            # Label phases as a, b, c or use index if more than 3
-            phase_label = i == 1 ? "a" : (i == 2 ? "b" : (i == 3 ? "c" : "phase_$i"))
-            push!(phase_labels, phase_label)
-        end
-    end
-end
+#         for (i, v_val) in enumerate(v_values)
+#             push!(all_bus_ids, index)
+#             push!(all_v_mags, v_val)
+#             # Label phases as a, b, c or use index if more than 3
+#             phase_label = i == 1 ? "a" : (i == 2 ? "b" : (i == 3 ? "c" : "phase_$i"))
+#             push!(phase_labels, phase_label)
+#         end
+#     end
+# end
 
 # Create a bar plot for the generation per bus
 #bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)

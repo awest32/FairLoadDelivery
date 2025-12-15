@@ -15,7 +15,7 @@ function constraint_fix_bus_terminal_mismatch(pm::_PMD.AbstractUnbalancedPowerMo
     JuMP.@constraint(pm.model, _PMD.var(pm, nw, :w)[i][3] ==_PMD.var(pm, nw, :w)[i][1])
 end
 
-function constraint_load_shed_def(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
+function constraint_load_shed_definition(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
     JuMP.@constraint(pm.model, pshed_constraint[d in keys(_PMD.ref(pm, nw, :load))], 
         _PMD.var(pm, nw)[:pshed][d] == (1-_PMD.var(pm, nw)[:z_demand][d])*sum(_PMD.ref(pm, nw, :load, d)["pd"])
     )

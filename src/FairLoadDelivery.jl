@@ -53,9 +53,11 @@ include("prob/pf.jl")
 include("prob/opf.jl")
 include("prob/mld.jl")
 
+include("core/palma_relaxation_constraint_matrix.jl")
+
 export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!, ref_add_rounded_load_blocks!
 export solve_mc_opf_acp, solve_mc_pf_aw, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
-export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable
+export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable_relaxed, build_mc_mld_switchable_integer
 export ipopt, gurobi, highs, juniper
 
 end #module FairLoadDelivery
