@@ -332,7 +332,7 @@ P = pd
 @variable(model, a[1:n^2], Bin)
 @variable(model, x_raw[1:n] >= 0)
 @variable(model, σ >= 1e-6)
-
+@variable(model, w[1:n] >= 0)
 # First permutation matrix constraint to sort the rows Ax == 1
 A = zeros(n,n^2)
 for i in 1:n
@@ -454,6 +454,7 @@ g = [ones(n)
 ]
 
 @constraint(model, F * y .<= g*σ)
+@constraint(model, σ >= 1e-6)
 A_long = [A zeros(n,n^2) zeros(n,n)]
 # Create the vectors to extract the top 10% of load shed
 top_10_percent_indices = zeros(n)

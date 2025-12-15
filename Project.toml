@@ -27,6 +27,7 @@ PowerModelsDistribution = "d7431456-977f-11e9-2de3-97ff7677985e"
 PowerPlots = "229d1e32-5c67-4c9a-a884-d6a3a7f23cfa"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
@@ -52,6 +53,7 @@ PowerModelsDistribution = "0.16.0"
 PowerPlots = "0.5.2"
 Random = "1.11.0"
 Revise = "3.11.0"
+SparseArrays = "1.12.0"
 StatsFuns = "1.5.2"
 julia = "1.6.7"
 
