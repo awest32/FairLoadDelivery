@@ -16,8 +16,14 @@ total_load = []
 total_load_shed = []
 total_pshed_var = []
 total_power_gen_capacity = 0
-
 total_ref_load = []
+
+
+mld_fin = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math_fin, ipopt)
+res = mld_fin["solution"]
+mld_paramed = instantiate_mc_model(math_fin, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
+ref = mld_paramed.ref[:it][:pmd][:nw][0]
+
 for i in collect(keys(res["gen"]))
 	generation[i] = sum(res["gen"][i]["pg"])#+sum(res["gen"][i]["qg"].^2))
 	push!(total_power_generated, generation[i])
@@ -188,24 +194,7 @@ function determine_branch_locs(ref, hops, sourcebus)
     end
     return branch_locs
 end
- 
-# max_hops = 15
-# branch_locations = Dict{Int,Any}()
-# for i in 1:max_hops
-#     println("Determining branch locations for hop $i")
-#     branch_locations[i] = determine_branch_locs(ref, i, sourcebus)
-# end
-# println(branch_locations)
 
-# exclusive_branch_hops = Dict{Int,Any}()
-# for i in 1:max_hops
-#     if i == 1
-#         exclusive_branch_hops[i] = branch_locations[i]
-#     else
-#         exclusive_branch_hops[i] = filter(x -> !(x in branch_locations[i-1]), branch_locations[i])
-#     end
-# end
-#println(exclusive_branch_hops)
  exclusive_branch_hops = [8,1,12,14,5,4,13,11,15,10,3,9,6,7]
 max_hops = 6
 node_locations = Dict{Int,Any}()
@@ -227,41 +216,7 @@ println(exclusive_hops)
 global x_ind = 0
 #sorted_buses = Dict{Int,Any,Any}()
 exclusive_hops = [8,13,14,4,1,12,7,6]#only loads
-# for (idx, buses) in enumerate(exclusive_hops)
-#     hops = buses
-#     #println(hops[1])
-#     buses_in_hop = hops
-#     #println(buses_in_hop)
-#     x_ind = idx
-#     #println(x_ind)
-#     y_ind = 0
-#     for index in buses_in_hop
-#         #println(index)
-#         # y_ind += 1#0.10
-#         # println(x_ind+y_ind)
-#         bus = bus_data[string(index)]
-#         #v_values = bus["vm"][:]
-#         v_values = bus["w"][:]
-#         # if ref[:bus_gens][buses] >= 1
-#         #     gen_values = []
-#         #     for gen_id in ref[:bus_gens][buses]
-#         #         gen = ref[:gen][gen_id]
-#         #         gen_mag = res["gen"][string(gen_id)]["pg"]
-#         #         append!(gen_values, gen_mag)
-#         #     end
-#         # else
-#         #     gen_values = zeros(length(bus["w"]))
-#         # end
-        
-#         for (i, v_val) in enumerate(v_values)
-#             push!(all_bus_ids, index)
-#             push!(all_v_mags, v_val)
-#             # Label phases as a, b, c or use index if more than 3
-#             phase_label = i == 1 ? "a" : (i == 2 ? "b" : (i == 3 ? "c" : "phase_$i"))
-#             push!(phase_labels, phase_label)
-#         end
-#     end
-# end
+
 
 # Create a bar plot for the generation per bus
 #bar(collect(keys(generation)), collect(values(generation)), label="Generation", legend=:topright)
@@ -661,3 +616,32 @@ title!("Demand States")
 
 # Save the figure
 savefig(sd, "$(switch_folder)/demand_states_$test_condition.png")
+
+# Save load served and load shed results to a svg files 
+# Plot total load shed over iterations
+iterations = collect(1:length(total_pshed))
+plot(iterations, total_pshed, title = "Total Load Shed over Iterations", xlabel = "Iteration", ylabel = "Total Load Shed (kW)", marker = :o)
+savefig("$(power_folder)/total_load_shed_over_iterations.svg")
+# Save load shed data to CSV
+df = DataFrame(Iteration = iterations, Total_Load_Shed = total_pshed, Lower_Level_Load_Shed = pshed_lower_level, Upper_Level_Load_Shed = pshed_upper_level)
+CSV.write("$(power_folder)/load_shed_data.csv", df)
+# Display the plot
+#display(plot(iterations, total_pshed, title = "Total Load Shed over Iterations", xlabel = "Iteration", ylabel = "Total Load Shed (kW)", marker = :o))
+# Display the plot with all three lines
+display(plot(iterations, [pshed_lower_level pshed_upper_level], labels = ["Total Load Shed" "Lower-Level Load Shed" "Upper-Level Load Shed"], title = "Load Shed over Iterations", xlabel = "Iteration", ylabel = "Load Shed (kW)", marker = :o))
+savefig("$(power_folder)/load_shed_comparison_over_iterations.svg")
+# Plot the load shed comparison, y-axis upper level load shed, x-axis lower level load shed
+# color each iteration differently
+iter_annotation = []
+for i in iterations
+    push!(iter_annotation, string(i))
+end
+pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
+for i in iterations
+    annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
+end
+# add a 45 degree line to the pshed_comparison plot 
+plot!(pshed_comparison, [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], label = "y=x", line = (:dash, :red))
+
+display(pshed_comparison)
+savefig("$(power_folder)/load_shed_comparison.svg")

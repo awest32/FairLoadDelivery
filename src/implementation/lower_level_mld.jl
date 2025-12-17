@@ -16,14 +16,14 @@ using DataFrames
 using CSV
 using Plots
 # using DataFrames
-ipopt = Ipopt.Optimizer
-gurobi = Gurobi.Optimizer
+# ipopt = Ipopt.Optimizer
+# gurobi = Gurobi.Optimizer
 
-ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
-highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
+# ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+# highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 # Inputs: case file path, percentage of load shed, list of critical load IDs
-eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+#eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
 
 function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector{Float64})
     weight_params = model[:fair_load_weights]
@@ -66,7 +66,7 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
     return jacobian, Array(value.(pshed_vars)), pshed_ids, Array(value.(weight_params)), weight_ids
 end
 
-function lower_level_soln(math, ipopt; weights_new=nothing, k=1)
+function lower_level_soln(math, weights_new, k)
     # Solve the parameterized MLD 
     # mld_paramed_soln = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math, ipopt)
     # # Extract the pshed from the loads in the solution
@@ -85,13 +85,14 @@ function lower_level_soln(math, ipopt; weights_new=nothing, k=1)
     else
         weights_prev = weights_new
     end
+
     # Use the parameterized MLD solution to perform implicit differentiation with DiffOpt.jl 
     dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
     return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids
 end
 
-dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt)
-function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)
+#dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt)
+function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
     # Labels for rows/columns (use pshed keys)
     # original ordering
     # keys_paramed = [string(k[1]) for k in keys(mld_paramed.model[:fair_load_weights])]
@@ -114,10 +115,26 @@ function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)
 
 
     # Save the heatmap
-    savefig(heatmap_plot, "load_shed_sensitivities_heatmap.svg")  # save as SVG
-    println("Heatmap saved as load_shed_sensitivities_heatmap.svg")
+    savefig(heatmap_plot, "load_shed_sensitivities_heatmap_k$(k).svg")  # save as SVG
+    println("Heatmap saved as load_shed_sensitivities_heatmap_k$(k).svg")
 end
-plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)
+
+# Plot the load shed per bus  with the buses sorted by distance from the sourcebus
+function plot_load_shed_per_bus(pshed_val, pshed_ids, k)
+    bar_plot = bar(
+        string.(pshed_ids), pshed_val;
+        xlabel = "Load ID",
+        ylabel = "Load Shedding (p.u.)",
+        title = "Load Shedding per Load ID",
+        legend = false,
+        size = (600, 400),
+        right_margin = 5Plots.mm,
+        top_margin = 5Plots.mm
+    )
+    savefig(bar_plot, "load_shedding_per_load_k$(k).svg")  # save as SVG
+    println("Bar plot saved as load_shedding_per_load_k$(k).svg")
+end
+#plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)
 
 # Solve the MILP MLD problem
 # mld_mip_soln = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
