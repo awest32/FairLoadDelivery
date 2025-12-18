@@ -46,45 +46,92 @@ math_new = deepcopy(math)
 total_pshed = []
 pshed_lower_level = []
 pshed_upper_level = []
+weight_ids_fin = []
 iterations = 1
-for k in 1:iterations
-    @info "Starting iteration $k"
 
-    # Solve lower-level problem and get sensitivities
-    dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math_new, fair_weights, k)
-    
-    # Plot the heatmap of sensitivities
-    plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
-    
-    # Plot load shed per bus
-    plot_load_shed_per_bus(pshed_val, pshed_ids, k)
-    
-    # Order the load using the indices from the pshed_ids
-    pd = Float64[]
-    for i in pshed_ids
-        push!(pd, sum(math_new["load"][string(i)]["pd"]))
+function relaxed_fldp(math::Dict{String, Any}, iterations::Int, fair_weights::Vector{Float64})
+    # Build and solve the relaxed Fair Load Delivery Problem (FLDP)
+    for k in 1:iterations
+        @info "Starting iteration $k"
+
+        # Solve lower-level problem and get sensitivities
+        dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math_new, fair_weights, k)
+        
+        # Plot the heatmap of sensitivities
+        plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
+        
+        # Plot load shed per bus
+        plot_load_shed_per_bus(pshed_val, pshed_ids, k)
+        
+        # Order the load using the indices from the pshed_ids
+        pd = Float64[]
+        for i in pshed_ids
+            push!(pd, sum(math_new["load"][string(i)]["pd"]))
+        end
+        
+        # Update weights using Lin-PALMA-W with gradient input
+        # pshed_new, fair_weight_vals, sigma = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
+        
+        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals)
+        #pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals)
+        #pshed_new, fair_weight_vals = min_max_load_shed(dpshed, pshed_val, weight_vals)
+        #pshed_new, fair_weight_vals = jains_fairness_index(dpshed, pshed_val, weight_vals)
+        
+        plot_weights_per_load(fair_weight_vals, weight_ids, k)
+        
+        # Update the fair load weights in the math dictionary
+        for (i, w) in zip(weight_ids, fair_weight_vals)
+            math_new["load"][string(i)]["weight"] = w
+        end
+        
+        # Store the total load shed for this iteration
+        push!(pshed_lower_level, sum(pshed_val))
+        push!(pshed_upper_level, sum(pshed_new))
+        push!(weight_ids_fin, weight_ids)
     end
-    
-    # Update weights using Lin-PALMA-W with gradient input
-    pshed_new, fair_weight_vals, sigma = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
-    
-    #pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals)
-    #pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals)
-    #pshed_new, fair_weight_vals = min_max_load_shed(dpshed, pshed_val, weight_vals)
-    #pshed_new, fair_weight_vals = jains_fairness_index(dpshed, pshed_val, weight_vals)
-    
-    plot_weights_per_load(fair_weight_vals, weight_ids, k)
-    
-    # Update the fair load weights in the math dictionary
-    for (i, w) in zip(weight_ids, fair_weight_vals)
-        math_new["load"][string(i)]["weight"] = w
-    end
-    
-    # Store the total load shed for this iteration
-    push!(total_pshed, sum(pshed_val))
-    push!(pshed_lower_level, sum(pshed_val))
-    push!(pshed_upper_level, sum(pshed_new))
+    return math, pshed_lower_level, pshed_upper_level, weight_ids_fin
 end
+
+math_relaxed, pshed_lower_level, pshed_upper_level, weight_ids_fin = relaxed_fldp(math_new, 1, fair_weights)
+
+# Extract the switch states and load block statuses from the math dictionary, save as seperate dictionaries 
+function extract_switch_block_states(math::Dict{String,Any})
+    # Create the switch state dictionary
+    switch_states = Dict{Int64,Float64}([])
+    for (s_id, s_data) in math["switch"]
+        @info s_id
+        @info s_data
+        @info s_data["state"]
+        switch_states[parse(Int,s_id)] = s_data["state"]
+    end
+
+    #Create the block status dictionary
+    block_status = Dict{Int64,Float64}([])
+    for (b_id, b_data) in math["block"]
+        block_status[parse(Int,b_id)] = b_data["state"]
+    end
+    return switch_states, block_status
+end
+
+switch_states, block_status = extract_switch_block_states(math_relaxed)
+
+# Round the final switch and block statuses in math_fin using the random rounding function
+bernoulli_selection_exp, switch_ids = random_rounding_switches_blocks(math_relaxed, 10, 1234)
+
+# Radiality radiality check
+bernoulli_selection,switch_ids = radiality_check(reference, zip(weight_ids_fin,switch_samples),
+                                      bernoulli_samples;
+                                      optimizer=ipopt)    
+if length(bernoulli_selection) == 0
+    error("No radial solutions found among Bernoulli samples.")
+else
+    println("Number of radial solutions from Bernoulli samples: $(length(bernoulli_selection))")
+end
+# Evaluate each sample and find the best one
+best_sample_ids, best_switch_config = find_best_switch_set(math_random_test, switch_samples, ipopt)
+
+# Find if the best switch configuration is feasible in AC power flow
+ac_bernoulli, ac_bernoulli_val = ac_feasibility_test(math_random_test, bernoulli_samples, collect(keys(best_switch_config)), optimizer=ipopt)
 
 math_fin = deepcopy(math_new)
 # Plot total load shed over iterations
@@ -113,4 +160,4 @@ end
 plot!(pshed_comparison, [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], label = "y=x", line = (:dash, :red))
 
 display(pshed_comparison)
-savefig("results/load_shed_comparison.svg")
+savefig("load_shed_comparison.svg")

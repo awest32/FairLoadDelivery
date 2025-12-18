@@ -313,7 +313,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Any},
         #FairLoadDelivery.constraint_rounded_switch_states(model_ran,ref_round,switch_state)
 	    FairLoadDelivery.constraint_radial_topology_jump(model_ran,ref_round,bernoulli_switch[i];bern=false)
         #push!(radial_cons, radial_con)
-        JuMP.@objective(model_ran, Min, 0)
+        JuMP.@objective(model_ran, Min, distance)
         optimize!(model_ran)
         term_status = JuMP.termination_status(model_ran)
         if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED

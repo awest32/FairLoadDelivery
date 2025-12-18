@@ -1,3 +1,6 @@
+using FairLoadDelivery
+using JuMP
+using PowerModelsDistribution
 """
     solve_mld_relaxed(data::Dict{String, Any}; optimizer=Ipopt.Optimizer)
 
@@ -37,6 +40,52 @@ function solve_mld_relaxed(data::Dict{String, Any}; optimizer=Ipopt.Optimizer)
 end
 
 """
+    random_rounding_switches_blocks(math::Dict{String, Any}, 
+                                   n_samples::Int; 
+                                   seed=nothing)
+Generate Bernoulli samples for switch and block variables based on their
+relaxed values in the math dictionary.
+"""
+function random_rounding_switches_blocks(math::Dict{String, Any}, 
+                                        n_samples::Int,
+                                        seed=nothing)
+    # Solve the relaxed MLD problem to get switch and block probabilities using the new weights
+    relaxed_soln = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math, Ipopt.Optimizer)
+    res = relaxed_soln["solution"]
+    # Extract switch states
+    switch_states = Dict{Int, Any}()
+       for (s_id, s_data) in enumerate(res["switch"])
+        switch_states[s_id] = s_data[2]["state"]
+    end
+    # # Extract block states
+    # block_states = Dict{Int, Any}()
+    # for (b_id, b_data) in enumerate(res["block"])
+    #     block_states[b_id] = b_data[2]["status"]
+    # end
+
+    # Generate Bernoulli samples for switches
+    switch_samples = generate_bernoulli_samples(switch_states; 
+                                               n_samples=n_samples, 
+                                               seed=seed)
+    # Generate Bernoulli samples for blocks
+    # block_samples = generate_bernoulli_samples(block_states; 
+    #                                           n_samples=n_samples, 
+    #                                           seed=seed)
+
+    # Find the best switch sample by minimizing the distane to the relaxed values
+    pm = instantiate_mc_model(
+        math, 
+        LinDist3FlowPowerModel,
+        build_mc_mld_shedding_implicit_diff;
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
+    )
+    ref = pm.ref[:it][:pmd][:nw][0]
+    bernoulli_selection_exp, switch_ids = radiality_check(ref, switch_states, switch_samples)
+
+    return bernoulli_selection_exp, switch_ids
+end
+
+"""
     generate_bernoulli_samples(switch_states::Dict{Int, Float64}; 
                                n_samples=10, 
                                seed=nothing)
@@ -66,6 +115,105 @@ function generate_bernoulli_samples(switch_states::Dict{Int, Any};
     return samples
 end
 
+"""
+    radiality_test(math::Dict{String, Any}, 
+                    bernoulli_selection_exp::Any;
+                    optimizer=Ipopt.Optimizer)
+
+Test radiality of the network for each set of switch configurations provided in bernoulli_selection_exp.
+Returns a vector of feasible switch configurations that maintain radiality.
+"""
+function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Any},
+                                      bernoulli_samples::Vector{Dict{Int, Float64}};
+                                      optimizer=Gurobi.Optimizer)
+    
+    n_samples = length(bernoulli_samples)
+    n_switches = length(z_relaxed)
+    switch_ids = sort(collect(keys(z_relaxed)))
+    
+    println("\n[Optimization] Finding best single Bernoulli sample...")
+    println("  Number of samples: $n_samples")
+    println("  Number of switches: $n_switches")
+    
+   
+    # Create variables for the rounded switch states
+    #bernoulli_selection = JuMP.@variable(model_ran, y[1:n_samples], Bin)
+    bernoulli_selection_exp = Vector{Dict{Int, JuMP.VariableRef}}()
+    #bernoulli_selection_val = Any[]# Vector{Dict{Int, Float64}}()
+
+     # Calculate L2 distance for each sample
+        distances = Any[]
+        radial_cons = Any[]
+        math_round = deepcopy(math)
+       
+    
+        # Build a model to evaluate distances
+        model_ran = JuMP.Model()
+        # set_attribute(model_ran, "hsllib", HSL_jll.libhsl_path)
+        # set_attribute(model_ran, "linear_solver", "ma27")
+        # Set optimizer
+        set_optimizer(model_ran, optimizer)
+        #set_optimizer_attribute(model_ran, "print_level", 0)
+        bernoulli_switch = Vector{Dict{Int, JuMP.VariableRef}}()
+    for i in 1:n_samples
+        for sample_idx in 1:n_samples
+            switch_state = Dict{Int, JuMP.VariableRef}()
+            for s in switch_ids
+                switch_state[s] = JuMP.@variable(model_ran, base_name="switch_$(sample_idx)_$(s)", lower_bound=0.0, upper_bound=1.0)  # Relaxed to [0,1]
+            end
+            push!(bernoulli_switch, switch_state)
+        end
+
+        # Very safe M (switches ∈ [0,1])
+        # M = 1.0
+        # M_radial = 1e4
+
+        distance = @expression(model_ran, sum((bernoulli_switch[i][s] - z_relaxed[s])^2 for s in switch_ids))
+        for s in switch_ids
+            #math_round["switch"][string(s)]["state"] = bernoulli_samples[i][s]   
+            # @constraint(model_ran,
+            #     bernoulli_switch[i][s] == bernoulli_samples[i][s] <= M * (1 - y[i]))            
+            # @constraint(model_ran,
+            #     bernoulli_switch[i][s] - bernoulli_samples[i][s] >= -M * (1 - y[i]))            
+            JuMP.@constraint(model_ran, bernoulli_switch[i][s] == bernoulli_samples[i][s])
+        end
+        JuMP.@constraint(model_ran, sum(bernoulli_switch[i][s] for s in switch_ids) >= 1)  # At least one switch closed
+        #FairLoadDelivery.constraint_rounded_switch_states(model_ran,ref_round,switch_state)
+	    radial_con = FairLoadDelivery.constraint_radial_topology_jump(model_ran,ref_round,bernoulli_switch[i];bern=false)
+        push!(radial_cons, radial_con)
+        push!(distances, distance)
+        JuMP.@objective(model_ran, Min, distances)
+    end
+        optimize!(model_ran)
+        term_status = JuMP.termination_status(model_ran)
+        if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED
+            println("Optimization converged to optimality.")
+            #push!(bernoulli_selection_exp, bernoulli_switch[i])
+            #push!(bernoulli_selection_val, value.(bernoulli_switch[i][s] for s in switch_ids))
+        else
+           println("Optimization did not converge to optimality. Status: $term_status")
+        end
+        # Extract the sample with the minimum distance
+        #argmin(value.(distance))
+        push!(bernoulli_selection_exp, bernoulli_switch[argmin(value.(distances))])
+    #end
+
+    # Find the sample with minimum distance
+    # Create an objective to minimize distance
+    # JuMP.@objective(model_ran, Min, sum(distances[i] for i in 1:n_samples))
+    # optimize!(model_ran)
+    # Extract best sample info
+    # best_sample_idx = argmin(value.(distances))
+    # best_distance = distances[best_sample_idx]
+    return bernoulli_selection_exp, switch_ids
+end
+
+"""
+    ac_feasibility_test(math::Dict{String, Any}, 
+                        bernoulli_selection_exp::Any,
+                        switch_ids::Vector{Int};
+                        optimizer=Ipopt.Optimizer)
+"""
 # Test the acpf feasibility for the new set of switches that passed radiality
 function ac_feasibility_test(math::Dict{String, Any}, 
                           bernoulli_selection_exp::Any,
@@ -91,31 +239,32 @@ function ac_feasibility_test(math::Dict{String, Any},
     return ac_bernoulli, ac_bernoulli_val
 end
 
-# Find the set of switches with best mld objective value among feasible ac solutions
-function find_best_switch_set(math::Dict{String, Any}, 
-                          ac_bernoulli::Vector{Any},
-                          switch_ids::Vector{Int};
-                          optimizer=Ipopt.Optimizer)
-    best_obj = -Inf
-    best_sample_idx = 0
-    best_switch_config = Dict{Int, Float64}()
-    math_round = deepcopy(math)
-    for (set_id, bernoulli_set) in enumerate(ac_bernoulli)
-        for s in switch_ids
-            math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
-        end
-        mld_rounded_soln = solve_mc_mld_shed_random_round(math_round, optimizer)
-        obj_val = mld_rounded_soln["objective"]
-        term_status = mld_rounded_soln["termination_status"]
-        @info "Sample $set_id: Objective = $obj_val, Status = $term_status"
-        if (term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED) && obj_val > best_obj
-            best_obj = obj_val
-            best_sample_idx = set_id
-            for s in switch_ids
-                best_switch_config[s] = value(bernoulli_set[s])
-            end
-        end
-    end
+# # Find the set of switches with best mld objective value among feasible ac solutions
+# function find_best_switch_set(math::Dict{String, Any}, 
+#                           ac_bernoulli::Vector{Any},
+#                           switch_ids::Vector{Int};
+#                           optimizer=Ipopt.Optimizer)
+#     best_obj = -Inf
+#     best_sample_idx = 0
+#     best_switch_config = Dict{Int, Float64}()
+#     math_round = deepcopy(math)
+#     for (set_id, bernoulli_set) in enumerate(ac_bernoulli)
+#         for s in switch_ids
+#             math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
+#         end
+#         mld_rounded_soln = solve_mc_mld_shed_random_round(math_round, optimizer)
+#         obj_val = mld_rounded_soln["objective"]
+#         term_status = mld_rounded_soln["termination_status"]
+#         @info "Sample $set_id: Objective = $obj_val, Status = $term_status"
+#         if (term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED) && obj_val > best_obj
+#             best_obj = obj_val
+#             best_sample_idx = set_id
+#             for s in switch_ids
+#                 best_switch_config[s] = value(bernoulli_set[s])
+#             end
+#         end
+#     end
 
-    return best_sample_idx, best_switch_config
-end
+#     return best_sample_idx, best_switch_config
+# end
+
