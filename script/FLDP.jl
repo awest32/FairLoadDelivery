@@ -31,7 +31,7 @@ for (load_id, load) in (math["load"])
 end
 
 
-dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, fair_weights, 1)
+dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, mld_soln  = lower_level_soln(math, fair_weights, 1)
 # plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, 1)
 
 fair_weights = Float64[]
@@ -51,12 +51,14 @@ iterations = 1
 
 function relaxed_fldp(math::Dict{String, Any}, iterations::Int, fair_weights::Vector{Float64})
     # Build and solve the relaxed Fair Load Delivery Problem (FLDP)
+    ref_out = []
     for k in 1:iterations
         @info "Starting iteration $k"
 
         # Solve lower-level problem and get sensitivities
-        dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math_new, fair_weights, k)
-        
+        dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, ref = lower_level_soln(math_new, fair_weights, k)
+  
+
         # Plot the heatmap of sensitivities
         plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
         
@@ -88,40 +90,60 @@ function relaxed_fldp(math::Dict{String, Any}, iterations::Int, fair_weights::Ve
         push!(pshed_lower_level, sum(pshed_val))
         push!(pshed_upper_level, sum(pshed_new))
         push!(weight_ids_fin, weight_ids)
+        push!(ref_out, ref)
     end
-    return math, pshed_lower_level, pshed_upper_level, weight_ids_fin
+    return math, pshed_lower_level, pshed_upper_level, weight_ids_fin, ref_out[1]
 end
 
-math_relaxed, pshed_lower_level, pshed_upper_level, weight_ids_fin = relaxed_fldp(math_new, 1, fair_weights)
+math_relaxed, pshed_lower_level, pshed_upper_level, weight_ids_fin, ref = relaxed_fldp(math_new, 1, fair_weights)
+
+# Find the switch samples from the relaxed solution using solve_mc_mld_shed_implicit_diff
+mld_implicit_diff_relaxed = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
 
 # Extract the switch states and load block statuses from the math dictionary, save as seperate dictionaries 
-function extract_switch_block_states(math::Dict{String,Any})
+function extract_switch_block_states(relaxed_soln::Dict{String,Any})
     # Create the switch state dictionary
     switch_states = Dict{Int64,Float64}([])
-    for (s_id, s_data) in math["switch"]
-        @info s_id
-        @info s_data
-        @info s_data["state"]
+    for (s_id, s_data) in relaxed_soln["switch"]
         switch_states[parse(Int,s_id)] = s_data["state"]
     end
 
     #Create the block status dictionary
     block_status = Dict{Int64,Float64}([])
-    for (b_id, b_data) in math["block"]
-        block_status[parse(Int,b_id)] = b_data["state"]
+    for (b_id, b_data) in relaxed_soln["block"]
+        block_status[parse(Int,b_id)] = b_data["status"]
     end
     return switch_states, block_status
 end
 
-switch_states, block_status = extract_switch_block_states(math_relaxed)
+switch_states, block_status = extract_switch_block_states(mld_implicit_diff_relaxed["solution"])
+
+# Determine the number of rounding rounds and bernoulli samples per round
+n_rounds = 3 # Change the randome seed per round to get different results
+n_bernoulli_samples = 10
+
+bernoulli_selection_exp = Vector{Dict{Int, Float64}}()
+bernoulli_selection_index = []
+for r in 1:n_rounds
+    #seed = 100*r
+    rng = MersenneTwister(100 * r)
+    bernoulli_samples = Dict{Int,Vector{Dict{Int, Float64}}}()
+    # Generate bernoulli samples for switches and blocks
+    bernoulli_samples[r] = generate_bernoulli_samples(switch_states, n_bernoulli_samples, rng)
+
+    # Find the best bernoulli sample be topology feasible and closes to the relaxed solution
+    index, selection = radiality_check(ref, switch_states, bernoulli_samples[r])
+    @info "Round $r: Best radial sample index: $index"
+    @info "Round $r: Best radial sample selection: $selection"
+    push!(bernoulli_selection_index, index)
+    push!(bernoulli_selection_exp, selection)
+end
 
 # Round the final switch and block statuses in math_fin using the random rounding function
-bernoulli_selection_exp, switch_ids = random_rounding_switches_blocks(math_relaxed, 10, 1234)
+#bernoulli_selection_exp, switch_ids = random_rounding_switches_blocks(math_relaxed, 10, 1234)
 
-# Radiality radiality check
-bernoulli_selection,switch_ids = radiality_check(reference, zip(weight_ids_fin,switch_samples),
-                                      bernoulli_samples;
-                                      optimizer=ipopt)    
+
+   
 if length(bernoulli_selection) == 0
     error("No radial solutions found among Bernoulli samples.")
 else

@@ -63,7 +63,7 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
         end
     end
     
-    return jacobian, Array(value.(pshed_vars)), pshed_ids, Array(value.(weight_params)), weight_ids
+    return jacobian, Array(value.(pshed_vars)), pshed_ids, Array(value.(weight_params)), weight_ids, model
 end
 
 function lower_level_soln(math, weights_new, k)
@@ -87,8 +87,8 @@ function lower_level_soln(math, weights_new, k)
     end
 
     # Use the parameterized MLD solution to perform implicit differentiation with DiffOpt.jl 
-    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
-    return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids
+    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, model = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
+    return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref
 end
 
 #dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt)

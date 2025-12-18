@@ -1,6 +1,8 @@
 using FairLoadDelivery
 using JuMP
 using PowerModelsDistribution
+using Random
+using Distributions
 """
     solve_mld_relaxed(data::Dict{String, Any}; optimizer=Ipopt.Optimizer)
 
@@ -94,24 +96,21 @@ Generate sets of Bernoulli variables based on relaxed switch probabilities.
 Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
 Returns an array of sample dictionaries.
 """
-function generate_bernoulli_samples(switch_states::Dict{Int, Any}; 
-                                   n_samples=10, 
-                                   seed=nothing)
-    if !isnothing(seed)
-        Random.seed!(seed)
-    end
-    
-    samples = Vector{Dict{Int, Float64}}()
-    
-    for sample_idx in 1:n_samples
+function generate_bernoulli_samples(
+    switch_states::Dict{Int, Float64},
+    n_samples::Int,
+    rng::Random.MersenneTwister
+)
+    samples = Vector{Dict{Int, Float64}}(undef, n_samples)
+
+    for i in 1:n_samples
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states
-            # Generate Bernoulli random variable with probability p
-            sample[switch_id] = Float64(rand(Bernoulli(p)))
+            sample[switch_id] = rand(rng, Bernoulli(p))
         end
-        push!(samples, sample)
+        samples[i] = sample
     end
-    
+
     return samples
 end
 
@@ -123,9 +122,7 @@ end
 Test radiality of the network for each set of switch configurations provided in bernoulli_selection_exp.
 Returns a vector of feasible switch configurations that maintain radiality.
 """
-function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Any},
-                                      bernoulli_samples::Vector{Dict{Int, Float64}};
-                                      optimizer=Gurobi.Optimizer)
+function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float64},bernoulli_samples::Vector{Dict{Int, Float64}}; optimizer=Gurobi.Optimizer)
     
     n_samples = length(bernoulli_samples)
     n_switches = length(z_relaxed)
@@ -136,76 +133,32 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Any},
     println("  Number of switches: $n_switches")
     
    
-    # Create variables for the rounded switch states
-    #bernoulli_selection = JuMP.@variable(model_ran, y[1:n_samples], Bin)
-    bernoulli_selection_exp = Vector{Dict{Int, JuMP.VariableRef}}()
-    #bernoulli_selection_val = Any[]# Vector{Dict{Int, Float64}}()
 
-     # Calculate L2 distance for each sample
-        distances = Any[]
-        radial_cons = Any[]
-        math_round = deepcopy(math)
-       
-    
-        # Build a model to evaluate distances
-        model_ran = JuMP.Model()
-        # set_attribute(model_ran, "hsllib", HSL_jll.libhsl_path)
-        # set_attribute(model_ran, "linear_solver", "ma27")
-        # Set optimizer
-        set_optimizer(model_ran, optimizer)
-        #set_optimizer_attribute(model_ran, "print_level", 0)
-        bernoulli_switch = Vector{Dict{Int, JuMP.VariableRef}}()
+    best_i = nothing
+    best_dist = Inf
+
     for i in 1:n_samples
-        for sample_idx in 1:n_samples
-            switch_state = Dict{Int, JuMP.VariableRef}()
-            for s in switch_ids
-                switch_state[s] = JuMP.@variable(model_ran, base_name="switch_$(sample_idx)_$(s)", lower_bound=0.0, upper_bound=1.0)  # Relaxed to [0,1]
-            end
-            push!(bernoulli_switch, switch_state)
-        end
-
-        # Very safe M (switches ∈ [0,1])
-        # M = 1.0
-        # M_radial = 1e4
-
-        distance = @expression(model_ran, sum((bernoulli_switch[i][s] - z_relaxed[s])^2 for s in switch_ids))
+        model = JuMP.Model()
+        set_optimizer(model, optimizer)
+        set_attribute(model, "DualReductions", 0)
+        @variable(model, bern_switch[1:length(switch_ids)])
         for s in switch_ids
-            #math_round["switch"][string(s)]["state"] = bernoulli_samples[i][s]   
-            # @constraint(model_ran,
-            #     bernoulli_switch[i][s] == bernoulli_samples[i][s] <= M * (1 - y[i]))            
-            # @constraint(model_ran,
-            #     bernoulli_switch[i][s] - bernoulli_samples[i][s] >= -M * (1 - y[i]))            
-            JuMP.@constraint(model_ran, bernoulli_switch[i][s] == bernoulli_samples[i][s])
+            @constraint(model, bern_switch[s] == bernoulli_samples[i][s])
         end
-        JuMP.@constraint(model_ran, sum(bernoulli_switch[i][s] for s in switch_ids) >= 1)  # At least one switch closed
-        #FairLoadDelivery.constraint_rounded_switch_states(model_ran,ref_round,switch_state)
-	    radial_con = FairLoadDelivery.constraint_radial_topology_jump(model_ran,ref_round,bernoulli_switch[i];bern=false)
-        push!(radial_cons, radial_con)
-        push!(distances, distance)
-        JuMP.@objective(model_ran, Min, distances)
-    end
-        optimize!(model_ran)
-        term_status = JuMP.termination_status(model_ran)
-        if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED
-            println("Optimization converged to optimality.")
-            #push!(bernoulli_selection_exp, bernoulli_switch[i])
-            #push!(bernoulli_selection_val, value.(bernoulli_switch[i][s] for s in switch_ids))
-        else
-           println("Optimization did not converge to optimality. Status: $term_status")
-        end
-        # Extract the sample with the minimum distance
-        #argmin(value.(distance))
-        push!(bernoulli_selection_exp, bernoulli_switch[argmin(value.(distances))])
-    #end
+        # radiality
+        FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, bern_switch; bern=false)
 
-    # Find the sample with minimum distance
-    # Create an objective to minimize distance
-    # JuMP.@objective(model_ran, Min, sum(distances[i] for i in 1:n_samples))
-    # optimize!(model_ran)
-    # Extract best sample info
-    # best_sample_idx = argmin(value.(distances))
-    # best_distance = distances[best_sample_idx]
-    return bernoulli_selection_exp, switch_ids
+        optimize!(model)
+
+        if termination_status(model) == MOI.OPTIMAL
+            d = sum((bernoulli_samples[i][s] - z_relaxed[s])^2 for s in switch_ids)
+            if d < best_dist
+                best_dist = d
+                best_i = i
+            end
+        end
+    end
+    return best_i, bernoulli_samples[best_i]
 end
 
 """

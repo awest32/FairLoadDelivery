@@ -23,9 +23,9 @@ function setup_network(case::String, ls_percent::Float64, critical_load::Vector{
     math = PowerModelsDistribution.transform_data_model(eng)
 
 
-    for (idx, switch) in math["switch"]
-        switch["state"] = 1
-    end
+    # for (idx, switch) in math["switch"]
+    #     switch["state"] = 1
+    # end
     lbs = PowerModelsDistribution.identify_load_blocks(math)
     get(eng, "time_series", Dict())
 
