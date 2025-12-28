@@ -32,13 +32,6 @@ end
 
 
 dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, mld_soln  = lower_level_soln(math, fair_weights, 1)
-# plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, 1)
-
-# fair_weights = Float64[]
-# for i in weight_ids
-#     load = math["load"][string(i)]
-#     push!(fair_weights, load["weight"])
-# end
 
 # Make a copy of the math dictionary
 math_new = deepcopy(math)
@@ -47,7 +40,7 @@ total_pshed = []
 pshed_lower_level = []
 pshed_upper_level = []
 weight_ids_fin = []
-iterations = 1
+iterations = 10
 fair_func = "proportional"
 function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Vector{Float64}, fair_func::String)
     # Build and solve the relaxed Fair Load Delivery Problem (FLDP)
@@ -101,8 +94,31 @@ function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Ve
     end
     return math, pshed_lower_level, pshed_upper_level, weight_ids_fin, ref_out[1]
 end
+math_relaxed, pshed_lower_level, pshed_upper_level, weight_ids_fin, model = relaxed_fldp(math_new, iterations, fair_weights, fair_func)
 
-math_relaxed, pshed_lower_level, pshed_upper_level, weight_ids_fin, model = relaxed_fldp(math_new, 1, fair_weights, fair_func)
+# Plot total load shed over iterations
+plot(1:iterations, pshed_lower_level, title = "Lower Level Load Shed over Iterations", xlabel = "Iteration", ylabel = "Total Load Shed (kW)", marker = :o)
+savefig("lower_level_load_shed_over_iterations_$fair_func.svg")
+# Save load shed data to CSV
+df = DataFrame(Iteration = 1:iterations, Total_Load_Shed = pshed_lower_level, Lower_Level_Load_Shed = pshed_lower_level, Upper_Level_Load_Shed = pshed_upper_level)
+CSV.write("load_shed_data_$fair_func.csv", df)
+# Display the plot with all three lines
+display(plot(1:iterations, [pshed_lower_level pshed_upper_level], labels = ["Total Load Shed" "Lower-Level Load Shed" "Upper-Level Load Shed"], title = "Load Shed over Iterations", xlabel = "Iteration", ylabel = "Load Shed (kW)", marker = :o))
+savefig("load_shed_comparison_over_iterations_$fair_func.svg")
+# Plot the load shed comparison, y-axis upper level load shed, x-axis lower level load shed
+# color each iteration differently
+iter_annotation = []
+for i in 1:iterations
+    push!(iter_annotation, string(i))
+end
+pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
+for i in 1:iterations
+    annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
+end
+# add a 45 degree line to the pshed_comparison plot 
+plot!(pshed_comparison, [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], label = "y=x", line = (:dash, :red))
+display(pshed_comparison)
+savefig("load_shed_comparison_$fair_func.svg")
 
 # Find the switch samples from the relaxed solution using solve_mc_mld_shed_implicit_diff
 mld_implicit_diff_relaxed = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
@@ -215,38 +231,29 @@ end
 max_load_served = -Inf
 best_feasibility = nothing
 for feas in ac_feas
-    if haskey(feas, "total_load_served")
-        load_served = feas["total_load_served"]
+    if haskey(feas, "feas_obj")
+        load_served = feas["feas_obj"]
         if load_served > max_load_served
             max_load_served = load_served
             best_feasibility = feas
         end
     end
 end
-math_fin = deepcopy(math_new)
-# Plot total load shed over iterations
-plot(iterations, pshed_lower_level, title = "Total Load Shed over Iterations", xlabel = "Iteration", ylabel = "Total Load Shed (kW)", marker = :o)
-savefig("total_load_shed_over_iterations_$fair_func.svg")
-# Save load shed data to CSV
-df = DataFrame(Iteration = iterations, Total_Load_Shed = pshed_lower_level, Lower_Level_Load_Shed = pshed_lower_level, Upper_Level_Load_Shed = pshed_upper_level)
-CSV.write("load_shed_data_$fair_func.csv", df)
-# Display the plot
-#display(plot(iterations, total_pshed, title = "Total Load Shed over Iterations", xlabel = "Iteration", ylabel = "Total Load Shed (kW)", marker = :o))
-# Display the plot with all three lines
-display(plot(iterations, [pshed_lower_level pshed_upper_level], labels = ["Total Load Shed" "Lower-Level Load Shed" "Upper-Level Load Shed"], title = "Load Shed over Iterations", xlabel = "Iteration", ylabel = "Load Shed (kW)", marker = :o))
-savefig("load_shed_comparison_over_iterations_$fair_func.svg")
-# Plot the load shed comparison, y-axis upper level load shed, x-axis lower level load shed
-# color each iteration differently
-iter_annotation = []
-for i in iterations
-    push!(iter_annotation, string(i))
+@info "Maximum load served among feasible AC solutions: $max_load_served"
+if best_feasibility != nothing
+    @info "Best feasibility solution details: $best_feasibility"
+else
+    @warn "No feasible AC solutions found among rounded solutions."
 end
-pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
-for i in iterations
-    annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
-end
-# add a 45 degree line to the pshed_comparison plot 
-plot!(pshed_comparison, [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], [minimum([pshed_lower_level,pshed_upper_level]) maximum([pshed_lower_level,pshed_upper_level])], label = "y=x", line = (:dash, :red))
+# plot the best solution 
+eng_out = PowerModelsDistribution.transform_data_model(math_out[best_feasibility["set_id"]])
 
-display(pshed_comparison)
-savefig("load_shed_comparison_$fair_func.svg")
+p = powerplot(eng_out, bus    = (:data=>"bus_type", :data_type=>"nominal"),
+                    branch = (:data=>"index", :data_type=>"ordinal"),
+                    gen    = (:data=>"pmax", :data_type=>"quantitative"),
+                    load   = (:data=>"pd",  :data_type=>"quantitative"),
+                    shunt = (:data=>"gs", :data_type=>"quantitative"),
+                    title = "Best AC Feasible Solution from Random Rounding",
+                    width = 300, height=300
+)
+# update the powerplot output to indicate the load values 
