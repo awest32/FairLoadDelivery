@@ -159,46 +159,47 @@ for r in 1:n_rounds
     math_copy = deepcopy(math_relaxed)
     push!(math_random_test, math_copy)
 end
-
+math_out = Vector{Dict{String, Any}}()
 # Apply the best switch configuration from each round to the respective math dictionary
 for r in 1:n_rounds
-    best_switch_config = bernoulli_switch_selection_exp[r]
-    @info "The best switch configuration for round $r is $best_switch_config"
-    for (switch_id, switch_state) in best_switch_config
-        @info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
-        math_random_test[r]["switch"][string(switch_id)]["state"] = switch_state
-        math_random_test[r]["switch"][string(switch_id)]["status"] = switch_state
-        math_random_test[r]["switch"][string(switch_id)]["dispatchable"] = 0.0
-        @info "Switch $switch_id state in math dictionary is now $(math_random_test[r]["switch"][string(switch_id)]["state"])"
-    end
-    # De-energize load blocks based on the block status from the relaxed solution
-    for (load_id, load_data) in math_random_test[r]["load"]
-        if bernoulli_load_selection_exp[r][parse(Int,load_id)] <= 0.0
-            @info "De-energizing load $load_id in round $r"
-            math_random_test[r]["load"][load_id]["pd"] = 0.0
-            math_random_test[r]["load"][load_id]["qd"] = 0.0
-            math_random_test[r]["load"][load_id]["status"] = 0.0
-        end
-    end
-    # De-energize shunts based on the block status from the relaxed solution
-    for (shunt_id, shunt_data) in math_random_test[r]["shunt"]
-        block_id = ref[:shunt_block_map][parse(Int,shunt_id)]
-        if bernoulli_block_selection_exp[r][block_id] <= 0.0
-            @info "De-energizing shunt $shunt_id in round $r"
-            math_random_test[r]["shunt"][shunt_id]["status"] = 0.0
-        end
-    end
+    math_out = update_network(math_random_test[r], bernoulli_switch_selection_exp[r], bernoulli_load_selection_exp[r], bernoulli_block_selection_exp[r], ref, r)
+    # best_switch_config = bernoulli_switch_selection_exp[r]
+    # @info "The best switch configuration for round $r is $best_switch_config"
+    # for (switch_id, switch_state) in best_switch_config
+    #     @info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
+    #     math_random_test[r]["switch"][string(switch_id)]["state"] = switch_state
+    #     math_random_test[r]["switch"][string(switch_id)]["status"] = switch_state
+    #     math_random_test[r]["switch"][string(switch_id)]["dispatchable"] = 0.0
+    #     @info "Switch $switch_id state in math dictionary is now $(math_random_test[r]["switch"][string(switch_id)]["state"])"
+    # end
+    # # De-energize load blocks based on the block status from the relaxed solution
+    # for (load_id, load_data) in math_random_test[r]["load"]
+    #     if bernoulli_load_selection_exp[r][parse(Int,load_id)] <= 0.0
+    #         @info "De-energizing load $load_id in round $r"
+    #         math_random_test[r]["load"][load_id]["pd"] = 0.0
+    #         math_random_test[r]["load"][load_id]["qd"] = 0.0
+    #         math_random_test[r]["load"][load_id]["status"] = 0.0
+    #     end
+    # end
+    # # De-energize shunts based on the block status from the relaxed solution
+    # for (shunt_id, shunt_data) in math_random_test[r]["shunt"]
+    #     block_id = ref[:shunt_block_map][parse(Int,shunt_id)]
+    #     if bernoulli_block_selection_exp[r][block_id] <= 0.0
+    #         @info "De-energizing shunt $shunt_id in round $r"
+    #         math_random_test[r]["shunt"][shunt_id]["status"] = 0.0
+    #     end
+    # end
 
-    # De-energize branches based on the block status from the relaxed solution
-    for (block_id, branches) in ref[:block_branches]
-        for branch_id in branches
-            @info "Branch $branch_id is in block $block_id"
-            if bernoulli_block_selection_exp[r][block_id] <= 0.0
-                @info "De-energizing branch $branch_id in round $r"
-                math_random_test[r]["branch"][string(branch_id)]["status"] = 0.0
-            end
-        end
-    end
+    # # De-energize branches based on the block status from the relaxed solution
+    # for (block_id, branches) in ref[:block_branches]
+    #     for branch_id in branches
+    #         @info "Branch $branch_id is in block $block_id"
+    #         if bernoulli_block_selection_exp[r][block_id] <= 0.0
+    #             @info "De-energizing branch $branch_id in round $r"
+    #             math_random_test[r]["branch"][string(branch_id)]["status"] = 0.0
+    #         end
+    #     end
+    # end
 end
 
 # Test the AC feasibility of each rounded solution
@@ -234,7 +235,7 @@ function ac_feasibility_test(math_list::Vector{Dict{String, Any}}, bernoulli_sam
     return ac_feasible_solutions, ac_feasible_values
 end
 
-ac_feasible_solutions, ac_feasible_values = ac_feasibility_test(math_random_test, bernoulli_switch_selection_exp, collect(keys(switch_states)), optimizer=ipopt)
+ac_feasible_solutions, ac_feasible_values = ac_feasibility_test(math_out, bernoulli_switch_selection_exp, collect(keys(switch_states)), optimizer=ipopt)
 
 
 math_fin = deepcopy(math_new)

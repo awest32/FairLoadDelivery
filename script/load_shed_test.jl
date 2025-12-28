@@ -175,17 +175,34 @@ for (switch_id, switch) in enumerate(math["switch"])
     end
 end
 math["switch"]["1"]["state"] = 0 # Open the switch to force load shedding
-math["switch"]["2"]["state"] = 1 # Open the switch to force load shedding
-math["switch"]["3"]["state"] = 1 # Open the switch to force load shedding
+math["switch"]["2"]["state"] = 0 # Open the switch to force load shedding
+math["switch"]["3"]["state"] = 0 # Open the switch to force load shedding
 math["block"] = Dict{String,Any}()
 for (block, loads) in enumerate(lbs)
     math["block"][string(block)] = Dict("id"=>block, "state"=>0)
 end
+switch_selection = Dict{Int,Int}()
+load_selection = Dict{Int,Float64}()
+block_selection = Dict{Int,Float64}()
+for (switch_id, switch) in math["switch"]
+    @info switch
+    switch_selection[parse(Int,switch_id)] = switch["state"]
+end
+for (load_id, load) in  (math["load"])
+    load_selection[parse(Int,load_id)] = 0.0
+end
+for (block_id, block) in (math["block"])
+    block_selection[parse(Int,block_id)] = 0.0
+end
+
+math_out = update_network(math, switch_selection, load_selection, block_selection, ref, 1)
+mld = instantiate_mc_model(math_out, LinDist3FlowPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+ref = mld.ref[:it][:pmd][:nw][0]
 # math["block"]["1"]["state"] = 0 # Open the switch to force load shedding
 # math["block"]["2"]["state"] = 1 # Open the switch to force load shedding
 # math["block"]["3"]["state"] = 1 
-#pm_ivr_soln = solve_mc_pf(math, IVRUPowerModel, ipopt)
-# pm_ivr_opf_soln = solve_mc_opf(math, IVRUPowerModel, ipopt)
+pm_ivr_soln = solve_mc_pf(math_out, IVRUPowerModel, ipopt)
+pm_ivr_opf_soln = solve_mc_opf(math_out, IVRUPowerModel, ipopt)
 #pf_ivrup_aw = solve_mc_pf_aw(math, ipopt)
 #ivrup_aw_mod = instantiate_mc_model(math, IVRUPowerModel, build_mc_pf_switch; ref_extensions=[ref_add_load_blocks!])
 

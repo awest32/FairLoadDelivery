@@ -28,18 +28,19 @@ using Plots
 function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector{Float64})
     weight_params = model[:fair_load_weights]
     pshed_vars = model[:pshed]
+    pserved_vars = model[:pd]
     
     weight_keys = (collect(eachindex(weight_params)))
     pshed_keys = (collect(eachindex(pshed_vars)))
+    pserved_keys = (collect(eachindex(pserved_vars)))
     weight_ids = collect(axes(weight_params, 1))
     pshed_ids = collect(axes(pshed_vars, 1))
+    pserved_ids = collect(axes(pserved_vars, 1))
 
     n_weights = length(weight_keys)
     n_pshed = length(pshed_keys)
-    
-    # Get current pshed
-   # pshed = [JuMP.value(pshed_vars[k]) for k in pshed_keys]
-    
+    n_pserved = length(pserved_keys)
+
     # Build Jacobian column by colum
     
     jacobian = zeros(n_pshed, n_weights)

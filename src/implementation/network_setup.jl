@@ -131,4 +131,47 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     return eng, math, lbs, critical_id
 end
 
+function update_network(data::Dict{String,Any}, switch_selection::Dict{}, load_selection::Dict{}, block_selection::Dict{}, ref::Dict{}, r)
+    for (switch_id, switch_state) in switch_selection
+        @info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
+        data["switch"][string(switch_id)]["state"] = switch_state
+        data["switch"][string(switch_id)]["status"] = switch_state
+        data["switch"][string(switch_id)]["dispatchable"] = 0.0
+        @info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
+    end
+    # De-energize load blocks based on the block status from the relaxed solution
+    for (load_id, load_data) in data["load"]
+        if load_selection[parse(Int,load_id)] <= 0.0
+            @info "De-energizing load $load_id in round $r"
+            data["load"][load_id]["pd"] = 0.0
+            data["load"][load_id]["qd"] = 0.0
+            data["load"][load_id]["vbase"] = 0.0
+            data["load"][load_id]["vnom_kv"] = 0.0
+            data["load"][load_id]["status"] = 0.0
+        end
+    end
+    # De-energize shunts based on the block status from the relaxed solution
+    if !isempty(ref[:shunt])
+        for (shunt_id, shunt_data) in data["shunt"]
+            block_id = ref[:shunt_block_map][parse(Int,shunt_id)]
+            if block_selection[block_id] <= 0.0
+                @info "De-energizing shunt $shunt_id in round $r"
+                data["shunt"][shunt_id]["status"] = 0.0
+            end
+        end
+    end
+    # De-energize branches based on the block status from the relaxed solution
+    for (block_id, branches) in ref[:block_branches]
+        for branch_id in branches
+            @info "Branch $branch_id is in block $block_id"
+            if block_selection[block_id] <= 0.0
+                @info "De-energizing branch $branch_id in round $r"
+                @info typeof(branch_id)
+                data["branch"][string(branch_id)]["status"] = 0.0
+                data["branch"][string(branch_id)]["br_status"] = 0.0
+            end
+        end
+    end
+    return data
+end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
