@@ -1,6 +1,6 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64, critical_load::Vector{String})
+function setup_network(case::String, ls_percent::Float64, critical_load)
     dir = @__DIR__
     casepath = "data/$case"
     file = joinpath(dir, "../../", casepath)
@@ -27,6 +27,25 @@ function setup_network(case::String, ls_percent::Float64, critical_load::Vector{
     #     switch["state"] = 1
     # end
     lbs = PowerModelsDistribution.identify_load_blocks(math)
+    # lbs = Dict{String, Any}()
+    # lbs_eng = Dict{String, Any}()
+    # lb1 = [645, 646, 611, 652, 671]
+    # lb2 = [670]#really 632
+    # lb3 = [634, 675, 692]
+    # lbs_eng[1] = lb1
+    # lbs_eng[2] = lb2
+    # lbs_eng[3] = lb3
+
+    # for (lb_id, lb) in lbs_eng
+    #     lb_vect = []
+    #     for bus in lb
+    #         for cons in 1:length(ref[:bus_loads][math["bus_lookup"][string(bus)]])
+    #             push!(lb_vect, ref[:bus_loads][math["bus_lookup"][string(bus)]][cons])
+    #         end
+    #     end
+    #     lbs[lb_id] = lb_vect
+    # end
+
     get(eng, "time_series", Dict())
 
     for (i,bus) in math["bus"]
@@ -79,12 +98,12 @@ function setup_network(case::String, ls_percent::Float64, critical_load::Vector{
 
     # Create the critical load set
     #critical_load = ["675a"]
-    critical_id =[]
+    critical_id = []
     #critical_load = ["l4"]
     for (i,load) in math["load"]
         if load["name"] in critical_load
-            load["critical"] = 1
-            load["weight"] = 1000
+            load["critical"] = 0
+            load["weight"] = 10
             push!(critical_id,parse(Int,i))
             #println("Load $(load["name"]) at math load node $(i) is critical.")
         else
@@ -112,4 +131,4 @@ function setup_network(case::String, ls_percent::Float64, critical_load::Vector{
     return eng, math, lbs, critical_id
 end
 
-eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+#eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])

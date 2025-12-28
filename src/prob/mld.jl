@@ -111,7 +111,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
-    constraint_mc_block_energization_consistency_bigm(pm)
+    #constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)

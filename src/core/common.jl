@@ -486,6 +486,35 @@ function _ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 end
 
 """
+Manually compute the load blocks
+"""
+function manually_id_load_blocks(data::Dict{String, Any}, ref::Dict{Symbol,<:Any})
+    lbs = Dict{Int64, Any}()
+    bbs = Dict{Int64, Any}()
+
+    lbs_eng = Dict{Int64, Any}()
+    lb1 = [645, 646, 611, 652, 671]
+    lb2 = [670]#really 632
+    lb3 = [634, 675, 692]
+    lbs_eng[1] = lb1
+    lbs_eng[2] = lb2
+    lbs_eng[3] = lb3
+
+    for (lb_id, lb) in lbs_eng
+        lb_vect = []
+        bb_vect = []
+        for bus in lb
+            for cons in 1:length(ref[:bus_loads][data["bus_lookup"][string(bus)]])
+                push!(lb_vect, ref[:bus_loads][data["bus_lookup"][string(bus)]][cons])
+            end
+            push!(bb_vect, data["bus_lookup"][string(bus)])
+        end
+        lbs[lb_id] = lb_vect
+        bbs[lb_id] = bb_vect
+    end
+    return lbs
+end
+"""
     identify_load_blocks(data::Dict{String,<:Any})
 
 computes load blocks based on switch locations

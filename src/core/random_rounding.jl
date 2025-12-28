@@ -106,7 +106,8 @@ function generate_bernoulli_samples(
     for i in 1:n_samples
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states
-            sample[switch_id] = rand(rng, Bernoulli(p))
+            p_clamped = clamp(p, 0.0, 1.0)
+            sample[switch_id] = rand(rng, Bernoulli(p_clamped))
         end
         samples[i] = sample
     end
@@ -131,22 +132,40 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float
     println("\n[Optimization] Finding best single Bernoulli sample...")
     println("  Number of samples: $n_samples")
     println("  Number of switches: $n_switches")
-    
-   
 
     best_i = nothing
     best_dist = Inf
+    best_block_status = nothing
+    best_load_status = nothing
 
     for i in 1:n_samples
         model = JuMP.Model()
         set_optimizer(model, optimizer)
         set_attribute(model, "DualReductions", 0)
-        @variable(model, bern_switch[1:length(switch_ids)])
+        @variable(model, switch_state[1:length(switch_ids)])
+        @variable(model, z_block[1:length(ref_round[:block])], Bin)
+        @variable(model, z_demand[1:length(ref_round[:load])])
+        @variable(model, z_gen[1:length(ref_round[:gen])])
+        @variable(model, z_storage[1:length(ref_round[:storage])])
+        @variable(model, z_voltage[1:length(ref_round[:bus])])
+        @variable(model, z_shunt[1:length(ref_round[:shunt])])
         for s in switch_ids
-            @constraint(model, bern_switch[s] == bernoulli_samples[i][s])
+            @constraint(model, switch_state[s] == bernoulli_samples[i][s])
         end
         # radiality
-        FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, bern_switch; bern=false)
+        FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, switch_state)
+        FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
+        #FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
+
+        # Must be disabled if there is no generation in the network
+        FairLoadDelivery.constraint_block_budget_jump(model, ref_round)
+        FairLoadDelivery.constraint_switch_budget_jump(model, ref_round)
+
+        FairLoadDelivery.constraint_connect_block_load_jump(model, ref_round)
+        FairLoadDelivery.constraint_connect_block_gen_jump(model, ref_round)
+        FairLoadDelivery.constraint_connect_block_voltage_jump(model, ref_round)
+        FairLoadDelivery.constraint_connect_block_shunt_jump(model, ref_round)
+        FairLoadDelivery.constraint_connect_block_storage_jump(model, ref_round)
 
         optimize!(model)
 
@@ -155,10 +174,14 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float
             if d < best_dist
                 best_dist = d
                 best_i = i
+                best_block_status = value.(z_block)
+                best_load_status = value.(z_demand)
             end
         end
     end
-    return best_i, bernoulli_samples[best_i]
+    block_ids = sort(collect(keys(ref_round[:block])))
+    load_ids = sort(collect(keys(ref_round[:load])))
+    return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
 end
 
 """

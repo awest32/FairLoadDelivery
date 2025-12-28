@@ -23,7 +23,7 @@ using Plots
 # highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 # Inputs: case file path, percentage of load shed, list of critical load IDs
-#eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+#eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, [])
 
 function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector{Float64})
     weight_params = model[:fair_load_weights]
@@ -91,7 +91,9 @@ function lower_level_soln(math, weights_new, k)
     return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref
 end
 
-#dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt)
+# dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, 10*ones(length(math["load"])), 1)
+# mld_relaxed = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
+# mld_relaxed["solution"]["switch"]
 function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
     # Labels for rows/columns (use pshed keys)
     # original ordering

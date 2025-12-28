@@ -9,8 +9,8 @@ using Ipopt, Gurobi
 #model = JuMP.Model()
 
 # Define a three bus system
-# n = 13
-# P = rand(n)
+#  n = 2
+#  P = [1.0, 3.0]
 function lin_palma(n::Int, P::Vector{Float64})
     # Create the JuMP model
     model = JuMP.Model()
@@ -19,6 +19,7 @@ function lin_palma(n::Int, P::Vector{Float64})
     #@variable(model, x_tilde[1:n^2] >= 0)
     @variable(model, a[1:n^2], Bin)
     @variable(model, x_raw[1:n] >= 0)
+    @constraint(model, x_raw .== P)
     @variable(model, σ >= 1e-6)
 
     # First permutation matrix constraint to sort the rows Ax == 1
@@ -82,16 +83,16 @@ function lin_palma(n::Int, P::Vector{Float64})
     #         lower_bound_x[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .=  Matrix(I, n, n)
     #     end
     # end
-    n_squared_identity = Diagonal(ones(n^2))
+    n_squared_identity = LinearAlgebra.Diagonal(ones(n^2))
     #@constraint(model, -n_squared_identity * x_hat .<= 0)
 
     # second McCormick envelope -\hat{x}_{ij} +x_j +a_ijP_j ≤ P_j
-    n_identity = Diagonal(ones(n))
+    n_identity = LinearAlgebra.Diagonal(ones(n))
     # Construct the a_ijP_j matrix
     A_ij_P_j = zeros(n^2,n^2)
 
     for i in 1:n
-    A_ij_P_j[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .= Diagonal(P)
+    A_ij_P_j[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .= LinearAlgebra.Diagonal(P)
     end
     A_ij_P_j
     # Construct the x_j matrix so that each block corresponds with the appropriate x_ij
@@ -120,8 +121,8 @@ function lin_palma(n::Int, P::Vector{Float64})
         zeros(n,n^2) -A zeros(n,n)
         zeros(n,n^2) AT zeros(n,n) 
         zeros(n,n^2) -AT zeros(n,n) 
-        -T zeros(n,n^2) zeros(n,n) 
-        # -n_squared_identity zeros(n^2,n^2)  zeros(n^2,n) 
+        T zeros(n,n^2) zeros(n,n)
+        -n_squared_identity zeros(n^2,n^2)  zeros(n^2,n) 
         n_squared_identity  -A_ij_P_j  zeros(n^2,n)
         -n_squared_identity A_ij_P_j x_j
         n_squared_identity zeros(n^2,n^2)  -x_j
@@ -129,47 +130,49 @@ function lin_palma(n::Int, P::Vector{Float64})
 
     x_tilde = vcat(x_hat, a, x_raw)
     y = x_tilde
+    #value.(y)
     # Store the right hand side of the constraints into a vector named g
-    g = [ones(n)
+     g = [ones(n)
         -ones(n)
         ones(n)
         -ones(n)
         zeros(n)
-        # zeros(n^2)
-        P_out
         zeros(n^2)
+        zeros(n^2)
+        P_out
         zeros(n^2)
     ]
 
-    @constraint(model, F * y .<= g*σ)
+    @constraint(model, F * y .<= g)
     A_long = [A zeros(n,n^2) zeros(n,n)]
     # Create the vectors to extract the top 10% of load shed
     top_10_percent_indices = zeros(n)
     top_10_percent_indices[ceil(Int, 0.9*n):n] .= 1.0
     bottom_40_percent_indices = zeros(n)
-    bottom_40_percent_indices[1:floor(Int, 0.4*n)] .= 1.0
+    bottom_40_percent_indices[1:ceil(Int, 0.4*n)] .= 1.0
     obj = transpose(top_10_percent_indices)*A_long*y
     denominator_constraint = transpose(bottom_40_percent_indices)*A_long*y
-    @constraint(model, denominator_constraint .== σ)
+    @constraint(model, denominator_constraint .== 1)
     @objective(model, Max, obj)
 
     set_optimizer(model, Gurobi.Optimizer)
     optimize!(model)
-    return value.(x_tilde), value(σ)
+    return value.(x_hat), value.(a), value.(x_raw)#, value(σ)
 end
+#y = lin_palma(n, P)
 
 #x, aux = lin_palma(n, P)
 # eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
 
-# dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt)
+# dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, ipopt,1)
 # pd = Float64[]
 # for i in pshed_ids
 #     push!(pd, sum(math["load"][string(i)]["pd"]))
 # end
-# pshed_prev = pshed_val
-# weights_prev = weight_vals
-# dpshed_dw = dpshed
-#critical_id = [4]
+# # pshed_prev = pshed_val
+# # weights_prev = weight_vals
+# # dpshed_dw = dpshed
+# #critical_id = [4]
 function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64})
     # Notation explantaion:
     # dpshed_dw: matrix of partial derivatives of pshed with respect to weights (loads)
@@ -349,19 +352,19 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
         #############
         # McCormick envelopes
         ############
-        #-n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
-        #n_squared_identity  -A_ij_P_j  zeros(n^2,n) zeros(n^2,n)
-        #-n_squared_identity A_ij_P_j x_j zeros(n^2,n)
-        #n_squared_identity zeros(n^2,n^2) -x_j zeros(n^2,n)
+        -n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
+        n_squared_identity  -A_ij_P_j  zeros(n^2,n) zeros(n^2,n)
+        -n_squared_identity A_ij_P_j x_j zeros(n^2,n)
+        n_squared_identity zeros(n^2,n^2) -x_j zeros(n^2,n)
         #############
         # BIG M
         ##############
-        -n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
+        #-n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
         #n_squared_identity  -A_ij_P_j -x_j zeros(n^2,n)
-        -n_squared_identity -A_ij_P_j x_j zeros(n^2,n)
+        #-n_squared_identity -A_ij_P_j x_j zeros(n^2,n)
         #n_squared_identity -A_ij_P_j zeros(n^2,n) zeros(n^2,n)
-        zeros(n,2*n^2) n_identity -dpshed_dw
-        zeros(n,2*n^2) -n_identity dpshed_dw
+        #zeros(n,2*n^2) n_identity -dpshed_dw
+        #zeros(n,2*n^2) -n_identity dpshed_dw
     ]
 
    # x_tilde = vcat(x_hat, a, pshed_new, (weights_new.-weights_prev))
@@ -371,16 +374,16 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
         ones(n)
         -ones(n)
         zeros(n)
-        #zeros(n^2)
-        #-P_out
-        #zeros(n^2)
-        #zeros(n^2)
         zeros(n^2)
-        #-P_out
         -P_out
+        zeros(n^2)
+        zeros(n^2)
         #zeros(n^2)
-        pshed_prev
-        -pshed_prev
+        #-P_out
+        #-P_out
+        #zeros(n^2)
+        #pshed_prev
+        #-pshed_prev
     ]
 
     @constraint(model, F * y .<= g*σ)
@@ -412,7 +415,7 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
 end
 
 
-#y = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
+# y = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
 
 # Plot the weights per load 
 function plot_weights_per_load(weights_new, weight_ids, k)
@@ -421,15 +424,15 @@ function plot_weights_per_load(weights_new, weight_ids, k)
     println("Weights plot saved as fair_load_weights_per_load_k$(k).svg")
 end
 
-# eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
-# # Initial fair load weights
-# fair_weights = Float64[]
-# for (load_id, load) in (math["load"])
-#     push!(fair_weights, load["weight"])
-# end
-# # Order the load using the indices from the pshed_ids
-# pd = Float64[]
-# for i in pshed_ids
-#     push!(pd, sum(math["load"][string(i)]["pd"]))
-# end
-# dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, fair_weights, 1)
+# # eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+# # # Initial fair load weights
+# # fair_weights = Float64[]
+# # for (load_id, load) in (math["load"])
+# #     push!(fair_weights, load["weight"])
+# # end
+# # # Order the load using the indices from the pshed_ids
+# # pd = Float64[]
+# # for i in pshed_ids
+# #     push!(pd, sum(math["load"][string(i)]["pd"]))
+# # end
+# # dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, fair_weights, 1)
