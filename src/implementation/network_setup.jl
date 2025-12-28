@@ -131,7 +131,8 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     return eng, math, lbs, critical_id
 end
 
-function update_network(data::Dict{String,Any}, switch_selection::Dict{}, load_selection::Dict{}, block_selection::Dict{}, ref::Dict{}, r)
+function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, load_selection::Dict{}, block_selection::Dict{}, ref::Dict{}, r)
+    data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
         @info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
         data["switch"][string(switch_id)]["state"] = switch_state
@@ -169,6 +170,8 @@ function update_network(data::Dict{String,Any}, switch_selection::Dict{}, load_s
                 @info typeof(branch_id)
                 data["branch"][string(branch_id)]["status"] = 0.0
                 data["branch"][string(branch_id)]["br_status"] = 0.0
+                data["branch"][string(branch_id)]["dispatchable"] = 0.0
+                data["branch"][string(branch_id)]["vbase"] = 0
             end
         end
     end

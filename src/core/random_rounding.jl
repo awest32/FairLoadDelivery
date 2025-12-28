@@ -191,30 +191,24 @@ end
                         optimizer=Ipopt.Optimizer)
 """
 # Test the acpf feasibility for the new set of switches that passed radiality
-function ac_feasibility_test(math::Dict{String, Any}, 
-                          bernoulli_selection_exp::Any,
-                          switch_ids::Vector{Int};
-                          optimizer=Ipopt.Optimizer)
-    ac_bernoulli = Any[]
-    ac_bernoulli_val = Any[]# Vector{Dict{Int, Float64
-    math_round = deepcopy(math)
-    for (set_id, bernoulli_set) in enumerate(bernoulli_selection_exp)
-        for s in switch_ids
-            math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
-        end
-        #pm_ivr_soln_round = solve_mc_pf(math_round, IVRUPowerModel, optimizer)
-        pf_ivrup_aw = solve_mc_pf_aw(math_round, ipopt)
-        term_status = pf_ivrup_aw["termination_status"]
-        if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED
-            push!(ac_bernoulli,bernoulli_set)
-            push!(ac_bernoulli_val, value.(bernoulli_set[s] for s in switch_ids))
-        else
-           # println("Optimization did not converge to optimality for sample $set_id. Status: $term_status")
-        end
+function ac_feasibility_test(math::Dict{String, Any}, set_id)
+    pf_ivrup = PowerModelsDistribution.solve_mc_opf(math, IVRUPowerModel, ipopt)#solve_mc_pf_aw(math_round, ipopt)
+    term_status = pf_ivrup["termination_status"]
+    feas_dict = Dict{String, Any}()
+    feas_dict["set_id"] = set_id
+    if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED || term_status == MOI.ITERATION_LIMIT
+        println("AC Optimization converged to optimality for sample $set_id.")
+        feas_dict["feas_status"] = true
+        feas_dict["feas_obj"] = pf_ivrup["objective"]
+    else
+        println("AC Optimization did not converge to optimality for sample $set_id. Status: $term_status")
+        feas_dict["feas_status"] = false
+        feas_dict["feas_obj"] = nothing
+        # println("Optimization did not converge to optimality for sample $set_id. Status: $term_status")
     end
-    return ac_bernoulli, ac_bernoulli_val
-end
 
+    return feas_dict
+end
 # # Find the set of switches with best mld objective value among feasible ac solutions
 # function find_best_switch_set(math::Dict{String, Any}, 
 #                           ac_bernoulli::Vector{Any},

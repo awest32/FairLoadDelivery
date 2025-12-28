@@ -62,7 +62,8 @@ export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_loa
 export solve_mc_opf_acp, solve_mc_pf_aw, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
 export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable_relaxed, build_mc_mld_switchable_integer
 export ipopt, gurobi, highs, juniper
-export setup_network, lower_level_soln, lin_palma, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index, generate_bernoulli_samples, radiality_check, update_network
+export setup_network, lower_level_soln,generate_bernoulli_samples, radiality_check, update_network, ac_feasibility_test
+export lin_palma, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index
 export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load
 
 end #module FairLoadDelivery

@@ -157,10 +157,17 @@ for (block_id, block) in (math["block"])
     block_selection[parse(Int,block_id)] = 0.0
 end
 
-opf = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+opf = instantiate_mc_model(math, IVRUPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+set_optimizer(opf.model, ipopt)
+optimize!(opf.model)
+objective_value(opf.model)
 ref = opf.ref[:it][:pmd][:nw][0]
 math_out = update_network(math, switch_selection, load_selection, block_selection, ref, 1)
 
+opf_new = instantiate_mc_model(math_out, IVRUPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+set_optimizer(opf_new.model, ipopt)
+optimize!(opf_new.model)
+objective_value(opf_new.model)
 
 pm_ivr_soln = solve_mc_pf(math_out, IVRUPowerModel, ipopt)
 pm_ivr_opf_soln = solve_mc_opf(math_out, IVRUPowerModel, ipopt)

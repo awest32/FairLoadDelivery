@@ -28,20 +28,20 @@ using Plots
 function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector{Float64})
     weight_params = model[:fair_load_weights]
     pshed_vars = model[:pshed]
-    pserved_vars = model[:pd]
+    #pserved_vars = model[:pd]
     
     weight_keys = (collect(eachindex(weight_params)))
     pshed_keys = (collect(eachindex(pshed_vars)))
-    pserved_keys = (collect(eachindex(pserved_vars)))
+    #pserved_keys = (collect(eachindex(pserved_vars)))
     weight_ids = collect(axes(weight_params, 1))
     pshed_ids = collect(axes(pshed_vars, 1))
-    pserved_ids = collect(axes(pserved_vars, 1))
+    #pserved_ids = collect(axes(pserved_vars, 1))
 
     n_weights = length(weight_keys)
     n_pshed = length(pshed_keys)
-    n_pserved = length(pserved_keys)
+    #n_pserved = length(pserved_keys)
 
-    # Build Jacobian column by colum
+    # Build Jacobian column by column
     
     jacobian = zeros(n_pshed, n_weights)
     #dpshed = Dict{Any,Any}()
@@ -88,7 +88,7 @@ function lower_level_soln(math, weights_new, k)
     end
 
     # Use the parameterized MLD solution to perform implicit differentiation with DiffOpt.jl 
-    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, model = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
+    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
     return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref
 end
 
