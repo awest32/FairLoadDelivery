@@ -96,18 +96,14 @@ Generate sets of Bernoulli variables based on relaxed switch probabilities.
 Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
 Returns an array of sample dictionaries.
 """
-function generate_bernoulli_samples(
-    switch_states::Dict{Int, Float64},
-    n_samples::Int,
-    rng::Random.MersenneTwister
-)
+function generate_bernoulli_samples(switch_states::Dict{Int, Float64},n_samples::Int, rng::Int)
     samples = Vector{Dict{Int, Float64}}(undef, n_samples)
 
     for i in 1:n_samples
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states
             p_clamped = clamp(p, 0.0, 1.0)
-            sample[switch_id] = rand(rng, Bernoulli(p_clamped))
+            sample[switch_id] = rand(Bernoulli(p_clamped))
         end
         samples[i] = sample
     end
@@ -123,34 +119,38 @@ end
 Test radiality of the network for each set of switch configurations provided in bernoulli_selection_exp.
 Returns a vector of feasible switch configurations that maintain radiality.
 """
-function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float64},bernoulli_samples::Vector{Dict{Int, Float64}}; optimizer=Gurobi.Optimizer)
+function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Float64}, zb_relaxed::Dict{Int, Float64}, bernoulli_samples::Vector{Dict{Int, Float64}}; optimizer=Gurobi.Optimizer)
     
     n_samples = length(bernoulli_samples)
-    n_switches = length(z_relaxed)
-    switch_ids = sort(collect(keys(z_relaxed)))
+    n_switches = length(zs_relaxed)
+    switch_ids = sort(collect(keys(zs_relaxed)))
+    n_blocks = length(zb_relaxed)
+    block_ids = sort(collect(keys(zb_relaxed)))
     
     println("\n[Optimization] Finding best single Bernoulli sample...")
     println("  Number of samples: $n_samples")
     println("  Number of switches: $n_switches")
+    println("  Number of blocks: $n_blocks")
+
 
     best_i = nothing
     best_dist = Inf
-    best_block_status = nothing
+    best_switch_status = nothing
     best_load_status = nothing
 
     for i in 1:n_samples
         model = JuMP.Model()
         set_optimizer(model, optimizer)
         set_attribute(model, "DualReductions", 0)
-        @variable(model, switch_state[1:length(switch_ids)])
-        @variable(model, z_block[1:length(ref_round[:block])], Bin)
+        @variable(model, z_block[1:length(block_ids)])
+        @variable(model, switch_state[1:length(ref_round[:switch])], Bin)
         @variable(model, z_demand[1:length(ref_round[:load])])
         @variable(model, z_gen[1:length(ref_round[:gen])])
         @variable(model, z_storage[1:length(ref_round[:storage])])
         @variable(model, z_voltage[1:length(ref_round[:bus])])
         @variable(model, z_shunt[1:length(ref_round[:shunt])])
-        for s in switch_ids
-            @constraint(model, switch_state[s] == bernoulli_samples[i][s])
+        for b in block_ids
+            @constraint(model, z_block[b] == bernoulli_samples[i][b])
         end
         # radiality
         FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, switch_state)
@@ -167,21 +167,27 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float
         FairLoadDelivery.constraint_connect_block_shunt_jump(model, ref_round)
         FairLoadDelivery.constraint_connect_block_storage_jump(model, ref_round)
 
+        # Constraint to ensure generation matches the load served
+        # @constraint(model, sum(ref_round[g]["pg"][t]*z_gen[g] for (g, conns) in ref_round[:bus_conns_gen] for t in conns)
+        #     >= sum(ref_round[s]["ps"][t]*z_storage[s] for (s, conns) in ref_round[:bus_conns_storage] for t in conns)
+        #     - sum(ref_round[l]["pd"][t]*z_demand[l] for (l, conns) in ref_round[:bus_conns_load] for t in conns)
+        #     ) 
+        print(model)
         optimize!(model)
 
         if termination_status(model) == MOI.OPTIMAL
-            d = sum((bernoulli_samples[i][s] - z_relaxed[s])^2 for s in switch_ids)
+            d = sum((bernoulli_samples[i][b] - zb_relaxed[b])^2 for b in block_ids)
             if d < best_dist
                 best_dist = d
                 best_i = i
-                best_block_status = value.(z_block)
+                best_switch_status = value.(switch_state)
                 best_load_status = value.(z_demand)
             end
         end
     end
-    block_ids = sort(collect(keys(ref_round[:block])))
+    switch_ids = sort(collect(keys(ref_round[:switch])))
     load_ids = sort(collect(keys(ref_round[:load])))
-    return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
+    return best_i, bernoulli_samples[best_i], switch_ids, best_switch_status, load_ids, best_load_status
 end
 
 """
@@ -192,7 +198,7 @@ end
 """
 # Test the acpf feasibility for the new set of switches that passed radiality
 function ac_feasibility_test(math::Dict{String, Any}, set_id)
-    pf_ivrup = PowerModelsDistribution.solve_mc_opf(math, IVRUPowerModel, ipopt)#solve_mc_pf_aw(math_round, ipopt)
+    pf_ivrup = PowerModelsDistribution.solve_mc_pf(math, IVRUPowerModel, ipopt)#solve_mc_pf_aw(math_round, ipopt)
     term_status = pf_ivrup["termination_status"]
     feas_dict = Dict{String, Any}()
     feas_dict["set_id"] = set_id

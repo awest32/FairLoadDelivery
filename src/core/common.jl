@@ -298,6 +298,19 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
         ref[:block_weights][ref[:bus_block_map][load["load_bus"]]] += 1e-2 * get(load, "priority", 1)
         #Int(load["dispatchable"]) == Int(_PMD.YES) && push!(ref[:block_dispatchable_loads][ref[:bus_block_map][load["load_bus"]]], l)
     end
+      for (block, loads) in ref[:block_loads]
+        block_weight = 0
+        # @info "Calculating weight for block $block"
+        # @info "Loads in block: $loads"
+        for load in loads
+            # @info "Load $load has weight $(data["load"][string(load)]["weight"])"
+            if block_weight < data["load"][string(load)]["weight"]
+                block_weight = data["load"][string(load)]["weight"]
+            end
+        end
+        # @info "Final weight for block $block is $block_weight"
+        ref[:block_weights][block] = block_weight
+    end
     ref[:load_block_map] = Dict{Int,Int}(load => b for (b,block_loads) in ref[:block_loads] for load in block_loads)
 
     for (s,shunt) in ref[:shunt]

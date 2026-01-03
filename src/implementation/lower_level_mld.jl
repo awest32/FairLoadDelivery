@@ -95,7 +95,7 @@ end
 # dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, 10*ones(length(math["load"])), 1)
 # mld_relaxed = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
 # mld_relaxed["solution"]["switch"]
-function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
+function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k, save_path)
     # Labels for rows/columns (use pshed keys)
     # original ordering
     # keys_paramed = [string(k[1]) for k in keys(mld_paramed.model[:fair_load_weights])]
@@ -118,12 +118,12 @@ function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k)
 
 
     # Save the heatmap
-    savefig(heatmap_plot, "load_shed_sensitivities_heatmap_k$(k).svg")  # save as SVG
+    savefig(heatmap_plot, "$save_path/load_shed_sensitivities_heatmap_k$(k).svg")  # save as SVG
     println("Heatmap saved as load_shed_sensitivities_heatmap_k$(k).svg")
 end
 
 # Plot the load shed per bus  with the buses sorted by distance from the sourcebus
-function plot_load_shed_per_bus(pshed_val, pshed_ids, k)
+function plot_load_shed_per_bus(pshed_val, pshed_ids, k, save_path)
     bar_plot = bar(
         string.(pshed_ids), pshed_val;
         xlabel = "Load ID",
@@ -134,7 +134,7 @@ function plot_load_shed_per_bus(pshed_val, pshed_ids, k)
         right_margin = 5Plots.mm,
         top_margin = 5Plots.mm
     )
-    savefig(bar_plot, "load_shedding_per_load_k$(k).svg")  # save as SVG
+    savefig(bar_plot, "$save_path/load_shedding_per_load_k$(k).svg")  # save as SVG
     println("Bar plot saved as load_shedding_per_load_k$(k).svg")
 end
 #plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)

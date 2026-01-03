@@ -14,7 +14,7 @@ using PowerPlots
 using DataFrames
 using CSV
 using Plots
-# using DataFrames
+
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
 
@@ -22,7 +22,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 # Inputs: case file path, percentage of load shed, list of critical load IDs
-eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_a.dss", 0.5, [])
+eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.9, [])
 
 #Initial fair load weights
 fair_weights = Float64[]
@@ -30,7 +30,17 @@ for (load_id, load) in (math["load"])
     push!(fair_weights, load["weight"])
 end
 
+# Gather control MLD results 
+# Integer MLD
+  pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
+            mld = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+            ref = mld.ref[:it][:pmd][:nw][0]
+# Relaxed MLD
+ pm_mld_soln = FairLoadDelivery.solve_mc_mld_switch_relaxed(math, ipopt)
+            mld = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_relaxed; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+            ref = mld.ref[:it][:pmd][:nw][0]
 
+          
 dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, mld_soln  = lower_level_soln(math, fair_weights, 1)
 
 # Make a copy of the math dictionary
@@ -148,7 +158,7 @@ end
 switch_states, block_status = extract_switch_block_states(mld_implicit_diff_relaxed["solution"])
 
 # Determine the number of rounding rounds and bernoulli samples per round
-n_rounds = 10 # Change the randome seed per round to get different results
+n_rounds = 5 # Change the randome seed per round to get different results
 n_bernoulli_samples = 10
 
 bernoulli_switch_selection_exp = Vector{Dict{Int, Float64}}()
@@ -161,17 +171,17 @@ for r in 1:n_rounds
     rng = 100*r
     #rng = Random.MersenneTwister(100 * r)
     # Generate bernoulli samples for switches and blocks
-    bernoulli_samples[r] = generate_bernoulli_samples(switch_states, n_bernoulli_samples, rng)
+    bernoulli_samples[r] = generate_bernoulli_samples(block_status, n_bernoulli_samples, rng)
 
     # Find the best bernoulli sample be topology feasible and closes to the relaxed solution
-    index, selection, block_ids, block_status, load_ids, load_status = radiality_check(ref, switch_states, bernoulli_samples[r])
+    index, block_states, switch_ids, switch_status, load_ids, load_status = radiality_check(ref, switch_states, block_status,bernoulli_samples[r])
     @info "Round $r: Best radial sample index: $index"
-    @info "Round $r: Best radial sample selection: $selection"
+    @info "Round $r: Best radial sample switch status: $switch_status"
     @info "Round $r: Best radial sample block status: $block_status"
     @info "Round $r: Best radial sample load status: $load_status"
     push!(bernoulli_selection_index, index)
-    push!(bernoulli_switch_selection_exp, selection)
-    push!(bernoulli_block_selection_exp, zip(block_ids, block_status) |> Dict)
+    push!(bernoulli_block_selection_exp, block_states)
+    push!(bernoulli_switch_selection_exp, zip(switch_ids, switch_status) |> Dict)
     push!(bernoulli_load_selection_exp, zip(load_ids, load_status) |> Dict)
 end
 
@@ -184,41 +194,11 @@ end
 math_out = Vector{Dict{String, Any}}()
 # Apply the best switch configuration from each round to the respective math dictionary
 for r in 1:n_rounds
-    push!(math_out, update_network(math_random_test[r], bernoulli_switch_selection_exp[r], bernoulli_load_selection_exp[r], bernoulli_block_selection_exp[r], ref, r))
+    push!(math_out, update_network(math_random_test[r], bernoulli_block_selection_exp[r], bernoulli_load_selection_exp[r], bernoulli_switch_selection_exp[r], ref, r))
 end
 
 # Test the AC feasibility of each rounded solution
 # Use the PMD IVRUPowerModel for AC power flow testing
-# function ac_feasibility_test(math_list::Vector{Dict{String, Any}}, bernoulli_samples::Vector{Dict{Int, Float64}}, switch_ids::Vector{Int}; optimizer=ipopt)
-#     ac_feasible_solutions = Vector{Dict{String, Any}}()
-#     ac_feasible_values = Float64[]
-#     for (i, math) in enumerate(math_list)
-#         # Build the AC power flow model with fixed switches
-#         # pm_ac = instantiate_mc_model(
-#         #     math,
-#         #     PowerModelsDistribution.IVRUPowerModel,
-#         #     build_mc_opf;
-#         #     ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]
-#         # )
-#         pm_ac = solve_mc_opf(math, IVRUPowerModel, ipopt)
-#         # Fix the switch states according to the bernoulli sample
-#         #FairLoadDelivery.constraint_rounded_switch_states_f(pm_ac; z_bern=bernoulli_samples[i])
-        
-#         # Optimize the AC power flow model
-#         #optimize_model!(pm_ac; optimizer=optimizer)
-        
-#         # Check feasibility
-#         status = pm_ac["termination_status"]# JuMP.termination_status(pm_ac.model)
-#         if status == MOI.OPTIMAL || status == MOI.FEASIBLE_POINT
-#             @info "Round $i: AC power flow feasible with status $status"
-#             push!(ac_feasible_solutions, pm_ac)
-#             push!(ac_feasible_values, total_pshed)
-#         else
-#             @warn "Round $i: AC power flow not feasible with status $status"
-#         end
-#     end
-#     return ac_feasible_solutions, ac_feasible_values
-# end
 ac_feas = Vector{Dict{String, Any}}()
 # Allowing the solution to be reached iteration limit
 for r in 1:n_rounds
@@ -231,24 +211,48 @@ end
 max_load_served = -Inf
 best_feasibility = nothing
 for feas in ac_feas
-    if haskey(feas, "feas_obj")
+    if haskey(feas, "feas_obj") && feas["feas_obj"] != nothing
         load_served = feas["feas_obj"]
         if load_served > max_load_served
             max_load_served = load_served
             best_feasibility = feas
         end
+        @info "Maximum load served among feasible AC solutions: $max_load_served"
+        if best_feasibility != nothing
+            @info "Best feasibility solution details: $best_feasibility"        
+        end
+    else
+        @warn "Feasibility dictionary does not contain an AC feasible solution."
+        @info "Finding best MLD objective"
     end
 end
-@info "Maximum load served among feasible AC solutions: $max_load_served"
-if best_feasibility != nothing
-    @info "Best feasibility solution details: $best_feasibility"
-else
-    @warn "No feasible AC solutions found among rounded solutions."
+
+best_mld = Dict{String, Any}()
+best_obj = -Inf
+best_set = 0 
+# data = math_out[1]
+# mld = instantiate_mc_model(
+#     data,
+#     LinDist3FlowPowerModel,
+#     build_mc_mld_shedding_random_rounding;
+#     ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]
+# )
+for (id, data) in enumerate(math_out)
+    #@info id
+    mld = FairLoadDelivery.solve_mc_mld_shed_random_round(data, ipopt)
+    if best_obj <= mld["objective"] 
+        best_obj = mld["objective"]
+        best_set = id
+        best_mld = mld
+    end
 end
+
+
+
 # plot the best solution 
 eng_out = PowerModelsDistribution.transform_data_model(math_out[best_feasibility["set_id"]])
 
-p = powerplot(eng_out, bus    = (:data=>"bus_type", :data_type=>"nominal"),
+p = powerplot(eng_out, bus = (:data=>"bus_type", :data_type=>"nominal"),
                     branch = (:data=>"index", :data_type=>"ordinal"),
                     gen    = (:data=>"pmax", :data_type=>"quantitative"),
                     load   = (:data=>"pd",  :data_type=>"quantitative"),
@@ -256,4 +260,3 @@ p = powerplot(eng_out, bus    = (:data=>"bus_type", :data_type=>"nominal"),
                     title = "Best AC Feasible Solution from Random Rounding",
                     width = 300, height=300
 )
-# update the powerplot output to indicate the load values 

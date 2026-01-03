@@ -47,7 +47,6 @@ include("core/objective.jl")
 include("core/variable.jl")
 include("core/constraint.jl")
 
-include("core/random_rounding.jl")
 
 include("prob/pf.jl")
 include("prob/opf.jl")
@@ -57,6 +56,7 @@ include("implementation/network_setup.jl")
 include("implementation/lower_level_mld.jl")
 include("implementation/palma_relaxation.jl")
 include("implementation/other_fair_funcs.jl")
+include("implementation/random_rounding.jl")
 
 export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!, ref_add_rounded_load_blocks!
 export solve_mc_opf_acp, solve_mc_pf_aw, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
