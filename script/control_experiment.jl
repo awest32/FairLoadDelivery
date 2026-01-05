@@ -36,7 +36,7 @@ gurobi = Gurobi.Optimizer
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_b"
+case = "motivation_a"
 gen_cap = 0.9
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
@@ -209,7 +209,7 @@ plot!(plt, switch_ids, fill(1.1^2, length(switch_ids)),
 # Save all the plots and the tables into the results folder
 savefig(pshed_block, joinpath(control_exp_folder,"pshed_block"))
 savefig(qshed_block, joinpath(control_exp_folder,"qshed_block"))
-#savefig(plt, joinpath(control_exp_folder, "v_squared_switch_3phase.svg"))
+savefig(plt, joinpath(control_exp_folder, "v_squared_switch_3phase.svg"))
 CSV.write(joinpath(control_exp_folder,"block_summary"), block_df)
 CSV.write(joinpath(control_exp_folder,"switch_summary"), switch_df)
 

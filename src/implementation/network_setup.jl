@@ -48,16 +48,33 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
 
     get(eng, "time_series", Dict())
 
+    # Update the voltage limits
     for (i,bus) in math["bus"]
-
             bus["vmax"][:] .= 1.1
             bus["vmin"][:] .= 0.9
     end
 
+    # Update the current limits on the switches based upon the case
+    if case == "ieee_13_aw_edit/motivation_a.dss"
+        for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 308
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 322
+            end
+        end
+    elseif case == "ieee_13_aw_edit/motivation_b.dss"
+       for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 304
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 305
+            elseif switch["name"] == "671692"
+                switch["current_rating"][:] .= 80
+            end
+        end
+    end
     # Ensure the generation from the source bus is less than the max load
-    # First calculate the total load
-    served = [] #Dict{Any,Any}()
-    #ls_percent = 0.5
     for (i,gen) in math["gen"]
         if gen["source_id"] == "voltage_source.source"
             pd_phase1=0
@@ -114,6 +131,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
         end
     end
 
+    # Set this mapping for the radial topology constraint
     for (switch_id, switch) in enumerate(math["switch"])
         math["switch"][string(switch_id)]["branch_id"] = 0
         for (branch_id, branch) in enumerate(math["branch"])
