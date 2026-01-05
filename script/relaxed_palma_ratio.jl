@@ -408,7 +408,7 @@ F = [zeros(n,n^2) A_row zeros(n,n)           # A_row * a <= 1
      zeros(n,n^2) -A_row zeros(n,n)          # -A_row * a <= -1 (i.e., A_row * a >= 1)
      zeros(n,n^2) A_col zeros(n,n)           # A_col * a <= 1
      zeros(n,n^2) -A_col zeros(n,n)          # -A_col * a <= -1 (i.e., A_col * a >= 1)
-     -T zeros(n-1,n^2) zeros(n-1,n)          # -T * x_hat <= 0 (ascending order)
+     T zeros(n-1,n^2) zeros(n-1,n)           # T * x_hat <= 0 (ascending order)
      -n_squared_identity zeros(n^2,n^2) zeros(n^2,n)   # -u <= 0 (envelope 1: u >= 0)
      n_squared_identity -A_ij_P_j zeros(n^2,n)         # u - a*P <= 0 (envelope 3: u <= a*P)
      -n_squared_identity A_ij_P_j x_j                  # -u + a*P + x <= P (envelope 2)
@@ -424,7 +424,7 @@ g = [ones(n)           # A_row * a <= 1
     -ones(n)           # -A_row * a <= -1
     ones(n)            # A_col * a <= 1
     -ones(n)           # -A_col * a <= -1
-    zeros(n-1)         # -T * x_hat <= 0 (n-1 rows now)
+    zeros(n-1)         # T * x_hat <= 0 (ascending order)
     zeros(n^2)         # -u <= 0 (envelope 1)
     zeros(n^2)         # u - a*P <= 0 (envelope 3) - FIXED
     P_out              # -u + a*P + x <= P (envelope 2) - FIXED

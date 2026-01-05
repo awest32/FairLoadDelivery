@@ -288,7 +288,7 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
         zeros(n,n^2) -A_row zeros(n,n) zeros(n,n)           # -A_row * a <= -1
         zeros(n,n^2) A_col zeros(n,n) zeros(n,n)            # A_col * a <= 1
         zeros(n,n^2) -A_col zeros(n,n) zeros(n,n)           # -A_col * a <= -1
-        -T zeros(n-1,n^2) zeros(n-1,n) zeros(n-1,n)         # -T * x_hat <= 0 (note: T is n-1 rows now)
+        T zeros(n-1,n^2) zeros(n-1,n) zeros(n-1,n)          # T * x_hat <= 0 (ascending order)
         # McCormick envelopes
         -n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n)   # -u <= 0 (envelope 1: u >= 0)
         n_squared_identity -A_ij_P_j zeros(n^2,n) zeros(n^2,n)         # u - a*P <= 0 (envelope 3: u <= a*P)
@@ -302,7 +302,7 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
         -ones(n)           # -A_row * a <= -1
         ones(n)            # A_col * a <= 1
         -ones(n)           # -A_col * a <= -1
-        zeros(n-1)         # -T * x_hat <= 0 (n-1 rows now)
+        zeros(n-1)         # T * x_hat <= 0 (ascending order)
         zeros(n^2)         # -u <= 0 (envelope 1)
         zeros(n^2)         # u - a*P <= 0 (envelope 3) - FIXED: was -P_out
         P_out              # -u + a*P + x <= P (envelope 2) - FIXED: was zeros
