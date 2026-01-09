@@ -96,12 +96,12 @@ Generate sets of Bernoulli variables based on relaxed switch probabilities.
 Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
 Returns an array of sample dictionaries.
 """
-function generate_bernoulli_samples(switch_states::Dict{Int, Float64},n_samples::Int, rng::Int)
+function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64},n_samples::Int, rng::Int)
     samples = Vector{Dict{Int, Float64}}(undef, n_samples)
 
     for i in 1:n_samples
         sample = Dict{Int, Float64}()
-        for (switch_id, p) in switch_states
+        for (switch_id, p) in switch_states_bern
             p_clamped = clamp(p, 0.0, 1.0)
             sample[switch_id] = rand(Bernoulli(p_clamped))
         end
@@ -135,25 +135,25 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
 
     best_i = nothing
     best_dist = Inf
-    best_switch_status = nothing
+    best_block_status = nothing
     best_load_status = nothing
 
     for i in 1:n_samples
         model = JuMP.Model()
         set_optimizer(model, optimizer)
         set_attribute(model, "DualReductions", 0)
-        @variable(model, z_block[1:length(block_ids)])
-        @variable(model, switch_state[1:length(ref_round[:switch])], Bin)
+        @variable(model, z_block[1:length(block_ids)],Bin)
+        @variable(model, z_switch[1:length(ref_round[:switch])])
         @variable(model, z_demand[1:length(ref_round[:load])])
         @variable(model, z_gen[1:length(ref_round[:gen])])
         @variable(model, z_storage[1:length(ref_round[:storage])])
         @variable(model, z_voltage[1:length(ref_round[:bus])])
         @variable(model, z_shunt[1:length(ref_round[:shunt])])
-        for b in block_ids
-            @constraint(model, z_block[b] == bernoulli_samples[i][b])
+        for s in switch_ids
+            @constraint(model, z_switch[s] == bernoulli_samples[i][s])
         end
         # radiality
-        FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, switch_state)
+        FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, z_switch)
         FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
         #FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
 
@@ -174,20 +174,26 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         #     ) 
         print(model)
         optimize!(model)
-
+        @info "Sample $i: Radiality check status: $(termination_status(model))"
         if termination_status(model) == MOI.OPTIMAL
-            d = sum((bernoulli_samples[i][b] - zb_relaxed[b])^2 for b in block_ids)
+            d = sum((bernoulli_samples[i][s] - zs_relaxed[s])^2 for s in switch_ids)
             if d < best_dist
                 best_dist = d
                 best_i = i
-                best_switch_status = value.(switch_state)
+                best_block_status = value.(z_block)
                 best_load_status = value.(z_demand)
             end
         end
+        #   JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+        #   open("radiality_model.txt", "w") do io
+        #     redirect_stdout(io) do
+        #         print(model)
+        #     end
+        # end
     end
-    switch_ids = sort(collect(keys(ref_round[:switch])))
+    block_ids = sort(collect(keys(ref_round[:block])))
     load_ids = sort(collect(keys(ref_round[:load])))
-    return best_i, bernoulli_samples[best_i], switch_ids, best_switch_status, load_ids, best_load_status
+    return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
 end
 
 """
@@ -206,10 +212,12 @@ function ac_feasibility_test(math::Dict{String, Any}, set_id)
         println("AC Optimization converged to optimality for sample $set_id.")
         feas_dict["feas_status"] = true
         feas_dict["feas_obj"] = pf_ivrup["objective"]
+        feas_dict["solution"] = pf_ivrup["solution"]
     else
         println("AC Optimization did not converge to optimality for sample $set_id. Status: $term_status")
         feas_dict["feas_status"] = false
-        feas_dict["feas_obj"] = nothing
+        feas_dict["feas_obj"] = pf_ivrup["objective"]
+        feas_dict["solution"] = pf_ivrup["solution"]
         # println("Optimization did not converge to optimality for sample $set_id. Status: $term_status")
     end
 

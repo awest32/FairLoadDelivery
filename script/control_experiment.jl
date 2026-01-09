@@ -28,7 +28,7 @@ Extract the results from these cases.
     6. Plot: qshed v. switch: integer and continuous
     7. Plot: v^2 v. switch: integer and continuous
 Save these results in the location:
-    data/date/control_exp/
+    results/date/control_exp/
 """
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
