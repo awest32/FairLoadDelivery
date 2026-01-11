@@ -338,46 +338,55 @@ println("Total undervoltage violations: $undervoltage_violation_num")
 #p = PowerModelsDistribution.calc_admittance_matrix( math_relaxed)
 
 # Find the feasibility solution which serves the most load
-max_load_served = -Inf
-best_feasibility = nothing
-for feas in ac_feas
-    if haskey(feas, "feas_obj") && feas["feas_obj"] != nothing
-       # load_served = feas["feas_obj"]
-       pd_served = 0.0
-       qd_served = 0.0
-       for (load_id, load_data) in feas["solution"]["load"]
-            pd_served += sum(load_data["pd"])
-            qd_served += sum(load_data["qd"])
-       end
-        if pd_served > max_load_served
-            max_load_served = pd_served
-            best_feasibility = feas
+function export_ac_feasibility_results(math_out::Vector{Dict{String, Any}}, ac_feas::Vector{Dict{String, Any}}, save_path::String)
+    max_load_served = -Inf
+    best_feasibility = nothing
+    for feas in ac_feas
+        if haskey(feas, "feas_obj") && feas["feas_obj"] != nothing
+        # load_served = feas["feas_obj"]
+        pd_served = 0.0
+        qd_served = 0.0
+        for (load_id, load_data) in feas["solution"]["load"]
+                pd_served += sum(load_data["pd"])
+                qd_served += sum(load_data["qd"])
         end
-        @info "Maximum load served among feasible ACPF solutions: $max_load_served"
-        if best_feasibility != nothing
-           # @info "Best feasibility solution details: $best_feasibility"        
+            if pd_served > max_load_served
+                max_load_served = pd_served
+                best_feasibility = feas
+            end
+            @info "Maximum load served among feasible ACPF solutions: $max_load_served"
+            if best_feasibility != nothing
+            # @info "Best feasibility solution details: $best_feasibility"        
+            end
+        else
+            @warn "Feasibility dictionary does not contain an ACPF feasible solution."
+            @info "Finding best MLD objective"
         end
-    else
-        @warn "Feasibility dictionary does not contain an ACPF feasible solution."
-        @info "Finding best MLD objective"
     end
+    return best_feasibility, max_load_served
 end
 
-best_mld = Dict{String, Any}()
-best_obj = -Inf
-best_set = 0 
-for (id, data) in enumerate(math_out)
-    #@info id
-    mld = FairLoadDelivery.solve_mc_mld_shed_random_round(data, ipopt)
-   # @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
-    if best_obj <= mld["objective"] 
-        best_obj = mld["objective"]
-        best_set = id
-        best_mld = mld
+best_feasibility, max_load_served = export_ac_feasibility_results(math_out, ac_feas, save_path)
+
+
+function find_best_mld_solution(math_out::Vector{Dict{String, Any}}, ipopt)
+    best_obj = -Inf
+    best_set = 0
+    best_mld = Dict{String, Any}()
+    for (id, data) in enumerate(math_out)
+        mld = FairLoadDelivery.solve_mc_mld_shed_random_round(data, ipopt)
+        @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
+        if best_obj <= mld["objective"] 
+            best_obj = mld["objective"]
+            best_set = id
+            best_mld = mld
+        end
     end
+    return best_set, best_mld
 end
 
-
+best_set, best_mld = find_best_mld_solution(math_out, ipopt)
+@info "Best MLD solution found from set $best_set with objective value: $(best_mld["objective"])"
 
 
 # # plot the best solution 
