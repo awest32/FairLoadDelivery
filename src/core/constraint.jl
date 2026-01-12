@@ -613,6 +613,15 @@ function constraint_mc_power_balance_shed(pm::_PMD.AbstractUnbalancedPowerModel,
         _PMD.sol(pm, nw, :bus, i)[:lam_kcl_i] = cstr_q
     end
 end
+
+"""
+constraint_shed_single_load(pm::AbstractUnbalancedPowerModel, nw::Int)
+"""
+function constraint_shed_single_load(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
+        z_demand = _PMD.var(pm, nw, :z_demand, 3)
+
+        JuMP.@constraint(pm.model,  z_demand == 0.1)
+end
 """
 constraint_connect_block_load(pm::AbstractUnbalancedPowerModel, nw::Int)
 """

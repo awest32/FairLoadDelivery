@@ -30,7 +30,6 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
     # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
     @info pm.model typeof(pm.model)
-    variable_mc_load_shed(pm)
     
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
@@ -51,7 +50,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
 
     _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
-
+    variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
@@ -117,6 +116,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     constraint_switch_budget(pm)
 
     constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
@@ -158,8 +158,6 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
-    constraint_load_shed_definition(pm)
-
 
     variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
@@ -224,7 +222,8 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     constraint_block_budget(pm)
     constraint_switch_budget(pm)
 
-   
+    constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
@@ -396,8 +395,6 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
 
    	_PMD.constraint_mc_model_current(pm)
 
-    constraint_load_shed_definition(pm)
-
 
      for i in _PMD.ids(pm, :ref_buses)
          _PMD.constraint_mc_theta_ref(pm, i)
@@ -468,7 +465,9 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     # constraint_set_block_state_rounded(pm)
     # constraint_set_switch_state_rounded(pm)
    
-   
+    constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
+
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
     constraint_connect_block_voltage(pm)

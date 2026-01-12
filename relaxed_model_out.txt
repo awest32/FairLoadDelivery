@@ -36,36 +36,6 @@ Subject to
  -0_qsw_(2, 9, 16)[1] - 0_qsw_aux_(2, 16, 9)[1] == 0
  -0_qsw_(2, 9, 16)[2] - 0_qsw_aux_(2, 16, 9)[2] == 0
  -0_qsw_(2, 9, 16)[3] - 0_qsw_aux_(2, 16, 9)[3] == 0
- pshed_constraint[5] : 128 0_z_demand[5] + pshed[5] == 128
- pshed_constraint[12] : 290 0_z_demand[12] + pshed[12] == 290
- pshed_constraint[8] : 117 0_z_demand[8] + pshed[8] == 117
- pshed_constraint[1] : 160 0_z_demand[1] + pshed[1] == 160
- pshed_constraint[6] : 230 0_z_demand[6] + pshed[6] == 230
- pshed_constraint[11] : 120 0_z_demand[11] + pshed[11] == 120
- pshed_constraint[9] : 120 0_z_demand[9] + pshed[9] == 120
- pshed_constraint[14] : 17 0_z_demand[14] + pshed[14] == 17
- pshed_constraint[3] : 1155 0_z_demand[3] + pshed[3] == 1155
- pshed_constraint[7] : 170 0_z_demand[7] + pshed[7] == 170
- pshed_constraint[4] : 485 0_z_demand[4] + pshed[4] == 485
- pshed_constraint[13] : 170 0_z_demand[13] + pshed[13] == 170
- pshed_constraint[15] : 170 0_z_demand[15] + pshed[15] == 170
- pshed_constraint[2] : 68 0_z_demand[2] + pshed[2] == 68
- pshed_constraint[10] : 66 0_z_demand[10] + pshed[10] == 66
- qshed_constraint[5] : 86 0_z_demand[5] + qshed[5] == 86
- qshed_constraint[12] : 212 0_z_demand[12] + qshed[12] == 212
- qshed_constraint[8] : 68 0_z_demand[8] + qshed[8] == 68
- qshed_constraint[1] : 110 0_z_demand[1] + qshed[1] == 110
- qshed_constraint[6] : 132 0_z_demand[6] + qshed[6] == 132
- qshed_constraint[11] : 90 0_z_demand[11] + qshed[11] == 90
- qshed_constraint[9] : 90 0_z_demand[9] + qshed[9] == 90
- qshed_constraint[14] : 10 0_z_demand[14] + qshed[14] == 10
- qshed_constraint[3] : 660 0_z_demand[3] + qshed[3] == 660
- qshed_constraint[7] : 125 0_z_demand[7] + qshed[7] == 125
- qshed_constraint[4] : 190 0_z_demand[4] + qshed[4] == 190
- qshed_constraint[13] : 151 0_z_demand[13] + qshed[13] == 151
- qshed_constraint[15] : 80 0_z_demand[15] + qshed[15] == 80
- qshed_constraint[2] : 60 0_z_demand[2] + qshed[2] == 60
- qshed_constraint[10] : 38 0_z_demand[10] + qshed[10] == 38
  -0_w_6[1] + 0_w_6[2] == 0
  -0_w_6[1] + 0_w_6[3] == 0
  0_p_(14, 16, 10)[1] + 0_psw_aux_(2, 16, 9)[1] == 0
@@ -262,6 +232,36 @@ Subject to
  lambda_(1, 2) - beta_(1, 2) + lambda_(2, 1) == 0
  lambda_(1, 3) - beta_(1, 3) + lambda_(3, 1) == 0
  lambda_(2, 3) - beta_(2, 3) + lambda_(3, 2) == 0
+ pshed_constraint[5] : 128 0_z_demand[5] + pshed[5] == 128
+ pshed_constraint[12] : 290 0_z_demand[12] + pshed[12] == 290
+ pshed_constraint[8] : 117 0_z_demand[8] + pshed[8] == 117
+ pshed_constraint[1] : 160 0_z_demand[1] + pshed[1] == 160
+ pshed_constraint[6] : 230 0_z_demand[6] + pshed[6] == 230
+ pshed_constraint[11] : 120 0_z_demand[11] + pshed[11] == 120
+ pshed_constraint[9] : 120 0_z_demand[9] + pshed[9] == 120
+ pshed_constraint[14] : 17 0_z_demand[14] + pshed[14] == 17
+ pshed_constraint[3] : 1155 0_z_demand[3] + pshed[3] == 1155
+ pshed_constraint[7] : 170 0_z_demand[7] + pshed[7] == 170
+ pshed_constraint[4] : 485 0_z_demand[4] + pshed[4] == 485
+ pshed_constraint[13] : 170 0_z_demand[13] + pshed[13] == 170
+ pshed_constraint[15] : 170 0_z_demand[15] + pshed[15] == 170
+ pshed_constraint[2] : 68 0_z_demand[2] + pshed[2] == 68
+ pshed_constraint[10] : 66 0_z_demand[10] + pshed[10] == 66
+ qshed_constraint[5] : 86 0_z_demand[5] + qshed[5] == 86
+ qshed_constraint[12] : 212 0_z_demand[12] + qshed[12] == 212
+ qshed_constraint[8] : 68 0_z_demand[8] + qshed[8] == 68
+ qshed_constraint[1] : 110 0_z_demand[1] + qshed[1] == 110
+ qshed_constraint[6] : 132 0_z_demand[6] + qshed[6] == 132
+ qshed_constraint[11] : 90 0_z_demand[11] + qshed[11] == 90
+ qshed_constraint[9] : 90 0_z_demand[9] + qshed[9] == 90
+ qshed_constraint[14] : 10 0_z_demand[14] + qshed[14] == 10
+ qshed_constraint[3] : 660 0_z_demand[3] + qshed[3] == 660
+ qshed_constraint[7] : 125 0_z_demand[7] + qshed[7] == 125
+ qshed_constraint[4] : 190 0_z_demand[4] + qshed[4] == 190
+ qshed_constraint[13] : 151 0_z_demand[13] + qshed[13] == 151
+ qshed_constraint[15] : 80 0_z_demand[15] + qshed[15] == 80
+ qshed_constraint[2] : 60 0_z_demand[2] + qshed[2] == 60
+ qshed_constraint[10] : 38 0_z_demand[10] + qshed[10] == 38
  -0.81 0_z_voltage[5] + 0_w_5[1] >= 0
  -0.81 0_z_voltage[5] + 0_w_5[2] >= 0
  -0.81 0_z_voltage[5] + 0_w_5[3] >= 0
