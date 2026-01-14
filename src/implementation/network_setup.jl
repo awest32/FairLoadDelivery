@@ -193,6 +193,20 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
             end
         end
     end
+    # Ensure the voltages are passed through correctly
+    for (bus_id, bus_data) in data["bus"]
+        bus_data["vmax"][:] .= 1.1
+        bus_data["vmin"][:] .= 0.9
+    end
+    for (i,gen) in data["gen"]
+        id = parse(Int,i)
+        if gen["source_id"] == "voltage_source.source"
+            gen["vg"][:] .= ref[:gen][id]["vg"]
+            gen["vbase"] = ref[:gen][id]["vbase"]
+        end
+    end
+
+    # Out put if the voltages are close to 1pu, if see voltage drop 10% 5% the will be an issue
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])

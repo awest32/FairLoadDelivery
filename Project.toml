@@ -6,6 +6,7 @@ authors = ["Amanda West <38090325+awest32@users.noreply.github.com> and contribu
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DiffOpt = "930fe3bc-9c6b-11ea-2d94-6184641e85e7"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
@@ -33,6 +34,7 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 [compat]
 CSV = "0.10.15"
 DataFrames = "1.8.1"
+Dates = "1.11.0"
 DiffOpt = "0.5.2"
 Distributions = "0.25.122"
 FrankWolfe = "0.6.1"

@@ -30,7 +30,6 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
     # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
     @info pm.model typeof(pm.model)
-    variable_mc_load_shed(pm)
     
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
@@ -51,7 +50,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
 
     _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
-
+    variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
@@ -117,6 +116,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     constraint_switch_budget(pm)
 
     constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
@@ -158,8 +158,6 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
-    constraint_load_shed_definition(pm)
-
 
     variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
@@ -224,7 +222,8 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     constraint_block_budget(pm)
     constraint_switch_budget(pm)
 
-   
+    constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
    
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
@@ -388,14 +387,14 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
-    constraint_load_shed_definition(pm)
 
     variable_block_indicator(pm; relax=true)
     variable_mc_fair_load_weights(pm)
 
 
 
-   	 _PMD.constraint_mc_model_current(pm)
+   	_PMD.constraint_mc_model_current(pm)
+
 
      for i in _PMD.ids(pm, :ref_buses)
          _PMD.constraint_mc_theta_ref(pm, i)
@@ -429,13 +428,14 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
 
     for i in _PMD.ids(pm, :branch)
         _PMD.constraint_mc_power_losses(pm, i)
-        #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
+                    #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
         FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
-        #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
+                    #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
         _PMD.constraint_mc_voltage_angle_difference(pm, i)
 
-        _PMD.constraint_mc_thermal_limit_from(pm, i)
-        _PMD.constraint_mc_thermal_limit_to(pm, i)
+        # The thermal limits are not activated
+        #_PMD.constraint_mc_thermal_limit_from(pm, i)
+        #_PMD.constraint_mc_thermal_limit_to(pm, i)
     end
 
     for i in _PMD.ids(pm, :switch)
@@ -443,17 +443,20 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
         # The switch thermal limit is not implemented in PowerModelsDistribution yet
         # The ampacity constraint is similar but instead of p^2 + q^2 <= w * s^2, it is p^2 + q^2 <= z * w * s^2
         constraint_mc_switch_ampacity(pm, i)
-        constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
+        
+        # Not activated
+        #constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
     end
 
+    #Not activated
     for i in _PMD.ids(pm, :transformer)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
-    # #constraint_mc_radiality(pm)
-    constraint_mc_block_energization_consistency_bigm(pm)
+    # constraint_mc_radiality(pm)
+    #constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)
@@ -462,24 +465,26 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     # constraint_set_block_state_rounded(pm)
     # constraint_set_switch_state_rounded(pm)
    
-   
+    constraint_load_shed_definition(pm)
+    #constraint_shed_single_load(pm)
+
     constraint_connect_block_load(pm)
     constraint_connect_block_gen(pm)
     constraint_connect_block_voltage(pm)
     constraint_connect_block_shunt(pm)
     constraint_connect_block_storage(pm)
-    # #constraint_open_switches(pm)
-    # #constraint_gen_event_simple(pm, ls_percent=0.5)
+    #constraint_open_switches(pm)
+    #constraint_gen_event_simple(pm, ls_percent=0.5)
  
 
     
-    # #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
-    # #_PMD.objective_mc_min_fuel_cost(pm)
-    # #objective_mc_min_fuel_cost_pwl_voll(pm)
+    #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
+    #_PMD.objective_mc_min_fuel_cost(pm)
+    #objective_mc_min_fuel_cost_pwl_voll(pm)
     objective_fairly_weighted_max_load_served(pm)
-    # #objective_fair_max_load_served(pm,"jain")
-    # #objective_fairly_weighted_max_load_served_with_penalty(pm)
-    # #objective_fairly_weighted_min_load_shed(pm)
+    #objective_fair_max_load_served(pm,"jain")
+    #objective_fairly_weighted_max_load_served_with_penalty(pm)
+    #objective_fairly_weighted_min_load_shed(pm)
     JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
     open("relaxed_model_out.txt", "w") do io
             redirect_stdout(io) do

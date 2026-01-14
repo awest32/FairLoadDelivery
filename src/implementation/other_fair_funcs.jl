@@ -6,7 +6,10 @@ using JuMP, Ipopt, Gurobi
 function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
     n = length(pshed_prev)
-    @variable(model, pshed_new[1:n] >= 0)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )
     @variable(model, weights_new[1:n] >= 0)
     @constraint(model, [i=1:n], weights_new[i] <= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
@@ -33,7 +36,10 @@ end
 # optimizing pshed_new and weights_new
 function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
-    @variable(model, pshed_new[1:length(pshed_prev)] >= 0)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )
     @variable(model, weights_new[1:length(weights_prev)] >= 0)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i] <= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
@@ -52,7 +58,10 @@ end
 # Function to compute the proportional fairness load shed
 function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
-    @variable(model, pshed_new[1:length(pshed_prev)] >= 0)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )
     @variable(model, weights_new[1:length(weights_prev)] >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
@@ -68,14 +77,17 @@ end
 # Function to compute complete efficiency (alpha fairness) of load shed
 function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
-    @variable(model, pshed_new[1:length(pshed_prev)] >= 0)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )    
     @variable(model, weights_new[1:length(weights_prev)] >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
     @constraint(model, [i in 1:length(pshed_prev)],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    @objective(model, Min, sum(pshed_new[i] for i in 1:length(pshed_new)))
+    @objective(model, Min, sum(pshed_new))
     JuMP.set_silent(model)
     optimize!(model)
     return value.(pshed_new), value.(weights_new)
@@ -84,7 +96,10 @@ end
 # Function to compute the infinity norm fairness of load shed
 function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
-    @variable(model, pshed_new[1:length(pshed_prev)] >= 0)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )    
     @variable(model, weights_new[1:length(weights_prev)] >= 0)
     @variable(model, t >= 0)
     @constraint(model, [i in 1:length(pshed_prev)],
@@ -134,6 +149,27 @@ function alpha_fairness(x, alpha=1)
     else
         return sum((xi^(1 - alpha)) / (1 - alpha) for xi in x)
     end
+end
+
+# Equality min fairness function
+function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+    model = JuMP.Model(Ipopt.Optimizer)
+    pshed_new = JuMP.@variable(
+    model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
+    base_name = "pshed_new"
+        )
+    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, t >= 0)
+    @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
+    @constraint(model, [i in 1:length(pshed_prev)],
+        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+    )
+    @constraint(model, [i = 1:length(pshed_new)],t == pshed_new[i])
+    @objective(model, Max, t)
+    JuMP.set_silent(model)
+    optimize!(model)
+    return value.(pshed_new), value.(weights_new)
 end
 
 
