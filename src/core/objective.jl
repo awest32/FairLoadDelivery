@@ -299,36 +299,6 @@ function objective_fairly_weighted_max_load_served_with_penalty(pm::_PMD.Abstrac
     sum(weighted_load_served) + penalty_weight * binary_penalty)
 end
 
-function gini_index(x)
-    n = length(x)
-    x = sort(x)
-    n = length(x)
-    gini = (2 * sum(i * x[i] for i in 1:n) / (n * sum(x))) - ((n + 1)/n)
-    return gini
-end
-
-#Jain's index
-function jains_index(x)
-    n = length(x)
-    sum_x = sum(x)
-    sum_x2 = sum(xi^2 for xi in x)
-    return (sum_x^2) / (n * sum_x2)
-end
-
-#Palma Ratio
-function palma_ratio(x)
-    x = load_served ./ load_ref
-    sorted_x = sort(x)
-    n = length(x)
-    top_10_percent = sum(sorted_x[ceil(Int, 0.9n):end])
-    bottom_40_percent = sum(sorted_x[1:floor(Int, 0.4n)])
-    return top_10_percent / bottom_40_percent
-end
-#Alpha fairness for alpha=1
-function alpha_fairness(x, alpha)
-if alpha == 1
-    return sum(log(xi) for xi in x)
-    else
-        return sum((xi^(1 - alpha)) / (1 - alpha) for xi in x)
-    end
-end
+# Note: gini_index, jains_index, palma_ratio, and alpha_fairness
+# are defined in src/implementation/other_fair_funcs.jl
+# Removed duplicates from here to avoid method overwriting errors
