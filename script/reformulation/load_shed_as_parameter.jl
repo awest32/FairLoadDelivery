@@ -74,21 +74,17 @@ For n=10: bottom_40_idx = [1,2,3,4], top_10_idx = [10]
 For n=20: bottom_40_idx = [1,2,3,4,5,6,7,8], top_10_idx = [19,20]
 """
 function compute_palma_indices(n::Int)
-    # Bottom 40%: indices 1 to floor(0.4n) in sorted order
+    # Bottom 40%: first floor(0.4n) positions in ascending sorted order
     n_bottom = max(1, floor(Int, 0.4 * n))
     bottom_40_idx = collect(1:n_bottom)
 
-    # Top 10%: indices ceil(0.9n) to n in sorted order
-    n_top_start = max(n, ceil(Int, 0.9 * n))  # Ensure at least last element
+    # Top 10%: last ceil(0.1n) positions in ascending sorted order
+    # For n=15: ceil(0.1*15) = 2 elements → positions [14, 15]
+    # For n=10: ceil(0.1*10) = 1 element → position [10]
+    # For n=20: ceil(0.1*20) = 2 elements → positions [19, 20]
+    n_top = max(1, ceil(Int, 0.1 * n))  # Number of elements in top 10%
+    n_top_start = n - n_top + 1         # Starting position (1-indexed)
     top_10_idx = collect(n_top_start:n)
-
-    # Handle edge case where ranges might be empty
-    if isempty(top_10_idx)
-        top_10_idx = [n]
-    end
-    if isempty(bottom_40_idx)
-        bottom_40_idx = [1]
-    end
 
     return top_10_idx, bottom_40_idx
 end
@@ -233,7 +229,7 @@ function palma_ratio_minimization(
     w_bounds::Tuple{Float64, Float64} = (0.0, 10.0),
     solver = get_default_solver(),
     silent::Bool = true,
-    relax_binary::Bool = true
+    relax_binary::Bool = false  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
 )
     n = length(pshed_prev)
     w_min, w_max = w_bounds
@@ -254,8 +250,13 @@ function palma_ratio_minimization(
     # Solver-specific settings
     if GUROBI_AVAILABLE && solver == Gurobi.Optimizer
         set_optimizer_attribute(model, "DualReductions", 0)
-        set_optimizer_attribute(model, "MIPGap", 1e-6)
-        set_optimizer_attribute(model, "NonConvex", 2)  # Allow non-convex QP
+        set_optimizer_attribute(model, "MIPGap", 1e-4)   # Relaxed gap (was 1e-6)
+        set_optimizer_attribute(model, "NonConvex", 2)   # Allow non-convex QP
+        set_optimizer_attribute(model, "TimeLimit", 60*5)  # 5-minute time limit
+        set_optimizer_attribute(model, "MIPFocus", 1)    # Focus on finding feasible solutions
+        if !silent
+            set_optimizer_attribute(model, "OutputFlag", 1)  # Show progress
+        end
     elseif IPOPT_AVAILABLE && solver == Ipopt.Optimizer
         set_optimizer_attribute(model, "print_level", 0)
     end
@@ -447,9 +448,9 @@ function lin_palma_reformulated(
 )
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
-        trust_radius = 0.1,
+        trust_radius = 0.5,
         w_bounds = (0.0, 10.0),
-        relax_binary = true
+        relax_binary = false  # Binary required; McCormick relaxation needs testing
     )
 
     # Compute σ from result (for compatibility)
