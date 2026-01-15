@@ -28,6 +28,7 @@ Date: 2026-01-14
 =#
 
 using JuMP
+import MathOptInterface as MOI
 using LinearAlgebra
 
 # Try to load solvers
@@ -93,24 +94,41 @@ function compute_palma_indices(n::Int)
 end
 
 """
-    palma_ratio(pshed::Vector{Float64}) -> Float64
+    palma_ratio(pshed::Vector{Float64}; eps_denom::Float64=1e-6) -> Float64
 
 Compute the Palma ratio: sum(top 10%) / sum(bottom 40%) after sorting.
-Returns Inf if denominator is zero or negative.
+Returns Inf if denominator is less than eps_denom.
+
+Note: The Palma ratio can be undefined when most loads have zero shed.
+A small eps_denom prevents division by zero while flagging degenerate cases.
 """
-function palma_ratio(pshed::Vector{Float64})
+function palma_ratio(pshed::Vector{Float64}; eps_denom::Float64=1e-6)
     n = length(pshed)
     sorted_pshed = sort(pshed)  # ascending order
 
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    numerator = sum(sorted_pshed[i] for i in top_10_idx)
-    denominator = sum(sorted_pshed[i] for i in bottom_40_idx)
+    numerator = sum(max(0.0, sorted_pshed[i]) for i in top_10_idx)
+    denominator = sum(max(0.0, sorted_pshed[i]) for i in bottom_40_idx)
 
-    if denominator <= 0
+    if denominator < eps_denom
         return Inf
     end
     return numerator / denominator
+end
+
+"""
+    is_palma_well_defined(pshed::Vector{Float64}; min_denom::Float64=1e-4) -> Bool
+
+Check if the Palma ratio is well-defined (bottom 40% has sufficient positive load shed).
+Returns false if the bottom 40% sum is too small to meaningfully compute Palma.
+"""
+function is_palma_well_defined(pshed::Vector{Float64}; min_denom::Float64=1e-4)
+    n = length(pshed)
+    sorted_pshed = sort(pshed)
+    _, bottom_40_idx = compute_palma_indices(n)
+    denominator = sum(max(0.0, sorted_pshed[i]) for i in bottom_40_idx)
+    return denominator >= min_denom
 end
 
 """
@@ -228,7 +246,7 @@ function palma_ratio_minimization(
     @assert all(pd .>= 0) "Load demands must be non-negative"
 
     # Create model
-    model = Model(solver)
+    model = JuMP.Model(solver)
     if silent
         set_silent(model)
     end
@@ -280,6 +298,15 @@ function palma_ratio_minimization(
     @constraint(model, trust_ub[j=1:n], Δw[j] <= trust_radius)
     @constraint(model, weight_lb[j=1:n], weights_prev[j] + Δw[j] >= w_min)
     @constraint(model, weight_ub[j=1:n], weights_prev[j] + Δw[j] <= w_max)
+
+    #=========================================================================
+    # P_shed Bounds (Critical for Charnes-Cooper feasibility)
+    =========================================================================#
+
+    # Ensure pshed_new stays non-negative and bounded by demand
+    # This prevents the Taylor approximation from producing invalid values
+    @constraint(model, pshed_lb[j=1:n], pshed_new[j] >= ε)
+    @constraint(model, pshed_ub[j=1:n], pshed_new[j] <= pd[j])
 
     #=========================================================================
     # Permutation Matrix Constraints (Doubly Stochastic)
@@ -334,7 +361,11 @@ function palma_ratio_minimization(
     # Get indices in sorted space
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
+    # Note: We rely on the caller to check is_palma_well_defined() BEFORE calling
+    # this function. If the denominator is too small, the problem becomes infeasible.
+
     # Denominator normalization: Σ_{i∈Bottom40%} sorted[i] * σ = 1
+    # This is the Charnes-Cooper transformation: scale by σ = 1/denominator
     @constraint(model, denom_norm,
         sum(sorted[i] * σ for i in bottom_40_idx) == 1)
 
@@ -352,7 +383,7 @@ function palma_ratio_minimization(
     # Extract Solution
     =========================================================================#
 
-    if status in [OPTIMAL, LOCALLY_SOLVED, ALMOST_OPTIMAL, TIME_LIMIT]
+    if status in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.TIME_LIMIT]
         Δw_val = value.(Δw)
         weights_new = weights_prev .+ Δw_val
 
