@@ -130,7 +130,9 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
     #_PMD.objective_mc_min_fuel_cost(pm)
     #objective_mc_min_fuel_cost_pwl_voll(pm)
-    objective_fairly_weighted_max_load_served(pm)
+    # Regularization keeps pd interior, fixing DiffOpt sensitivity computation
+    # See script/reformulation/debug/ for analysis
+    objective_fairly_weighted_max_load_served(pm; regularization=0.1)
     #objective_fair_max_load_served(pm,"jain")
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)

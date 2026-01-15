@@ -3,6 +3,7 @@
 using FairLoadDelivery
 using PowerModelsDistribution
 using JuMP
+import MathOptInterface as MOI
 using LinearAlgebra
 using Ipopt, Gurobi
 
@@ -186,7 +187,8 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
     @variable(model, σ >= 1e-6)
     @variable(model, y_xhat[1:n^2] >= 0)
     @variable(model, y_a[1:n^2], Bin)      # or Bin if enforced
-    @variable(model, y_pshed[1:n] >= 0) # pshed_new
+    # Allow y_pshed to go slightly negative in Taylor expansion (will be bounded by McCormick)
+    @variable(model, y_pshed[1:n] >= -100) # pshed_new with relaxed lower bound
     @variable(model, y_w[1:n] >=0)            # FREE (signed)
 
     y = vcat(y_xhat, y_a, y_pshed, (y_w-weights_prev))
@@ -194,24 +196,21 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
     # # Create new weight variables
     #@variable(model, weights_new[1:n] >= 0)
 
+    # Weight bounds
     @constraint(model, y_w .<= 10)
-    # Create a infinity norm trust region on the weights
-    # ϵ = 0.1
+    @constraint(model, y_w .>= 0)
 
-    # @constraint(model, [i in eachindex(y_w)],
-    #     y_w[i] - weights_prev[i] <= ϵ
-    # )
+    # Trust region on weight changes (critical for convergence)
+    trust_radius = 0.5
+    Δw = y_w .- weights_prev
+    @constraint(model, Δw .<= trust_radius)
+    @constraint(model, Δw .>= -trust_radius)
 
-    # @constraint(model, [i in eachindex(y_w)],
-    #     weights_prev[i] - y_w[i] <= ϵ
-    # )
-    # for i in 1:n
-    #     if i in critical_id
-    #         @constraint(model, weights_new[i] == 1000)
-    #     else
-    #         @constraint(model, weights_new[i] <= 10)
-    #     end
-    # end
+    # CRITICAL: Taylor expansion constraint linking pshed_new to weight changes
+    # pshed_new[i] = pshed_prev[i] + Σ_j dpshed_dw[i,j] * Δw[j]
+    @constraint(model, taylor_expansion[i=1:n],
+        y_pshed[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * Δw[j] for j in 1:n)
+    )
 
     # Sorting constraint matrix: enforces ascending order S_k <= S_{k+1}
     # T * x_hat <= 0 means sorted[k] - sorted[k+1] <= 0
@@ -314,31 +313,45 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
     @assert size(F, 1) == length(g) "F rows ($(size(F, 1))) must match g length ($(length(g)))"
 
     @constraint(model, F * y .<= g*σ)
-    A_long = [A_row zeros(n,n^2) zeros(n,2*n)]  # FIXED: use A_row instead of undefined A
-    # Create the vectors to extract the top 10% of load shed
+    # A_long extracts sorted values from y_xhat (McCormick aux = a * pshed)
+    # y = [y_xhat(n²), y_a(n²), y_pshed(n), y_w-weights_prev(n)]
+    A_long = [A_row zeros(n, n^2) zeros(n, 2*n)]
+
+    # Palma ratio = sum(top 10% sorted) / sum(bottom 40% sorted)
+    # Using Charnes-Cooper: normalize denominator = 1, minimize numerator
     top_10_percent_indices = zeros(n)
     top_10_percent_indices[ceil(Int, 0.9*n):n] .= 1.0
     bottom_40_percent_indices = zeros(n)
     bottom_40_percent_indices[1:floor(Int, 0.4*n)] .= 1.0
-    obj = transpose(top_10_percent_indices)*A_long*y
-    denominator_constraint = transpose(bottom_40_percent_indices)*A_long*y
-   # @constraint(model, denominator_constraint .== σ)
-    @objective(model, Max, 0)
+
+    # Numerator (top 10% sum, scaled by σ)
+    numerator_expr = transpose(top_10_percent_indices) * A_long * y
+    # Denominator (bottom 40% sum, scaled by σ) - normalized to 1 via Charnes-Cooper
+    denominator_expr = transpose(bottom_40_percent_indices) * A_long * y
+
+    # Charnes-Cooper normalization: denominator * σ = 1 (scaled denominator = 1)
+    @constraint(model, denominator_expr == 1.0)
+
+    # Minimize the Palma ratio (= numerator when denominator normalized to 1)
+    @objective(model, Min, numerator_expr)
 
     set_optimizer(model, Gurobi.Optimizer)
     # Disable dual reductions
     set_attribute(model, "DualReductions", 0)
 
     optimize!(model)
-    #  value.(pshed_new)
-    #    value(σ)
-    #    value.(weights_new)
     @info termination_status(model)
     println("Termination: ", termination_status(model))
     println("Primal status: ", primal_status(model))
     println("Dual status: ", dual_status(model))
 
-   return Array(value.(y_pshed)), Array(value.(weights_prev .+ y_w)), value(σ)
+    # Handle infeasibility - return unchanged values
+    if termination_status(model) in [MOI.INFEASIBLE, MOI.INFEASIBLE_OR_UNBOUNDED]
+        @warn "Palma optimization infeasible, returning unchanged weights"
+        return pshed_prev, weights_prev, 1.0
+    end
+
+    return Array(value.(y_pshed)), Array(value.(y_w)), value(σ)
 end
 
 

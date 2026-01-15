@@ -203,16 +203,27 @@ function objective_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerMode
     sum(weighted_load_served))
 end
 
-function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true)
+function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true, regularization::Float64=0.0)
     fair_load_weights = _PMD.var(pm, nw, :fair_load_weights)
     weighted_load_served = []
+    regularization_term = []
     for d in _PMD.ids(pm, nw, :load)
-        push!(weighted_load_served, sum(fair_load_weights[d].*_PMD.var(pm, nw, :pd)[d]))
+        pd_var = _PMD.var(pm, nw, :pd)[d]
+        push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
+        # Quadratic regularization to keep pd interior (fixes DiffOpt sensitivity computation)
+        if regularization > 0
+            push!(regularization_term, sum(pd_var .^ 2))
+        end
     end
     #@info fair_load_weights
     #@info _PMD.var(pm, nw, :pd)
-    return JuMP.@objective(pm.model, Max,
-    sum(weighted_load_served))
+    if regularization > 0
+        return JuMP.@objective(pm.model, Max,
+            sum(weighted_load_served) - regularization * sum(regularization_term))
+    else
+        return JuMP.@objective(pm.model, Max,
+            sum(weighted_load_served))
+    end
 end
 
 function objective_fairly_weighted_min_load_shed(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true)
