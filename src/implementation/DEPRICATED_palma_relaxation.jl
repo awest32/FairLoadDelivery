@@ -357,12 +357,6 @@ end
 
 # y = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
 
-# Plot the weights per load 
-function plot_weights_per_load(weights_new, weight_ids, k, save_path)
-    weights_plot = bar(weight_ids, weights_new, title = "Fair Load Weights per Load - Iteration $k", xlabel = "Load ID", ylabel = "Fair Load Weight", legend = false)
-    savefig(weights_plot, "$save_path/fair_load_weights_per_load_k$(k).svg")
-    println("Weights plot saved as $save_path/fair_load_weights_per_load_k$(k).svg")
-end
 
 # # eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
 # # # Initial fair load weights

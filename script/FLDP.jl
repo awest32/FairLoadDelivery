@@ -17,7 +17,7 @@ using Plots
 
 include("../src/implementation/network_setup.jl")
 include("../src/implementation/lower_level_mld.jl")
-include("../src/implementation/palma_relaxation.jl")
+include("../src/implementation/load_shed_as_parameter.jl")
 include("../src/implementation/other_fair_funcs.jl")
 include("../src/implementation/random_rounding.jl")
 include("../src/implementation/export_results.jl")
@@ -45,6 +45,7 @@ function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Ve
     weight_vals_out = Float64[]
     weight_ids_out = Int64[]
     pshed_upper_per_bus = Float64[]
+    math_new = deepcopy(data)
     for k in 1:iterations
         @info "Starting iteration $k"
 
@@ -75,7 +76,7 @@ function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Ve
             for i in pshed_ids
                 push!(pd, sum(math_new["load"][string(i)]["pd"]))
             end
-            pshed_new, fair_weight_vals = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
+            pshed_new, fair_weight_vals = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd)
         end
         
         plot_weights_per_load(fair_weight_vals, weight_ids, k, save_path)
@@ -256,7 +257,7 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
     final_load_shed_per_fair_func = DataFrame(FairnessFunction=String[], FinalLoadShed=Float64[])
     relaxed_fldp_fairness_table = DataFrame(FairnessFunction=String[], MinMax=Float64[], Proportional=Float64[], Jain=Float64[], Palma=Float64[], Gini=Float64[])
     relaxed_fldp_loadshed_table = DataFrame(FairnessFunction=String[], Lower_Level_Load_Shed=Float64[], Upper_Level_Load_Shed=Float64[])
-    for fair_func in ["proportional", "efficiency", "min_max", "jain", "equality_min"]#"palma"]
+    for fair_func in ["palma","proportional", "efficiency", "min_max", "jain", "equality_min"]#
         @info "Running relaxed FLDP with $fair_func fairness function"
     
         save_path = "results/$(Dates.today())/$case/$fair_func/"

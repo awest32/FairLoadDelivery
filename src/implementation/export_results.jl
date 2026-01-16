@@ -190,3 +190,9 @@ function export_results(math::Dict, exp_folder::String, gen_cap::Float64, fair_f
 
 
 end
+# Plot the weights per load 
+function plot_weights_per_load(weights_new, weight_ids, k, save_path)
+    weights_plot = bar(weight_ids, weights_new, title = "Fair Load Weights per Load - Iteration $k", xlabel = "Load ID", ylabel = "Fair Load Weight", legend = false)
+    savefig(weights_plot, "$save_path/fair_load_weights_per_load_k$(k).svg")
+    println("Weights plot saved as $save_path/fair_load_weights_per_load_k$(k).svg")
+end

@@ -55,7 +55,7 @@ include("prob/mld.jl")
 
 include("implementation/network_setup.jl")
 include("implementation/lower_level_mld.jl")
-include("implementation/palma_relaxation.jl")
+include("implementation/load_shed_as_parameter.jl")
 include("implementation/other_fair_funcs.jl")
 include("implementation/random_rounding.jl")
 include("implementation/export_results.jl")
