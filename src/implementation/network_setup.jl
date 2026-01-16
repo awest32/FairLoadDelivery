@@ -73,6 +73,18 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
                 switch["current_rating"][:] .= 80
             end
         end
+    elseif case == "ieee_13_aw_edit/motivation_c.dss"
+       for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 310
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 264
+            elseif switch["name"] == "671692"
+                switch["current_rating"][:] .= 70
+            elseif switch["name"] == "646611"
+                switch["current_rating"][:] .= 264
+            end
+        end
     end
     # Ensure the generation from the source bus is less than the max load
     for (i,gen) in math["gen"]
@@ -162,8 +174,10 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     for (load_id, load_data) in data["load"]
         if load_selection[parse(Int,load_id)] <= 0.0
             @info "De-energizing load $load_id in round $r"
-            data["load"][load_id]["pd"] = 0.0
-            data["load"][load_id]["qd"] = 0.0
+            for phase in 1:length(load_data["pd"])
+                 load_data["pd"][phase] = 0.0
+                 load_data["qd"][phase] = 0.0
+            end
             data["load"][load_id]["vbase"] = 0.0
             data["load"][load_id]["vnom_kv"] = 0.0
             data["load"][load_id]["status"] = 0.0
