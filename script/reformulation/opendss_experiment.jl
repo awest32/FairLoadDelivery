@@ -245,6 +245,21 @@ function solve_palma_ratio_minimization(
             push!(palma_history, initial_palma)
             push!(pshed_history, copy(pshed_ordered))
             push!(weights_history, copy(weights))
+        else
+            # For subsequent iterations, show ACTUAL vs PREDICTED comparison
+            actual_palma_from_mld = palma_ratio(pshed_ordered)
+            if length(palma_history) > 0
+                predicted_palma = palma_history[end]
+                verbose && println("  [DEBUG] Predicted Palma (Taylor): $predicted_palma")
+                verbose && println("  [DEBUG] Actual Palma (MLD solve): $actual_palma_from_mld")
+                verbose && println("  [DEBUG] Prediction error: $(abs(predicted_palma - actual_palma_from_mld) / actual_palma_from_mld * 100)%")
+            end
+        end
+
+        # Debug: Show Jacobian diagonal (should be negative)
+        if k == 1 && verbose
+            println("  [DEBUG] Jacobian diagonal (first 5): ", round.(diag(jacobian_ordered)[1:min(5,n_loads)], digits=4))
+            println("  [DEBUG] Expected: NEGATIVE values (increasing weight → decreasing shed)")
         end
 
         # Upper level: Solve reformulated Palma ratio minimization
@@ -272,12 +287,21 @@ function solve_palma_ratio_minimization(
             trust_radius = trust_radius,
             w_bounds = (0.0, 10.0),
             relax_binary = false,  # Must use integer permutation for correct sorting
-            silent = true
+            silent = false  # Show Gurobi output to debug
         )
         solve_time = time() - t_start
 
         # Update weights for next iteration
+        old_weights = copy(weights)
         weights = result.weights_new
+
+        # Debug: Show weight changes
+        if verbose
+            delta_w = weights - old_weights
+            println("  [DEBUG] Weight changes (Δw): min=$(minimum(delta_w)), max=$(maximum(delta_w))")
+            println("  [DEBUG] Loads with Δw > 0: ", sum(delta_w .> 0.001))
+            println("  [DEBUG] Loads with Δw < 0: ", sum(delta_w .< -0.001))
+        end
 
         # Store results
         push!(palma_history, result.palma_ratio)
