@@ -20,7 +20,11 @@ import FrankWolfe
 import PowerPlots
 import DataFrames
 import CSV
-using Dates
+import Dates
+import GraphPlot
+import Colors
+import Compose: draw, SVG, inch
+import Cairo
 
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
@@ -59,6 +63,7 @@ include("implementation/load_shed_as_parameter.jl")
 include("implementation/other_fair_funcs.jl")
 include("implementation/random_rounding.jl")
 include("implementation/export_results.jl")
+include("implementation/visualization.jl")
 
 
 export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!, ref_add_rounded_load_blocks!
@@ -67,6 +72,6 @@ export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_sheddin
 export ipopt, gurobi, highs, juniper
 export setup_network, lower_level_soln,generate_bernoulli_samples, radiality_check, update_network, ac_feasibility_test
 export lin_palma, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index
-export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder
+export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder, plot_network_load_shed
 
 end #module FairLoadDelivery

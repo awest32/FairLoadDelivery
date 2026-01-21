@@ -114,7 +114,7 @@ function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k, save_path)
         right_margin = 5Plots.mm,
         top_margin = 5Plots.mm
     )
-    annotate!(16.5, 16, text("∂P/∂w", 9, "Computer Modern"))
+    Plots.annotate!(16.5, 16, Plots.text("∂P/∂w", 9, "Computer Modern"))
 
 
     # Save the heatmap

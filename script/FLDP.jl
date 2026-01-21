@@ -229,7 +229,8 @@ function find_best_mld_solution(math_out::Vector{Dict{String, Any}}, ipopt)
     return best_set, best_mld
 end
 
-for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/motivation_a.dss", "ieee_13_aw_edit/motivation_b.dss", "ieee_13_aw_edit/motivation_c.dss"]
+#for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/motivation_a.dss", "ieee_13_aw_edit/motivation_b.dss", "ieee_13_aw_edit/motivation_c.dss"]
+    case = "motivation_a"
     @info "Running FLDP for case: $case"
     # Inputs: case file path, percentage of load shed, list of critical load IDs
     ls_percent = 0.9
@@ -257,7 +258,8 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
     final_load_shed_per_fair_func = DataFrame(FairnessFunction=String[], FinalLoadShed=Float64[])
     relaxed_fldp_fairness_table = DataFrame(FairnessFunction=String[], MinMax=Float64[], Proportional=Float64[], Jain=Float64[], Palma=Float64[], Gini=Float64[])
     relaxed_fldp_loadshed_table = DataFrame(FairnessFunction=String[], Lower_Level_Load_Shed=Float64[], Upper_Level_Load_Shed=Float64[])
-    for fair_func in ["palma","proportional", "efficiency", "min_max", "jain", "equality_min"]#
+    #for fair_func in ["palma","proportional", "efficiency", "min_max", "jain", "equality_min"]#
+        fair_func = "palma"
         @info "Running relaxed FLDP with $fair_func fairness function"
     
         save_path = "results/$(Dates.today())/$case/$fair_func/"
@@ -284,7 +286,7 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
         end
         pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison ($fair_func)", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
         for i in 1:iterations
-            annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
+            Plots.annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], Plots.text(string(i), :left, :green, 30))
         end
         # add a 45 degree line to the pshed_comparison plot 
         min_val = minimum([minimum(pshed_lower_level), minimum(pshed_upper_level)])
@@ -436,7 +438,7 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
         best_set, best_mld = find_best_mld_solution(math_out, ipopt)
         final_load_shed = 0
         for (load_id, load_data) in best_mld["solution"]["load"]
-            final_load_shed += sum(load_data["pd"])
+            final_load_shed += sum(load_data["pshed"])
         end
         @info "Best MLD solution found from set $best_set with objective value: $(best_mld["objective"])"
         push!(final_load_shed_per_fair_func, (fair_func, final_load_shed))
@@ -444,8 +446,8 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
         CSV.write(joinpath(casepath,"final_load_shed.csv"),final_load_shed_per_fair_func)
         savefig(final_load_shed_v_fairness, joinpath(casepath,"final_load_shed_v_fairness.svg"))
 
-    end
-end
+#     end
+# end
 # # plot the best solution 
 # eng_out = PowerModelsDistribution.transform_data_model(math_out[best_feasibility["set_id"]])
 
@@ -457,3 +459,6 @@ end
 #                     title = "Best AC Feasible Solution from Random Rounding",
 #                     width = 300, height=300
 # )
+plot_network_load_shed(best_mld["solution"], math;
+    output_file=joinpath(save_path, "network_load_shed.svg"),
+    layout=:ieee13)

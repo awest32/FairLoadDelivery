@@ -99,6 +99,8 @@ New Load.634b Bus1=634.2     Phases=1 Conn=Wye  Model=1 kV=2.4  kW=120   kvar=90
 New Load.634c Bus1=634.3     Phases=1 Conn=Wye  Model=1 kV=2.4  kW=120   kvar=90 vminpu=0.6 vmaxpu=1.4
 New Load.645b Bus1=645.2     Phases=1 Conn=Wye  Model=1 kV=2.4  kW=170   kvar=125 vminpu=0.6 vmaxpu=1.4
 
+New Load.646bc Bus1=646.2.3    Phases=2 Conn=Wye Model=1 kV=4.16    kW=230   kvar=132 vminpu=0.6 vmaxpu=1.4
+
 New Load.692 Bus1=692.3.1   Phases=2 Conn=Wye  Model=1 kV=4.16  kW=170   kvar=151 vminpu=0.6 vmaxpu=1.4
 New Load.675a Bus1=675.1    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=485   kvar=190 vminpu=0.6 vmaxpu=1.4
 New Load.675b Bus1=675.2    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=68   kvar=60 vminpu=0.6 vmaxpu=1.4

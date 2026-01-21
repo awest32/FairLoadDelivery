@@ -15,6 +15,9 @@ using DataFrames
 using CSV
 using Plots
 using Dates
+
+include("../src/implementation/visualization.jl")
+
 """
 This is the control case.
 Select the desired network.
@@ -37,7 +40,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 case = "motivation_c"
-gen_cap = 0.9
+gen_cap = 1000000.0
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
 powerplot(eng)
@@ -122,6 +125,39 @@ end
 for (id, switch) in switch_relax
     push!(switch_df.RelaxStatus, switch["state"])
 end
+
+# Debug: Check if switch ampacity constraint is binding
+println("\n=== Switch Ampacity Debug ===")
+for (sid, sw) in math["switch"]
+    sw_soln = mld_relaxed["solution"]["switch"][sid]
+    fbus = string(sw["f_bus"])
+    w_fbus = mld_relaxed["solution"]["bus"][fbus]["w"]
+
+    # Get switch power flow (psw, qsw)
+    psw = sw_soln["pf"]
+    qsw = sw_soln["qf"]
+
+    # Current rating
+    i_rating = sw["current_rating"]
+
+    println("\nSwitch $(sid) ($(sw["name"])):")
+    println("  State: $(sw_soln["state"])")
+    println("  Current Rating: $(i_rating) A")
+    println("  Voltage squared (w) at f_bus: $(w_fbus)")
+
+    for (idx, phase) in enumerate(sw["f_connections"])
+        p = psw[idx]
+        q = qsw[idx]
+        w = w_fbus[idx]
+        s_squared = p^2 + q^2
+        limit = sw_soln["state"] * w * i_rating[idx]^2
+        utilization = s_squared / limit * 100
+
+        println("  Phase $(phase): P=$(round(p, digits=2)) kW, Q=$(round(q, digits=2)) kVar")
+        println("           S²=$(round(s_squared, digits=2)), Limit=$(round(limit, digits=2)), Utilization=$(round(utilization, digits=1))%")
+    end
+end
+println("=== End Debug ===")
 
 # Plot the squared voltage at each switch for both the integer and relaxed cases
 switch_ids = sort(parse.(Int, collect(keys(mld_relaxed["solution"]["switch"]))))
@@ -218,3 +254,6 @@ CSV.write(joinpath(control_exp_folder,"switch_summary"), switch_df)
 # plot_fairness_indices(mld["solution"], collect(mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(mld["solution"]["load"])), collect(parse.(Int,collect(keys(mld["solution"]["load"])))), iterations, fair_exp, fair_func)
 
 
+plot_network_load_shed(mld_relaxed["solution"], math;
+    output_file=joinpath(control_exp_folder, "network_load_shed.svg"),
+    layout=:ieee13)
