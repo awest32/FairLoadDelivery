@@ -45,6 +45,7 @@ function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Ve
     weight_vals_out = Float64[]
     weight_ids_out = Int64[]
     pshed_upper_per_bus = Float64[]
+    math_new = deepcopy(data)
     for k in 1:iterations
         @info "Starting iteration $k"
 
@@ -283,7 +284,7 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
         end
         pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison ($fair_func)", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
         for i in 1:iterations
-            annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
+            annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], Plots.text(string(i), :left, :green, 30))
         end
         # add a 45 degree line to the pshed_comparison plot 
         min_val = minimum([minimum(pshed_lower_level), minimum(pshed_upper_level)])
@@ -433,10 +434,13 @@ for case in ["motivation_a","motivation_b","motivation_c"] #"ieee_13_aw_edit/mot
         best_feasibility, max_load_served = export_ac_feasibility_results(math_out, ac_feas, save_path)
 
         best_set, best_mld = find_best_mld_solution(math_out, ipopt)
-        final_load_shed = 0
-        for (load_id, load_data) in best_mld["solution"]["load"]
-            final_load_shed += sum(load_data["pd"])
-        end
+        # final_load_shed = 0
+        # for (load_id, load_data) in best_mld["solution"]["load"]
+        #     final_load_shed += sum(load_data["pd"])
+        # end
+        @info "The length of the final load shed per bus in the best MLD solution is: $(length(best_mld["solution"]["load"]))"
+        @info "The final load shed per bus in the best MLD solution is: $(collect(best_mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(best_mld["solution"]["load"])))"
+        final_load_shed = sum(best_mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(best_mld["solution"]["load"]))
         @info "Best MLD solution found from set $best_set with objective value: $(best_mld["objective"])"
         push!(final_load_shed_per_fair_func, (fair_func, final_load_shed))
         bar!(final_load_shed_v_fairness, [fair_func], [final_load_shed], xlabel = "Fairness Function", ylabel = "Final Load Shed (kW)", title = "Final Load Shed vs. Fairness Function", legend=false)

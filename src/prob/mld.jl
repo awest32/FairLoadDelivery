@@ -8,6 +8,68 @@ function solve_mc_mld_switch_integer(data::Dict{String,<:Any}, solver; kwargs...
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_switchable_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
 
+"""
+Solve MLD with equality_min (min-max fairness) objective (relaxed).
+Minimizes the maximum load shed across all loads.
+"""
+function solve_mc_mld_equality_min(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_equality_min; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+"""
+Solve MLD with equality_min (min-max fairness) objective (integer).
+Minimizes the maximum load shed across all loads with binary switch/block variables.
+"""
+function solve_mc_mld_equality_min_integer(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_equality_min_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+"""
+Solve MLD with proportional fairness (Nash bargaining) objective (relaxed).
+Maximizes sum of log(load_served) across all loads.
+"""
+function solve_mc_mld_proportional_fairness(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_proportional_fairness; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+"""
+Solve MLD with proportional fairness (Nash bargaining) objective (integer).
+Maximizes sum of log(load_served) with binary switch/block variables.
+"""
+function solve_mc_mld_proportional_fairness_integer(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_proportional_fairness_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+"""
+Solve MLD with Jain's index promoting objective (relaxed).
+Maximizes total served while penalizing inequality in served fractions.
+"""
+function solve_mc_mld_jain(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_jain; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+"""
+Solve MLD with Jain's index promoting objective (integer).
+"""
+function solve_mc_mld_jain_integer(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_jain_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
+
+# """
+# Solve MLD with Palma ratio promoting objective (relaxed).
+# Minimizes range of served fractions (max - min).
+# """
+# function solve_mc_mld_palma(data::Dict{String,<:Any}, solver; kwargs...)
+#     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_palma; ref_extensions=[ref_add_load_blocks!], kwargs...)
+# end
+
+# """
+# Solve MLD with Palma ratio promoting objective (integer).
+# """
+# function solve_mc_mld_palma_integer(data::Dict{String,<:Any}, solver; kwargs...)
+#     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_palma_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
+# end
+
 function solve_mc_mld_traditional(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_traditional; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
@@ -360,8 +422,8 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     # #objective_fairly_weighted_max_load_served_with_penalty(pm)
     # #objective_fairly_weighted_min_load_shed(pm)
 
-    JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    print(pm.model)
+    # JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    # print(pm.model)
 
 end
 
@@ -485,13 +547,671 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     #objective_fair_max_load_served(pm,"jain")
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)
-    JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    open("relaxed_model_out.txt", "w") do io
-            redirect_stdout(io) do
-                print(pm.model)
-            end
-        end
 end
+
+"""
+MLD problem with equality_min (min-max fairness) objective.
+Minimizes the maximum load shed across all loads.
+Based on switchable_relaxed formulation but with equality_min objective.
+"""
+function build_mc_mld_equality_min(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=true)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=true)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=true)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use equality_min (min-max fairness) objective
+    objective_equality_min(pm)
+end
+
+"""
+MLD problem with equality_min (min-max fairness) objective (INTEGER version).
+Minimizes the maximum load shed across all loads with binary switch/block variables.
+"""
+function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=false)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=false)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=false)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=false)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use equality_min (min-max fairness) objective
+    objective_equality_min(pm)
+end
+
+"""
+MLD problem with proportional fairness (Nash bargaining) objective (RELAXED).
+Maximizes sum of log(load_served) across all loads.
+"""
+function build_mc_mld_proportional_fairness(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=true)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=true)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=true)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use proportional fairness (log-sum) objective
+    objective_proportional_fairness_mld(pm)
+end
+
+"""
+MLD problem with proportional fairness (Nash bargaining) objective (INTEGER).
+Maximizes sum of log(load_served) with binary switch/block variables.
+"""
+function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=false)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=false)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=false)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=false)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use proportional fairness (log-sum) objective
+    objective_proportional_fairness_mld(pm)
+end
+
+"""
+MLD problem with Jain's index promoting objective (RELAXED).
+Maximizes total served while penalizing inequality in served fractions.
+"""
+function build_mc_mld_jain(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=true)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=true)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=true)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use Jain's index promoting objective
+    objective_jain_mld(pm)
+end
+
+"""
+MLD problem with Jain's index promoting objective (INTEGER).
+"""
+function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+ 	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+    _PMD.variable_mc_branch_power(pm)
+	_PMD.variable_mc_branch_current(pm)
+    _PMD.variable_mc_switch_power(pm)
+    _PMD.variable_mc_switch_state(pm; relax=false)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
+    _PMD.variable_mc_transformer_power(pm)
+
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
+    _PMD.variable_mc_generator_power_on_off(pm)
+
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
+
+    _PMD.variable_mc_load_indicator(pm; relax=false)
+    variable_mc_load_shed(pm)
+
+    variable_block_indicator(pm; relax=false)
+    variable_mc_fair_load_weights(pm)
+
+   	_PMD.constraint_mc_model_current(pm)
+
+    for i in _PMD.ids(pm, :ref_buses)
+        _PMD.constraint_mc_theta_ref(pm, i)
+    end
+
+    _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+    for i in _PMD.ids(pm, :gen)
+        _PMD.constraint_mc_generator_power(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :bus)
+        constraint_mc_power_balance_shed(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :storage)
+        _PMD.constraint_storage_state(pm, i)
+        _PMD.constraint_storage_complementarity_mi(pm, i)
+        _PMD.constraint_mc_storage_losses(pm, i)
+        _PMD.constraint_mc_storage_thermal_limit(pm, i)
+        _PMD.constraint_mc_storage_on_off(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :branch)
+        _PMD.constraint_mc_power_losses(pm, i)
+        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+        _PMD.constraint_mc_voltage_angle_difference(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :switch)
+        constraint_switch_state_on_off(pm,i; relax=false)
+        constraint_mc_switch_ampacity(pm, i)
+    end
+
+    for i in _PMD.ids(pm, :transformer)
+       _PMD.constraint_mc_transformer_power(pm, i)
+    end
+
+    constraint_mc_isolate_block(pm)
+    constraint_radial_topology(pm)
+
+    constraint_block_budget(pm)
+    constraint_switch_budget(pm)
+
+    constraint_load_shed_definition(pm)
+
+    constraint_connect_block_load(pm)
+    constraint_connect_block_gen(pm)
+    constraint_connect_block_voltage(pm)
+    constraint_connect_block_shunt(pm)
+    constraint_connect_block_storage(pm)
+
+    # Use Jain's index promoting objective
+    objective_jain_mld(pm)
+end
+
+# """
+# MLD problem with Palma ratio promoting objective (RELAXED).
+# Minimizes range of served fractions (max - min).
+# """
+# function build_mc_mld_palma(pm::_PMD.AbstractUBFModels)
+#     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+#  	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+#     _PMD.variable_mc_branch_power(pm)
+# 	_PMD.variable_mc_branch_current(pm)
+#     _PMD.variable_mc_switch_power(pm)
+#     _PMD.variable_mc_switch_state(pm; relax=true)
+#     _PMD.variable_mc_shunt_indicator(pm; relax=true)
+#     _PMD.variable_mc_transformer_power(pm)
+
+#     _PMD.variable_mc_gen_indicator(pm; relax=true)
+#     _PMD.variable_mc_generator_power_on_off(pm)
+
+#    	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+
+#     _PMD.variable_mc_load_indicator(pm; relax=true)
+#     variable_mc_load_shed(pm)
+
+#     variable_block_indicator(pm; relax=true)
+#     variable_mc_fair_load_weights(pm)
+
+#    	_PMD.constraint_mc_model_current(pm)
+
+#     for i in _PMD.ids(pm, :ref_buses)
+#         _PMD.constraint_mc_theta_ref(pm, i)
+#     end
+
+#     _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+#     for i in _PMD.ids(pm, :gen)
+#         _PMD.constraint_mc_generator_power(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :bus)
+#         constraint_mc_power_balance_shed(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :storage)
+#         _PMD.constraint_storage_state(pm, i)
+#         _PMD.constraint_storage_complementarity_mi(pm, i)
+#         _PMD.constraint_mc_storage_losses(pm, i)
+#         _PMD.constraint_mc_storage_thermal_limit(pm, i)
+#         _PMD.constraint_mc_storage_on_off(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :branch)
+#         _PMD.constraint_mc_power_losses(pm, i)
+#         FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+#         _PMD.constraint_mc_voltage_angle_difference(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :switch)
+#         constraint_switch_state_on_off(pm,i; relax=true)
+#         constraint_mc_switch_ampacity(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :transformer)
+#        _PMD.constraint_mc_transformer_power(pm, i)
+#     end
+
+#     constraint_mc_isolate_block(pm)
+#     constraint_radial_topology(pm)
+
+#     constraint_block_budget(pm)
+#     constraint_switch_budget(pm)
+
+#     constraint_load_shed_definition(pm)
+
+#     constraint_connect_block_load(pm)
+#     constraint_connect_block_gen(pm)
+#     constraint_connect_block_voltage(pm)
+#     constraint_connect_block_shunt(pm)
+#     constraint_connect_block_storage(pm)
+
+#     # Use Palma ratio promoting objective (minimize range)
+#     objective_palma_mld(pm)
+# end
+
+# """
+# MLD problem with Palma ratio promoting objective (INTEGER).
+# """
+# function build_mc_mld_palma_integer(pm::_PMD.AbstractUBFModels)
+#     _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+#  	_PMD.variable_mc_bus_voltage_on_off(pm)
+
+#     _PMD.variable_mc_branch_power(pm)
+# 	_PMD.variable_mc_branch_current(pm)
+#     _PMD.variable_mc_switch_power(pm)
+#     _PMD.variable_mc_switch_state(pm; relax=false)
+#     _PMD.variable_mc_shunt_indicator(pm; relax=false)
+#     _PMD.variable_mc_transformer_power(pm)
+
+#     _PMD.variable_mc_gen_indicator(pm; relax=false)
+#     _PMD.variable_mc_generator_power_on_off(pm)
+
+#    	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
+
+#     _PMD.variable_mc_load_indicator(pm; relax=false)
+#     variable_mc_load_shed(pm)
+
+#     variable_block_indicator(pm; relax=false)
+#     variable_mc_fair_load_weights(pm)
+
+#    	_PMD.constraint_mc_model_current(pm)
+
+#     for i in _PMD.ids(pm, :ref_buses)
+#         _PMD.constraint_mc_theta_ref(pm, i)
+#     end
+
+#     _PMD.constraint_mc_bus_voltage_on_off(pm)
+
+#     for i in _PMD.ids(pm, :gen)
+#         _PMD.constraint_mc_generator_power(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :bus)
+#         constraint_mc_power_balance_shed(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :storage)
+#         _PMD.constraint_storage_state(pm, i)
+#         _PMD.constraint_storage_complementarity_mi(pm, i)
+#         _PMD.constraint_mc_storage_losses(pm, i)
+#         _PMD.constraint_mc_storage_thermal_limit(pm, i)
+#         _PMD.constraint_mc_storage_on_off(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :branch)
+#         _PMD.constraint_mc_power_losses(pm, i)
+#         FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+#         _PMD.constraint_mc_voltage_angle_difference(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :switch)
+#         constraint_switch_state_on_off(pm,i; relax=false)
+#         constraint_mc_switch_ampacity(pm, i)
+#     end
+
+#     for i in _PMD.ids(pm, :transformer)
+#        _PMD.constraint_mc_transformer_power(pm, i)
+#     end
+
+#     constraint_mc_isolate_block(pm)
+#     constraint_radial_topology(pm)
+
+#     constraint_block_budget(pm)
+#     constraint_switch_budget(pm)
+
+#     constraint_load_shed_definition(pm)
+
+#     constraint_connect_block_load(pm)
+#     constraint_connect_block_gen(pm)
+#     constraint_connect_block_voltage(pm)
+#     constraint_connect_block_shunt(pm)
+#     constraint_connect_block_storage(pm)
+
+#     # Use Palma ratio promoting objective (minimize range)
+#     objective_palma_mld(pm)
+# end
+
 "MLD problem for Branch Flow model "
 function build_mc_mld_traditional(pm::_PMD.AbstractUBFModels)
 

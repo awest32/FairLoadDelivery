@@ -7,6 +7,7 @@ import PowerModels
 import PowerModelsDistribution
 import JuMP
 import StatsFuns
+import Statistics
 import Ipopt, Gurobi, HiGHS, Juniper
 import HSL_jll
 import Memento
@@ -20,7 +21,12 @@ import FrankWolfe
 import PowerPlots
 import DataFrames
 import CSV
-using Dates
+import Dates
+import GraphPlot
+import Colors
+import Compose
+import Compose: compose, context, line, circle, text, stroke, fill, linewidth, fontsize, draw, SVG, inch, cm, mm, pt, font, hcenter, vcenter, hleft, vtop, vbottom, strokedash
+using Cairo
 
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
@@ -59,14 +65,21 @@ include("implementation/palma_relaxation.jl")
 include("implementation/other_fair_funcs.jl")
 include("implementation/random_rounding.jl")
 include("implementation/export_results.jl")
-
+include("implementation/visualization.jl")
 
 export nw_id_default, optimize_model!, ismultinetwork, update_data!, ref_add_load_blocks!, ref_add_rounded_load_blocks!
 export solve_mc_opf_acp, solve_mc_pf_aw, solve_mc_mld, solve_mc_mld_switch, solve_mc_mld_shed_implicit_diff, solve_mc_mld_shed_random_round, solve_mc_mld_traditional
+export solve_mc_mld_equality_min, solve_mc_mld_equality_min_integer, solve_mc_mld_switch_relaxed, solve_mc_mld_switch_integer
+export solve_mc_mld_proportional_fairness, solve_mc_mld_proportional_fairness_integer
+export solve_mc_mld_jain, solve_mc_mld_jain_integer, solve_mc_mld_palma, solve_mc_mld_palma_integer
 export build_mc_opf_ldf, build_mc_pf_switch, build_mc_pf_aw,build_mc_mld_shedding_implicit_diff, build_mc_mld_shedding_random_rounding, build_mc_mld_switchable_relaxed, build_mc_mld_switchable_integer
+export build_mc_mld_equality_min, build_mc_mld_equality_min_integer, objective_equality_min, objective_equality_min_weighted
+export build_mc_mld_proportional_fairness, build_mc_mld_proportional_fairness_integer, objective_proportional_fairness_mld
+export build_mc_mld_jain, build_mc_mld_jain_integer, objective_jain_mld, objective_jain_mld_minvar
+export build_mc_mld_palma, build_mc_mld_palma_integer, objective_palma_mld, objective_palma_mld_maxmin
 export ipopt, gurobi, highs, juniper
 export setup_network, lower_level_soln,generate_bernoulli_samples, radiality_check, update_network, ac_feasibility_test
 export lin_palma, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index
-export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder
+export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder, visualize_network_svg, plot_network_load_shed
 
 end #module FairLoadDelivery

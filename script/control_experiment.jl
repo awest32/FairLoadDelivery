@@ -30,14 +30,18 @@ Extract the results from these cases.
 Save these results in the location:
     results/date/control_exp/
 """
+
+include("../src/implementation/network_setup.jl")
+include("../src/implementation/export_results.jl")
+include("../src/implementation/visualization.jl")
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
 
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_c"
-gen_cap = 0.9
+case = "motivation_b"
+gen_cap = 1000.0
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
 powerplot(eng)
@@ -86,7 +90,7 @@ v_squared_max = (1.1^2)*ones(n_sw)
 v_squared_min = (0.9^2)*ones(n_sw)
 
 # Get the reference data for the blocks
-mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_relaxed; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
 # Run the integer case of the mld
@@ -218,3 +222,6 @@ CSV.write(joinpath(control_exp_folder,"switch_summary"), switch_df)
 # plot_fairness_indices(mld["solution"], collect(mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(mld["solution"]["load"])), collect(parse.(Int,collect(keys(mld["solution"]["load"])))), iterations, fair_exp, fair_func)
 
 
+plot_network_load_shed(mld_relaxed["solution"], math;
+    output_file=joinpath(control_exp_folder, "network_load_shed.svg"),
+    layout=:ieee13)

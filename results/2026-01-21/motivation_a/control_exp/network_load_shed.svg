@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.2"
+     width="140mm" height="100mm" viewBox="0 0 140 100"
+     stroke="none"
+     fill="#000000"
+     stroke-width="0.3"
+     font-size="3.88"
+>
+<defs>
+  <marker id="arrow" markerWidth="15" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
+  </marker>
+</defs>
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#FF8C00" id="img-553967fb-1">
+  <g transform="translate(56,30)">
+    <path fill="none" d="M14,0 L-14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#FF8C00" id="img-553967fb-2">
+  <g transform="translate(84,30)">
+    <path fill="none" d="M-14,0 L14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-3">
+  <g transform="translate(28,70)">
+    <path fill="none" d="M14,0 L-14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-4">
+  <g transform="translate(70,80)">
+    <path fill="none" d="M0,-10 L0,10 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-5">
+  <g transform="translate(112,30)">
+    <path fill="none" d="M-14,0 L14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-6">
+  <g transform="translate(28,30)">
+    <path fill="none" d="M14,0 L-14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-7">
+  <g transform="translate(14,50)">
+    <path fill="none" d="M0,-20 L0,20 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-8">
+  <g transform="translate(70,19)">
+    <path fill="none" d="M0,-11 L0,11 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-9">
+  <g transform="translate(42,80)">
+    <path fill="none" d="M0,-10 L0,10 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-10">
+  <g transform="translate(56,70)">
+    <path fill="none" d="M14,0 L-14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-11">
+  <g transform="translate(126,50)">
+    <path fill="none" d="M0,-20 L0,20 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-12">
+  <g transform="translate(70,40)">
+    <path fill="none" d="M0,-10 L0,10 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-13">
+  <g transform="translate(112,70)">
+    <path fill="none" d="M-14,0 L14,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-14">
+  <g transform="translate(98,30)">
+    <circle cx="0" cy="0" r="1.68" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-15">
+  <g transform="translate(70,90)">
+    <circle cx="0" cy="0" r="1.68" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1A661A" id="img-553967fb-16">
+  <g transform="translate(70,50)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#99E699" id="img-553967fb-17">
+  <g transform="translate(42,90)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#6CDA6C" id="img-553967fb-18">
+  <g transform="translate(14,70)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#29A329" id="img-553967fb-19">
+  <g transform="translate(126,30)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#98E598" id="img-553967fb-20">
+  <g transform="translate(14,30)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-21">
+  <g transform="translate(70,30)">
+    <circle cx="0" cy="0" r="1.68" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-22">
+  <g transform="translate(42,70)">
+    <circle cx="0" cy="0" r="1.68" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-23">
+  <g transform="translate(70,8)">
+    <circle cx="0" cy="0" r="1.68" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#249024" id="img-553967fb-24">
+  <g transform="translate(70,70)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#99E699" id="img-553967fb-25">
+  <g transform="translate(42,30)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1A661A" id="img-553967fb-26">
+  <g transform="translate(98,70)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#35CD35" id="img-553967fb-27">
+  <g transform="translate(126,70)">
+    <circle cx="0" cy="0" r="3.5" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-28">
+  <g transform="translate(98,26)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">633 (10)</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-29">
+  <g transform="translate(64.4,86)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">680 (2)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-30">
+  <g transform="translate(64.4,56.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-31">
+  <g transform="translate(64.4,56)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: -0.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-32">
+  <g transform="translate(64.4,45)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">670 (13)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-33">
+  <g transform="translate(36.4,96.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-34">
+  <g transform="translate(36.4,96)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 100.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-35">
+  <g transform="translate(36.4,85)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">652 (4)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-36">
+  <g transform="translate(8.4,76.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-37">
+  <g transform="translate(8.4,76)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 77.9%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-38">
+  <g transform="translate(8.4,65)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">611 (7)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-39">
+  <g transform="translate(124.18,36.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-40">
+  <g transform="translate(124.18,36)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 30.1%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-41">
+  <g transform="translate(124.18,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">634 (3)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-42">
+  <g transform="translate(12.18,36.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-43">
+  <g transform="translate(12.18,36)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 99.7%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-44">
+  <g transform="translate(12.18,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">646 (14)</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-45">
+  <g transform="translate(64.4,26)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">632 (9)</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-46">
+  <g transform="translate(42,66)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">684 (11)</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-47">
+  <g transform="translate(70,4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">rg60 (6)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-48">
+  <g transform="translate(66.36,76.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-49">
+  <g transform="translate(66.36,76)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 20.4%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-50">
+  <g transform="translate(66.36,65)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">671 (1)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-51">
+  <g transform="translate(42,36.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-52">
+  <g transform="translate(42,36)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 100.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-53">
+  <g transform="translate(42,25)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">645 (8)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-54">
+  <g transform="translate(98,76.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-55">
+  <g transform="translate(98,76)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 0.1%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-56">
+  <g transform="translate(98,65)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">692 (12)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-57">
+  <g transform="translate(120.4,76.25)">
+    <path d="M-8.4,-1.75 L8.4,-1.75 8.4,1.75 -8.4,1.75  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-58">
+  <g transform="translate(120.4,76)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 51.2%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.53" id="img-553967fb-59">
+  <g transform="translate(120.4,65)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">675 (5)</text>
+    </g>
+  </g>
+</g>
+</svg>
