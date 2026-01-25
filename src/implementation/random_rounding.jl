@@ -172,7 +172,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         #     >= sum(ref_round[s]["ps"][t]*z_storage[s] for (s, conns) in ref_round[:bus_conns_storage] for t in conns)
         #     - sum(ref_round[l]["pd"][t]*z_demand[l] for (l, conns) in ref_round[:bus_conns_load] for t in conns)
         #     ) 
-        print(model)
+        # print(model)
         optimize!(model)
         @info "Sample $i: Radiality check status: $(termination_status(model))"
         if termination_status(model) == MOI.OPTIMAL

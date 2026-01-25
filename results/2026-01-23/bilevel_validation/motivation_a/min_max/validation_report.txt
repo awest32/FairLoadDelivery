@@ -1,0 +1,50 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_a
+  Fairness Function: min_max
+  Iterations: 5
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [+] voltage_limits: PASS
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [X] voltage_limits_rounded: FAIL
+        - (bus_id = "13", phase = 1, w = 1.2100000061816039, type = "overvoltage", limit = 1.2100000000000002)
+    [+] block_label_consistency: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] radiality_found: PASS
+    [+] rounded_mld_converged: PASS
+    [+] current_limits_rounded: PASS
+    [+] switch_label_consistency: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "1", phase = 1, s_squared = 567898.3206272118, limit = 94864.0, utilization_pct = 244.672171096673, z_switch = 1.0, w = 1.0, rating = 308.0)
+        - (switch_id = "1", phase = 3, s_squared = 280363.2005366342, limit = 94864.0, utilization_pct = 171.9134231302263, z_switch = 1.0, w = 1.0, rating = 308.0)
+        - (switch_id = "2", phase = 1, s_squared = 364860.29004848935, limit = 103684.0, utilization_pct = 187.58902572506423, z_switch = 1.0, w = 1.0, rating = 322.0)
+        - (switch_id = "2", phase = 2, s_squared = 626922.5446305329, limit = 103684.0, utilization_pct = 245.89577807373036, z_switch = 1.0, w = 1.0, rating = 322.0)
+        - (switch_id = "2", phase = 3, s_squared = 525624.6824870309, limit = 103684.0, utilization_pct = 225.1552114986042, z_switch = 1.0, w = 1.0, rating = 322.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 5
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 19 checks, 16 passed, 3 failed
+======================================================================

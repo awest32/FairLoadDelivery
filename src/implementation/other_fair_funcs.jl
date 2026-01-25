@@ -10,7 +10,7 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     # base_name = "pshed_new"
     #     )
-    @variable(model, weights_new[1:n] >= 0)
+    @variable(model, weights_new[1:n] >= 1)
     @constraint(model, [i=1:n], weights_new[i] <= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
     # @constraint(model, [i in 1:n],
@@ -43,11 +43,11 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     # base_name = "pshed_new"
     #     )
-    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i] <= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
 
-    @variable(model, t >= 0)
+    @variable(model, t >= 1)
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     # )
@@ -68,7 +68,7 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     # base_name = "pshed_new"
     #     )
-    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
     # @constraint(model, [i in 1:length(pshed_prev)],
@@ -98,20 +98,20 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
             total_load_ref += load["pd"][idx]
         end
     end
-    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
     @objective(model, Min, sum(pshed_new))
-     JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    open("efficiency_model_out.txt", "w") do io
-            redirect_stdout(io) do
-                print(model)
-            end
-        end
-    JuMP.set_silent(model)
+    #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    # open("efficiency_model_out.txt", "w") do io
+    #         redirect_stdout(io) do
+    #             print(model)
+    #         end
+    #     end
+    # JuMP.set_silent(model)
     JuMP.set_silent(model)
     optimize!(model)
     return value.(pshed_new), value.(weights_new)
@@ -124,7 +124,7 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
     model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     base_name = "pshed_new"
         )    
-    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, weights_new[1:length(weights_prev)] >= 1)
     #@variable(model, t >= 0)
     @constraint(model, [i in 1:length(pshed_prev)],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
@@ -146,7 +146,7 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     # base_name = "pshed_new"
     #     )
-    @variable(model, weights_new[1:length(weights_prev)] >= 0)
+    @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @variable(model, t >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]^2-weights_prev[i]^2 <= 0.1^2)
