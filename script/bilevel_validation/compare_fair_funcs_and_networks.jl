@@ -16,6 +16,7 @@ using DataFrames
 using CSV
 using Dates
 using Plots
+using Statistics
 
 include("../../src/implementation/network_setup.jl")
 include("../../src/implementation/lower_level_mld.jl")
@@ -59,6 +60,8 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
     fair_weights = copy(fair_weights_init)  # Mutable copy for updates
     pshed_lower_level = Float64[]
     pshed_upper_level = Float64[]
+    final_weight_ids = Int[]
+    final_weights = Float64[]
 
     for k in 1:iterations
         # Solve lower-level problem and get sensitivities
@@ -84,12 +87,14 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
 
         # Update fair_weights for next iteration
         fair_weights = fair_weight_vals
+        final_weight_ids = weight_ids
+        final_weights = fair_weight_vals
 
         push!(pshed_lower_level, sum(pshed_val))
         push!(pshed_upper_level, sum(pshed_new))
     end
 
-    return math_new, pshed_lower_level, pshed_upper_level
+    return math_new, pshed_lower_level, pshed_upper_level, final_weight_ids, final_weights
 end
 
 # ============================================================
@@ -156,6 +161,37 @@ function find_best_mld_solution(mlds::Vector{Dict{String, Any}})
         end
     end
     return best_idx, best_idx > 0 ? mlds[best_idx] : nothing
+end
+
+function check_binary_solution(mld::Dict)
+    """Check that switch states and block status in final MLD solution are binary (0.0 or 1.0)."""
+    if mld === nothing || !haskey(mld, "solution")
+        return true, []
+    end
+
+    violations = String[]
+
+    # Check switch states
+    if haskey(mld["solution"], "switch")
+        for (s_id, s_data) in mld["solution"]["switch"]
+            state = s_data["state"]
+            if !(isapprox(state, 0.0, atol=1e-6) || isapprox(state, 1.0, atol=1e-6))
+                push!(violations, "Switch $s_id: state=$state")
+            end
+        end
+    end
+
+    # Check block status
+    if haskey(mld["solution"], "block")
+        for (b_id, b_data) in mld["solution"]["block"]
+            status = b_data["status"]
+            if !(isapprox(status, 0.0, atol=1e-6) || isapprox(status, 1.0, atol=1e-6))
+                push!(violations, "Block $b_id: status=$status")
+            end
+        end
+    end
+
+    return isempty(violations), violations
 end
 
 function extract_load_shed(mld::Dict)
@@ -300,6 +336,72 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     return p
 end
 
+function create_shed_distribution_plot(case::String, per_load_data::Dict, save_dir::String)
+    """
+    Create scatter plot showing shed distribution by fairness function.
+    Similar to mld_comparison_experiment.jl shed_distribution.svg
+    """
+    # Get union of all load IDs
+    all_load_ids = Set{Int}()
+    for (_, data) in per_load_data
+        if !isempty(data[:load_ids])
+            union!(all_load_ids, data[:load_ids])
+        end
+    end
+
+    if isempty(all_load_ids)
+        return nothing
+    end
+
+    load_ids = sort(collect(all_load_ids))
+
+    p = plot(
+        xlabel = "Load ID",
+        ylabel = "Load Shed (kW)",
+        title = "Shed Distribution by Fairness Function: $case",
+        legend = :outertopright,
+        size = (1100, 500)
+    )
+
+    markers = Dict(
+        "proportional" => :square,
+        "efficiency" => :circle,
+        "min_max" => :star5,
+        "equality_min" => :diamond,
+        "jain" => :utriangle
+    )
+
+    for fair_func in FAIR_FUNCS
+        if !haskey(per_load_data, fair_func)
+            continue
+        end
+
+        data = per_load_data[fair_func]
+        if isempty(data[:load_ids])
+            continue
+        end
+
+        id_to_value = Dict(zip(data[:load_ids], data[:pshed]))
+        aligned_values = [get(id_to_value, lid, NaN) for lid in load_ids]
+
+        scatter!(p, load_ids, aligned_values,
+            label = FAIR_FUNC_LABELS[fair_func],
+            marker = markers[fair_func],
+            markersize = 8,
+            color = FAIR_FUNC_COLORS[fair_func]
+        )
+    end
+
+    # Add horizontal line for equality_min max shed (fairness target)
+    if haskey(per_load_data, "equality_min") && !isempty(per_load_data["equality_min"][:pshed])
+        max_eq_shed = maximum(per_load_data["equality_min"][:pshed])
+        hline!(p, [max_eq_shed], label="EqMin Max Shed", linestyle=:dash, color=:orange, linewidth=2)
+    end
+
+    savefig(p, joinpath(save_dir, "shed_distribution_$case.svg"))
+    return p
+end
+
 # ============================================================
 # MAIN COMPARISON LOOP
 # ============================================================
@@ -328,6 +430,9 @@ function run_comparison()
     # Per-load data storage: case => fair_func => {load_ids, pshed, pd_served}
     per_load_results = Dict{String, Dict{String, Dict{Symbol, Vector}}}()
 
+    # Final weights storage: case => fair_func => {weight_ids, weights}
+    final_weights_results = Dict{String, Dict{String, Dict{Symbol, Vector}}}()
+
     println("=" ^ 60)
     println("LOAD SHED COMPARISON ACROSS CASES AND FAIRNESS FUNCTIONS")
     println("=" ^ 60)
@@ -344,14 +449,21 @@ function run_comparison()
 
         # Initialize per-load storage for this case
         per_load_results[case] = Dict{String, Dict{Symbol, Vector}}()
+        final_weights_results[case] = Dict{String, Dict{Symbol, Vector}}()
 
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
 
             try
                 # Run bilevel relaxation
-                math_relaxed, pshed_lower, pshed_upper = run_bilevel_relaxed(
+                math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts = run_bilevel_relaxed(
                     math, ITERATIONS, fair_weights, fair_func
+                )
+
+                # Store final weights
+                final_weights_results[case][fair_func] = Dict(
+                    :weight_ids => weight_ids,
+                    :weights => final_wts
                 )
 
                 # Run random rounding
@@ -368,6 +480,13 @@ function run_comparison()
 
                 # Find best solution
                 best_idx, best_mld = find_best_mld_solution(mld_results)
+
+                # Check binary values in final solution
+                binary_ok, binary_violations = check_binary_solution(best_mld)
+                if !binary_ok
+                    @warn "$case/$fair_func: Non-binary values in final MLD solution: $(join(binary_violations[1:min(3,length(binary_violations))], "; "))"
+                end
+
                 final_pshed, final_pd_served = extract_load_shed(best_mld)
 
                 # Extract per-load data
@@ -400,11 +519,12 @@ function run_comparison()
                 println("ERROR: $e")
                 push!(results, (case, fair_func, total_demand, NaN, NaN, NaN, NaN, NaN, NaN))
                 per_load_results[case][fair_func] = Dict(:load_ids => Int[], :pshed => Float64[], :pd_served => Float64[])
+                final_weights_results[case][fair_func] = Dict(:weight_ids => Int[], :weights => Float64[])
             end
         end
     end
 
-    return results, per_load_results
+    return results, per_load_results, final_weights_results
 end
 
 # ============================================================
@@ -412,7 +532,7 @@ end
 # ============================================================
 println("\nStarting comparison at $(now())...\n")
 
-results, per_load_results = run_comparison()
+results, per_load_results, final_weights_results = run_comparison()
 
 # Print summary table
 println("\n" * "=" ^ 60)
@@ -438,7 +558,7 @@ for case in CASES
 end
 
 # Save results
-save_dir = joinpath("results", Dates.format(today(), "yyyy-mm-dd"))
+save_dir = "results/$(Dates.today())/"
 mkpath(save_dir)
 csv_path = joinpath(save_dir, "load_shed_comparison.csv")
 CSV.write(csv_path, results)
@@ -469,6 +589,170 @@ for case in CASES
     if p_served !== nothing
         println("    Saved load_served_per_bus_$case.svg")
     end
+
+    # Create shed distribution scatter plot
+    p_dist = create_shed_distribution_plot(case, per_load_results[case], save_dir)
+    if p_dist !== nothing
+        println("    Saved shed_distribution_$case.svg")
+    end
+end
+
+# ============================================================
+# FINAL WEIGHTS COMPARISON
+# ============================================================
+println("\n" * "=" ^ 60)
+println("FINAL WEIGHTS COMPARISON")
+println("=" ^ 60)
+
+for case in CASES
+    if !haskey(final_weights_results, case)
+        continue
+    end
+
+    println("\n$case:")
+
+    # Get all load IDs
+    all_weight_ids = Set{Int}()
+    for (ff, data) in final_weights_results[case]
+        union!(all_weight_ids, data[:weight_ids])
+    end
+    load_ids_sorted = sort(collect(all_weight_ids))
+
+    if isempty(load_ids_sorted)
+        println("  No weight data available")
+        continue
+    end
+
+    # Build weights DataFrame
+    weights_df = DataFrame(load_id = load_ids_sorted)
+    for fair_func in FAIR_FUNCS
+        if !haskey(final_weights_results[case], fair_func) || isempty(final_weights_results[case][fair_func][:weight_ids])
+            weights_df[!, fair_func] = fill(NaN, length(load_ids_sorted))
+        else
+            data = final_weights_results[case][fair_func]
+            id_to_weight = Dict(zip(data[:weight_ids], data[:weights]))
+            weights_df[!, fair_func] = [get(id_to_weight, lid, NaN) for lid in load_ids_sorted]
+        end
+    end
+
+    # Print weight statistics only
+    for fair_func in FAIR_FUNCS
+        wts = weights_df[!, fair_func]
+        valid_wts = filter(!isnan, wts)
+        if !isempty(valid_wts)
+            println("  $(rpad(fair_func, 15)): min=$(round(minimum(valid_wts), digits=2)), max=$(round(maximum(valid_wts), digits=2)), spread=$(round(maximum(valid_wts)-minimum(valid_wts), digits=2))")
+        end
+    end
+
+    # Save CSV
+    CSV.write(joinpath(save_dir, "final_weights_$case.csv"), weights_df)
+
+    # Create bar chart
+    p_weights = plot(xlabel="Load ID", ylabel="Final Weight", title="Final Weights: $case",
+                     legend=:outertopright, xticks=load_ids_sorted, size=(1100, 500))
+    n_funcs = length(FAIR_FUNCS)
+    bar_width = 0.8 / n_funcs
+    offsets = collect(range(-(n_funcs-1)/2 * bar_width, (n_funcs-1)/2 * bar_width, length=n_funcs))
+
+    for (i, fair_func) in enumerate(FAIR_FUNCS)
+        wts = weights_df[!, fair_func]
+        valid_mask = .!isnan.(wts)
+        if any(valid_mask)
+            bar!(p_weights, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
+                bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
+        end
+    end
+    savefig(p_weights, joinpath(save_dir, "final_weights_$case.svg"))
+    println("  Saved: final_weights_$case.csv, final_weights_$case.svg")
+end
+
+# ============================================================
+# FAIRNESS METRICS SUMMARY CSV
+# ============================================================
+println("\n" * "=" ^ 60)
+println("FAIRNESS METRICS SUMMARY")
+println("=" ^ 60)
+
+for case in CASES
+    if !haskey(per_load_results, case)
+        continue
+    end
+
+    println("\n$case:")
+
+    # Get total demand from results DataFrame
+    case_rows = filter(row -> row.case == case, results)
+    if isempty(case_rows)
+        continue
+    end
+    total_demand = first(case_rows).total_demand
+
+    # Build summary DataFrame
+    summary_df = DataFrame(
+        Formulation = String[],
+        TotalServed_pct = Float64[],
+        TotalShed_kW = Float64[],
+        MaxShed_kW = Float64[],
+        ShedVariance = Float64[],
+        JainsIndex = Float64[],
+        PalmaRatio = Float64[],
+        GiniCoeff = Float64[],
+        CV_Served = Float64[]
+    )
+
+    for fair_func in FAIR_FUNCS
+        if !haskey(per_load_results[case], fair_func)
+            continue
+        end
+
+        data = per_load_results[case][fair_func]
+        pshed_vals = data[:pshed]
+        pd_vals = data[:pd_served]
+
+        if isempty(pshed_vals) || isempty(pd_vals)
+            continue
+        end
+
+        # Calculate metrics
+        total_shed = sum(pshed_vals)
+        total_served = sum(pd_vals)
+        total_served_pct = (total_served / total_demand) * 100
+        max_shed = maximum(pshed_vals)
+        shed_variance = Statistics.var(pshed_vals)
+
+        # Fairness metrics on served values (filter zeros)
+        served_nonzero = filter(x -> x > 0, pd_vals)
+        if length(served_nonzero) >= 2
+            jains_idx = jains_index(served_nonzero)
+            palma = length(served_nonzero) >= 3 ? palma_ratio(served_nonzero) : NaN
+            gini = gini_index(served_nonzero)
+            cv_served = std(served_nonzero) / mean(served_nonzero)
+        else
+            jains_idx = NaN
+            palma = NaN
+            gini = NaN
+            cv_served = NaN
+        end
+
+        push!(summary_df, (
+            FAIR_FUNC_LABELS[fair_func],
+            round(total_served_pct, digits=2),
+            round(total_shed, digits=2),
+            round(max_shed, digits=2),
+            round(shed_variance, digits=2),
+            round(jains_idx, digits=4),
+            round(palma, digits=4),
+            round(gini, digits=4),
+            round(cv_served, digits=4)
+        ))
+
+        println("  $(rpad(FAIR_FUNC_LABELS[fair_func], 15)): $(round(total_served_pct, digits=1))% served, Jain=$(round(jains_idx, digits=3)), Gini=$(round(gini, digits=3))")
+    end
+
+    # Save summary CSV
+    summary_path = joinpath(save_dir, "fairness_summary_$case.csv")
+    CSV.write(summary_path, summary_df)
+    println("  Saved: $summary_path")
 end
 
 println("\n" * "=" ^ 60)

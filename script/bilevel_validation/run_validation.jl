@@ -39,7 +39,7 @@ const CASE = "motivation_a"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.9
 const ITERATIONS = 5
-const FAIR_FUNC = "jain"  # simplest fairness function for testing
+const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 5
 
@@ -366,6 +366,38 @@ end
 passed_radial = any(idx !== nothing for idx in bernoulli_selection_index)
 rounding_checks["radiality_found"] = Dict("passed" => passed_radial, "details" => ["Sample indices by round: $bernoulli_selection_index"])
 print_check_result("Radial topology found", passed_radial)
+
+# Check that rounded values are binary (1.0 or 0.0)
+binary_check_passed = true
+non_binary_values = []
+for r in 1:n_rounds
+    if bernoulli_selection_index[r] === nothing
+        continue
+    end
+    # Check switch states
+    for (s_id, state) in bernoulli_switch_selection_exp[r]
+        if !(state == 0.0 || state == 1.0)
+            binary_check_passed = false
+            push!(non_binary_values, "Round $r: Switch $s_id = $state")
+        end
+    end
+    # Check block status
+    for (b_id, status) in bernoulli_block_selection_exp[r]
+        if !(status == 0.0 || status == 1.0)
+            binary_check_passed = false
+            push!(non_binary_values, "Round $r: Block $b_id = $status")
+        end
+    end
+    # Check load status
+    for (l_id, status) in bernoulli_load_selection_exp[r]
+        if !(status == 0.0 || status == 1.0)
+            binary_check_passed = false
+            push!(non_binary_values, "Round $r: Load $l_id = $status")
+        end
+    end
+end
+rounding_checks["binary_values"] = Dict("passed" => binary_check_passed, "details" => non_binary_values)
+print_check_result("Rounded values are binary (0.0 or 1.0)", binary_check_passed, isempty(non_binary_values) ? "" : join(non_binary_values[1:min(5,length(non_binary_values))], "; "))
 
 # Create copies of math dictionary for each round and apply rounded states
 math_random_test = Vector{Dict{String, Any}}()

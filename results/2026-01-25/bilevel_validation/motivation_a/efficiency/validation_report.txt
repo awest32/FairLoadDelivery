@@ -21,15 +21,16 @@
 
   --- random_rounding ---
     [+] rounded_mld_converged_r1: PASS
-    [+] voltage_limits_rounded_r2: PASS
     [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
     [+] voltage_limits_rounded_r1: PASS
     [+] block_label_consistency: PASS
-    [+] voltage_source_after_rounding: PASS
     [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
     [+] current_limits_rounded_r1: PASS
     [+] current_limits_rounded_r2: PASS
-    [+] switch_label_consistency: PASS
 
   --- ac_feasibility ---
     [+] ac_convergence: PASS
@@ -48,5 +49,5 @@
     Current Rating Violations: 5
     ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
 
-  TOTALS: 22 checks, 20 passed, 2 failed
+  TOTALS: 23 checks, 21 passed, 2 failed
 ======================================================================
