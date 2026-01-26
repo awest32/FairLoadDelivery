@@ -16,12 +16,15 @@ function constraint_fix_bus_terminal_mismatch(pm::_PMD.AbstractUnbalancedPowerMo
 end
 
 function constraint_load_shed_definition(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
-    JuMP.@constraint(pm.model, pshed_constraint[d in keys(_PMD.ref(pm, nw, :load))], 
-        _PMD.var(pm, nw)[:pshed][d] == (1-_PMD.var(pm, nw)[:z_demand][d])*sum(_PMD.ref(pm, nw, :load, d)["pd"])
+    # Anonymous constraint syntax for multinetwork support
+    JuMP.@constraint(pm.model, [d in keys(_PMD.ref(pm, nw, :load))],
+        _PMD.var(pm, nw)[:pshed][d] == (1-_PMD.var(pm, nw)[:z_demand][d])*sum(_PMD.ref(pm, nw, :load, d)["pd"]),
+        base_name = "$(nw)_pshed_constraint"
     )
-    
-    JuMP.@constraint(pm.model, qshed_constraint[d in keys(_PMD.ref(pm, nw, :load))], 
-        _PMD.var(pm, nw)[:qshed][d] == (1-_PMD.var(pm, nw)[:z_demand][d])*sum(_PMD.ref(pm, nw, :load, d)["qd"])
+
+    JuMP.@constraint(pm.model, [d in keys(_PMD.ref(pm, nw, :load))],
+        _PMD.var(pm, nw)[:qshed][d] == (1-_PMD.var(pm, nw)[:z_demand][d])*sum(_PMD.ref(pm, nw, :load, d)["qd"]),
+        base_name = "$(nw)_qshed_constraint"
     )
 end
 

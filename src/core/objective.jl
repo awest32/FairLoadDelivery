@@ -1,4 +1,5 @@
 
+
 """
     objective_mc_min_fuel_cost_pwl_voll(pm::AbstractUnbalancedPowerModel)
 
@@ -582,4 +583,32 @@ function objective_palma_mld_maxmin(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
 
     # Maximize minimum served fraction, with small incentive for total efficiency
     return JuMP.@objective(pm.model, Max, t_min + epsilon * total_served)
+end
+
+
+"""
+Objective function: maximize weighted load served across all time periods.
+Matches FairLoadDelivery's objective_fairly_weighted_max_load_served.
+"""
+function objective_mn_max_load_served(pm::PMD.AbstractUnbalancedPowerModel)
+    nw_ids = PMD.nw_ids(pm)
+
+    obj_expr = JuMP.AffExpr(0.0)
+
+    for n in nw_ids
+        for (i, load) in PMD.ref(pm, n, :load)
+            z_demand = PMD.var(pm, n, :z_demand, i)
+            pd = load["pd"]
+
+            # Weight by load magnitude (serve more load = better)
+            weight = get(load, "weight", 10.0)
+
+            for (idx, p) in enumerate(pd)
+                # Maximize weighted load served
+                JuMP.add_to_expression!(obj_expr, weight * p * z_demand)
+            end
+        end
+    end
+
+    JuMP.@objective(pm.model, Max, obj_expr)
 end

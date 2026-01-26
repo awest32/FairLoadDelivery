@@ -63,6 +63,14 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
                 switch["current_rating"][:] .= 322
             end
         end
+    elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
+        for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 308
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 322
+            end
+        end
     elseif case == "ieee_13_aw_edit/motivation_b.dss"
        for (i,switch) in math["switch"]
             if switch["name"] == "632633"

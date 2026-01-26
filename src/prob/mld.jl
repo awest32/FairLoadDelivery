@@ -9,6 +9,20 @@ function solve_mc_mld_switch_integer(data::Dict{String,<:Any}, solver; kwargs...
 end
 
 """
+Solve the multiperiod MLD problem using FairLoadDelivery formulation.
+"""
+function solve_mn_mc_mld_switch_relaxed(data::Dict{String,Any}, solver)
+    return PMD.solve_mc_model(
+        data,
+        PMD.LPUBFDiagPowerModel,
+        solver,
+        build_mn_mc_mld_switch_relaxed;
+        multinetwork=true,
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
+    )
+end
+
+"""
 Solve MLD with equality_min (min-max fairness) objective (relaxed).
 Minimizes the maximum load shed across all loads.
 """
@@ -85,6 +99,90 @@ end
 
 function solve_mc_mld_weight_update(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_weight_update; ref_extensions=[ref_update_weights!], kwargs...)
+end
+"""
+Build the multiperiod MLD problem using FairLoadDelivery constraints.
+This creates variables and constraints for each time period with proper
+radiality, switch ampacity, and load block constraints.
+"""
+function build_mn_mc_mld_switch_relaxed(pm::PMD.AbstractUnbalancedPowerModel)
+    # Get all network IDs and sort them
+    nw_ids = sort(collect(PMD.nw_ids(pm)))
+
+    println("Building multiperiod FLDP with $(length(nw_ids)) periods...")
+
+    for n in nw_ids
+        println("  Building period $n...")
+
+        # Variables (same as FairLoadDelivery's build_mc_mld_switchable_relaxed)
+        PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=true)
+        PMD.variable_mc_bus_voltage_on_off(pm; nw=n)
+
+        PMD.variable_mc_branch_power(pm; nw=n)
+        PMD.variable_mc_branch_current(pm; nw=n)
+        PMD.variable_mc_switch_power(pm; nw=n)
+        PMD.variable_mc_switch_state(pm; nw=n, relax=true)
+        PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
+        PMD.variable_mc_transformer_power(pm; nw=n)
+
+        PMD.variable_mc_gen_indicator(pm; nw=n, relax=true)
+        PMD.variable_mc_generator_power_on_off(pm; nw=n)
+
+        PMD.variable_mc_load_indicator(pm; nw=n, relax=true)
+        FairLoadDelivery.variable_mc_load_shed(pm; nw=n)
+
+        FairLoadDelivery.variable_block_indicator(pm; nw=n, relax=true)
+        FairLoadDelivery.variable_mc_fair_load_weights(pm; nw=n)
+
+        # Constraints
+        PMD.constraint_mc_model_current(pm; nw=n)
+
+        for i in PMD.ids(pm, n, :ref_buses)
+            PMD.constraint_mc_theta_ref(pm, i; nw=n)
+        end
+
+        PMD.constraint_mc_bus_voltage_on_off(pm; nw=n)
+
+        for i in PMD.ids(pm, n, :gen)
+            PMD.constraint_mc_generator_power(pm, i; nw=n)
+        end
+
+        for i in PMD.ids(pm, n, :bus)
+            FairLoadDelivery.constraint_mc_power_balance_shed(pm, i; nw=n)
+        end
+
+        for i in PMD.ids(pm, n, :branch)
+            PMD.constraint_mc_power_losses(pm, i; nw=n)
+            FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm, i; nw=n)
+            PMD.constraint_mc_voltage_angle_difference(pm, i; nw=n)
+        end
+
+        for i in PMD.ids(pm, n, :switch)
+            FairLoadDelivery.constraint_switch_state_on_off(pm, i; nw=n, relax=true)
+            FairLoadDelivery.constraint_mc_switch_ampacity(pm, i; nw=n)
+        end
+
+        for i in PMD.ids(pm, n, :transformer)
+            PMD.constraint_mc_transformer_power(pm, i; nw=n)
+        end
+
+        # FairLoadDelivery-specific constraints
+        FairLoadDelivery.constraint_mc_isolate_block(pm; nw=n)
+        FairLoadDelivery.constraint_radial_topology(pm; nw=n)
+
+        FairLoadDelivery.constraint_block_budget(pm; nw=n)
+        FairLoadDelivery.constraint_switch_budget(pm; nw=n)
+
+        FairLoadDelivery.constraint_load_shed_definition(pm; nw=n)
+
+        FairLoadDelivery.constraint_connect_block_load(pm; nw=n)
+        FairLoadDelivery.constraint_connect_block_gen(pm; nw=n)
+        FairLoadDelivery.constraint_connect_block_voltage(pm; nw=n)
+        FairLoadDelivery.constraint_connect_block_shunt(pm; nw=n)
+    end
+
+    # Objective: maximize weighted load served across all periods
+    objective_mn_max_load_served(pm)
 end
 
 function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)

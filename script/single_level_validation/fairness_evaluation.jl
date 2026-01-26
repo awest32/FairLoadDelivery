@@ -67,7 +67,7 @@ formulations_to_run = [
 ]
 
 case = "motivation_a"
-gen_cap = 1000.0  # Limited generation to force load shedding
+gen_cap = 0.5  # Limited generation to force load shedding
 
 # ============================================================
 # SETUP

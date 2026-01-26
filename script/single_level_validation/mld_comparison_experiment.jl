@@ -16,13 +16,13 @@ using DataFrames
 using CSV
 using Dates
 
-include("../src/implementation/network_setup.jl")
-include("../src/implementation/lower_level_mld.jl")
-include("../src/implementation/palma_relaxation.jl")
-include("../src/implementation/other_fair_funcs.jl")
-include("../src/implementation/random_rounding.jl")
-include("../src/implementation/export_results.jl")
-include("../src/implementation/visualization.jl")
+include("../../src/implementation/network_setup.jl")
+include("../../src/implementation/lower_level_mld.jl")
+include("../../src/implementation/palma_relaxation.jl")
+include("../../src/implementation/other_fair_funcs.jl")
+include("../../src/implementation/random_rounding.jl")
+include("../../src/implementation/export_results.jl")
+include("../../src/implementation/visualization.jl")
 
 """
 This experiment compares different MLD formulations:
@@ -44,7 +44,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 case = "motivation_a"
-gen_cap = 1000.0  # Limited generation to force load shedding
+gen_cap = 0.5  # Limited generation to force load shedding
 
 # Inputs: case file path, generation capacity, list of critical load IDs
 eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", gen_cap, [])
