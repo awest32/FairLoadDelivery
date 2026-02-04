@@ -31,17 +31,17 @@ Save these results in the location:
     results/date/control_exp/
 """
 
-include("../src/implementation/network_setup.jl")
-include("../src/implementation/export_results.jl")
-include("../src/implementation/visualization.jl")
+include("../../src/implementation/network_setup.jl")
+include("../../src/implementation/export_results.jl")
+include("../../src/implementation/visualization.jl")
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
 
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_b"
-gen_cap = 1000.0
+case = "motivation_c"
+gen_cap = 0.8
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
 powerplot(eng)
@@ -110,7 +110,7 @@ for (id, switch) in switch_int
     push!(switch_voltage_df.SwitchID, parse(Int,id))
     push!(switch_df.GenCap, gen_cap)
     push!(switch_voltage_df.GenCap, gen_cap)
-    push!(switch_df.IntStatus, switch["state"])
+    push!(switch_df.IntStatus, Int(round(switch["state"])))
     push!(switch_df.SwitchName, math["switch"][id]["name"])
 end
 
@@ -223,5 +223,27 @@ CSV.write(joinpath(control_exp_folder,"switch_summary"), switch_df)
 
 
 plot_network_load_shed(mld_relaxed["solution"], math;
-    output_file=joinpath(control_exp_folder, "network_load_shed.svg"),
+    output_file=joinpath(control_exp_folder, "network_load_shed_relaxed.svg"),
     layout=:ieee13)
+
+plot_network_load_shed(mld_int["solution"], math;
+    output_file=joinpath(control_exp_folder, "network_load_shed_integer.svg"),
+    layout=:ieee13)
+
+# --- Single-level test: force switches 671692 and 646611 open ---
+println("\n" * "="^60)
+println("BLOCK DE-ENERGIZATION TEST: forcing 671692 and 646611 open")
+println("="^60)
+math_test = deepcopy(math)
+for (i, sw) in math_test["switch"]
+    if sw["name"] in ("671692", "646611")
+        sw["state"] = 0
+        println("  Forced switch $(sw["name"]) (id=$i) to state=0")
+    end
+end
+mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round(math_test, ipopt)
+println("Termination: $(mld_test["termination_status"])")
+plot_network_load_shed(mld_test["solution"], math_test;
+    output_file=joinpath(control_exp_folder, "network_block_deenergize_test.svg"),
+    layout=:ieee13)
+

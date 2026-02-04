@@ -1,0 +1,93 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_b
+  Fairness Function: efficiency
+  Iterations: 2
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [+] gen_forces_shedding: PASS
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [X] voltage_limits: FAIL
+        - (bus_id = "4", phase = 1, w = 0.728929866824827, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "4", phase = 2, w = 0.7418462466350391, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "4", phase = 3, w = 0.7323733532091958, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "1", phase = 1, w = 0.7338540133264291, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "1", phase = 2, w = 0.7402581144248177, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "1", phase = 3, w = 0.7326753410238955, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "12", phase = 1, w = 0.7462075915538708, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "12", phase = 2, w = 0.7406122009235193, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "12", phase = 3, w = 0.7381799950586295, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "2", phase = 1, w = 0.73385402871351, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "2", phase = 2, w = 0.7402581315513359, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "2", phase = 3, w = 0.732675358376607, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "11", phase = 1, w = 0.7338689197476966, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "11", phase = 2, w = 0.7402613092100467, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "11", phase = 3, w = 0.7326837168090153, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "5", phase = 1, w = 0.741602199084303, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "5", phase = 2, w = 0.7448988659698879, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "5", phase = 3, w = 0.7406302325661525, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "15", phase = 1, w = 0.7462075995191861, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "15", phase = 2, w = 0.7406121971771986, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "15", phase = 3, w = 0.7381799964933088, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "16", phase = 1, w = 0.7547630739964124, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "16", phase = 2, w = 0.75038021548432, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "16", phase = 3, w = 0.7599611216219482, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "14", phase = 1, w = 0.7436586690452662, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "14", phase = 2, w = 0.7384800088008058, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "14", phase = 3, w = 0.7406532943488003, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "7", phase = 1, w = 0.7436416546358333, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "7", phase = 2, w = 0.7384768140155763, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "7", phase = 3, w = 0.740641506951226, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "8", phase = 1, w = 0.7512593283902201, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "8", phase = 2, w = 0.7406274949712985, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "8", phase = 3, w = 0.752462047293002, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "17", phase = 1, w = 0.7512593454046297, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "17", phase = 2, w = 0.7406275080472788, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "17", phase = 3, w = 0.7524620630675484, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "10", phase = 1, w = 0.754763056652001, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "10", phase = 2, w = 0.7503802052198776, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "10", phase = 3, w = 0.7599611058945526, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "3", phase = 1, w = 0.74161399615817, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "3", phase = 2, w = 0.7449049699089173, type = "undervoltage", limit = 0.9025)
+        - (bus_id = "3", phase = 3, w = 0.7406417994587952, type = "undervoltage", limit = 0.9025)
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] block_label_consistency: PASS
+    [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "2", phase = 1, s_squared = 576821.9860864196, limit = 490000.0, utilization_pct = 108.49828232313075, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "3", phase = 2, s_squared = 625344.6637118917, limit = 490000.0, utilization_pct = 112.9696242098744, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "3", phase = 3, s_squared = 532967.6806508584, limit = 490000.0, utilization_pct = 104.29233644834241, z_switch = 1.0, w = 1.0, rating = 700.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 3
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 23 checks, 21 passed, 2 failed
+======================================================================
