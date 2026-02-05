@@ -35,7 +35,7 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_a"
+const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.9
 const ITERATIONS = 5

@@ -590,8 +590,8 @@ end
 Objective function: maximize weighted load served across all time periods.
 Matches FairLoadDelivery's objective_fairly_weighted_max_load_served.
 """
-function objective_mn_max_load_served(pm::PMD.AbstractUnbalancedPowerModel)
-    nw_ids = PMD.nw_ids(pm)
+function objective_mn_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel)
+    nw_ids = _PMD.nw_ids(pm)
 
     obj_expr = JuMP.AffExpr(0.0)
 

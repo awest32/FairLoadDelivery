@@ -649,6 +649,60 @@ function constraint_connect_block_load_jump(model::JuMP.Model,reference::Dict{Sy
     end
 end
 
+"""
+    constraint_connect_load_bus(pm::AbstractUnbalancedPowerModel; nw::Int)
+
+Enforces that all loads at the same bus (node) have the same z_demand value.
+This ensures that load shedding is consistent across all phases at a given node.
+"""
+function constraint_connect_load_bus(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
+    # Build mapping of bus -> list of load IDs at that bus
+    bus_loads = Dict{Int,Vector{Int}}()
+    for (i, load) in _PMD.ref(pm, nw, :load)
+        bus = load["load_bus"]
+        if !haskey(bus_loads, bus)
+            bus_loads[bus] = Int[]
+        end
+        push!(bus_loads[bus], i)
+    end
+
+    # For each bus with multiple loads, constrain all z_demand values to be equal
+    for (bus, loads) in bus_loads
+        if length(loads) > 1
+            first_load = loads[1]
+            z_first = _PMD.var(pm, nw, :z_demand, first_load)
+            for j in 2:length(loads)
+                z_j = _PMD.var(pm, nw, :z_demand, loads[j])
+                JuMP.@constraint(pm.model, z_first == z_j)
+            end
+        end
+    end
+end
+
+function constraint_connect_load_bus_jump(model::JuMP.Model, reference::Dict{Symbol,Any})
+    # Build mapping of bus -> list of load IDs at that bus
+    bus_loads = Dict{Int,Vector{Int}}()
+    for (i, load) in reference[:load]
+        bus = load["load_bus"]
+        if !haskey(bus_loads, bus)
+            bus_loads[bus] = Int[]
+        end
+        push!(bus_loads[bus], i)
+    end
+
+    # For each bus with multiple loads, constrain all z_demand values to be equal
+    for (bus, loads) in bus_loads
+        if length(loads) > 1
+            first_load = loads[1]
+            z_first = model[:z_demand][first_load]
+            for j in 2:length(loads)
+                z_j = model[:z_demand][loads[j]]
+                JuMP.@constraint(model, z_first == z_j)
+            end
+        end
+    end
+end
+
 function constraint_connect_block_gen(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         z_gen = _PMD.var(pm, nw, :z_gen, i)
