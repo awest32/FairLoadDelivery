@@ -22,11 +22,11 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c"]
-const FAIR_FUNCS = ["efficiency", "proportional", "min_max", "equality_min", "jain"]
+const CASES = ["motivation_a"]#, "motivation_b", "motivation_c"]
+const FAIR_FUNCS = ["efficiency"]#, "proportional", "min_max", "equality_min", "jain"]
 const LS_PERCENT = 0.8
-const ITERATIONS = 10
-const N_ROUNDS = 5
+const ITERATIONS = 1
+const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 5
 
 # Save results

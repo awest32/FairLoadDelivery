@@ -30,14 +30,70 @@ include("../../src/implementation/network_setup.jl")
 # CONFIGURATION
 # ============================================================
 const CASE_FILE = "ieee_13_aw_edit/motivation_a.dss"
-const N_PERIODS = 3  # Number of time periods
 const LS_PERCENT = 0.9  # Generation limit as fraction of total load
 
-# Load scaling factors for each period (simulating daily load curve)
-# Period 1: Morning (80% of peak)
-# Period 2: Afternoon peak (100%)
-# Period 3: Evening (90% of peak)
-const LOAD_SCALE_FACTORS = [0.8, 1.0, 0.9]
+# 24-hour load profile (p.u.) - typical residential/commercial demand curve
+# Morning ramp, midday plateau, evening peak, night valley
+const LOAD_PROFILE_24H = [
+    0.45,  # 00:00 - night minimum
+    0.40,  # 01:00 - night minimum
+    0.38,  # 02:00 - lowest demand
+    0.38,  # 03:00 - lowest demand
+    0.40,  # 04:00 - slight uptick
+    0.50,  # 05:00 - early risers
+    0.65,  # 06:00 - morning ramp begins
+    0.80,  # 07:00 - morning ramp
+    0.90,  # 08:00 - morning peak starting
+    0.95,  # 09:00 - business hours
+    0.95,  # 10:00 - business hours
+    0.92,  # 11:00 - midday
+    0.90,  # 12:00 - lunch dip
+    0.92,  # 13:00 - afternoon
+    0.95,  # 14:00 - afternoon
+    0.98,  # 15:00 - afternoon peak building
+    1.00,  # 16:00 - late afternoon peak
+    1.00,  # 17:00 - evening peak
+    0.98,  # 18:00 - evening peak
+    0.95,  # 19:00 - evening
+    0.85,  # 20:00 - evening decline
+    0.75,  # 21:00 - late evening
+    0.60,  # 22:00 - night begins
+    0.50   # 23:00 - night
+]
+
+# Full 24-hour simulation
+const N_PERIODS = 24
+const LOAD_SCALE_FACTORS = LOAD_PROFILE_24H
+const GEN_SCALE_FACTORS = GEN_PROFILE_24H
+
+# 24-hour generation profile (p.u.) - base generation + solar variation
+# Base generation always available, with solar boost during daylight hours
+const GEN_PROFILE_24H = [
+    0.50,  # 00:00 - base only
+    0.50,  # 01:00 - base only
+    0.50,  # 02:00 - base only
+    0.50,  # 03:00 - base only
+    0.50,  # 04:00 - base only
+    0.52,  # 05:00 - dawn
+    0.55,  # 06:00 - sunrise
+    0.65,  # 07:00 - early morning ramp
+    0.75,  # 08:00 - morning ramp
+    0.85,  # 09:00 - mid-morning
+    0.92,  # 10:00 - approaching peak
+    0.98,  # 11:00 - near peak
+    1.00,  # 12:00 - solar noon (peak)
+    0.98,  # 13:00 - just past peak
+    0.92,  # 14:00 - early afternoon
+    0.85,  # 15:00 - mid-afternoon decline
+    0.75,  # 16:00 - late afternoon
+    0.65,  # 17:00 - evening decline
+    0.55,  # 18:00 - sunset ramp down
+    0.52,  # 19:00 - dusk
+    0.50,  # 20:00 - base only
+    0.50,  # 21:00 - base only
+    0.50,  # 22:00 - base only
+    0.50   # 23:00 - base only
+]
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -49,11 +105,9 @@ gurobi_solver = optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 
 """
 Create multinetwork data structure from a single network.
-Replicates the network N times with different load scaling factors.
+Replicates the network N times with different load and generation scaling factors.
 """
-function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
-    @assert length(load_scales) == n_periods "Load scale factors must match number of periods"
-
+function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64}, gen_scales::Vector{Float64})
     # Create the multinetwork structure
     mn_data = Dict{String,Any}(
         "multinetwork" => true,
@@ -79,15 +133,23 @@ function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, l
         delete!(nw_data, "multinetwork")
 
         # Scale loads for this time period
-        scale = load_scales[t]
+        load_scale = load_scales[t]
         for (load_id, load) in nw_data["load"]
-            load["pd"] = load["pd"] .* scale
-            load["qd"] = load["qd"] .* scale
+            load["pd"] = load["pd"] .* load_scale
+            load["qd"] = load["qd"] .* load_scale
+        end
+
+        # Scale sourcebus generation capacity for this time period
+        gen_scale = gen_scales[t]
+        for (gen_id, gen) in nw_data["gen"]
+            gen["pmax"] = gen["pmax"] .* gen_scale
+            gen["qmax"] = gen["qmax"] .* gen_scale
         end
 
         # Add period identifier
         nw_data["time_period"] = t
-        nw_data["load_scale"] = scale
+        nw_data["load_scale"] = load_scale
+        nw_data["gen_scale"] = gen_scale
 
         mn_data["nw"][nw_id] = nw_data
     end
@@ -217,6 +279,8 @@ function summarize_mn_results(result::Dict, mn_data::Dict)
     results_df = DataFrame(
         Period = Int[],
         LoadScale = Float64[],
+        GenScale = Float64[],
+        GenCapacity = Float64[],
         TotalLoadRef = Float64[],
         TotalServed = Float64[],
         TotalShed = Float64[],
@@ -229,37 +293,33 @@ function summarize_mn_results(result::Dict, mn_data::Dict)
     for nw_id in nw_ids
         nw_data = mn_data["nw"][nw_id]
         period = nw_data["time_period"]
-        scale = nw_data["load_scale"]
+        load_scale = nw_data["load_scale"]
+        gen_scale = nw_data["gen_scale"]
 
         # Get solution for this period
-        if !haskey(result["solution"], "nw") || !haskey(result["solution"]["nw"], nw_id)
-            println("  Period $period: No solution found")
-            continue
-        end
-
         nw_soln = result["solution"]["nw"][nw_id]
 
         # Calculate totals
         total_load_ref = 0.0
         total_served = 0.0
+        total_gen_capacity = sum(sum(g["pmax"]) for (_, g) in nw_data["gen"])
 
         for (load_id, load_data) in nw_data["load"]
             pd_ref = sum(load_data["pd"])
             total_load_ref += pd_ref
-
-            if haskey(nw_soln, "load") && haskey(nw_soln["load"], load_id)
-                pd_served = sum(nw_soln["load"][load_id]["pd"])
-                total_served += pd_served
-            end
+            pd_served = sum(nw_soln["load"][load_id]["pd"])
+            total_served += pd_served
         end
 
         total_shed = total_load_ref - total_served
-        pct_served = total_load_ref > 0 ? (total_served / total_load_ref) * 100 : 0.0
-        pct_shed = total_load_ref > 0 ? (total_shed / total_load_ref) * 100 : 0.0
+        pct_served = (total_served / total_load_ref) * 100
+        pct_shed = (total_shed / total_load_ref) * 100
 
         push!(results_df, (
             Period = period,
-            LoadScale = scale,
+            LoadScale = load_scale,
+            GenScale = gen_scale,
+            GenCapacity = round(total_gen_capacity, digits=2),
             TotalLoadRef = round(total_load_ref, digits=2),
             TotalServed = round(total_served, digits=2),
             TotalShed = round(total_shed, digits=2),
@@ -267,7 +327,8 @@ function summarize_mn_results(result::Dict, mn_data::Dict)
             PctShed = round(pct_shed, digits=2)
         ))
 
-        println("\n  Period $period (scale=$scale):")
+        println("\n  Period $period (load_scale=$load_scale, gen_scale=$gen_scale):")
+        println("    Gen capacity: $(round(total_gen_capacity, digits=2)) MW")
         println("    Total load reference: $(round(total_load_ref, digits=2)) MW")
         println("    Total load served: $(round(total_served, digits=2)) MW")
         println("    Total load shed: $(round(total_shed, digits=2)) MW")
@@ -337,6 +398,7 @@ function run_multiperiod_mld()
     println("Case: $CASE_FILE")
     println("Periods: $N_PERIODS")
     println("Load scales: $LOAD_SCALE_FACTORS")
+    println("Gen scales:  $GEN_SCALE_FACTORS")
     println("=" ^ 70)
 
     # Step 1: Setup base network (using shared setup_network function)
@@ -351,12 +413,13 @@ function run_multiperiod_mld()
 
     # Step 2: Create multinetwork data
     println("\n[2] Creating multinetwork data for $N_PERIODS periods...")
-    mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
+    mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS, GEN_SCALE_FACTORS)
 
     for nw_id in sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
         nw_data = mn_data["nw"][nw_id]
         total_load = sum(sum(l["pd"]) for (_, l) in nw_data["load"])
-        println("  Period $(nw_data["time_period"]): scale=$(nw_data["load_scale"]), total_load=$(round(total_load, digits=2)) MW")
+        total_gen = sum(sum(g["pmax"]) for (_, g) in nw_data["gen"])
+        println("  Period $(nw_data["time_period"]): load_scale=$(nw_data["load_scale"]), gen_scale=$(nw_data["gen_scale"]), load=$(round(total_load, digits=2)) MW, gen=$(round(total_gen, digits=2)) MW")
     end
 
     # Step 3: Solve multiperiod problem
