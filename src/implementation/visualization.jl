@@ -25,6 +25,18 @@ function build_bus_name_maps(math::Dict{String,Any})
     end
     return bus_id_to_name
 end
+
+"""
+Map the load IDs to their engineering names from the math dictionary.
+"""
+function build_load_name_map(math::Dict{String,Any})
+    load_id_to_name = Dict{Int,String}()
+    for (lid, load) in math["load"]
+        load_id_to_name[parse(Int, lid)] = load["name"]
+    end
+    return load_id_to_name
+end
+
 """
 A new function to extract the bus voltage per phase from the solution dictionary.
 """
@@ -66,23 +78,33 @@ end
 
 Aggregate load shed values by bus from solution and math dictionaries.
 
-Returns Dict{String => (bus_id, original_kw, served_kw, shed_kw)} where key is bus name.
+Returns:
+- bus_load_phases_p: Dict{String => Dict{Int => (original_p, shed_p)}} for active power
+- bus_load_phases_q: Dict{String => Dict{Int => (original_q, shed_q)}} for reactive power
+- bus_terminals: Dict{String => Vector{Int}} mapping bus name to phase terminals
 """
 function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::Dict{String,Any})
     # Build bus ID to name mapping
     bus_id_to_name = build_bus_name_maps(math)
-    # Aggregate load shed by bus
-    # Dict: bus_name => (bus_id, original_kw, served_kw, shed_kw)
-    bus_load_phases = Dict{String,Dict{Int, Tuple{Float64,Float64}}}()
+    # Aggregate load shed by bus for both P and Q
+    # Dict: bus_name => phase => (original, shed)
+    bus_load_phases_p = Dict{String,Dict{Int, Tuple{Float64,Float64}}}()
+    bus_load_phases_q = Dict{String,Dict{Int, Tuple{Float64,Float64}}}()
     bus_terminals = Dict{String,Vector{Int}}()
+
     for (load_id_str, load) in math["load"]
         load_bus = load["load_bus"]
         bus_name = bus_id_to_name[load_bus]
-        original_demand = zeros(3)
-        shed = zeros(3)
+        original_pd = zeros(3)
+        original_qd = zeros(3)
+        pshed = zeros(3)
+        qshed = zeros(3)
+
         for (id, c) in enumerate(load["connections"])
             # Original demand
-            original_demand[c] = load["pd"][id]
+            original_pd[c] = load["pd"][id]
+            original_qd[c] = load["qd"][id]
+
             # Merge terminals rather than overwrite (handles split buses like 634a/b/c)
             if haskey(bus_terminals, bus_name)
                 if !(c in bus_terminals[bus_name])
@@ -91,35 +113,55 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
             else
                 bus_terminals[bus_name] = [c]
             end
-            # Get per-phase served load from solution pd, shed = original - served
+
+            # Get per-phase served load from solution, shed = original - served
             if haskey(solution, "load") && haskey(solution["load"], load_id_str)
                 load_soln = solution["load"][load_id_str]
                 if haskey(load_soln, "pd")
                     pd_served = load_soln["pd"]
                     served_val = isa(pd_served, AbstractArray) ? pd_served[id] : pd_served
-                    shed[c] = original_demand[c] - served_val
+                    pshed[c] = original_pd[c] - served_val
+                end
+                if haskey(load_soln, "qd")
+                    qd_served = load_soln["qd"]
+                    served_val = isa(qd_served, AbstractArray) ? qd_served[id] : qd_served
+                    qshed[c] = original_qd[c] - served_val
                 end
             end
-            served = original_demand[c] - shed[c]
 
-            # Map to bus
-            if haskey(bus_load_phases, bus_name)
-                phase_data = bus_load_phases[bus_name]
-                    if haskey(phase_data, c)
-                        orig, srv = phase_data[c]
-                        phase_data[c] = (orig + original_demand[c], srv + shed[c])
-                    else
-                        phase_data[c] = (original_demand[c], shed[c])
-                    end
+            # Map active power to bus
+            if haskey(bus_load_phases_p, bus_name)
+                phase_data = bus_load_phases_p[bus_name]
+                if haskey(phase_data, c)
+                    orig, shd = phase_data[c]
+                    phase_data[c] = (orig + original_pd[c], shd + pshed[c])
+                else
+                    phase_data[c] = (original_pd[c], pshed[c])
+                end
             else
                 phase_data = Dict{Int,Tuple{Float64,Float64}}()
-                    phase_data[c] = (original_demand[c], shed[c])
-                bus_load_phases[bus_name] = phase_data
+                phase_data[c] = (original_pd[c], pshed[c])
+                bus_load_phases_p[bus_name] = phase_data
+            end
+
+            # Map reactive power to bus
+            if haskey(bus_load_phases_q, bus_name)
+                phase_data = bus_load_phases_q[bus_name]
+                if haskey(phase_data, c)
+                    orig, shd = phase_data[c]
+                    phase_data[c] = (orig + original_qd[c], shd + qshed[c])
+                else
+                    phase_data[c] = (original_qd[c], qshed[c])
+                end
+            else
+                phase_data = Dict{Int,Tuple{Float64,Float64}}()
+                phase_data[c] = (original_qd[c], qshed[c])
+                bus_load_phases_q[bus_name] = phase_data
             end
         end
     end
 
-    return bus_load_phases, bus_terminals
+    return bus_load_phases_p, bus_load_phases_q, bus_terminals
 end
 
 """
@@ -773,7 +815,7 @@ function plot_network_load_shed(
     # --- Data extraction via helpers ---
     bus_id_to_name = build_bus_name_maps(math)
     bus_voltages = get_bus_voltage_per_phase(solution, math)
-    bus_load_phases, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math)
+    bus_load_phases_p, bus_load_phases_q, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math)
     bus_gen_data = extract_gen_utilization_per_phase(solution, math)
     switch_info = extract_switch_utilization_per_phase(solution, math, bus_voltages; ac_flag=ac_flag)
 
@@ -957,14 +999,14 @@ function plot_network_load_shed(
             label_x = x - label_shift_1
         end
 
-        is_load_bus = haskey(bus_load_phases, bus_name)
+        is_load_bus = haskey(bus_load_phases_p, bus_name)
         is_gen_bus = haskey(bus_gen_data, bus_id)
 
         # Draw node circle
         if is_load_bus
-            phases_data = bus_load_phases[bus_name]
-            total_orig = sum(orig for (orig, _) in values(phases_data))
-            total_shed = sum(shed for (_, shed) in values(phases_data))
+            phases_data_p = bus_load_phases_p[bus_name]
+            total_orig = sum(orig for (orig, _) in values(phases_data_p))
+            total_shed = sum(shed for (_, shed) in values(phases_data_p))
             shed_frac = total_orig > 0 ? clamp(total_shed / total_orig, 0.0, 1.0) : 0.0
             lightness = 0.30 + 0.5 * shed_frac
             node_color = HSL(207, 0.6, lightness)
@@ -992,18 +1034,25 @@ function plot_network_load_shed(
 
         # --- Per-phase load shed (only for load buses) ---
         if is_load_bus
-            phases_data = bus_load_phases[bus_name]
+            phases_data_p = bus_load_phases_p[bus_name]
+            phases_data_q = get(bus_load_phases_q, bus_name, Dict{Int,Tuple{Float64,Float64}}())
             terminals = get(bus_terminals, bus_name, Int[])
             for phase in sort(terminals)
-                if haskey(phases_data, phase)
-                    orig, shed = phases_data[phase]
-                    shed_pct = orig > 0 ? round(shed / orig * 100, digits=1) : 0.0
-                    shed_label = "S$phase: $(shed_pct)%"
-                else
-                    shed_label = "S$phase: N/A"
+                p_pct_str = "N/A"
+                q_pct_str = "N/A"
+                if haskey(phases_data_p, phase)
+                    orig_p, shed_p = phases_data_p[phase]
+                    p_pct = orig_p > 0 ? round(shed_p / orig_p * 100, digits=0) : 0.0
+                    p_pct_str = "$(Int(p_pct))%"
                 end
+                if haskey(phases_data_q, phase)
+                    orig_q, shed_q = phases_data_q[phase]
+                    q_pct = orig_q > 0 ? round(shed_q / orig_q * 100, digits=0) : 0.0
+                    q_pct_str = "$(Int(q_pct))%"
+                end
+                shed_label = "S$phase:$(p_pct_str)(P),$(q_pct_str)(Q)"
                 push!(bg_elements, compose(context(),
-                    Compose.rectangle(label_x - 0.05, current_y - 0.004, 0.10, 0.016),
+                    Compose.rectangle(label_x - 0.07, current_y - 0.004, 0.14, 0.016),
                     fill("white"), stroke(nothing)
                 ))
                 push!(label_elements, compose(context(),
@@ -1221,13 +1270,13 @@ function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,A
     println("LOAD SHEDDING SUMMARY BY BUS")
     println("="^60)
 
-    bus_load_phases, _ = aggregate_load_shed_by_bus_per_phase(solution, math)
+    bus_load_phases_p, bus_load_phases_q, _ = aggregate_load_shed_by_bus_per_phase(solution, math)
 
     total_demand = 0.0
     total_served = 0.0
 
-    for bus_name in sort(collect(keys(bus_load_phases)))
-        phases_data = bus_load_phases[bus_name]
+    for bus_name in sort(collect(keys(bus_load_phases_p)))
+        phases_data = bus_load_phases_p[bus_name]
         bus_orig = sum(orig for (orig, _) in values(phases_data))
         bus_shed = sum(srv for (_, srv) in values(phases_data))
         total_demand += bus_orig

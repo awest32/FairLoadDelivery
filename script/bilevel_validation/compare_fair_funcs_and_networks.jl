@@ -16,6 +16,7 @@ using DataFrames
 using CSV
 using Dates
 using Plots
+using StatsPlots
 using Statistics
 
 # ============================================================
@@ -23,10 +24,15 @@ using Statistics
 # ============================================================
 const CASES = ["motivation_a", "motivation_b", "motivation_c"]
 const FAIR_FUNCS = ["efficiency", "proportional", "min_max", "equality_min", "jain"]
-const LS_PERCENT = 100.0
-const ITERATIONS = 5
-const N_ROUNDS = 2
+const LS_PERCENT = 0.8
+const ITERATIONS = 10
+const N_ROUNDS = 5
 const N_BERNOULLI_SAMPLES = 5
+
+# Save results
+save_dir = "results/$(Dates.today())/"
+mkpath(save_dir)
+
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -208,22 +214,159 @@ function extract_load_shed(mld::Dict)
 end
 
 function extract_per_load_data(mld::Dict)
-    """Extract per-load shed and served values, sorted by load ID."""
-    if mld === nothing || !haskey(mld, "solution") || !haskey(mld["solution"], "load")
-        return Int[], Float64[], Float64[]
-    end
-
+    """Extract per-load shed and served percentages (P and Q), sorted by load ID."""
     load_ids = sort(parse.(Int, collect(keys(mld["solution"]["load"]))))
-    pshed_per_load = Float64[]
-    pd_per_load = Float64[]
+    pshed_pct = Float64[]
+    pd_served_pct = Float64[]
+    qshed_pct = Float64[]
+    qd_served_pct = Float64[]
 
     for lid in load_ids
         load_data = mld["solution"]["load"][string(lid)]
-        push!(pshed_per_load, haskey(load_data, "pshed") ? sum(load_data["pshed"]) : 0.0)
-        push!(pd_per_load, haskey(load_data, "pd") ? sum(load_data["pd"]) : 0.0)
+        pshed = sum(load_data["pshed"])
+        pd_served = sum(load_data["pd"])
+        qshed = sum(load_data["qshed"])
+        qd_served = sum(load_data["qd"])
+
+        pd_total = pd_served + pshed
+        qd_total = qd_served + qshed
+
+        push!(pshed_pct, (pshed / pd_total) * 100)
+        push!(pd_served_pct, (pd_served / pd_total) * 100)
+        push!(qshed_pct, (qshed / qd_total) * 100)
+        push!(qd_served_pct, (qd_served / qd_total) * 100)
     end
 
-    return load_ids, pshed_per_load, pd_per_load
+    return load_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct
+end
+
+function extract_original_load(math::Dict)
+    """Extract original pd and qd values from math dictionary, sorted by load ID."""
+    load_ids = sort(parse.(Int, collect(keys(math["load"]))))
+    pd_original = Float64[]
+    qd_original = Float64[]
+    load_names = String[]
+
+    for lid in load_ids
+        load_data = math["load"][string(lid)]
+        push!(pd_original, sum(load_data["pd"]))
+        push!(qd_original, sum(load_data["qd"]))
+        push!(load_names, load_data["name"])
+    end
+
+    return load_ids, load_names, pd_original, qd_original
+end
+
+function plot_original_load_bars(case::String, math::Dict, save_dir::String)
+    """Create bar plots for original pd and qd per load."""
+    load_ids, load_names, pd_original, qd_original = extract_original_load(math)
+    x_positions = collect(1:length(load_ids))
+
+    # Active power plot
+    p_pd = bar(
+        x_positions, pd_original,
+        xlabel = "Load",
+        ylabel = "Active Power (kW)",
+        title = "Original Active Power Demand: $case",
+        legend = false,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        color = :blue
+    )
+    savefig(p_pd, joinpath(save_dir, "original_pd_$case.svg"))
+
+    # Reactive power plot
+    p_qd = bar(
+        x_positions, qd_original,
+        xlabel = "Load",
+        ylabel = "Reactive Power (kVAR)",
+        title = "Original Reactive Power Demand: $case",
+        legend = false,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        color = :red
+    )
+    savefig(p_qd, joinpath(save_dir, "original_qd_$case.svg"))
+
+    # Combined P and Q plot
+    p_combined = groupedbar(
+        load_names, hcat(pd_original, qd_original),
+        xlabel = "Load",
+        ylabel = "Power",
+        title = "Original Demand (P and Q): $case",
+        label = ["Active Power (kW)" "Reactive Power (kVAR)"],
+        legend = :outertopright,
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        color = [:blue :red]
+    )
+    savefig(p_combined, joinpath(save_dir, "original_demand_$case.svg"))
+
+    return p_pd, p_qd, p_combined
+end
+
+function plot_original_network_load(case::String, math::Dict, save_dir::String)
+    """Create network visualization showing original load distribution."""
+    # Create a mock solution with all loads fully served (no shedding)
+    mock_solution = Dict{String, Any}()
+
+    # Load data - all served, no shed
+    mock_solution["load"] = Dict{String, Any}()
+    for (lid, load_data) in math["load"]
+        mock_solution["load"][lid] = Dict(
+            "pd" => load_data["pd"],
+            "qd" => load_data["qd"],
+            "pshed" => zeros(length(load_data["pd"])),
+            "qshed" => zeros(length(load_data["qd"])),
+            "status" => 1.0
+        )
+    end
+
+    # Bus data - all on with nominal voltage
+    mock_solution["bus"] = Dict{String, Any}()
+    for (bid, bus_data) in math["bus"]
+        n_phases = length(bus_data["terminals"])
+        mock_solution["bus"][bid] = Dict(
+            "w" => ones(n_phases),
+            "status" => 1.0
+        )
+    end
+
+    # Switch data - all closed
+    mock_solution["switch"] = Dict{String, Any}()
+    if haskey(math, "switch")
+        for (sid, switch_data) in math["switch"]
+            n_phases = length(switch_data["f_connections"])
+            mock_solution["switch"][sid] = Dict(
+                "state" => 1.0,
+                "pf" => zeros(n_phases),
+                "qf" => zeros(n_phases)
+            )
+        end
+    end
+
+    # Block data - all on
+    mock_solution["block"] = Dict{String, Any}()
+    if haskey(math, "block")
+        for (bid, _) in math["block"]
+            mock_solution["block"][bid] = Dict("status" => 1.0)
+        end
+    end
+
+    # Plot using existing function
+    plot_filename = joinpath(save_dir, "network_original_$case.svg")
+    FairLoadDelivery.plot_network_load_shed(mock_solution, math; output_file=plot_filename)
 end
 
 # ============================================================
@@ -250,11 +393,15 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     Create grouped bar chart for load shed or load served.
     data_type: :pshed or :pd_served
     """
-    # Get union of all load IDs across all fairness functions
+    # Get union of all load IDs and build ID-to-name mapping
     all_load_ids = Set{Int}()
+    id_to_name = Dict{Int,String}()
     for (_, data) in per_load_data
         if !isempty(data[:load_ids])
             union!(all_load_ids, data[:load_ids])
+            for (lid, lname) in zip(data[:load_ids], data[:load_names])
+                id_to_name[lid] = lname
+            end
         end
     end
 
@@ -264,6 +411,7 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     end
 
     load_ids = sort(collect(all_load_ids))
+    load_names = [id_to_name[lid] for lid in load_ids]
 
     # Count functions with actual data
     n_funcs_with_data = count(ff -> haskey(per_load_data, ff) && !isempty(per_load_data[ff][:load_ids]), FAIR_FUNCS)
@@ -276,23 +424,38 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     x_offset = bar_width
 
     if data_type == :pshed
-        title = "Load Shed Comparison: $case"
-        ylabel = "Load Shed (kW)"
-        filename = "load_shed_per_bus_$case.svg"
+        title = "Active Power Load Shed: $case"
+        ylabel = "Load Shed (%)"
+        filename = "pshed_per_bus_$case.svg"
+    elseif data_type == :pd_served
+        title = "Active Power Load Served: $case"
+        ylabel = "Load Served (%)"
+        filename = "pd_served_per_bus_$case.svg"
+    elseif data_type == :qshed
+        title = "Reactive Power Load Shed: $case"
+        ylabel = "Load Shed (%)"
+        filename = "qshed_per_bus_$case.svg"
+    elseif data_type == :qd_served
+        title = "Reactive Power Load Served: $case"
+        ylabel = "Load Served (%)"
+        filename = "qd_served_per_bus_$case.svg"
     else
-        title = "Load Served Comparison: $case"
-        ylabel = "Load Served (kW)"
-        filename = "load_served_per_bus_$case.svg"
+        error("Unknown data_type: $data_type")
     end
 
+    x_positions = collect(1:length(load_ids))
+
     p = plot(
-        xlabel = "Load ID",
+        xlabel = "Load",
         ylabel = ylabel,
         title = title,
         legend = :outertopright,
-        xticks = load_ids,
-        size = (1100, 500),
-        bottom_margin = 5Plots.mm
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm
     )
 
     # Calculate offsets to center the bars
@@ -306,7 +469,7 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
 
         data = per_load_data[fair_func]
         func_load_ids = data[:load_ids]
-        func_values = data_type == :pshed ? data[:pshed] : data[:pd_served]
+        func_values = data[data_type]
 
         if isempty(func_load_ids)
             continue
@@ -320,7 +483,7 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
         # Build values array aligned with the common load_ids (0 for missing)
         aligned_values = [get(id_to_value, lid, 0.0) for lid in load_ids]
 
-        bar!(p, load_ids .+ offsets[func_idx], aligned_values,
+        bar!(p, x_positions .+ offsets[func_idx], aligned_values,
             bar_width = bar_width * 0.9,
             label = FAIR_FUNC_LABELS[fair_func],
             color = FAIR_FUNC_COLORS[fair_func]
@@ -331,16 +494,20 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     return p
 end
 
-function create_shed_distribution_plot(case::String, per_load_data::Dict, save_dir::String)
+function create_shed_distribution_plot(case::String, per_load_data::Dict, power_type::Symbol, save_dir::String)
     """
     Create scatter plot showing shed distribution by fairness function.
-    Similar to mld_comparison_experiment.jl shed_distribution.svg
+    power_type: :pshed for active power, :qshed for reactive power
     """
-    # Get union of all load IDs
+    # Get union of all load IDs and build ID-to-name mapping
     all_load_ids = Set{Int}()
+    id_to_name = Dict{Int,String}()
     for (_, data) in per_load_data
         if !isempty(data[:load_ids])
             union!(all_load_ids, data[:load_ids])
+            for (lid, lname) in zip(data[:load_ids], data[:load_names])
+                id_to_name[lid] = lname
+            end
         end
     end
 
@@ -349,13 +516,32 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, save_d
     end
 
     load_ids = sort(collect(all_load_ids))
+    load_names = [id_to_name[lid] for lid in load_ids]
+    x_positions = collect(1:length(load_ids))
+
+    if power_type == :pshed
+        ylabel = "Load Shed (%)"
+        title = "Active Power Shed Distribution: $case"
+        filename = "pshed_distribution_$case.svg"
+    elseif power_type == :qshed
+        ylabel = "Load Shed (%)"
+        title = "Reactive Power Shed Distribution: $case"
+        filename = "qshed_distribution_$case.svg"
+    else
+        error("Unknown power_type: $power_type")
+    end
 
     p = plot(
-        xlabel = "Load ID",
-        ylabel = "Load Shed (kW)",
-        title = "Shed Distribution by Fairness Function: $case",
+        xlabel = "Load",
+        ylabel = ylabel,
+        title = title,
         legend = :outertopright,
-        size = (1100, 500)
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm
     )
 
     markers = Dict(
@@ -376,10 +562,10 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, save_d
             continue
         end
 
-        id_to_value = Dict(zip(data[:load_ids], data[:pshed]))
+        id_to_value = Dict(zip(data[:load_ids], data[power_type]))
         aligned_values = [haskey(id_to_value, lid) ? id_to_value[lid] : error("Load ID $lid not found in id_to_value") for lid in load_ids]
 
-        scatter!(p, load_ids, aligned_values,
+        scatter!(p, x_positions, aligned_values,
             label = FAIR_FUNC_LABELS[fair_func],
             marker = markers[fair_func],
             markersize = 8,
@@ -388,12 +574,12 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, save_d
     end
 
     # Add horizontal line for equality_min max shed (fairness target)
-    if haskey(per_load_data, "equality_min") && !isempty(per_load_data["equality_min"][:pshed])
-        max_eq_shed = maximum(per_load_data["equality_min"][:pshed])
+    if haskey(per_load_data, "equality_min") && !isempty(per_load_data["equality_min"][power_type])
+        max_eq_shed = maximum(per_load_data["equality_min"][power_type])
         hline!(p, [max_eq_shed], label="EqMin Max Shed", linestyle=:dash, color=:orange, linewidth=2)
     end
 
-    savefig(p, joinpath(save_dir, "shed_distribution_$case.svg"))
+    savefig(p, joinpath(save_dir, filename))
     return p
 end
 
@@ -428,6 +614,9 @@ function run_comparison()
     # Final weights storage: case => fair_func => {weight_ids, weights}
     final_weights_results = Dict{String, Dict{String, Dict{Symbol, Vector}}}()
 
+    # Solutions storage for plotting: case => fair_func => {mld, math}
+    solutions_for_plotting = Dict{String, Dict{String, Dict{Symbol, Any}}}()
+
     println("=" ^ 60)
     println("LOAD SHED COMPARISON ACROSS CASES AND FAIRNESS FUNCTIONS")
     println("=" ^ 60)
@@ -442,9 +631,15 @@ function run_comparison()
 
         println("    Total demand: $(round(total_demand, digits=4))")
 
+        # Plot original load
+        plot_original_load_bars(case, math, save_dir)
+        plot_original_network_load(case, math, save_dir)
+        println("    Saved original demand plots for $case")
+
         # Initialize per-load storage for this case
         per_load_results[case] = Dict{String, Dict{Symbol, Vector}}()
         final_weights_results[case] = Dict{String, Dict{Symbol, Vector}}()
+        solutions_for_plotting[case] = Dict{String, Dict{Symbol, Any}}()
 
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
@@ -481,11 +676,22 @@ function run_comparison()
             final_pshed, final_pd_served = extract_load_shed(best_mld)
 
             # Extract per-load data
-            load_ids, pshed_per_load, pd_per_load = extract_per_load_data(best_mld)
+            load_ids, pshed_per_load, pd_per_load, qshed_per_load, qd_per_load = extract_per_load_data(best_mld)
+            load_name_map = build_load_name_map(math_out[best_idx])
+            load_names = [load_name_map[lid] for lid in load_ids]
             per_load_results[case][fair_func] = Dict(
                 :load_ids => load_ids,
+                :load_names => load_names,
                 :pshed => pshed_per_load,
-                :pd_served => pd_per_load
+                :pd_served => pd_per_load,
+                :qshed => qshed_per_load,
+                :qd_served => qd_per_load
+            )
+
+            # Store solution for plotting
+            solutions_for_plotting[case][fair_func] = Dict(
+                :mld => best_mld,
+                :math => math_out[best_idx]
             )
 
             # Calculate percentages
@@ -508,7 +714,7 @@ function run_comparison()
         end
     end
 
-    return results, per_load_results, final_weights_results
+    return results, per_load_results, final_weights_results, solutions_for_plotting
 end
 
 # ============================================================
@@ -516,7 +722,7 @@ end
 # ============================================================
 println("\nStarting comparison at $(now())...\n")
 
-results, per_load_results, final_weights_results = run_comparison()
+results, per_load_results, final_weights_results, solutions_for_plotting = run_comparison()
 
 # Print summary table
 println("\n" * "=" ^ 60)
@@ -541,9 +747,6 @@ for case in CASES
     end
 end
 
-# Save results
-save_dir = "results/$(Dates.today())/"
-mkpath(save_dir)
 csv_path = joinpath(save_dir, "load_shed_comparison.csv")
 CSV.write(csv_path, results)
 println("\nResults saved to: $csv_path")
@@ -556,28 +759,135 @@ println("GENERATING BAR CHARTS")
 println("=" ^ 60)
 
 for case in CASES
-    if !haskey(per_load_results, case)
+    println("\n  Creating charts for $case...")
+
+    # Active power charts
+    create_grouped_bar_chart(case, per_load_results[case], :pshed, save_dir)
+    println("    Saved pshed_per_bus_$case.svg")
+
+    create_grouped_bar_chart(case, per_load_results[case], :pd_served, save_dir)
+    println("    Saved pd_served_per_bus_$case.svg")
+
+    create_shed_distribution_plot(case, per_load_results[case], :pshed, save_dir)
+    println("    Saved pshed_distribution_$case.svg")
+
+    # Reactive power charts
+    create_grouped_bar_chart(case, per_load_results[case], :qshed, save_dir)
+    println("    Saved qshed_per_bus_$case.svg")
+
+    create_grouped_bar_chart(case, per_load_results[case], :qd_served, save_dir)
+    println("    Saved qd_served_per_bus_$case.svg")
+
+    create_shed_distribution_plot(case, per_load_results[case], :qshed, save_dir)
+    println("    Saved qshed_distribution_$case.svg")
+end
+
+# ============================================================
+# GENERATE NETWORK PLOTS
+# ============================================================
+println("\n" * "=" ^ 60)
+println("GENERATING NETWORK PLOTS")
+println("=" ^ 60)
+
+for case in CASES
+    if !haskey(solutions_for_plotting, case)
         continue
     end
 
-    println("\n  Creating charts for $case...")
+    println("\n  Creating network plots for $case...")
 
-    # Create load shed chart
-    p_shed = create_grouped_bar_chart(case, per_load_results[case], :pshed, save_dir)
-    if p_shed !== nothing
-        println("    Saved load_shed_per_bus_$case.svg")
-    end
+    for fair_func in FAIR_FUNCS
+        if !haskey(solutions_for_plotting[case], fair_func)
+            continue
+        end
 
-    # Create load served chart
-    p_served = create_grouped_bar_chart(case, per_load_results[case], :pd_served, save_dir)
-    if p_served !== nothing
-        println("    Saved load_served_per_bus_$case.svg")
-    end
+        sol_data = solutions_for_plotting[case][fair_func]
+        mld_solution = sol_data[:mld]
+        math_data = sol_data[:math]
 
-    # Create shed distribution scatter plot
-    p_dist = create_shed_distribution_plot(case, per_load_results[case], save_dir)
-    if p_dist !== nothing
-        println("    Saved shed_distribution_$case.svg")
+        # Create network plot
+        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func).svg")
+        FairLoadDelivery.plot_network_load_shed(
+            mld_solution["solution"],
+            math_data;
+            output_file=plot_filename
+        )
+        println("    Saved network_$(case)_$(fair_func).svg")
+
+        # Save solution data as CSV
+        solution = mld_solution["solution"]
+
+        # Load data
+        load_df = DataFrame(
+            load_id = Int[],
+            pd = Float64[],
+            qd = Float64[],
+            pshed = Float64[],
+            qshed = Float64[],
+            z_demand = Float64[]
+        )
+        for (lid, ldata) in solution["load"]
+            push!(load_df, (
+                parse(Int, lid),
+                sum(ldata["pd"]),
+                sum(ldata["qd"]),
+                sum(ldata["pshed"]),
+                sum(ldata["qshed"]),
+                ldata["status"]
+            ))
+        end
+        sort!(load_df, :load_id)
+        CSV.write(joinpath(save_dir, "solution_load_$(case)_$(fair_func).csv"), load_df)
+
+        # Switch data
+        switch_df = DataFrame(
+            switch_id = Int[],
+            state = Float64[],
+            ps_fr = Float64[],
+            qs_fr = Float64[]
+        )
+        for (sid, sdata) in solution["switch"]
+            push!(switch_df, (
+                parse(Int, sid),
+                sdata["state"],
+                sum(sdata["pf"]),
+                sum(sdata["qf"])
+            ))
+        end
+        sort!(switch_df, :switch_id)
+        CSV.write(joinpath(save_dir, "solution_switch_$(case)_$(fair_func).csv"), switch_df)
+
+        # Block data
+        block_df = DataFrame(
+            block_id = Int[],
+            status = Float64[]
+        )
+        for (bid, bdata) in solution["block"]
+            push!(block_df, (
+                parse(Int, bid),
+                bdata["status"]
+            ))
+        end
+        sort!(block_df, :block_id)
+        CSV.write(joinpath(save_dir, "solution_block_$(case)_$(fair_func).csv"), block_df)
+
+        # Bus voltage data
+        bus_df = DataFrame(
+            bus_id = Int[],
+            vm_avg = Float64[],
+            z_voltage = Float64[]
+        )
+        for (bid, bdata) in solution["bus"]
+            push!(bus_df, (
+                parse(Int, bid),
+                mean(sqrt.(bdata["w"])),
+                bdata["status"]
+            ))
+        end
+        sort!(bus_df, :bus_id)
+        CSV.write(joinpath(save_dir, "solution_bus_$(case)_$(fair_func).csv"), bus_df)
+
+        println("    Saved solution CSVs for $(case)_$(fair_func)")
     end
 end
 
