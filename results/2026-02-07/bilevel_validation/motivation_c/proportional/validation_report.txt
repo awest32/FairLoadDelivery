@@ -1,0 +1,72 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_c
+  Fairness Function: proportional
+  Iterations: 5
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [X] voltage_limits: FAIL
+        - (bus_id = "4", phase = 1, w = 0.7306273026660141, type = "undervoltage", limit = 0.81)
+        - (bus_id = "4", phase = 2, w = 0.7455179698130897, type = "undervoltage", limit = 0.81)
+        - (bus_id = "4", phase = 3, w = 0.739513034365734, type = "undervoltage", limit = 0.81)
+        - (bus_id = "1", phase = 1, w = 0.7410041377734695, type = "undervoltage", limit = 0.81)
+        - (bus_id = "1", phase = 2, w = 0.7421798064984362, type = "undervoltage", limit = 0.81)
+        - (bus_id = "1", phase = 3, w = 0.7401588819185657, type = "undervoltage", limit = 0.81)
+        - (bus_id = "12", phase = 3, w = 0.8043496066349867, type = "undervoltage", limit = 0.81)
+        - (bus_id = "2", phase = 1, w = 0.7410039795570921, type = "undervoltage", limit = 0.81)
+        - (bus_id = "2", phase = 2, w = 0.7421796251277613, type = "undervoltage", limit = 0.81)
+        - (bus_id = "2", phase = 3, w = 0.7401587432308645, type = "undervoltage", limit = 0.81)
+        - (bus_id = "11", phase = 1, w = 0.7410182673745574, type = "undervoltage", limit = 0.81)
+        - (bus_id = "11", phase = 2, w = 0.7421838601550393, type = "undervoltage", limit = 0.81)
+        - (bus_id = "11", phase = 3, w = 0.7401661920760525, type = "undervoltage", limit = 0.81)
+        - (bus_id = "5", phase = 3, w = 0.808694165234209, type = "undervoltage", limit = 0.81)
+        - (bus_id = "15", phase = 3, w = 0.8043496038701781, type = "undervoltage", limit = 0.81)
+        - (bus_id = "7", phase = 1, w = 0.7518781858595497, type = "undervoltage", limit = 0.81)
+        - (bus_id = "7", phase = 2, w = 0.7407430804355943, type = "undervoltage", limit = 0.81)
+        - (bus_id = "7", phase = 3, w = 0.7472838244876021, type = "undervoltage", limit = 0.81)
+        - (bus_id = "17", phase = 1, w = 0.7518783426294068, type = "undervoltage", limit = 0.81)
+        - (bus_id = "17", phase = 2, w = 0.7407433494369475, type = "undervoltage", limit = 0.81)
+        - (bus_id = "17", phase = 3, w = 0.7472839390871467, type = "undervoltage", limit = 0.81)
+        - (bus_id = "3", phase = 3, w = 0.808708770081942, type = "undervoltage", limit = 0.81)
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [X] rounded_mld_converged_r1: FAIL
+        - Status: ALMOST_LOCALLY_SOLVED
+    [+] voltage_limits_rounded_r2: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] block_label_consistency: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] radiality_found: PASS
+    [+] current_limits_rounded_r2: PASS
+    [+] switch_label_consistency: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "4", phase = 2, s_squared = 625340.1131116266, limit = 490000.0, utilization_pct = 112.96921317211638, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "4", phase = 3, s_squared = 532957.5338677831, limit = 490000.0, utilization_pct = 104.29134367074113, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "2", phase = 1, s_squared = 576821.980736704, limit = 490000.0, utilization_pct = 108.49828181999897, z_switch = 1.0, w = 1.0, rating = 700.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 3
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 21 checks, 17 passed, 4 failed
+======================================================================

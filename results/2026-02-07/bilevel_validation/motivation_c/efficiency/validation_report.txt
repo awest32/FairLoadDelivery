@@ -38,15 +38,15 @@
     [+] iteration_label_consistency: PASS
 
   --- random_rounding ---
-    [+] rounded_mld_converged_r1: PASS
-    [X] rounded_mld_converged_r2: FAIL
+    [X] rounded_mld_converged_r1: FAIL
         - Status: ALMOST_LOCALLY_SOLVED
+    [+] voltage_limits_rounded_r2: PASS
+    [+] rounded_mld_converged_r2: PASS
     [+] binary_values: PASS
     [+] block_label_consistency: PASS
     [+] voltage_source_after_rounding: PASS
     [+] radiality_found: PASS
-    [+] voltage_limits_rounded_r1: PASS
-    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
     [+] switch_label_consistency: PASS
 
   --- ac_feasibility ---

@@ -18,17 +18,12 @@ using Dates
 using Plots
 using Statistics
 
-include("../../src/implementation/network_setup.jl")
-include("../../src/implementation/lower_level_mld.jl")
-include("../../src/implementation/other_fair_funcs.jl")
-include("../../src/implementation/random_rounding.jl")
-
 # ============================================================
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_a", "motivation_b", "motivation_c"]
-const FAIR_FUNCS = ["proportional", "efficiency", "min_max", "equality_min", "jain"]
-const LS_PERCENT = 0.9
+const FAIR_FUNCS = ["efficiency", "proportional", "min_max", "equality_min", "jain"]
+const LS_PERCENT = 100.0
 const ITERATIONS = 5
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 5
@@ -75,7 +70,7 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
         elseif fair_func == "min_max"
             pshed_new, fair_weight_vals = min_max_load_shed(dpshed, pshed_val, weight_vals)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals = equality_min(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals)
         elseif fair_func == "jain"
             pshed_new, fair_weight_vals = jains_fairness_index(dpshed, pshed_val, weight_vals)
         end
@@ -196,7 +191,7 @@ end
 
 function extract_load_shed(mld::Dict)
     if mld === nothing || !haskey(mld, "solution") || !haskey(mld["solution"], "load")
-        return NaN, NaN
+       @error "MLD solution does not contain load data"
     end
 
     total_pshed = 0.0
@@ -382,7 +377,7 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, save_d
         end
 
         id_to_value = Dict(zip(data[:load_ids], data[:pshed]))
-        aligned_values = [get(id_to_value, lid, NaN) for lid in load_ids]
+        aligned_values = [haskey(id_to_value, lid) ? id_to_value[lid] : error("Load ID $lid not found in id_to_value") for lid in load_ids]
 
         scatter!(p, load_ids, aligned_values,
             label = FAIR_FUNC_LABELS[fair_func],
@@ -454,73 +449,62 @@ function run_comparison()
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
 
-            try
-                # Run bilevel relaxation
-                math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts = run_bilevel_relaxed(
-                    math, ITERATIONS, fair_weights, fair_func
-                )
+            # Run bilevel relaxation
+            math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts = run_bilevel_relaxed(
+                math, ITERATIONS, fair_weights, fair_func
+            )
 
-                # Store final weights
-                final_weights_results[case][fair_func] = Dict(
-                    :weight_ids => weight_ids,
-                    :weights => final_wts
-                )
+            # Store final weights
+            final_weights_results[case][fair_func] = Dict(
+                :weight_ids => weight_ids,
+                :weights => final_wts
+            )
 
-                # Run random rounding
-                math_out, mld_results = run_random_rounding(
-                    math_relaxed, N_ROUNDS, N_BERNOULLI_SAMPLES, ipopt_solver
-                )
+            # Run random rounding
+            math_out, mld_results = run_random_rounding(
+                math_relaxed, N_ROUNDS, N_BERNOULLI_SAMPLES, ipopt_solver
+            )
 
-                if isempty(mld_results)
-                    println("No feasible solution found")
-                    push!(results, (case, fair_func, total_demand, NaN, NaN, NaN, NaN, pshed_upper[end], NaN))
-                    per_load_results[case][fair_func] = Dict(:load_ids => Int[], :pshed => Float64[], :pd_served => Float64[])
-                    continue
-                end
-
-                # Find best solution
-                best_idx, best_mld = find_best_mld_solution(mld_results)
-
-                # Check binary values in final solution
-                binary_ok, binary_violations = check_binary_solution(best_mld)
-                if !binary_ok
-                    @warn "$case/$fair_func: Non-binary values in final MLD solution: $(join(binary_violations[1:min(3,length(binary_violations))], "; "))"
-                end
-
-                final_pshed, final_pd_served = extract_load_shed(best_mld)
-
-                # Extract per-load data
-                load_ids, pshed_per_load, pd_per_load = extract_per_load_data(best_mld)
-                per_load_results[case][fair_func] = Dict(
-                    :load_ids => load_ids,
-                    :pshed => pshed_per_load,
-                    :pd_served => pd_per_load
-                )
-
-                # Calculate percentages
-                pct_shed = (final_pshed / total_demand) * 100
-                pct_served = (final_pd_served / total_demand) * 100
-
-                println("shed=$(round(pct_shed, digits=2))%, served=$(round(pct_served, digits=2))%")
-
-                push!(results, (
-                    case,
-                    fair_func,
-                    total_demand,
-                    final_pshed,
-                    final_pd_served,
-                    pct_shed,
-                    pct_served,
-                    pshed_upper[end],
-                    best_mld["objective"]
-                ))
-
-            catch e
-                println("ERROR: $e")
-                push!(results, (case, fair_func, total_demand, NaN, NaN, NaN, NaN, NaN, NaN))
-                per_load_results[case][fair_func] = Dict(:load_ids => Int[], :pshed => Float64[], :pd_served => Float64[])
-                final_weights_results[case][fair_func] = Dict(:weight_ids => Int[], :weights => Float64[])
+            if isempty(mld_results)
+                error("No feasible solution found for case=$case, fair_func=$fair_func")
             end
+
+            # Find best solution
+            best_idx, best_mld = find_best_mld_solution(mld_results)
+
+            # Check binary values in final solution
+            binary_ok, binary_violations = check_binary_solution(best_mld)
+            if !binary_ok
+                @warn "$case/$fair_func: Non-binary values in final MLD solution: $(join(binary_violations[1:min(3,length(binary_violations))], "; "))"
+            end
+
+            final_pshed, final_pd_served = extract_load_shed(best_mld)
+
+            # Extract per-load data
+            load_ids, pshed_per_load, pd_per_load = extract_per_load_data(best_mld)
+            per_load_results[case][fair_func] = Dict(
+                :load_ids => load_ids,
+                :pshed => pshed_per_load,
+                :pd_served => pd_per_load
+            )
+
+            # Calculate percentages
+            pct_shed = (final_pshed / total_demand) * 100
+            pct_served = (final_pd_served / total_demand) * 100
+
+            println("shed=$(round(pct_shed, digits=2))%, served=$(round(pct_served, digits=2))%")
+
+            push!(results, (
+                case,
+                fair_func,
+                total_demand,
+                final_pshed,
+                final_pd_served,
+                pct_shed,
+                pct_served,
+                pshed_upper[end],
+                best_mld["objective"]
+            ))
         end
     end
 
@@ -627,11 +611,11 @@ for case in CASES
     weights_df = DataFrame(load_id = load_ids_sorted)
     for fair_func in FAIR_FUNCS
         if !haskey(final_weights_results[case], fair_func) || isempty(final_weights_results[case][fair_func][:weight_ids])
-            weights_df[!, fair_func] = fill(NaN, length(load_ids_sorted))
+            error("No weight data for case=$case, fair_func=$fair_func")
         else
             data = final_weights_results[case][fair_func]
             id_to_weight = Dict(zip(data[:weight_ids], data[:weights]))
-            weights_df[!, fair_func] = [get(id_to_weight, lid, NaN) for lid in load_ids_sorted]
+            weights_df[!, fair_func] = [haskey(id_to_weight, lid) ? id_to_weight[lid] : error("Weight for load ID $lid not found") for lid in load_ids_sorted]
         end
     end
 
@@ -723,9 +707,9 @@ for case in CASES
         # Fairness metrics on served values (filter zeros)
         served_nonzero = filter(x -> x > 0, pd_vals)
         if length(served_nonzero) >= 2
-            jains_idx = jains_index(served_nonzero)
-            palma = length(served_nonzero) >= 3 ? palma_ratio(served_nonzero) : NaN
-            gini = gini_index(served_nonzero)
+            jains_idx = FairLoadDelivery.jains_index(served_nonzero)
+            palma = length(served_nonzero) >= 3 ? FairLoadDelivery.palma_ratio(served_nonzero) : NaN
+            gini = FairLoadDelivery.gini_index(served_nonzero)
             cv_served = std(served_nonzero) / mean(served_nonzero)
         else
             jains_idx = NaN

@@ -35,10 +35,10 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_c"
+const CASE = "motivation_a"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
-const LS_PERCENT = 0.9
-const ITERATIONS = 5
+const LS_PERCENT = 0.8
+const ITERATIONS = 1
 const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 5
@@ -63,7 +63,7 @@ mkpath(save_dir)
 # ============================================================
 print_validation_header("Step 1: Network Setup")
 
-eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT, [])
+eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT, ["670"])
 
 setup_checks = Dict{String, Any}()
 
