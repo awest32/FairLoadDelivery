@@ -12,7 +12,7 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     #     )
     @variable(model, weights_new[1:n] >= 1)
     @constraint(model, [i=1:n], weights_new[i] <= 10)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.5)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
     # @constraint(model, [i in 1:n],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     # )

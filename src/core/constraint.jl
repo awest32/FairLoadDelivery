@@ -298,9 +298,9 @@ function constraint_set_switch_state_rounded(pm::_PMD.AbstractUnbalancedPowerMod
         )
     end
     
-    if report
-        _PMD.sol(pm, nw)[:switch_rounded_states] = _PMD.con(pm, nw)[:switch_rounded_states]
-    end
+    # if report
+    #     _PMD.sol(pm, nw)[:switch_rounded_states] = _PMD.con(pm, nw)[:switch_rounded_states]
+    # end
 end
 
 """
@@ -1388,7 +1388,7 @@ function constraint_model_voltage_magnitude_difference_fld(pm::_PMD.LPUBFDiagMod
     MQ = 2 * (real(Gamma) .* x - imag(Gamma) .* r)
 
     N = length(f_connections)
-    M = .5
+    M = 1.05
     
     # Get block indices for from and to buses
     block_fr = _PMD.ref(pm, n, :bus_block_map)[f_bus]
@@ -1453,7 +1453,7 @@ function constraint_model_switch_voltage_magnitude_difference_fld(pm::_PMD.LPUBF
     MQ = 2 * (real(Gamma) .* x - imag(Gamma) .* r)
 
     N = length(f_connections)
-    M = 1.1^2
+    M = 1.05^2
     
     # Get block status variables
     block_fr = _PMD.ref(pm, n, :bus_block_map)[f_bus]

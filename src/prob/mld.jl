@@ -376,7 +376,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_mc_isolate_block(pm)
+    constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
     constraint_mc_block_energization_consistency_bigm(pm)
@@ -610,7 +610,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
         constraint_mc_switch_ampacity(pm, i)
         
         # Not activated
-        #constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
+        constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
     end
 
     #Not activated

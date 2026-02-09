@@ -39,7 +39,7 @@ const CASE = "motivation_a"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
 const ITERATIONS = 1
-const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
+const FAIR_FUNC = "jain"  # simplest fairness function for testing
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 5
 
@@ -87,20 +87,22 @@ print_check_result("Switches have current ratings", passed, "$switches_with_rati
 # Check 1.3: Voltage limits set correctly
 v_limits_ok = true
 for (bus_id, bus) in math["bus"]
-    if any(bus["vmax"] .!= 1.1) || any(bus["vmin"] .!= 0.9)
+    if any(bus["vmax"] .!= 1.05) || any(bus["vmin"] .!= 0.95)
         v_limits_ok = false
         break
     end
 end
 setup_checks["voltage_limits_set"] = Dict("passed" => v_limits_ok)
-print_check_result("Voltage limits set to [0.9, 1.1]", v_limits_ok)
+print_check_result("Voltage limits set to [0.95, 1.05]", v_limits_ok)
 
 # Check 1.4: Generation capacity limited (forces load shedding)
 gen_limited = false
 for (i, gen) in math["gen"]
     if gen["source_id"] == "voltage_source.source"
         total_pmax = sum(gen["pmax"])
+        @info "Generation $i ($(gen["name"])) capacity: $total_pmax"
         total_pd = sum(sum(load["pd"]) for (_, load) in math["load"])
+        @info "Total demand in system: $total_pd"
         if total_pmax < total_pd
             gen_limited = true
         end
