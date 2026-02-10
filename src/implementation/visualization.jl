@@ -6,6 +6,10 @@ import Compose
 import Compose: compose, context, line, circle, text, stroke, fill, linewidth, fontsize, draw, SVG, inch, cm, mm, pt, font, hcenter, vcenter, hleft, vtop, vbottom, strokedash
 using Cairo
 
+# Fairness function styling constants
+const FAIR_FUNC_COLORS = Dict("proportional"=>:green, "efficiency"=>:blue, "min_max"=>:red, "equality_min"=>:orange, "jain"=>:purple)
+const FAIR_FUNC_LABELS = Dict("proportional"=>"Proportional", "efficiency"=>"Efficiency", "min_max"=>"Min-Max", "equality_min"=>"Equality Min", "jain"=>"Jain's Index")
+const FAIR_FUNC_MARKERS = Dict("proportional"=>:square, "efficiency"=>:circle, "min_max"=>:star5, "equality_min"=>:diamond, "jain"=>:utriangle)
 
 """
 Map the bus names to their corresponding IDs from the math and solution dictionaries.
@@ -1377,4 +1381,282 @@ function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,A
         end
         println("Switch power flow data saved to $csv_file")
     end
+end
+
+"""
+    extract_voltage_by_bus_name(solution, math)
+
+Extract per-phase voltage for each bus, grouped by engineering bus name.
+Returns Dict{String, Dict{Int, Float64}} mapping bus_name => phase => voltage_pu.
+"""
+function extract_voltage_by_bus_name(solution::Dict, math::Dict)
+    bus_voltages = get_bus_voltage_per_phase(solution, math)
+    bus_id_to_name = build_bus_name_maps(math)
+
+    voltage_by_name = Dict{String, Dict{Int, Float64}}()
+
+    for (bus_id_str, bus) in math["bus"]
+        bus_id = parse(Int, bus_id_str)
+        bus_name = bus_id_to_name[bus_id]
+        bus_terms = filter(t -> t <= 3, bus["terminals"])
+        voltages = bus_voltages[bus_id]
+
+        if !haskey(voltage_by_name, bus_name)
+            voltage_by_name[bus_name] = Dict{Int, Float64}()
+        end
+
+        for phase in bus_terms
+            voltage_by_name[bus_name][phase] = voltages[phase]
+        end
+    end
+
+    return voltage_by_name
+end
+
+"""
+    extract_per_bus_loadshed(solution, math)
+
+Extract total load shed per bus (summed across phases) as percentages of original demand.
+Returns `(bus_names::Vector{String}, pshed_pct::Vector{Float64}, qshed_pct::Vector{Float64})`.
+"""
+function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,Any})
+    bus_id_to_name = build_bus_name_maps(math)
+
+    bus_pd_orig = Dict{String, Float64}()
+    bus_qd_orig = Dict{String, Float64}()
+    bus_pshed = Dict{String, Float64}()
+    bus_qshed = Dict{String, Float64}()
+
+    for (lid, load) in math["load"]
+        bus_name = bus_id_to_name[load["load_bus"]]
+
+        pd_orig = sum(load["pd"])
+        qd_orig = sum(load["qd"])
+
+        load_sol = solution["load"][lid]
+        pd_s = load_sol["pd"]
+        pd_served = isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
+        qd_s = load_sol["qd"]
+        qd_served = isa(qd_s, AbstractArray) ? sum(qd_s) : qd_s
+
+        pshed = pd_orig - pd_served
+        qshed = qd_orig - qd_served
+
+        bus_pd_orig[bus_name] = get(bus_pd_orig, bus_name, 0.0) + pd_orig
+        bus_qd_orig[bus_name] = get(bus_qd_orig, bus_name, 0.0) + qd_orig
+        bus_pshed[bus_name] = get(bus_pshed, bus_name, 0.0) + pshed
+        bus_qshed[bus_name] = get(bus_qshed, bus_name, 0.0) + qshed
+    end
+
+    bus_names = sort(collect(keys(bus_pd_orig)))
+    pshed_pct = Float64[]
+    qshed_pct = Float64[]
+
+    for bn in bus_names
+        push!(pshed_pct, (bus_pshed[bn] / bus_pd_orig[bn]) * 100)
+        push!(qshed_pct, (bus_qshed[bn] / bus_qd_orig[bn]) * 100)
+    end
+
+    return bus_names, pshed_pct, qshed_pct
+end
+
+"""
+    plot_voltage_per_bus_comparison(voltage_data_per_func, save_path; title="", target_buses=String[])
+
+Scatter plot comparing per-phase bus voltages across fairness functions.
+
+# Arguments
+- `voltage_data_per_func::Dict{String, Dict{String, Dict{Int, Float64}}}` — fair_func => bus_name => phase => voltage
+- `save_path::String` — file path to save the SVG
+- `title::String` — plot title (auto-generated if empty)
+- `target_buses::Vector{String}` — subset of buses to plot (all load buses if empty)
+"""
+function plot_voltage_per_bus_comparison(
+    voltage_data_per_func::Dict{String, Dict{String, Dict{Int, Float64}}},
+    save_path::String;
+    title::String="Bus Voltage Per Phase by Fairness Function",
+    target_buses::Vector{String}=String[]
+)
+    phase_labels = Dict(1 => "A", 2 => "B", 3 => "C")
+    phases = [1, 2, 3]
+
+    # Determine target buses: use provided list or collect all buses with data
+    if isempty(target_buses)
+        all_buses = Set{String}()
+        for (_, bus_volt) in voltage_data_per_func
+            union!(all_buses, keys(bus_volt))
+        end
+        target_buses = sort(collect(all_buses))
+    end
+
+    # Build x-axis: bus groups with phase positions, gaps between buses
+    x_labels = String[]
+    x_positions = Float64[]
+    pos = 1.0
+
+    for bus in target_buses
+        for phase in phases
+            push!(x_labels, "$(bus)-$(phase_labels[phase])")
+            push!(x_positions, pos)
+            pos += 1.0
+        end
+        pos += 1.0  # gap between bus groups
+    end
+
+    active_funcs = [ff for ff in keys(voltage_data_per_func) if !isempty(voltage_data_per_func[ff])]
+    sort!(active_funcs)
+    n_funcs = length(active_funcs)
+
+    if n_funcs == 0
+        @error "No voltage data available"
+    end
+
+    offset_width = 0.25 / max(n_funcs, 1)
+    offsets = n_funcs == 1 ? [0.0] : collect(range(-(n_funcs-1)/2 * offset_width, (n_funcs-1)/2 * offset_width, length=n_funcs))
+
+    p = Plots.plot(
+        xlabel = "Bus - Phase",
+        ylabel = "Voltage (pu)",
+        title = title,
+        legend = :outertopright,
+        xticks = (x_positions, x_labels),
+        xrotation = 45,
+        size = (1400, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 20Plots.mm,
+        top_margin = 5Plots.mm,
+        right_margin = 15Plots.mm,
+        ylims = (0.80, 1.10),
+        grid = :y
+    )
+
+    # Voltage limit lines
+    Plots.hline!(p, [0.95], color=:red, linestyle=:dash, linewidth=2, label="V_min (0.95 pu)")
+    Plots.hline!(p, [1.05], color=:red, linestyle=:dash, linewidth=2, label="V_max (1.05 pu)")
+
+    for (fi, fair_func) in enumerate(active_funcs)
+        bus_volt = voltage_data_per_func[fair_func]
+
+        plot_x = Float64[]
+        plot_y = Float64[]
+
+        for (bi, bus) in enumerate(target_buses)
+            bus_data = bus_volt[bus]
+            for (pi, phase) in enumerate(phases)
+                push!(plot_x, x_positions[(bi-1)*3 + pi] + offsets[fi])
+                push!(plot_y, bus_data[phase])
+            end
+        end
+
+        Plots.scatter!(p, plot_x, plot_y,
+            label = FAIR_FUNC_LABELS[fair_func],
+            marker = FAIR_FUNC_MARKERS[fair_func],
+            markersize = 8,
+            color = FAIR_FUNC_COLORS[fair_func]
+        )
+    end
+
+    # Vertical separators between bus groups
+    for i in 1:(length(target_buses)-1)
+        sep_x = x_positions[i*3] + 0.5
+        Plots.vline!(p, [sep_x], color=:lightgray, linestyle=:dot, linewidth=0.5, label=false)
+    end
+
+    Plots.savefig(p, save_path)
+    println("  Saved voltage comparison: $save_path")
+    return p
+end
+
+"""
+    plot_loadshed_per_bus_comparison(loadshed_data_per_func, save_path; title="")
+
+Grouped bar chart comparing per-bus load shed (%) across fairness functions.
+Each fairness function group has two bars: P shed % (full opacity) and Q shed % (reduced opacity).
+
+# Arguments
+- `loadshed_data_per_func::Dict{String, Tuple{Vector{String}, Vector{Float64}, Vector{Float64}}}` — fair_func => (bus_names, pshed_pct, qshed_pct)
+- `save_path::String` — file path to save the SVG
+- `title::String` — plot title
+"""
+function plot_loadshed_per_bus_comparison(
+    loadshed_data_per_func::Dict{String, Tuple{Vector{String}, Vector{Float64}, Vector{Float64}}},
+    save_path::String;
+    title::String="Load Shed Per Bus by Fairness Function"
+)
+    # Collect union of all bus names in order
+    all_buses = String[]
+    for (_, (bus_names, _, _)) in loadshed_data_per_func
+        for bn in bus_names
+            if !(bn in all_buses)
+                push!(all_buses, bn)
+            end
+        end
+    end
+    sort!(all_buses)
+
+    if isempty(all_buses)
+        @error "No loadshed data available"
+    end
+
+    active_funcs = sort(collect(keys(loadshed_data_per_func)))
+    n_funcs = length(active_funcs)
+    n_buses = length(all_buses)
+
+    # Each fairness function gets 2 sub-bars (P, Q), so total bars per bus group = 2 * n_funcs
+    total_bars = 2 * n_funcs
+    group_width = 0.8
+    bar_w = group_width / total_bars
+    x_positions = collect(1:n_buses)
+
+    p = Plots.plot(
+        xlabel = "Bus",
+        ylabel = "Load Shed (%)",
+        title = title,
+        legend = :outertopright,
+        xticks = (x_positions, all_buses),
+        xrotation = 45,
+        size = (1400, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        right_margin = 20Plots.mm
+    )
+
+    for (fi, fair_func) in enumerate(active_funcs)
+        bus_names, pshed_pct, qshed_pct = loadshed_data_per_func[fair_func]
+
+        # Build lookup
+        name_to_idx = Dict(bn => i for (i, bn) in enumerate(bus_names))
+
+        p_vals = [pshed_pct[name_to_idx[bn]] for bn in all_buses]
+        q_vals = [qshed_pct[name_to_idx[bn]] for bn in all_buses]
+
+        # Offset: center the group, then position P and Q sub-bars
+        base_offset = (fi - (n_funcs + 1) / 2) * 2 * bar_w
+        p_offset = base_offset
+        q_offset = base_offset + bar_w
+
+        fc = FAIR_FUNC_COLORS[fair_func]
+        fl = FAIR_FUNC_LABELS[fair_func]
+
+        # P bar (full opacity)
+        Plots.bar!(p, x_positions .+ p_offset, p_vals,
+            bar_width = bar_w * 0.9,
+            label = "$fl P",
+            color = fc,
+            alpha = 1.0
+        )
+
+        # Q bar (reduced opacity)
+        Plots.bar!(p, x_positions .+ q_offset, q_vals,
+            bar_width = bar_w * 0.9,
+            label = "$fl Q",
+            color = fc,
+            alpha = 0.4
+        )
+    end
+
+    Plots.savefig(p, save_path)
+    println("  Saved loadshed comparison: $save_path")
+    return p
 end

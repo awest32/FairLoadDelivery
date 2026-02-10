@@ -22,8 +22,8 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b"]#, "motivation_c"]
-const FAIR_FUNCS = ["efficiency", "proportional", "min_max", "equality_min", "jain"]
+const CASES = ["motivation_c"]#, "motivation_b", "motivation_c"]
+const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "jain"]
 const LS_PERCENT = 0.8
 const ITERATIONS = 10
 const N_ROUNDS = 2
@@ -430,21 +430,7 @@ end
 # ============================================================
 # PLOTTING FUNCTIONS
 # ============================================================
-const FAIR_FUNC_COLORS = Dict(
-    "proportional" => :green,
-    "efficiency" => :blue,
-    "min_max" => :red,
-    "equality_min" => :orange,
-    "jain" => :purple
-)
-
-const FAIR_FUNC_LABELS = Dict(
-    "proportional" => "Proportional",
-    "efficiency" => "Efficiency",
-    "min_max" => "Min-Max",
-    "equality_min" => "Equality Min",
-    "jain" => "Jain's Index"
-)
+# FAIR_FUNC_COLORS, FAIR_FUNC_LABELS, FAIR_FUNC_MARKERS now imported from FairLoadDelivery
 
 function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::Symbol, save_dir::String)
     """
@@ -602,14 +588,6 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, power_
         top_margin = 5Plots.mm
     )
 
-    markers = Dict(
-        "proportional" => :square,
-        "efficiency" => :circle,
-        "min_max" => :star5,
-        "equality_min" => :diamond,
-        "jain" => :utriangle
-    )
-
     for fair_func in FAIR_FUNCS
         if !haskey(per_load_data, fair_func)
             continue
@@ -625,7 +603,7 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, power_
 
         scatter!(p, x_positions, aligned_values,
             label = FAIR_FUNC_LABELS[fair_func],
-            marker = markers[fair_func],
+            marker = FAIR_FUNC_MARKERS[fair_func],
             markersize = 8,
             color = FAIR_FUNC_COLORS[fair_func]
         )
@@ -646,130 +624,9 @@ end
 # ============================================================
 const TARGET_BUSES = ["646", "611", "675", "645", "652", "671"]
 
-function extract_voltage_by_bus_name(solution::Dict, math::Dict)
-    """Extract per-phase voltage for each bus, grouped by engineering bus name."""
-    bus_voltages = FairLoadDelivery.get_bus_voltage_per_phase(solution, math)
-    bus_id_to_name = FairLoadDelivery.build_bus_name_maps(math)
+# extract_voltage_by_bus_name now imported from FairLoadDelivery
 
-    voltage_by_name = Dict{String, Dict{Int, Float64}}()
-
-    for (bus_id_str, bus) in math["bus"]
-        bus_id = parse(Int, bus_id_str)
-        bus_name = get(bus_id_to_name, bus_id, bus_id_str)
-        bus_terms = filter(t -> t <= 3, get(bus, "terminals", Int[]))
-        voltages = get(bus_voltages, bus_id, ones(3))
-
-        if !haskey(voltage_by_name, bus_name)
-            voltage_by_name[bus_name] = Dict{Int, Float64}()
-        end
-
-        for phase in bus_terms
-            v = voltages[phase]
-            voltage_by_name[bus_name][phase] = v
-        end
-    end
-
-    return voltage_by_name
-end
-
-function plot_voltage_per_phase_comparison(case::String, voltage_data_per_func::Dict{String, Dict{String, Dict{Int, Float64}}}, save_dir::String)
-    """
-    Plot per-phase voltage at target buses across fairness functions.
-    voltage_data_per_func: fair_func => bus_name => phase => voltage
-    """
-    phase_labels = Dict(1 => "A", 2 => "B", 3 => "C")
-    phases = [1, 2, 3]
-
-    # Build x-axis: bus groups with 3 phase positions each, gaps between buses
-    x_labels = String[]
-    x_positions = Float64[]
-    pos = 1.0
-
-    for bus in TARGET_BUSES
-        for phase in phases
-            push!(x_labels, "$(bus)-$(phase_labels[phase])")
-            push!(x_positions, pos)
-            pos += 1.0
-        end
-        pos += 1.0  # gap between bus groups
-    end
-
-    active_funcs = [ff for ff in FAIR_FUNCS if haskey(voltage_data_per_func, ff)]
-    n_funcs = length(active_funcs)
-
-    if n_funcs == 0
-        @warn "No voltage data available for $case"
-        return nothing
-    end
-
-    offset_width = 0.25 / max(n_funcs, 1)
-    offsets = n_funcs == 1 ? [0.0] : collect(range(-(n_funcs-1)/2 * offset_width, (n_funcs-1)/2 * offset_width, length=n_funcs))
-
-    markers = Dict(
-        "proportional" => :square,
-        "efficiency" => :circle,
-        "min_max" => :star5,
-        "equality_min" => :diamond,
-        "jain" => :utriangle
-    )
-
-    p = plot(
-        xlabel = "Bus - Phase",
-        ylabel = "Voltage (pu)",
-        title = "Bus Voltage Per Phase by Fairness Function: $case",
-        legend = :outertopright,
-        xticks = (x_positions, x_labels),
-        xrotation = 45,
-        size = (1400, 600),
-        left_margin = 10Plots.mm,
-        bottom_margin = 20Plots.mm,
-        top_margin = 5Plots.mm,
-        right_margin = 15Plots.mm,
-        ylims = (0.80, 1.10),
-        grid = :y
-    )
-
-    # Voltage limit lines
-    hline!(p, [0.95], color = :red, linestyle = :dash, linewidth = 2, label = "V_min (0.95 pu)")
-    hline!(p, [1.05], color = :red, linestyle = :dash, linewidth = 2, label = "V_max (1.05 pu)")
-
-    # Plot data for each fairness function
-    for (fi, fair_func) in enumerate(active_funcs)
-        bus_volt = voltage_data_per_func[fair_func]
-
-        plot_x = Float64[]
-        plot_y = Float64[]
-
-        for (bi, bus) in enumerate(TARGET_BUSES)
-            bus_data = get(bus_volt, bus, Dict{Int,Float64}())
-            for (pi, phase) in enumerate(phases)
-                if haskey(bus_data, phase)
-                    push!(plot_x, x_positions[(bi-1)*3 + pi] + offsets[fi])
-                    push!(plot_y, bus_data[phase])
-                end
-            end
-        end
-
-        if !isempty(plot_x)
-            scatter!(p, plot_x, plot_y,
-                label = FAIR_FUNC_LABELS[fair_func],
-                marker = get(markers, fair_func, :circle),
-                markersize = 8,
-                color = FAIR_FUNC_COLORS[fair_func]
-            )
-        end
-    end
-
-    # Vertical separators between bus groups
-    for i in 1:(length(TARGET_BUSES)-1)
-        sep_x = x_positions[i*3] + 0.5
-        vline!(p, [sep_x], color = :lightgray, linestyle = :dot, linewidth = 0.5, label = false)
-    end
-
-    savefig(p, joinpath(save_dir, "voltage_per_phase_$case.svg"))
-    println("    Saved voltage_per_phase_$case.svg")
-    return p
-end
+# plot_voltage_per_phase_comparison replaced by FairLoadDelivery.plot_voltage_per_bus_comparison
 
 # ============================================================
 # MAIN COMPARISON LOOP
@@ -1119,20 +976,12 @@ println("GENERATING VOLTAGE PER PHASE PLOTS")
 println("=" ^ 60)
 
 for case in CASES
-    # if !haskey(solutions_for_plotting, case)
-    #     continue
-    # end
-
     println("\n  Creating voltage comparison plot for $case...")
 
     # Collect voltage data: fair_func => bus_name => phase => voltage
     voltage_data_per_func = Dict{String, Dict{String, Dict{Int, Float64}}}()
 
     for fair_func in FAIR_FUNCS
-        # if !haskey(solutions_for_plotting[case], fair_func)
-        #     continue
-        # end
-
         sol_data = solutions_for_plotting[case][fair_func]
         voltage_data_per_func[fair_func] = extract_voltage_by_bus_name(
             sol_data[:acpf]["solution"],
@@ -1140,7 +989,53 @@ for case in CASES
         )
     end
 
-    plot_voltage_per_phase_comparison(case, voltage_data_per_func, save_dir)
+    plot_voltage_per_bus_comparison(
+        voltage_data_per_func,
+        joinpath(save_dir, "voltage_per_phase_$case.svg");
+        title = "Bus Voltage Per Phase by Fairness Function: $case",
+        target_buses = TARGET_BUSES
+    )
+end
+
+# ============================================================
+# LOADSHED PER BUS COMPARISON PLOTS
+# ============================================================
+println("\n" * "=" ^ 60)
+println("GENERATING LOADSHED PER BUS PLOTS")
+println("=" ^ 60)
+
+for case in CASES
+    if !haskey(per_load_results, case)
+        continue
+    end
+
+    println("\n  Creating loadshed comparison plot for $case...")
+
+    # Build loadshed data from per_load_results: fair_func => (bus_names, pshed_pct, qshed_pct)
+    loadshed_data_per_func = Dict{String, Tuple{Vector{String}, Vector{Float64}, Vector{Float64}}}()
+
+    for fair_func in FAIR_FUNCS
+        if !haskey(per_load_results[case], fair_func)
+            continue
+        end
+        data = per_load_results[case][fair_func]
+        if isempty(data[:load_ids])
+            continue
+        end
+        loadshed_data_per_func[fair_func] = (
+            data[:load_names],
+            data[:pshed],
+            data[:qshed]
+        )
+    end
+
+    if !isempty(loadshed_data_per_func)
+        plot_loadshed_per_bus_comparison(
+            loadshed_data_per_func,
+            joinpath(save_dir, "loadshed_per_bus_$case.svg");
+            title = "Load Shed Per Bus: $case"
+        )
+    end
 end
 
 # ============================================================

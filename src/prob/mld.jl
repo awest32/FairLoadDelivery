@@ -415,24 +415,24 @@ end
 
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=false)
+    _PMD.variable_mc_shunt_indicator(pm; relax=true)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=false)
+    _PMD.variable_mc_gen_indicator(pm; relax=true)
     _PMD.variable_mc_generator_power_on_off(pm)
 
     # # The on-off variable is making the solution error at the report statement in the variable function
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
  
 
-    _PMD.variable_mc_load_indicator(pm; relax=false)
+    _PMD.variable_mc_load_indicator(pm; relax=true)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
     constraint_load_shed_definition(pm)
