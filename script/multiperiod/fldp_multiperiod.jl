@@ -33,9 +33,10 @@ include("../../src/implementation/network_setup.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE_FILE = "ieee_13_aw_edit/motivation_b.dss"
+const CASE = "motivation_c"
+const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const N_PERIODS = 3  # Number of time periods
-const LS_PERCENT = 0.9  # Generation limit as fraction of total load
+const LS_PERCENT = 0.8  # Generation limit as fraction of total load
 
 # Load scaling factors for each period (simulating daily load curve)
 # Period 1: Morning (80% of peak)
@@ -277,14 +278,18 @@ function run_multiperiod_fldp()
         today = Dates.format(Dates.today(), "yyyy-mm-dd")
         output_dir = joinpath(@__DIR__, "../..", "results", today)
         mkpath(output_dir)
+        save_dir = joinpath(output_dir, "fald_multiperiod")
+        mkpath(save_dir)
+        case_dir = joinpath(save_dir, CASE)
+        mkpath(case_dir)
 
         # Save CSV
-        csv_path = joinpath(output_dir, "fldp_multiperiod_results.csv")
+        csv_path = joinpath(case_dir, "fald_multiperiod_results_$CASE.csv")
         CSV.write(csv_path, results_df)
         println("\nResults saved to: $csv_path")
 
         # Create plot
-        plot_path = joinpath(output_dir, "fldp_multiperiod_results.svg")
+        plot_path = joinpath(case_dir, "fald_multiperiod_results_$CASE.svg")
         plot_mn_results(results_df, plot_path)
     end
 

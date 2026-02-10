@@ -596,19 +596,17 @@ function objective_mn_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel)
     obj_expr = JuMP.AffExpr(0.0)
 
     for n in nw_ids
-        for (i, load) in PMD.ref(pm, n, :load)
-            z_demand = PMD.var(pm, n, :z_demand, i)
-            pd = load["pd"]
+        for (i, load) in _PMD.ref(pm, n, :load)
 
             # Weight by load magnitude (serve more load = better)
             weight = get(load, "weight", 10.0)
 
-            for (idx, p) in enumerate(pd)
+            #for (idx, p) in enumerate(pd)
                 # Maximize weighted load served
-                JuMP.add_to_expression!(obj_expr, weight * p * z_demand)
-            end
+                JuMP.add_to_expression!(obj_expr, weight * _PMD.var(pm, n, :pshed, i))
+            #end
         end
     end
 
-    JuMP.@objective(pm.model, Max, obj_expr)
+    JuMP.@objective(pm.model, Min, obj_expr)
 end

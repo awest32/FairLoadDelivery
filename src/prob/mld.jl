@@ -12,9 +12,9 @@ end
 Solve the multiperiod MLD problem using FairLoadDelivery formulation.
 """
 function solve_mn_mc_mld_switch_relaxed(data::Dict{String,Any}, solver)
-    return PMD.solve_mc_model(
+    return _PMD.solve_mc_model(
         data,
-        PMD.LPUBFDiagPowerModel,
+        _PMD.LinDist3FlowPowerModel,
         solver,
         build_mn_mc_mld_switch_relaxed;
         multinetwork=true,
@@ -91,7 +91,9 @@ end
 function solve_mc_mld_shed_random_round(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_random_rounding; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
-
+function solve_mc_mld_shed_random_round_integer(data::Dict{String,<:Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_random_rounding_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
+end
 function solve_mc_mld_shed_implicit_diff(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_implicit_diff; ref_extensions=[ref_add_rounded_load_blocks!], kwargs...)
 end
@@ -115,55 +117,56 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
         println("  Building period $n...")
 
         # Variables (same as FairLoadDelivery's build_mc_mld_switchable_relaxed)
-        PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=true)
-        PMD.variable_mc_bus_voltage_on_off(pm; nw=n)
+        _PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_bus_voltage_on_off(pm; nw=n)
 
-        PMD.variable_mc_branch_power(pm; nw=n)
-        PMD.variable_mc_branch_current(pm; nw=n)
-        PMD.variable_mc_switch_power(pm; nw=n)
-        PMD.variable_mc_switch_state(pm; nw=n, relax=true)
-        PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
-        PMD.variable_mc_transformer_power(pm; nw=n)
+        _PMD.variable_mc_branch_power(pm; nw=n)
+        _PMD.variable_mc_branch_current(pm; nw=n)
+        _PMD.variable_mc_switch_power(pm; nw=n)
+        _PMD.variable_mc_switch_state(pm; nw=n, relax=true)
+        _PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_transformer_power(pm; nw=n)
 
-        PMD.variable_mc_gen_indicator(pm; nw=n, relax=true)
-        PMD.variable_mc_generator_power_on_off(pm; nw=n)
+        _PMD.variable_mc_gen_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_generator_power_on_off(pm; nw=n)
 
-        PMD.variable_mc_load_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_load_indicator(pm; nw=n, relax=true)
         FairLoadDelivery.variable_mc_load_shed(pm; nw=n)
 
         FairLoadDelivery.variable_block_indicator(pm; nw=n, relax=true)
         FairLoadDelivery.variable_mc_fair_load_weights(pm; nw=n)
 
         # Constraints
-        PMD.constraint_mc_model_current(pm; nw=n)
+        _PMD.constraint_mc_model_current(pm; nw=n)
 
-        for i in PMD.ids(pm, n, :ref_buses)
-            PMD.constraint_mc_theta_ref(pm, i; nw=n)
+        for i in _PMD.ids(pm, n, :ref_buses)
+            _PMD.constraint_mc_theta_ref(pm, i; nw=n)
         end
 
-        PMD.constraint_mc_bus_voltage_on_off(pm; nw=n)
+        _PMD.constraint_mc_bus_voltage_on_off(pm; nw=n)
 
-        for i in PMD.ids(pm, n, :gen)
-            PMD.constraint_mc_generator_power(pm, i; nw=n)
+        for i in _PMD.ids(pm, n, :gen)
+            _PMD.constraint_mc_generator_power(pm, i; nw=n)
         end
 
-        for i in PMD.ids(pm, n, :bus)
+        for i in _PMD.ids(pm, n, :bus)
             FairLoadDelivery.constraint_mc_power_balance_shed(pm, i; nw=n)
         end
 
-        for i in PMD.ids(pm, n, :branch)
-            PMD.constraint_mc_power_losses(pm, i; nw=n)
+        for i in _PMD.ids(pm, n, :branch)
+            _PMD.constraint_mc_power_losses(pm, i; nw=n)
             FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm, i; nw=n)
-            PMD.constraint_mc_voltage_angle_difference(pm, i; nw=n)
+            _PMD.constraint_mc_voltage_angle_difference(pm, i; nw=n)
         end
 
-        for i in PMD.ids(pm, n, :switch)
+        for i in _PMD.ids(pm, n, :switch)
             FairLoadDelivery.constraint_switch_state_on_off(pm, i; nw=n, relax=true)
             FairLoadDelivery.constraint_mc_switch_ampacity(pm, i; nw=n)
+            constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
         end
 
-        for i in PMD.ids(pm, n, :transformer)
-            PMD.constraint_mc_transformer_power(pm, i; nw=n)
+        for i in _PMD.ids(pm, n, :transformer)
+            _PMD.constraint_mc_transformer_power(pm, i; nw=n)
         end
 
         # FairLoadDelivery-specific constraints
@@ -268,6 +271,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -375,7 +379,8 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :transformer)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
-
+    
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -617,7 +622,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :transformer)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
-
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # constraint_mc_radiality(pm)

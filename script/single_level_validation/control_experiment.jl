@@ -86,8 +86,8 @@ v_squared_switch = plot()
 
 # Prepare the bounds to plot for the squared voltage of each switch
 n_sw = length(math["switch"])
-v_squared_max = (1.1^2)*ones(n_sw)
-v_squared_min = (0.9^2)*ones(n_sw)
+v_squared_max = (1.05^2)*ones(n_sw)
+v_squared_min = (0.95^2)*ones(n_sw)
 
 # Get the reference data for the blocks
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_switchable_relaxed; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])

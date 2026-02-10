@@ -22,7 +22,7 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c"]
+const CASES = ["motivation_a", "motivation_b"]#, "motivation_c"]
 const FAIR_FUNCS = ["efficiency", "proportional", "min_max", "equality_min", "jain"]
 const LS_PERCENT = 0.8
 const ITERATIONS = 10
@@ -30,7 +30,7 @@ const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 5
 
 # Save results
-save_dir = "results/$(Dates.today())/"
+save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
 mkpath(save_dir)
 
 
@@ -126,10 +126,6 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status =
             radiality_check(ref, switch_states, block_status, bernoulli_samples)
 
-        if index === nothing
-            continue
-        end
-
         # Apply rounded states
         math_copy = deepcopy(math_relaxed)
         math_rounded = update_network(
@@ -195,6 +191,52 @@ function check_binary_solution(mld::Dict)
     return isempty(violations), violations
 end
 
+function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver)
+    ac_checks = Dict{String, Any}()
+    ac_summary = Dict{String, Any}()
+
+    # Set generation capacity high for AC feasibility (slack bus)
+    math_ac = deepcopy(math_rounded)
+    for (i, gen) in math_ac["gen"]
+        if gen["source_id"] == "voltage_source.source"
+            pd_phase1 = 0.0; pd_phase2 = 0.0; pd_phase3 = 0.0
+            qd_phase1 = 0.0; qd_phase2 = 0.0; qd_phase3 = 0.0
+            for (ind, d) in math_ac["load"]
+                for (idx, con) in enumerate(d["connections"])
+                    if con == 1
+                        pd_phase1 += d["pd"][idx]; qd_phase1 += d["qd"][idx]
+                    elseif con == 2
+                        pd_phase2 += d["pd"][idx]; qd_phase2 += d["qd"][idx]
+                    elseif con == 3
+                        pd_phase3 += d["pd"][idx]; qd_phase3 += d["qd"][idx]
+                    end
+                end
+            end
+            gen["pmax"][1] = pd_phase1 * 1000
+            gen["qmax"][1] = qd_phase1 * 1000
+            gen["pmax"][2] = pd_phase2 * 1000
+            gen["qmax"][2] = qd_phase2 * 1000
+            gen["pmax"][3] = pd_phase3 * 1000
+            gen["qmax"][3] = qd_phase3 * 1000
+            gen["pmin"][:] .= 0
+            gen["qmin"][:] .= 0
+        end
+    end
+    
+    # Run AC power flow
+    println("  Running AC power flow (IVRUPowerModel)...")
+    ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
+
+    ac_term = ac_result["termination_status"]
+    ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED)
+
+    ac_checks["ac_convergence"] = Dict("passed" => ac_converged, "details" => ["Status: $ac_term"])
+
+    ac_summary["converged"] = ac_converged
+    ac_summary["termination_status"] = string(ac_term)
+    return ac_result, math_ac, ac_checks, ac_summary
+end
+
 function extract_load_shed(mld::Dict)
     if mld === nothing || !haskey(mld, "solution") || !haskey(mld["solution"], "load")
        @error "MLD solution does not contain load data"
@@ -213,15 +255,31 @@ function extract_load_shed(mld::Dict)
     return total_pshed, total_pd_served
 end
 
-function extract_per_load_data(mld::Dict)
-    """Extract per-load shed and served percentages (P and Q), sorted by load ID."""
-    load_ids = sort(parse.(Int, collect(keys(mld["solution"]["load"]))))
+function extract_per_load_data(mld::Dict, math::Dict)
+    """Extract per-bus shed and served percentages (P and Q), one entry per bus.
+    Since z_demand is per-load (all phases shed equally), the percentage is
+    identical across phases, so we only need one phase per bus."""
+
+    # Group loads by bus
+    bus_loads = Dict{Int, Vector{Int}}()  # bus_id => [load_ids...]
+    for (lid_str, load_data) in math["load"]
+        lid = parse(Int, lid_str)
+        bus_id = load_data["load_bus"]
+        if !haskey(bus_loads, bus_id)
+            bus_loads[bus_id] = Int[]
+        end
+        push!(bus_loads[bus_id], lid)
+    end
+
+    bus_ids = sort(collect(keys(bus_loads)))
     pshed_pct = Float64[]
     pd_served_pct = Float64[]
     qshed_pct = Float64[]
     qd_served_pct = Float64[]
 
-    for lid in load_ids
+    for bus_id in bus_ids
+        # Take the first load at this bus (percentages are the same across phases)
+        lid = first(bus_loads[bus_id])
         load_data = mld["solution"]["load"][string(lid)]
         pshed = sum(load_data["pshed"])
         pd_served = sum(load_data["pd"])
@@ -237,7 +295,7 @@ function extract_per_load_data(mld::Dict)
         push!(qd_served_pct, (qd_served / qd_total) * 100)
     end
 
-    return load_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct
+    return bus_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct
 end
 
 function extract_original_load(math::Dict)
@@ -424,19 +482,19 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     x_offset = bar_width
 
     if data_type == :pshed
-        title = "Active Power Load Shed: $case"
+        title = "Active Power Load Shed per Bus: $case"
         ylabel = "Load Shed (%)"
         filename = "pshed_per_bus_$case.svg"
     elseif data_type == :pd_served
-        title = "Active Power Load Served: $case"
+        title = "Active Power Load Served per Bus: $case"
         ylabel = "Load Served (%)"
         filename = "pd_served_per_bus_$case.svg"
     elseif data_type == :qshed
-        title = "Reactive Power Load Shed: $case"
+        title = "Reactive Power Load Shed per Bus: $case"
         ylabel = "Load Shed (%)"
         filename = "qshed_per_bus_$case.svg"
     elseif data_type == :qd_served
-        title = "Reactive Power Load Served: $case"
+        title = "Reactive Power Load Served per Bus: $case"
         ylabel = "Load Served (%)"
         filename = "qd_served_per_bus_$case.svg"
     else
@@ -446,7 +504,7 @@ function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::
     x_positions = collect(1:length(load_ids))
 
     p = plot(
-        xlabel = "Load",
+        xlabel = "Bus",
         ylabel = ylabel,
         title = title,
         legend = :outertopright,
@@ -606,7 +664,7 @@ function extract_voltage_by_bus_name(solution::Dict, math::Dict)
         end
 
         for phase in bus_terms
-            v = phase <= length(voltages) ? voltages[phase] : 1.0
+            v = voltages[phase]
             voltage_by_name[bus_name][phase] = v
         end
     end
@@ -803,25 +861,35 @@ function run_comparison()
                 @warn "$case/$fair_func: Non-binary values in final MLD solution: $(join(binary_violations[1:min(3,length(binary_violations))], "; "))"
             end
 
+            # Conduct ACPF on best solution to get accurate load shed values and voltage data for plotting
+
+
             final_pshed, final_pd_served = extract_load_shed(best_mld)
 
-            # Extract per-load data
-            load_ids, pshed_per_load, pd_per_load, qshed_per_load, qd_per_load = extract_per_load_data(best_mld)
-            load_name_map = build_load_name_map(math_out[best_idx])
-            load_names = [load_name_map[lid] for lid in load_ids]
+            # Extract per-bus data (one entry per bus, since all phases have same shed %)
+            bus_ids, pshed_per_bus, pd_per_bus, qshed_per_bus, qd_per_bus = extract_per_load_data(best_mld, math_out[best_idx])
+            bus_name_map = build_bus_name_maps(math_out[best_idx])
+            bus_names = [get(bus_name_map, bid, "bus_$bid") for bid in bus_ids]
             per_load_results[case][fair_func] = Dict(
-                :load_ids => load_ids,
-                :load_names => load_names,
-                :pshed => pshed_per_load,
-                :pd_served => pd_per_load,
-                :qshed => qshed_per_load,
-                :qd_served => qd_per_load
+                :load_ids => bus_ids,
+                :load_names => bus_names,
+                :pshed => pshed_per_bus,
+                :pd_served => pd_per_bus,
+                :qshed => qshed_per_bus,
+                :qd_served => qd_per_bus
             )
 
+        
+            acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver)
+            
             # Store solution for plotting
             solutions_for_plotting[case][fair_func] = Dict(
                 :mld => best_mld,
-                :math => math_out[best_idx]
+                :mld_math => math_out[best_idx],
+                :acpf => acpf,
+                :acpf_math => math_ac,
+                :checks => ac_checks,
+                :summary => ac_summary
             )
 
             # Calculate percentages
@@ -933,16 +1001,26 @@ for case in CASES
 
         sol_data = solutions_for_plotting[case][fair_func]
         mld_solution = sol_data[:mld]
-        math_data = sol_data[:math]
+        math_data = sol_data[:mld_math]
+        acpf_solution = sol_data[:acpf]
+        math_ac = sol_data[:acpf_math]
 
         # Create network plot
-        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func).svg")
+        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_mld.svg")
         FairLoadDelivery.plot_network_load_shed(
             mld_solution["solution"],
             math_data;
             output_file=plot_filename
         )
-        println("    Saved network_$(case)_$(fair_func).svg")
+        println("    Saved network_$(case)_$(fair_func)_mld.svg")
+
+        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_acpf.svg")
+        FairLoadDelivery.plot_network_load_shed(
+            acpf_solution["solution"],
+            math_ac;
+            output_file=plot_filename, ac_flag=true
+        )
+        println("    Saved network_$(case)_$(fair_func)_acpf.svg")
 
         # Save solution data as CSV
         solution = mld_solution["solution"]
@@ -1020,7 +1098,7 @@ for case in CASES
         println("    Saved solution CSVs for $(case)_$(fair_func)")
 
         # Per-phase voltage CSV
-        voltage_by_name = extract_voltage_by_bus_name(solution, math_data)
+        voltage_by_name = extract_voltage_by_bus_name(acpf_solution["solution"], math_ac)
         volt_phase_df = DataFrame(bus_name = String[], phase = String[], voltage_pu = Float64[])
         phase_map = Dict(1 => "A", 2 => "B", 3 => "C")
         for bus_name in sort(collect(keys(voltage_by_name)))
@@ -1028,8 +1106,8 @@ for case in CASES
                 push!(volt_phase_df, (bus_name, phase_map[phase], voltage_by_name[bus_name][phase]))
             end
         end
-        CSV.write(joinpath(save_dir, "solution_bus_voltage_per_phase_$(case)_$(fair_func).csv"), volt_phase_df)
-        println("    Saved solution_bus_voltage_per_phase_$(case)_$(fair_func).csv")
+        CSV.write(joinpath(save_dir, "solution_bus_voltage_per_phase_$(case)_$(fair_func)_acpf.csv"), volt_phase_df)
+        println("    Saved solution_bus_voltage_per_phase_$(case)_$(fair_func)_acpf.csv")
     end
 end
 
@@ -1041,9 +1119,9 @@ println("GENERATING VOLTAGE PER PHASE PLOTS")
 println("=" ^ 60)
 
 for case in CASES
-    if !haskey(solutions_for_plotting, case)
-        continue
-    end
+    # if !haskey(solutions_for_plotting, case)
+    #     continue
+    # end
 
     println("\n  Creating voltage comparison plot for $case...")
 
@@ -1051,14 +1129,14 @@ for case in CASES
     voltage_data_per_func = Dict{String, Dict{String, Dict{Int, Float64}}}()
 
     for fair_func in FAIR_FUNCS
-        if !haskey(solutions_for_plotting[case], fair_func)
-            continue
-        end
+        # if !haskey(solutions_for_plotting[case], fair_func)
+        #     continue
+        # end
 
         sol_data = solutions_for_plotting[case][fair_func]
         voltage_data_per_func[fair_func] = extract_voltage_by_bus_name(
-            sol_data[:mld]["solution"],
-            sol_data[:math]
+            sol_data[:acpf]["solution"],
+            sol_data[:acpf_math]
         )
     end
 

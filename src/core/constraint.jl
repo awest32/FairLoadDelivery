@@ -1,11 +1,12 @@
 
-function constraint_gen_event_simple(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, ls_percent::Float64)
-    total_load = sum(load["pd"][idx] for (i, load) in _PMD.ref(pm, nw, :load) for (idx, c) in enumerate(load["connections"]))
+function constraint_source_voltage_bounds(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
+    v_pu = 1.03
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         if gen["source_id"] == "voltage_source.source"
-            pg = sum(_PMD.var(pm, nw, :pg, i))
-            JuMP.@constraint(pm.model, pg <= ls_percent * sum(total_load))
-            JuMP.@constraint(pm.model, pg>=0)
+            for  w in _PMD.var(pm, nw, :w, i)
+                JuMP.@constraint(pm.model, w <= (v_pu * 1.02)^2)
+                JuMP.@constraint(pm.model, w >= (v_pu * 0.98)^2)
+            end
         end
     end
 end
