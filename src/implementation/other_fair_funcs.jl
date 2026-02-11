@@ -21,10 +21,13 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     )
     sum_pshed = sum(pshed_new)
     sum_pshed_squared = sum(pshed_new[i]^2 for i in 1:n)
-    if sum_pshed == 0.0
-        return 0.0
+
+    # Guard: if all pshed values are zero, no inequality to reduce — return unchanged
+    if all(pshed_prev .== 0.0)
+        @warn "[jains_fairness_index] All pshed_prev values are zero — returning unchanged weights"
+        return pshed_prev, weights_prev
     end
-    
+
     fairness_index = (sum_pshed^2) / (n * sum_pshed_squared)
     @objective(model, Max, fairness_index)
     JuMP.set_silent(model)
@@ -157,14 +160,14 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
     @constraint(model, [i = 1:length(pshed_new)],t == pshed_new[i])
-    @objective(model, Max, t)
-     JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    open("equality_min_model_out.txt", "w") do io
-            redirect_stdout(io) do
-                print(model)
-            end
-        end
-    JuMP.set_silent(model)
+    @objective(model, Min, t)
+    #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    # open("equality_min_model_out.txt", "w") do io
+    #         redirect_stdout(io) do
+    #             print(model)
+    #         end
+    #     end
+    # JuMP.set_silent(model)
     optimize!(model)
     
     return value.(pshed_new), value.(weights_new)

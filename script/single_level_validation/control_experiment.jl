@@ -44,7 +44,6 @@ case = "motivation_a"
 gen_cap = 0.8
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
-powerplot(eng)
 # Create the folder to store the results
     today = Dates.today()
 
@@ -94,7 +93,7 @@ mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_swit
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
 # Run the integer case of the mld
-mld_int = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
+mld_int = FairLoadDelivery.solve_mc_mld_palma_integer(math, gurobi)
 
 block_int = mld_int["solution"]["block"]
 switch_int = mld_int["solution"]["switch"]
@@ -116,7 +115,7 @@ end
 
 
 # Run the continuous case of the mld
-mld_relaxed = FairLoadDelivery.solve_mc_mld_switch_relaxed(math, ipopt)
+mld_relaxed = FairLoadDelivery.solve_mc_mld_equality_min_relaxed(math, ipopt)
 block_relax = mld_relaxed["solution"]["block"]
 switch_relax = mld_relaxed["solution"]["switch"]
 for (id, block) in (block_relax)

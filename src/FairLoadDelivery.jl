@@ -78,6 +78,8 @@ export build_mc_mld_equality_min, build_mc_mld_equality_min_integer, objective_e
 export build_mc_mld_proportional_fairness, build_mc_mld_proportional_fairness_integer, objective_proportional_fairness_mld
 export build_mc_mld_jain, build_mc_mld_jain_integer, objective_jain_mld, objective_jain_mld_minvar
 export build_mc_mld_palma, build_mc_mld_palma_integer, objective_palma_mld, objective_palma_mld_maxmin
+export solve_mc_mld_gini, solve_mc_mld_gini_integer
+export build_mc_mld_gini, build_mc_mld_gini_integer, objective_gini_mld
 export ipopt, gurobi, highs, juniper
 export setup_network, lower_level_soln,generate_bernoulli_samples, radiality_check, update_network, ac_feasibility_test
 export lin_palma, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index

@@ -1,10 +1,3 @@
-"""
-    compare_load_shed.jl
-
-    Efficient script to compare load shed results from the bilevel formulation
-    across all cases and fairness functions.
-"""
-
 using Revise
 using MKL
 using FairLoadDelivery
@@ -19,13 +12,17 @@ using Plots
 using StatsPlots
 using Statistics
 
+"""
+    Efficient script to compare load shed results from the bilevel formulation
+    across all cases and fairness functions.
+"""
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]#, "motivation_b", "motivation_c"]
-const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "jain"]
-const LS_PERCENT = 0.8
-const ITERATIONS = 10
+const CASES = ["motivation_a", "motivation_b", "motivation_c"]
+const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
+const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
+const ITERATIONS = 1
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 5
 
@@ -66,7 +63,7 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
 
     for k in 1:iterations
         # Solve lower-level problem and get sensitivities
-        dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, _ = lower_level_soln(data, fair_weights, k)
+        dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, _ = lower_level_soln(math_new, fair_weights, k)
 
         # Apply fairness function
         if fair_func == "proportional"
@@ -101,7 +98,7 @@ end
 # ============================================================
 # RANDOM ROUNDING AND FINAL SOLUTION
 # ============================================================
-function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, ipopt)
+function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, ipopt; fair_func::String="", case::String="")
     # Solve implicit diff to get switch/block states
     mld_implicit = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
 
@@ -118,6 +115,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
     # Storage for each round
     math_out = Vector{Dict{String, Any}}()
     mld_results = Vector{Dict{String, Any}}()
+    stage = "random_rounding"
 
     for r in 1:n_rounds
         rng = 100 * r
@@ -125,6 +123,11 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
 
         index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status =
             radiality_check(ref, switch_states, block_status, bernoulli_samples)
+
+        if index === nothing
+            @warn "[$case/$fair_func] Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
+            continue
+        end
 
         # Apply rounded states
         math_copy = deepcopy(math_relaxed)
@@ -142,6 +145,8 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         if mld_rounded["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED]
             push!(math_out, math_rounded)
             push!(mld_results, mld_rounded)
+        else
+            @warn "[$case/$fair_func] Round $r failed at: ROUNDED MLD SOLVE — termination status: $(mld_rounded["termination_status"])"
         end
     end
 
@@ -662,6 +667,9 @@ function run_comparison()
     # Solutions storage for plotting: case => fair_func => {mld, math}
     solutions_for_plotting = Dict{String, Dict{String, Dict{Symbol, Any}}}()
 
+    # Track failed combinations
+    failed_combinations = Vector{Tuple{String, String, String}}()  # (case, fair_func, reason)
+
     println("=" ^ 60)
     println("LOAD SHED COMPARISON ACROSS CASES AND FAIRNESS FUNCTIONS")
     println("=" ^ 60)
@@ -702,11 +710,14 @@ function run_comparison()
 
             # Run random rounding
             math_out, mld_results = run_random_rounding(
-                math_relaxed, N_ROUNDS, N_BERNOULLI_SAMPLES, ipopt_solver
+                math_relaxed, N_ROUNDS, N_BERNOULLI_SAMPLES, ipopt_solver;
+                fair_func=fair_func, case=case
             )
 
             if isempty(mld_results)
-                error("No feasible solution found for case=$case, fair_func=$fair_func")
+                @warn "[$case/$fair_func] FAILED — no feasible solution after random rounding (all $N_ROUNDS rounds failed). Check warnings above for failure stage (RADIAL FEASIBILITY or ROUNDED MLD SOLVE)."
+                push!(failed_combinations, (case, fair_func, "No feasible solution after random rounding"))
+                continue
             end
 
             # Find best solution
@@ -722,7 +733,7 @@ function run_comparison()
 
 
             final_pshed, final_pd_served = extract_load_shed(best_mld)
-
+            @info "    Case=$case, FairFunc=$fair_func => Final shed: $(round(final_pshed, digits=4)), Served: $(round(final_pd_served, digits=4))"
             # Extract per-bus data (one entry per bus, since all phases have same shed %)
             bus_ids, pshed_per_bus, pd_per_bus, qshed_per_bus, qd_per_bus = extract_per_load_data(best_mld, math_out[best_idx])
             bus_name_map = build_bus_name_maps(math_out[best_idx])
@@ -769,7 +780,7 @@ function run_comparison()
         end
     end
 
-    return results, per_load_results, final_weights_results, solutions_for_plotting
+    return results, per_load_results, final_weights_results, solutions_for_plotting, failed_combinations
 end
 
 # ============================================================
@@ -777,7 +788,17 @@ end
 # ============================================================
 println("\nStarting comparison at $(now())...\n")
 
-results, per_load_results, final_weights_results, solutions_for_plotting = run_comparison()
+results, per_load_results, final_weights_results, solutions_for_plotting, failed_combinations = run_comparison()
+
+# Print failed combinations
+if !isempty(failed_combinations)
+    println("\n" * "=" ^ 60)
+    println("FAILED COMBINATIONS")
+    println("=" ^ 60)
+    for (case, fair_func, reason) in failed_combinations
+        println("  $case / $fair_func: $reason")
+    end
+end
 
 # Print summary table
 println("\n" * "=" ^ 60)
@@ -982,6 +1003,9 @@ for case in CASES
     voltage_data_per_func = Dict{String, Dict{String, Dict{Int, Float64}}}()
 
     for fair_func in FAIR_FUNCS
+        if !haskey(solutions_for_plotting, case) || !haskey(solutions_for_plotting[case], fair_func)
+            continue
+        end
         sol_data = solutions_for_plotting[case][fair_func]
         voltage_data_per_func[fair_func] = extract_voltage_by_bus_name(
             sol_data[:acpf]["solution"],
@@ -989,12 +1013,14 @@ for case in CASES
         )
     end
 
-    plot_voltage_per_bus_comparison(
-        voltage_data_per_func,
-        joinpath(save_dir, "voltage_per_phase_$case.svg");
-        title = "Bus Voltage Per Phase by Fairness Function: $case",
-        target_buses = TARGET_BUSES
-    )
+    if !isempty(voltage_data_per_func)
+        plot_voltage_per_bus_comparison(
+            voltage_data_per_func,
+            joinpath(save_dir, "voltage_per_phase_$case.svg");
+            title = "Bus Voltage Per Phase by Fairness Function: $case",
+            target_buses = TARGET_BUSES
+        )
+    end
 end
 
 # ============================================================
@@ -1068,11 +1094,11 @@ for case in CASES
     weights_df = DataFrame(load_id = load_ids_sorted)
     for fair_func in FAIR_FUNCS
         if !haskey(final_weights_results[case], fair_func) || isempty(final_weights_results[case][fair_func][:weight_ids])
-            error("No weight data for case=$case, fair_func=$fair_func")
+            weights_df[!, fair_func] = fill(NaN, length(load_ids_sorted))
         else
             data = final_weights_results[case][fair_func]
             id_to_weight = Dict(zip(data[:weight_ids], data[:weights]))
-            weights_df[!, fair_func] = [haskey(id_to_weight, lid) ? id_to_weight[lid] : error("Weight for load ID $lid not found") for lid in load_ids_sorted]
+            weights_df[!, fair_func] = [haskey(id_to_weight, lid) ? id_to_weight[lid] : NaN for lid in load_ids_sorted]
         end
     end
 
@@ -1194,6 +1220,15 @@ for case in CASES
     summary_path = joinpath(save_dir, "fairness_summary_$case.csv")
     CSV.write(summary_path, summary_df)
     println("  Saved: $summary_path")
+end
+
+if !isempty(failed_combinations)
+    println("\n" * "=" ^ 60)
+    println("FAILED COMBINATIONS ($(length(failed_combinations)) total)")
+    println("=" ^ 60)
+    for (case, fair_func, reason) in failed_combinations
+        println("  $case / $fair_func: $reason")
+    end
 end
 
 println("\n" * "=" ^ 60)
