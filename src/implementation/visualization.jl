@@ -1054,7 +1054,7 @@ function plot_network_load_shed(
                     q_pct = orig_q > 0 ? round(shed_q / orig_q * 100, digits=0) : 0.0
                     q_pct_str = "$(Int(q_pct))%"
                 end
-                shed_label = "S$phase:$(p_pct_str)(P),$(q_pct_str)(Q)"
+                shed_label = "S$phase: $(p_pct_str)"
                 push!(bg_elements, compose(context(),
                     Compose.rectangle(label_x - 0.07, current_y - 0.004, 0.14, 0.016),
                     fill("white"), stroke(nothing)
@@ -1602,15 +1602,13 @@ function plot_loadshed_per_bus_comparison(
     n_funcs = length(active_funcs)
     n_buses = length(all_buses)
 
-    # Each fairness function gets 2 sub-bars (P, Q), so total bars per bus group = 2 * n_funcs
-    total_bars = 2 * n_funcs
     group_width = 0.8
-    bar_w = group_width / total_bars
+    bar_w = group_width / n_funcs
     x_positions = collect(1:n_buses)
 
     p = Plots.plot(
         xlabel = "Bus",
-        ylabel = "Load Shed (%)",
+        ylabel = "Active Power Load Shed (%)",
         title = title,
         legend = :outertopright,
         xticks = (x_positions, all_buses),
@@ -1629,30 +1627,17 @@ function plot_loadshed_per_bus_comparison(
         name_to_idx = Dict(bn => i for (i, bn) in enumerate(bus_names))
 
         p_vals = [pshed_pct[name_to_idx[bn]] for bn in all_buses]
-        q_vals = [qshed_pct[name_to_idx[bn]] for bn in all_buses]
 
-        # Offset: center the group, then position P and Q sub-bars
-        base_offset = (fi - (n_funcs + 1) / 2) * 2 * bar_w
-        p_offset = base_offset
-        q_offset = base_offset + bar_w
+        # Offset: center the bars
+        offset = (fi - (n_funcs + 1) / 2) * bar_w
 
         fc = FAIR_FUNC_COLORS[fair_func]
         fl = FAIR_FUNC_LABELS[fair_func]
 
-        # P bar (full opacity)
-        Plots.bar!(p, x_positions .+ p_offset, p_vals,
+        Plots.bar!(p, x_positions .+ offset, p_vals,
             bar_width = bar_w * 0.9,
-            label = "$fl P",
-            color = fc,
-            alpha = 1.0
-        )
-
-        # Q bar (reduced opacity)
-        Plots.bar!(p, x_positions .+ q_offset, q_vals,
-            bar_width = bar_w * 0.9,
-            label = "$fl Q",
-            color = fc,
-            alpha = 0.4
+            label = fl,
+            color = fc
         )
     end
 

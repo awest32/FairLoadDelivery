@@ -35,13 +35,13 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_c"
+const CASE = "motivation_d"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
-const ITERATIONS = 1
+const ITERATIONS = 2
 const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 5
+const N_BERNOULLI_SAMPLES = 6
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)

@@ -95,6 +95,18 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
                 switch["current_rating"][:] .= 700#264
             end
         end
+    elseif case == "ieee_13_aw_edit/motivation_d.dss"
+       for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 700#310
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 700#264
+            elseif switch["name"] == "671692"
+                switch["current_rating"][:] .= 700#70
+            elseif switch["name"] == "646611"
+                switch["current_rating"][:] .= 700#264
+            end
+        end
     end
     # Ensure the generation from the source bus is less than the max load
     for (i,gen) in math["gen"]

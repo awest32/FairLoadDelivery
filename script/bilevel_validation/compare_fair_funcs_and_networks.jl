@@ -19,7 +19,7 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c"]
+const CASES = ["motivation_a", "motivation_b", "motivation_c"]#, "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 1
@@ -627,7 +627,7 @@ end
 # ============================================================
 # VOLTAGE PER PHASE COMPARISON
 # ============================================================
-const TARGET_BUSES = ["646", "611", "675", "645", "652", "671"]
+## Show all buses in voltage comparison (no filtering)
 
 # extract_voltage_by_bus_name now imported from FairLoadDelivery
 
@@ -843,19 +843,6 @@ for case in CASES
 
     create_grouped_bar_chart(case, per_load_results[case], :pd_served, save_dir)
     println("    Saved pd_served_per_bus_$case.svg")
-
-#    create_shed_distribution_plot(case, per_load_results[case], :pshed, save_dir)
- #   println("    Saved pshed_distribution_$case.svg")
-
-    # Reactive power charts
-    create_grouped_bar_chart(case, per_load_results[case], :qshed, save_dir)
-    println("    Saved qshed_per_bus_$case.svg")
-
-    create_grouped_bar_chart(case, per_load_results[case], :qd_served, save_dir)
-    println("    Saved qd_served_per_bus_$case.svg")
-
-   # create_shed_distribution_plot(case, per_load_results[case], :qshed, save_dir)
-    #println("    Saved qshed_distribution_$case.svg")
 end
 
 # ============================================================
@@ -1017,8 +1004,7 @@ for case in CASES
         plot_voltage_per_bus_comparison(
             voltage_data_per_func,
             joinpath(save_dir, "voltage_per_phase_$case.svg");
-            title = "Bus Voltage Per Phase by Fairness Function: $case",
-            target_buses = TARGET_BUSES
+            title = "Bus Voltage Per Phase by Fairness Function: $case"
         )
     end
 end
