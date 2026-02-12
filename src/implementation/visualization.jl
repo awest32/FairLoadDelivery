@@ -60,7 +60,7 @@ function get_bus_voltage_per_phase(solution::Dict{String,Any}, math::Dict{String
             elseif haskey(bus_sol, "vm")
                 vm_vals = bus_sol["vm"]
                  for (id,c) in enumerate(bus["terminals"])
-                    voltages[c] = sqrt(vm_vals[id])
+                    voltages[c] = vm_vals[id]
                 end
             elseif haskey(bus_sol, "vr")
                 vr_vals = bus_sol["vr"]
@@ -1398,6 +1398,12 @@ function extract_voltage_by_bus_name(solution::Dict, math::Dict)
     for (bus_id_str, bus) in math["bus"]
         bus_id = parse(Int, bus_id_str)
         bus_name = bus_id_to_name[bus_id]
+
+        # Skip virtual switch buses (e.g. "632633", "671692") — they duplicate real bus voltages
+        if length(bus_name) > 3 && all(isdigit, bus_name)
+            continue
+        end
+
         bus_terms = filter(t -> t <= 3, bus["terminals"])
         voltages = bus_voltages[bus_id]
 

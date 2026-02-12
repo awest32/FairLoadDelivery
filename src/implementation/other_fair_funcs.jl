@@ -58,29 +58,30 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
          pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
     @constraint(model, t >= maximum(pshed_new))
-    @objective(model, Min, maximum(pshed_new))
+    @objective(model, Min, t)
     JuMP.set_silent(model)
     optimize!(model)
     return value.(pshed_new), value.(weights_new)
 end
 
-# Function to compute the proportional fairness load shed
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+# Function to compute the proportional fairness of load served
+# Maximizes Σ log(pd_served_i) = Σ log(pref_i - pshed_i)  (α-fairness with α=1)
+# Reports load shed values
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, math::Dict{String,Any})
     model = JuMP.Model(Ipopt.Optimizer)
-    # pshed_new = JuMP.@variable(
-    # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
-    # base_name = "pshed_new"
-    #     )
+
+    # Build reference demand vector aligned with pshed indexing (sorted load IDs)
+    load_ids = sort(parse.(Int, collect(keys(math["load"]))))
+    pref = Float64[sum(math["load"][string(lid)]["pd"]) for lid in load_ids]
+
     @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
-    # @constraint(model, [i in 1:length(pshed_prev)],
-    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
-    # )
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    @objective(model, Max, sum(log(pshed_new[i]) for i in 1:length(pshed_new))) # Adding a small constant to avoid log(0)
+    # Maximize sum of log(load served) = sum of log(pref - pshed)
+    @objective(model, Max, sum(log(pref[i] - pshed_new[i]) for i in 1:length(pshed_new)))
     JuMP.set_silent(model)
     optimize!(model)
     return value.(pshed_new), value.(weights_new)
@@ -136,8 +137,8 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
     #     pshed_new[i] <= t
     # )
     @objective(model, Min, norm(pshed_new, Inf))
-     JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    JuMP.set_silent(model)
+    #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    # JuMP.set_silent(model)
     optimize!(model)
     return value.(pshed_new), value.(weights_new)
 end
@@ -152,7 +153,7 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     @variable(model, weights_new[1:length(weights_prev)] >= 1)
     @variable(model, t >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]^2-weights_prev[i]^2 <= 0.1^2)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= 0.1)
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     # )

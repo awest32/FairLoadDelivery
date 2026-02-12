@@ -19,12 +19,12 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c"]#, "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["motivation_a", "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 1
-const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 5
+const ITERATIONS = 100
+const N_ROUNDS = 3
+const N_BERNOULLI_SAMPLES = 6
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -67,7 +67,7 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
 
         # Apply fairness function
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "efficiency"
             pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "min_max"
@@ -142,7 +142,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         # Solve rounded MLD
         mld_rounded = FairLoadDelivery.solve_mc_mld_shed_random_round(math_rounded, ipopt)
 
-        if mld_rounded["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED]
+        if mld_rounded["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
             push!(math_out, math_rounded)
             push!(mld_results, mld_rounded)
         else
@@ -1145,8 +1145,8 @@ for case in CASES
         Formulation = String[],
         TotalServed_pct = Float64[],
         TotalShed_kW = Float64[],
-        MaxShed_kW = Float64[],
-        ShedVariance = Float64[],
+        MaxBusShed_pct = Float64[],
+        ShedVariance_pct = Float64[],
         JainsIndex = Float64[],
         PalmaRatio = Float64[],
         GiniCoeff = Float64[],
@@ -1159,21 +1159,26 @@ for case in CASES
         end
 
         data = per_load_results[case][fair_func]
-        pshed_vals = data[:pshed]
-        pd_vals = data[:pd_served]
+        pshed_vals = data[:pshed]       # per-bus shed PERCENTAGES (0-100)
+        pd_vals = data[:pd_served]      # per-bus served PERCENTAGES (0-100)
 
         if isempty(pshed_vals) || isempty(pd_vals)
             continue
         end
 
-        # Calculate metrics
-        total_shed = sum(pshed_vals)
-        total_served = sum(pd_vals)
-        total_served_pct = (total_served / total_demand) * 100
-        max_shed = maximum(pshed_vals)
+        # Get correct total served % from results DataFrame (kW-based, not from per-bus percentages)
+        func_row = filter(row -> row.case == case && row.fair_func == fair_func, results)
+        if isempty(func_row)
+            continue
+        end
+        total_served_pct = first(func_row).pct_served
+        total_shed_kw = first(func_row).final_pshed
+
+        # Per-bus statistics (on percentages)
+        max_shed_pct = maximum(pshed_vals)
         shed_variance = Statistics.var(pshed_vals)
 
-        # Fairness metrics on served values (filter zeros)
+        # Fairness metrics on served percentages (filter zeros)
         served_nonzero = filter(x -> x > 0, pd_vals)
         if length(served_nonzero) >= 2
             jains_idx = FairLoadDelivery.jains_index(served_nonzero)
@@ -1190,8 +1195,8 @@ for case in CASES
         push!(summary_df, (
             FAIR_FUNC_LABELS[fair_func],
             round(total_served_pct, digits=2),
-            round(total_shed, digits=2),
-            round(max_shed, digits=2),
+            round(total_shed_kw, digits=2),
+            round(max_shed_pct, digits=2),
             round(shed_variance, digits=2),
             round(jains_idx, digits=4),
             round(palma, digits=4),

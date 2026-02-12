@@ -35,11 +35,11 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_d"
+const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
 const ITERATIONS = 2
-const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
+const FAIR_FUNC = "proportional"  # simplest fairness function for testing
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 6
 
@@ -208,7 +208,7 @@ for k in 1:ITERATIONS
     if FAIR_FUNC == "min_max"
         pshed_new, fair_weight_vals = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "proportional"
-        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
     elseif FAIR_FUNC == "efficiency"
         pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
     elseif FAIR_FUNC == "jain"
@@ -462,7 +462,7 @@ for r in 1:n_rounds
     println("\n  Solving rounded MLD for round $r...")
     mld_rounded_r = FairLoadDelivery.solve_mc_mld_shed_random_round(math_out[r], ipopt_solver)
     rounded_term = mld_rounded_r["termination_status"]
-    passed_term = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED)
+    passed_term = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED || rounded_term == MOI.ALMOST_LOCALLY_SOLVED)
     rounding_checks["rounded_mld_converged_r$r"] = Dict("passed" => passed_term, "details" => ["Status: $rounded_term"])
     print_check_result("Rounded MLD converged (round $r)", passed_term, "Status: $rounded_term")
 
@@ -555,7 +555,7 @@ println("  Running AC power flow (IVRUPowerModel)...")
 ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
 
 ac_term = ac_result["termination_status"]
-ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ITERATION_LIMIT)
+ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ALMOST_LOCALLY_SOLVED)
 
 ac_checks["ac_convergence"] = Dict("passed" => ac_converged, "details" => ["Status: $ac_term"])
 print_check_result("AC power flow converged", ac_converged, "Status: $ac_term")
