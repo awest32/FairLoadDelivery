@@ -19,10 +19,10 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 100
+const ITERATIONS = 2 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 3
 const N_BERNOULLI_SAMPLES = 6
 

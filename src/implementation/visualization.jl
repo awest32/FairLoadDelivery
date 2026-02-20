@@ -6,10 +6,17 @@ import Compose
 import Compose: compose, context, line, circle, text, stroke, fill, linewidth, fontsize, draw, SVG, inch, cm, mm, pt, font, hcenter, vcenter, hleft, vtop, vbottom, strokedash
 using Cairo
 
-# Fairness function styling constants
-const FAIR_FUNC_COLORS = Dict("proportional"=>:green, "efficiency"=>:blue, "min_max"=>:red, "equality_min"=>:orange, "jain"=>:purple)
+# Fairness function styling constants (colorblind-friendly palette)
+const FAIR_FUNC_COLORS = Dict(
+    "proportional" => RGB(0.30, 0.65, 0.40),   # dark green
+    "efficiency"   => RGB(0.35, 0.55, 0.80),   # dark blue
+    "min_max"      => RGB(0.85, 0.35, 0.35),   # dark red/coral
+    "equality_min" => RGB(0.90, 0.65, 0.25),   # dark amber
+    "jain"         => RGB(0.55, 0.40, 0.75)    # dark purple
+)
 const FAIR_FUNC_LABELS = Dict("proportional"=>"Proportional", "efficiency"=>"Efficiency", "min_max"=>"Min-Max", "equality_min"=>"Equality Min", "jain"=>"Jain's Index")
 const FAIR_FUNC_MARKERS = Dict("proportional"=>:square, "efficiency"=>:circle, "min_max"=>:star5, "equality_min"=>:diamond, "jain"=>:utriangle)
+const FAIR_FUNC_LINESTYLES = Dict("proportional"=>:dash, "efficiency"=>:solid, "min_max"=>:dashdot, "equality_min"=>:dot, "jain"=>:dashdotdot)
 
 """
 Map the bus names to their corresponding IDs from the math and solution dictionaries.
@@ -55,19 +62,40 @@ function get_bus_voltage_per_phase(solution::Dict{String,Any}, math::Dict{String
             if haskey(bus_sol, "w")
                 w_vals = bus_sol["w"]
                 for (id,c) in enumerate(bus["terminals"])
-                    voltages[c] = sqrt(w_vals[id])
+                    if w_vals[id] < -1e-6
+                        @warn "Negative w value at bus $bus_id_str phase $c: $(w_vals[id])"
+                        voltages[c] = 0.0
+                    elseif w_vals[id] < 0.0
+                        voltages[c] = 0.0
+                    else
+                        voltages[c] = sqrt(w_vals[id])
+                    end
                 end
             elseif haskey(bus_sol, "vm")
                 vm_vals = bus_sol["vm"]
-                 for (id,c) in enumerate(bus["terminals"])
-                    voltages[c] = vm_vals[id]
+                for (id,c) in enumerate(bus["terminals"])
+                    if vm_vals[id] < -1e-6
+                        @warn "Negative vm value at bus $bus_id_str phase $c: $(vm_vals[id])"
+                        voltages[c] = 0.0
+                    elseif vm_vals[id] < 0.0
+                        voltages[c] = 0.0
+                    else
+                        voltages[c] = vm_vals[id]
+                    end
                 end
             elseif haskey(bus_sol, "vr")
                 vr_vals = bus_sol["vr"]
                 vi_vals = bus_sol["vi"]
                 vmag_vals = vr_vals .^ 2 .+ vi_vals .^ 2
-                 for (id,c) in enumerate(bus["terminals"])
-                    voltages[c] = sqrt(vmag_vals[id])
+                for (id,c) in enumerate(bus["terminals"])
+                    if vmag_vals[id] < -1e-6
+                        @warn "Negative vmag² value at bus $bus_id_str phase $c: $(vmag_vals[id])"
+                        voltages[c] = 0.0
+                    elseif vmag_vals[id] < 0.0
+                        voltages[c] = 0.0
+                    else
+                        voltages[c] = sqrt(vmag_vals[id])
+                    end
                 end
             end
         end
@@ -1135,7 +1163,7 @@ function plot_network_load_shed(
     # --- Switch Utilization Legend ---
     push!(legend_elements, compose(context(),
         text(leg_x, leg_y, "Switch Utilization:", hleft, vtop),
-        fontsize(8pt),
+        fontsize(9pt),
         fill("black")
     ))
 
@@ -1159,7 +1187,7 @@ function plot_network_load_shed(
         # Label
         push!(legend_elements, compose(context(),
             text(leg_x + line_len + 0.01, y_pos, label, hleft, vcenter),
-            fontsize(7pt),
+            fontsize(9pt),
             fill("black")
         ))
     end
@@ -1168,7 +1196,7 @@ function plot_network_load_shed(
     volt_y = leg_y + (length(util_colors) + 1) * leg_spacing
     push!(legend_elements, compose(context(),
         text(leg_x, volt_y, "Bus Voltage:", hleft, vtop),
-        fontsize(8pt),
+        fontsize(9pt),
         fill("black")
     ))
 
@@ -1183,13 +1211,13 @@ function plot_network_load_shed(
         # Colored "V:" sample
         push!(legend_elements, compose(context(),
             text(leg_x, y_pos, "V:", hleft, vcenter),
-            fontsize(7pt),
+            fontsize(9pt),
             fill(color)
         ))
         # Label
         push!(legend_elements, compose(context(),
             text(leg_x + 0.025, y_pos, label, hleft, vcenter),
-            fontsize(7pt),
+            fontsize(9pt),
             fill("black")
         ))
     end
@@ -1198,7 +1226,7 @@ function plot_network_load_shed(
     shed_y = volt_y + (length(volt_colors) + 1) * leg_spacing
     push!(legend_elements, compose(context(),
         text(leg_x, shed_y, "Load Bus (% shed):", hleft, vtop),
-        fontsize(8pt),
+        fontsize(9pt),
         fill("black")
     ))
 
@@ -1221,7 +1249,7 @@ function plot_network_load_shed(
         # Label
         push!(legend_elements, compose(context(),
             text(leg_x + 2.5 * circle_r + 0.01, y_pos, label, hleft, vcenter),
-            fontsize(7pt),
+            fontsize(9pt),
             fill("black")
         ))
     end
@@ -1616,14 +1644,18 @@ function plot_loadshed_per_bus_comparison(
         xlabel = "Bus",
         ylabel = "Active Power Load Shed (%)",
         title = title,
-        legend = :outertopright,
+        legend = :top,
         xticks = (x_positions, all_buses),
         xrotation = 45,
         size = (1400, 600),
         left_margin = 10Plots.mm,
         bottom_margin = 15Plots.mm,
         top_margin = 5Plots.mm,
-        right_margin = 20Plots.mm
+        right_margin = 20Plots.mm,
+        legendfontsize = 12,
+        tickfontsize = 12,
+        guidefontsize = 12,
+        titlefontsize = 14
     )
 
     for (fi, fair_func) in enumerate(active_funcs)
@@ -1638,16 +1670,397 @@ function plot_loadshed_per_bus_comparison(
         offset = (fi - (n_funcs + 1) / 2) * bar_w
 
         fc = FAIR_FUNC_COLORS[fair_func]
-        fl = FAIR_FUNC_LABELS[fair_func]
+        fm = FAIR_FUNC_MARKERS[fair_func]
+        fls = FAIR_FUNC_LINESTYLES[fair_func]
 
-        Plots.bar!(p, x_positions .+ offset, p_vals,
+        bar_x = x_positions .+ offset
+        Plots.bar!(p, bar_x, p_vals,
             bar_width = bar_w * 0.9,
-            label = fl,
-            color = fc
+            label = false,
+            color = fc,
+            linecolor = :gray30,
+            linestyle = fls,
+            linewidth = 1.5
+        )
+
+        # Overlay markers on bars for pattern differentiation
+        for (xi, vi) in zip(bar_x, p_vals)
+            if vi > 2.0
+                n_markers = max(1, round(Int, vi / 25))
+                for mi in 1:n_markers
+                    y_pos = vi * mi / (n_markers + 1)
+                    Plots.scatter!(p, [xi], [y_pos],
+                        marker = fm, markersize = 5,
+                        color = :gray40, markerstrokecolor = :gray40,
+                        label = false
+                    )
+                end
+            end
+        end
+    end
+
+    # Add marker-based legend entries (symbols, not bar colors)
+    for fair_func in active_funcs
+        fl = FAIR_FUNC_LABELS[fair_func]
+        fm = FAIR_FUNC_MARKERS[fair_func]
+        fc = FAIR_FUNC_COLORS[fair_func]
+        Plots.scatter!(p, [NaN], [NaN],
+            marker = fm, markersize = 8,
+            color = fc, markerstrokecolor = :gray30,
+            label = fl
         )
     end
 
     Plots.savefig(p, save_path)
     println("  Saved loadshed comparison: $save_path")
+    return p
+end
+
+"""
+    plot_original_load_bars(case, math, save_dir)
+
+Create bar plots for original pd and qd per load, plus a combined P+Q plot.
+"""
+function plot_original_load_bars(case::String, math::Dict, save_dir::String)
+    load_ids, load_names, pd_original, qd_original = extract_original_load(math)
+    x_positions = collect(1:length(load_ids))
+
+    # Active power plot
+    p_pd = Plots.bar(
+        x_positions, pd_original,
+        xlabel = "Load",
+        ylabel = "Active Power (kW)",
+        title = "Original Active Power Demand: $case",
+        legend = false,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        color = :blue
+    )
+    Plots.savefig(p_pd, joinpath(save_dir, "original_pd_$case.svg"))
+
+    # Reactive power plot
+    p_qd = Plots.bar(
+        x_positions, qd_original,
+        xlabel = "Load",
+        ylabel = "Reactive Power (kVAR)",
+        title = "Original Reactive Power Demand: $case",
+        legend = false,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        color = :red
+    )
+    Plots.savefig(p_qd, joinpath(save_dir, "original_qd_$case.svg"))
+
+    # Combined P and Q plot using manual bar! with offsets (avoids StatsPlots dependency)
+    n_groups = 2
+    bar_width = 0.35
+    offsets = [-bar_width/2, bar_width/2]
+
+    p_combined = Plots.plot(
+        xlabel = "Load",
+        ylabel = "Power",
+        title = "Original Demand (P and Q): $case",
+        legend = :outertopright,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm
+    )
+    Plots.bar!(p_combined, x_positions .+ offsets[1], pd_original,
+        bar_width = bar_width * 0.9,
+        label = "Active Power (kW)",
+        color = :blue
+    )
+    Plots.bar!(p_combined, x_positions .+ offsets[2], qd_original,
+        bar_width = bar_width * 0.9,
+        label = "Reactive Power (kVAR)",
+        color = :red
+    )
+    Plots.savefig(p_combined, joinpath(save_dir, "original_demand_$case.svg"))
+
+    return p_pd, p_qd, p_combined
+end
+
+"""
+    plot_original_network_load(case, math, save_dir)
+
+Create network visualization showing original load distribution (no shedding).
+"""
+function plot_original_network_load(case::String, math::Dict, save_dir::String)
+    mock_solution = Dict{String, Any}()
+
+    mock_solution["load"] = Dict{String, Any}()
+    for (lid, load_data) in math["load"]
+        mock_solution["load"][lid] = Dict(
+            "pd" => load_data["pd"],
+            "qd" => load_data["qd"],
+            "pshed" => zeros(length(load_data["pd"])),
+            "qshed" => zeros(length(load_data["qd"])),
+            "status" => 1.0
+        )
+    end
+
+    mock_solution["bus"] = Dict{String, Any}()
+    for (bid, bus_data) in math["bus"]
+        n_phases = length(bus_data["terminals"])
+        mock_solution["bus"][bid] = Dict(
+            "w" => ones(n_phases),
+            "status" => 1.0
+        )
+    end
+
+    mock_solution["switch"] = Dict{String, Any}()
+    if haskey(math, "switch")
+        for (sid, switch_data) in math["switch"]
+            n_phases = length(switch_data["f_connections"])
+            mock_solution["switch"][sid] = Dict(
+                "state" => 1.0,
+                "pf" => zeros(n_phases),
+                "qf" => zeros(n_phases)
+            )
+        end
+    end
+
+    mock_solution["block"] = Dict{String, Any}()
+    if haskey(math, "block")
+        for (bid, _) in math["block"]
+            mock_solution["block"][bid] = Dict("status" => 1.0)
+        end
+    end
+
+    plot_filename = joinpath(save_dir, "network_original_$case.svg")
+    plot_network_load_shed(mock_solution, math; output_file=plot_filename)
+end
+
+"""
+    create_grouped_bar_chart(case, per_load_data, data_type, save_dir; fair_funcs=String[])
+
+Create grouped bar chart for load shed or load served across fairness functions.
+`data_type`: `:pshed`, `:pd_served`, `:qshed`, or `:qd_served`.
+`fair_funcs`: ordered list of fairness function keys to plot.
+"""
+function create_grouped_bar_chart(case::String, per_load_data::Dict, data_type::Symbol, save_dir::String; fair_funcs::Vector{String}=String[])
+    all_load_ids = Set{Int}()
+    id_to_name = Dict{Int,String}()
+    for (_, data) in per_load_data
+        if !isempty(data[:load_ids])
+            union!(all_load_ids, data[:load_ids])
+            for (lid, lname) in zip(data[:load_ids], data[:load_names])
+                id_to_name[lid] = lname
+            end
+        end
+    end
+
+    if isempty(all_load_ids)
+        @warn "No load data available for $case"
+        return nothing
+    end
+
+    load_ids = sort(collect(all_load_ids))
+    load_names = [id_to_name[lid] for lid in load_ids]
+
+    n_funcs_with_data = count(ff -> haskey(per_load_data, ff) && !isempty(per_load_data[ff][:load_ids]), fair_funcs)
+    if n_funcs_with_data == 0
+        @warn "No valid data for $case"
+        return nothing
+    end
+
+    bar_width = 0.8 / n_funcs_with_data
+    x_offset = bar_width
+
+    if data_type == :pshed
+        title = "Active Power Load Shed per Bus: $case"
+        ylabel = "Load Shed (%)"
+        filename = "pshed_per_bus_$case.svg"
+    elseif data_type == :pd_served
+        title = "Active Power Load Served per Bus: $case"
+        ylabel = "Load Served (%)"
+        filename = "pd_served_per_bus_$case.svg"
+    elseif data_type == :qshed
+        title = "Reactive Power Load Shed per Bus: $case"
+        ylabel = "Load Shed (%)"
+        filename = "qshed_per_bus_$case.svg"
+    elseif data_type == :qd_served
+        title = "Reactive Power Load Served per Bus: $case"
+        ylabel = "Load Served (%)"
+        filename = "qd_served_per_bus_$case.svg"
+    else
+        error("Unknown data_type: $data_type")
+    end
+
+    x_positions = collect(1:length(load_ids))
+
+    p = Plots.plot(
+        xlabel = "Bus",
+        ylabel = ylabel,
+        title = title,
+        legend = :top,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm,
+        legendfontsize = 12,
+        tickfontsize = 12,
+        guidefontsize = 12,
+        titlefontsize = 16
+    )
+
+    offsets = collect(range(-(n_funcs_with_data-1)/2 * x_offset, (n_funcs_with_data-1)/2 * x_offset, length=n_funcs_with_data))
+
+    func_idx = 0
+    for fair_func in fair_funcs
+        if !haskey(per_load_data, fair_func)
+            continue
+        end
+
+        data = per_load_data[fair_func]
+        func_load_ids = data[:load_ids]
+        func_values = data[data_type]
+
+        if isempty(func_load_ids)
+            continue
+        end
+
+        func_idx += 1
+
+        id_to_value = Dict(zip(func_load_ids, func_values))
+        aligned_values = [get(id_to_value, lid, 0.0) for lid in load_ids]
+
+        bar_x = x_positions .+ offsets[func_idx]
+        Plots.bar!(p, bar_x, aligned_values,
+            bar_width = bar_width * 0.9,
+            label = false,
+            color = FAIR_FUNC_COLORS[fair_func],
+            linecolor = :gray30,
+            linestyle = FAIR_FUNC_LINESTYLES[fair_func],
+            linewidth = 1.5
+        )
+
+        # Overlay markers on bars for pattern differentiation
+        fm = FAIR_FUNC_MARKERS[fair_func]
+        for (xi, vi) in zip(bar_x, aligned_values)
+            if vi > 2.0
+                n_markers = max(1, round(Int, vi / 25))
+                for mi in 1:n_markers
+                    y_pos = vi * mi / (n_markers + 1)
+                    Plots.scatter!(p, [xi], [y_pos],
+                        marker = fm, markersize = 5,
+                        color = :gray40, markerstrokecolor = :gray40,
+                        label = false
+                    )
+                end
+            end
+        end
+    end
+
+    # Add marker-based legend entries (symbols, not bar colors)
+    for fair_func in fair_funcs
+        if haskey(per_load_data, fair_func) && !isempty(per_load_data[fair_func][:load_ids])
+            fl = FAIR_FUNC_LABELS[fair_func]
+            fm = FAIR_FUNC_MARKERS[fair_func]
+            fc = FAIR_FUNC_COLORS[fair_func]
+            Plots.scatter!(p, [NaN], [NaN],
+                marker = fm, markersize = 8,
+                color = fc, markerstrokecolor = :gray30,
+                label = fl
+            )
+        end
+    end
+
+    Plots.savefig(p, joinpath(save_dir, filename))
+    return p
+end
+
+"""
+    create_shed_distribution_plot(case, per_load_data, power_type, save_dir; fair_funcs=String[])
+
+Create scatter plot showing shed distribution by fairness function.
+`power_type`: `:pshed` for active power, `:qshed` for reactive power.
+`fair_funcs`: ordered list of fairness function keys to plot.
+"""
+function create_shed_distribution_plot(case::String, per_load_data::Dict, power_type::Symbol, save_dir::String; fair_funcs::Vector{String}=String[])
+    all_load_ids = Set{Int}()
+    id_to_name = Dict{Int,String}()
+    for (_, data) in per_load_data
+        if !isempty(data[:load_ids])
+            union!(all_load_ids, data[:load_ids])
+            for (lid, lname) in zip(data[:load_ids], data[:load_names])
+                id_to_name[lid] = lname
+            end
+        end
+    end
+
+    if isempty(all_load_ids)
+        return nothing
+    end
+
+    load_ids = sort(collect(all_load_ids))
+    load_names = [id_to_name[lid] for lid in load_ids]
+    x_positions = collect(1:length(load_ids))
+
+    if power_type == :pshed
+        ylabel = "Load Shed (%)"
+        title = "Active Power Shed Distribution: $case"
+        filename = "pshed_distribution_$case.svg"
+    elseif power_type == :qshed
+        ylabel = "Load Shed (%)"
+        title = "Reactive Power Shed Distribution: $case"
+        filename = "qshed_distribution_$case.svg"
+    else
+        error("Unknown power_type: $power_type")
+    end
+
+    p = Plots.plot(
+        xlabel = "Load",
+        ylabel = ylabel,
+        title = title,
+        legend = :outertopright,
+        xticks = (x_positions, load_names),
+        xrotation = 45,
+        size = (1200, 600),
+        left_margin = 10Plots.mm,
+        bottom_margin = 15Plots.mm,
+        top_margin = 5Plots.mm
+    )
+
+    for fair_func in fair_funcs
+        if !haskey(per_load_data, fair_func)
+            continue
+        end
+
+        data = per_load_data[fair_func]
+        if isempty(data[:load_ids])
+            continue
+        end
+
+        id_to_value = Dict(zip(data[:load_ids], data[power_type]))
+        aligned_values = [haskey(id_to_value, lid) ? id_to_value[lid] : error("Load ID $lid not found in id_to_value") for lid in load_ids]
+
+        Plots.scatter!(p, x_positions, aligned_values,
+            label = FAIR_FUNC_LABELS[fair_func],
+            marker = FAIR_FUNC_MARKERS[fair_func],
+            markersize = 8,
+            color = FAIR_FUNC_COLORS[fair_func]
+        )
+    end
+
+    if haskey(per_load_data, "equality_min") && !isempty(per_load_data["equality_min"][power_type])
+        max_eq_shed = maximum(per_load_data["equality_min"][power_type])
+        Plots.hline!(p, [max_eq_shed], label="EqMin Max Shed", linestyle=:dash, color=:orange, linewidth=2)
+    end
+
+    Plots.savefig(p, joinpath(save_dir, filename))
     return p
 end

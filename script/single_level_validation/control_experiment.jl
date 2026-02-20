@@ -40,7 +40,7 @@ gurobi = Gurobi.Optimizer
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_d"
+case = "motivation_c"
 gen_cap = 0.8
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
@@ -93,7 +93,7 @@ mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_swit
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
 # Run the integer case of the mld
-mld_int = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
+mld_int = FairLoadDelivery.solve_mc_mld_jain_integer(math, gurobi)
 
 block_int = mld_int["solution"]["block"]
 switch_int = mld_int["solution"]["switch"]

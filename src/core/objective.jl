@@ -298,39 +298,6 @@ function objective_fairly_weighted_max_load_served_with_penalty(pm::_PMD.Abstrac
     sum(weighted_load_served) + penalty_weight * binary_penalty)
 end
 
-# function gini_index(x)
-#     n = length(x)
-#     x = sort(x)
-#     n = length(x)
-#     gini = (2 * sum(i * x[i] for i in 1:n) / (n * sum(x))) - ((n + 1)/n)
-#     return gini
-# end
-
-# #Jain's index
-# function jains_index(x)
-#     n = length(x)
-#     sum_x = sum(x)
-#     sum_x2 = sum(xi^2 for xi in x)
-#     return (sum_x^2) / (n * sum_x2)
-# end
-
-# #Palma Ratio
-# function palma_ratio(x)
-#     x = load_served ./ load_ref
-#     sorted_x = sort(x)
-#     n = length(x)
-#     top_10_percent = sum(sorted_x[ceil(Int, 0.9n):end])
-#     bottom_40_percent = sum(sorted_x[1:floor(Int, 0.4n)])
-#     return top_10_percent / bottom_40_percent
-# end
-# #Alpha fairness for alpha=1
-# function alpha_fairness(x, alpha)
-# if alpha == 1
-#     return sum(log(xi) for xi in x)
-#     else
-#         return sum((xi^(1 - alpha)) / (1 - alpha) for xi in x)
-#     end
-# end
 
 """
     objective_equality_min(pm::AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
@@ -359,7 +326,28 @@ function objective_equality_min(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_
     return JuMP.@objective(pm.model, Min, α)
 end
 
+"""
+    objective_min_max(pm::AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
+Min-max fairness objective for load shedding.
+Minimizes the maximum load shed across all loads, promoting fairness by ensuring no single load is disproportionately shed.
 
+"""
+
+function objective_min_max(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true)
+    # Create auxiliary variable for the maximum shed amount
+    max_shed = JuMP.@variable(pm.model, base_name="max_shed", lower_bound=0)
+
+    # Get load shed variable (pshed)
+    pshed = _PMD.var(pm, nw, :pshed)
+
+    # Constrain max_shed to be greater than or equal to each load's shed amount
+    for (i, load) in _PMD.ref(pm, nw, :load)
+        JuMP.@constraint(pm.model, max_shed >= sum(pshed[i]))
+    end
+
+    # Minimize the maximum shed amount
+    return JuMP.@objective(pm.model, Min, max_shed)
+end
 
 """
     objective_proportional_fairness_mld(pm::AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
@@ -414,7 +402,7 @@ The lambda parameter controls the efficiency-fairness tradeoff:
 """
 function objective_jain_mld(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, lambda::Float64=10.0, report::Bool=true)
     pd = _PMD.var(pm, nw, :pd)
-
+    pshed = _PMD.var(pm, nw, :pshed)
     # Total load served (efficiency term)
     total_served = sum(sum(pd[d]) for d in _PMD.ids(pm, nw, :load))
 
@@ -424,13 +412,15 @@ function objective_jain_mld(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.n
     for d in _PMD.ids(pm, nw, :load)
         pd_ref = sum(_PMD.ref(pm, nw, :load, d)["pd"])
         if pd_ref > 1e-6
-            # (pd / pd_ref)^2 = pd^2 / pd_ref^2
-            push!(squared_fractions, sum(pd[d])^2 / (pd_ref^2))
+            push!(squared_fractions, sum(pshed[d]/pd_ref)^2)
         end
     end
 
+    pshed_sum = sum(sum(pshed[d])/sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in _PMD.ids(pm, nw, :load))
+    jain = (pshed_sum^2) / (length(squared_fractions) * sum(squared_fractions))
+
     # Maximize total served minus penalty for inequality
-    return JuMP.@objective(pm.model, Max, total_served - lambda * sum(squared_fractions))
+    return JuMP.@objective(pm.model, Max, jain)
 end
 
 """

@@ -25,7 +25,7 @@ include("../../src/implementation/network_setup.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a", "motivation_b", "motivation_c"]
+const CASES = ["motivation_c"]#["motivation_a", "motivation_b",
 const GEN_CAP = 0.8
 
 # Relaxed formulations (continuous, Ipopt)
@@ -33,7 +33,8 @@ const FAIR_SOLVE_RELAXED = [
     "efficiency"    => FairLoadDelivery.solve_mc_mld_switch_relaxed,
     "equality_min"  => FairLoadDelivery.solve_mc_mld_equality_min,
     "proportional"  => FairLoadDelivery.solve_mc_mld_proportional_fairness,
-    "jain"          => FairLoadDelivery.solve_mc_mld_jain,
+     "min_max"       => FairLoadDelivery.solve_mc_mld_min_max,
+    #"jain"          => FairLoadDelivery.solve_mc_mld_jain,
 ]
 
 # Integer formulations (MIP, Gurobi)
@@ -41,7 +42,8 @@ const FAIR_SOLVE_INTEGER = [
     "efficiency"    => FairLoadDelivery.solve_mc_mld_switch_integer,
     "equality_min"  => FairLoadDelivery.solve_mc_mld_equality_min_integer,
     "proportional"  => FairLoadDelivery.solve_mc_mld_proportional_fairness_integer,
-    "jain"          => FairLoadDelivery.solve_mc_mld_jain_integer,
+    "min_max"       => FairLoadDelivery.solve_mc_mld_min_max_integer,
+   # "jain"          => FairLoadDelivery.solve_mc_mld_jain_integer,
 ]
 
 # Solvers
@@ -56,7 +58,7 @@ mkpath(relaxed_dir)
 mkpath(integer_dir)
 
 # Target buses for voltage plots (load buses of interest)
-const TARGET_BUSES = ["646", "611", "675", "645", "652", "671"]
+const TARGET_BUSES = ["670","632","645","671","634","646","611","675","652","692"]
 
 # ============================================================
 # SOLVE + EXTRACT + PLOT FOR ONE FORMULATION TYPE
@@ -91,7 +93,7 @@ function run_formulation(
 
             mld_result = solve_func(math, solver)
 
-            if !(mld_result["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED])
+            if !(mld_result["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED])
                 @warn "Non-optimal termination for $case/$fair_func ($formulation_label): $(mld_result["termination_status"])"
                 continue
             end
