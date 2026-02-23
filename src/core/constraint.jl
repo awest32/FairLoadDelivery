@@ -894,12 +894,8 @@ function constraint_radial_topology(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
     N = [N₀..., virtual_iᵣ]
     iᵣ = [virtual_iᵣ]
 
-    # create a set L of all branches, including virtual branches between iᵣ and generator blocks only
-    # Per Lei et al. (2020): "For a DS with multiple substation nodes, one can merge them into
-    # one node in modeling constraints (1)-(2)" - virtual edges only connect to blocks with generators
-    # This includes both voltage sources (substations) AND distributed generators (DGs)
-    generator_blocks = [b for (b, gens) in _PMD.ref(pm, nw, :block_gens) if !isempty(gens)]
-    L = [L₀..., [(virtual_iᵣ, n) for n in generator_blocks]...]
+    # create a set L of all branches, including virtual branches between iᵣ and all other nodes in L₀
+    L = [L₀..., [(virtual_iᵣ, n) for n in N₀]...]
 
     # create a set L′ that inlcudes the branch reverses
     L′ = union(L, Set([(j,i) for (i,j) in L]))
@@ -1253,12 +1249,8 @@ function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbo
     N = [N₀..., virtual_iᵣ]
     iᵣ = [virtual_iᵣ]
 
-    # create a set L of all branches, including virtual branches between iᵣ and generator blocks only
-    # Per Lei et al. (2020): "For a DS with multiple substation nodes, one can merge them into
-    # one node in modeling constraints (1)-(2)" - virtual edges only connect to blocks with generators
-    # This includes both voltage sources (substations) AND distributed generators (DGs)
-    generator_blocks = [b for (b, gens) in reference[:block_gens] if !isempty(gens)]
-    L = [L₀..., [(virtual_iᵣ, n) for n in generator_blocks]...]
+    # create a set L of all branches, including virtual branches between iᵣ and all other nodes in L₀
+    L = [L₀..., [(virtual_iᵣ, n) for n in N₀]...]
 
     # create a set L′ that inlcudes the branch reverses
     L′ = union(L, Set([(j,i) for (i,j) in L]))
