@@ -3,6 +3,7 @@
 using FairLoadDelivery
 using PowerModelsDistribution
 using JuMP
+import MathOptInterface as MOI
 using LinearAlgebra
 using Ipopt, Gurobi
 
@@ -22,129 +23,111 @@ function lin_palma(n::Int, P::Vector{Float64})
     @constraint(model, x_raw .== P)
     @variable(model, σ >= 1e-6)
 
-    # First permutation matrix constraint to sort the rows Ax == 1
-    A = zeros(n,n^2)
-    for i in 1:n
-        if i == 1
-            A[i, i:n] .= 1.0
-        else
-            A[i, (i-1)*n+1:i*n] .= 1.0
-        end
-    end
-    #@constraint(model, A*a.<= 1.0)
-    #@constraint(model, -A*a .<= -1.0)
-
-    # Second permutation matrix constraint to sort the columns A^T * x == 1
-    AT = zeros(n,n^2)
-    #γ = 1
+    # Permutation matrix row sum constraint: Σ_j a_{ij} = 1 for all i
+    # Using column-major indexing: a[k] = a_{i,j} where k = i + (j-1)*n
+    A_row = zeros(n, n^2)
     for i in 1:n
         for j in 1:n
-            row = zeros(n)
-            row[i] = 1.0
-            if j == 1
-                AT[i,j:n] = row
-            else
-                AT[i,(j-1)*n+1:j*n] = row
-            end
+            idx = i + (j-1)*n  # column-major index
+            A_row[i, idx] = 1.0
         end
-        #γ += 1
     end
-    #@constraint(model, AT*a .<= 1.0)
-    #@constraint(model, -AT*a .<= -1.0)
 
-    # Create the ascending sorting constraint matrix -T ⋅ \tilde{x} ≤ 0
-    # This is the difference matrix
-    T = zeros(n,n^2)
-    for i in 1:n
-        if i == 1
-            T[i, i:n] .= 1.0
-            T[i, n+1:(i+1)*n] .-= 1.0
-        else
-            T[i, (i-1)*n+1:i*n] .= 1.0
-            if i == n
-                T[i, (i-1)*n+1:i*n] .= 1.0
-            else
-                T[i, i*n+1:(i+1)*n] .-= 1.0
-            end
+    # Permutation matrix column sum constraint: Σ_i a_{ij} = 1 for all j
+    A_col = zeros(n, n^2)
+    for j in 1:n
+        for i in 1:n
+            idx = i + (j-1)*n  # column-major index
+            A_col[j, idx] = 1.0
         end
     end
-    #@constraint(model, -T*x_hat.<= 0.0)
+
+    # Sorting constraint matrix: enforces ascending order S_k <= S_{k+1}
+    # T * x_hat <= 0 means sorted[k] - sorted[k+1] <= 0
+    # Using column-major indexing for consistency
+    T = zeros(n-1, n^2)
+    for k in 1:n-1
+        for j in 1:n
+            idx_k = k + (j-1)*n
+            idx_k1 = (k+1) + (j-1)*n
+            T[k, idx_k] = 1.0
+            T[k, idx_k1] = -1.0
+        end
+    end
 
     #############################################################
-    # Implement th McCormick envelopes for the bilinear terms
+    # Implement the McCormick envelopes for the bilinear terms
+    # u_ij = a_ij * x_j where a_ij ∈ {0,1} and x_j ∈ [0, P_j]
+    # Envelope 1: u >= 0 (eq. 19)
+    # Envelope 2: u >= x̄·a + x - x̄ (eq. 20)
+    # Envelope 3: u <= x̄·a (eq. 21)
+    # Envelope 4: u <= x (eq. 22)
     ##############################################################
-    # Start with \hat{x}_{ij} ≤ 0
-    # Stagger In matrices
-    # lower_bound_x = zeros(n^2,n^2)
-    # for i in 1:n
-    #     if i == 1
-    #         lower_bound_x[i:n, i:n] .= Matrix(I, n, n)
-    #     else
-    #         lower_bound_x[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .=  Matrix(I, n, n)
-    #     end
-    # end
     n_squared_identity = LinearAlgebra.Diagonal(ones(n^2))
     #@constraint(model, -n_squared_identity * x_hat .<= 0)
 
-    # second McCormick envelope -\hat{x}_{ij} +x_j +a_ijP_j ≤ P_j
-    n_identity = LinearAlgebra.Diagonal(ones(n))
-    # Construct the a_ijP_j matrix
-    A_ij_P_j = zeros(n^2,n^2)
-
-    for i in 1:n
-    A_ij_P_j[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .= LinearAlgebra.Diagonal(P)
-    end
-    A_ij_P_j
-    # Construct the x_j matrix so that each block corresponds with the appropriate x_ij
-    x_j = zeros(n^2,n)
-    P_out = zeros(n^2)
+    # Construct A_ij_P_j matrix for McCormick: represents a_ij * P_j term
+    # Using column-major indexing: entry (i,j) maps to index i + (j-1)*n
+    A_ij_P_j = zeros(n^2, n^2)
     for j in 1:n
-        if j == 1
-            x_j[j:n,j:n] = Matrix(I, n, n)
-            P_out[j:n] .= P
-        else
-            x_j[(j-1)*n+1:j*n, 1:n] = Matrix(I, n, n)
-            P_out[(j-1)*n+1:j*n] .= P
+        for i in 1:n
+            idx = i + (j-1)*n  # column-major index for (i,j)
+            A_ij_P_j[idx, idx] = P[j]  # P_j is the upper bound for x_j
         end
     end
-    x_j
-    #@constraint(model, -n_squared_identity * x_hat .+ x_j .+ A_ij_P_j * a .<= P_out)
 
-    # third McCormick envelope -\hat{x}_{ij} - a_ijP_j ≤ 0
-    #@constraint(model, n_squared_identity * x_hat .- A_ij_P_j * a .<= 0)
-
-    # fourth McCormick envelope \hat{x}_{ij} - x_j ≤ 0
-    #@constraint(model, n_squared_identity * x_hat .- x_j .<= 0)
+    # Construct x_j matrix: maps x[j] to all entries (i,j) in the bilinear term
+    # x_j[idx, j] = 1 where idx = i + (j-1)*n for all i
+    x_j = zeros(n^2, n)
+    P_out = zeros(n^2)
+    for j in 1:n
+        for i in 1:n
+            idx = i + (j-1)*n
+            x_j[idx, j] = 1.0
+            P_out[idx] = P[j]
+        end
+    end
 
     # Create the big F matrix for the Palma ratio constraints
-    F = [zeros(n,n^2) A zeros(n,n) 
-        zeros(n,n^2) -A zeros(n,n)
-        zeros(n,n^2) AT zeros(n,n) 
-        zeros(n,n^2) -AT zeros(n,n) 
-        T zeros(n,n^2) zeros(n,n)
-        -n_squared_identity zeros(n^2,n^2)  zeros(n^2,n) 
-        n_squared_identity  -A_ij_P_j  zeros(n^2,n)
-        -n_squared_identity A_ij_P_j x_j
-        n_squared_identity zeros(n^2,n^2)  -x_j
+    # Variable vector: y = [x_hat, a, x_raw]
+    # Constraints:
+    #   Row 1-2: Row sum of permutation matrix = 1 (A_row * a = 1)
+    #   Row 3-4: Column sum of permutation matrix = 1 (A_col * a = 1)
+    #   Row 5: Sorting constraint (T * x_hat <= 0)
+    #   Row 6-9: McCormick envelopes
+    F = [zeros(n,n^2) A_row zeros(n,n)           # A_row * a <= 1
+        zeros(n,n^2) -A_row zeros(n,n)           # -A_row * a <= -1 (i.e., A_row * a >= 1)
+        zeros(n,n^2) A_col zeros(n,n)            # A_col * a <= 1
+        zeros(n,n^2) -A_col zeros(n,n)           # -A_col * a <= -1 (i.e., A_col * a >= 1)
+        T zeros(n-1,n^2) zeros(n-1,n)            # T * x_hat <= 0 (ascending order)
+        -n_squared_identity zeros(n^2,n^2) zeros(n^2,n)   # -u <= 0 (envelope 1: u >= 0)
+        n_squared_identity -A_ij_P_j zeros(n^2,n)         # u - a*P <= 0 (envelope 3: u <= a*P)
+        -n_squared_identity A_ij_P_j x_j                  # -u + a*P + x <= P (envelope 2: u >= a*P + x - P)
+        n_squared_identity zeros(n^2,n^2) -x_j            # u - x <= 0 (envelope 4: u <= x)
     ]
 
     x_tilde = vcat(x_hat, a, x_raw)
     y = x_tilde
-    #value.(y)
-    # Store the right hand side of the constraints into a vector named g
-     g = [ones(n)
-        -ones(n)
-        ones(n)
-        -ones(n)
-        zeros(n)
-        zeros(n^2)
-        zeros(n^2)
-        P_out
-        zeros(n^2)
+
+    # Right-hand side vector g
+    # Matches the constraint structure of F
+    g = [ones(n)           # A_row * a <= 1
+        -ones(n)           # -A_row * a <= -1
+        ones(n)            # A_col * a <= 1
+        -ones(n)           # -A_col * a <= -1
+        zeros(n-1)         # T * x_hat <= 0 (n-1 rows now)
+        zeros(n^2)         # -u <= 0 (envelope 1)
+        zeros(n^2)         # u - a*P <= 0 (envelope 3)
+        P_out              # -u + a*P + x <= P (envelope 2)
+        zeros(n^2)         # u - x <= 0 (envelope 4)
     ]
 
+    # Verify dimensions before adding constraint
+    @assert size(F, 2) == length(y) "F columns ($(size(F, 2))) must match y length ($(length(y)))"
+    @assert size(F, 1) == length(g) "F rows ($(size(F, 1))) must match g length ($(length(g)))"
+
     @constraint(model, F * y .<= g)
-    A_long = [A zeros(n,n^2) zeros(n,n)]
+    A_long = [A_row zeros(n,n^2) zeros(n,n)]
     # Create the vectors to extract the top 10% of load shed
     top_10_percent_indices = zeros(n)
     top_10_percent_indices[ceil(Int, 0.9*n):n] .= 1.0
@@ -204,7 +187,8 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
     @variable(model, σ >= 1e-6)
     @variable(model, y_xhat[1:n^2] >= 0)
     @variable(model, y_a[1:n^2], Bin)      # or Bin if enforced
-    @variable(model, y_pshed[1:n] >= 0) # pshed_new
+    # Allow y_pshed to go slightly negative in Taylor expansion (will be bounded by McCormick)
+    @variable(model, y_pshed[1:n] >= -100) # pshed_new with relaxed lower bound
     @variable(model, y_w[1:n] >=0)            # FREE (signed)
 
     y = vcat(y_xhat, y_a, y_pshed, (y_w-weights_prev))
@@ -212,120 +196,69 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
     # # Create new weight variables
     #@variable(model, weights_new[1:n] >= 0)
 
+    # Weight bounds
     @constraint(model, y_w .<= 10)
-    # Create a infinity norm trust region on the weights
-    # ϵ = 0.1
+    @constraint(model, y_w .>= 0)
 
-    # @constraint(model, [i in eachindex(y_w)],
-    #     y_w[i] - weights_prev[i] <= ϵ
-    # )
+    # Trust region on weight changes (critical for convergence)
+    trust_radius = 0.5
+    Δw = y_w .- weights_prev
+    @constraint(model, Δw .<= trust_radius)
+    @constraint(model, Δw .>= -trust_radius)
 
-    # @constraint(model, [i in eachindex(y_w)],
-    #     weights_prev[i] - y_w[i] <= ϵ
-    # )
-    # for i in 1:n
-    #     if i in critical_id
-    #         @constraint(model, weights_new[i] == 1000)
-    #     else
-    #         @constraint(model, weights_new[i] <= 10)
-    #     end
-    # end
+    # CRITICAL: Taylor expansion constraint linking pshed_new to weight changes
+    # pshed_new[i] = pshed_prev[i] + Σ_j dpshed_dw[i,j] * Δw[j]
+    @constraint(model, taylor_expansion[i=1:n],
+        y_pshed[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * Δw[j] for j in 1:n)
+    )
 
-    # First permutation matrix constraint to sort the rows Ax == 1
-    A = zeros(n,n^2)
-    for i in 1:n
-        if i == 1
-            A[i, i:n] .= 1.0
-        else
-            A[i, (i-1)*n+1:i*n] .= 1.0
-        end
-    end
-    #@constraint(model, A*a.<= 1.0)
-    #@constraint(model, -A*a .<= -1.0)
-
-    # Second permutation matrix constraint to sort the columns A^T * x == 1
-    AT = zeros(n,n^2)
-    #γ = 1
-    for i in 1:n
+    # Sorting constraint matrix: enforces ascending order S_k <= S_{k+1}
+    # T * x_hat <= 0 means sorted[k] - sorted[k+1] <= 0
+    # Using column-major indexing for consistency with A_row, A_col
+    T = zeros(n-1, n^2)
+    for k in 1:n-1
         for j in 1:n
-            row = zeros(n)
-            row[i] = 1.0
-            if j == 1
-                AT[i,j:n] = row
-            else
-                AT[i,(j-1)*n+1:j*n] = row
-            end
-        end
-        #γ += 1
-    end
-    #@constraint(model, AT*a .<= 1.0)
-    #@constraint(model, -AT*a .<= -1.0)
-
-    # Create the ascending sorting constraint matrix -T ⋅ \tilde{x} ≤ 0
-    # This is the difference matrix
-    T = zeros(n,n^2)
-    for i in 1:n
-        if i == 1
-            T[i, i:n] .= 1.0
-            T[i, n+1:(i+1)*n] .-= 1.0
-        else
-            T[i, (i-1)*n+1:i*n] .= 1.0
-            if i == n
-                T[i, (i-1)*n+1:i*n] .= 1.0
-            else
-                T[i, i*n+1:(i+1)*n] .-= 1.0
-            end
+            idx_k = k + (j-1)*n
+            idx_k1 = (k+1) + (j-1)*n
+            T[k, idx_k] = 1.0
+            T[k, idx_k1] = -1.0
         end
     end
-    #@constraint(model, -T*x_hat.<= 0.0)
 
     #############################################################
-    # Implement th McCormick envelopes for the bilinear terms
+    # Implement the McCormick envelopes for the bilinear terms
+    # u_ij = a_ij * x_j where a_ij ∈ {0,1} and x_j ∈ [0, P_j]
+    # Envelope 1: u >= 0 (eq. 19)
+    # Envelope 2: u >= x̄·a + x - x̄ (eq. 20)
+    # Envelope 3: u <= x̄·a (eq. 21)
+    # Envelope 4: u <= x (eq. 22)
     ##############################################################
-    # Start with \hat{x}_{ij} ≤ 0
-    # Stagger In matrices
-    # lower_bound_x = zeros(n^2,n^2)
-    # for i in 1:n
-    #     if i == 1
-    #         lower_bound_x[i:n, i:n] .= Matrix(I, n, n)
-    #     else
-    #         lower_bound_x[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .=  Matrix(I, n, n)
-    #     end
-    # end
     n_squared_identity = Diagonal(ones(n^2))
-    #@constraint(model, -n_squared_identity * x_hat .<= 0)
 
-    # second McCormick envelope -\hat{x}_{ij} +x_j +a_ijP_j ≤ P_j
-    n_identity = Diagonal(ones(n))
-    # Construct the a_ijP_j matrix
-    A_ij_P_j = zeros(n^2,n^2)
-
-    # Set the upper limit for the sorted load shed for each node (x_raw) to be the demand (pd) at that node
+    # Upper bound for load shed is the demand (pd) at each node
     P = pd
-    for i in 1:n
-    A_ij_P_j[(i-1)*n+1:i*n, (i-1)*n+1:i*n] .= Diagonal(P)
-    end
-    A_ij_P_j
-    # Construct the x_j matrix so that each block corresponds with the appropriate x_ij
-    x_j = zeros(n^2,n)
-    P_out = zeros(n^2)
+
+    # Construct A_ij_P_j matrix for McCormick: represents a_ij * P_j term
+    # Using column-major indexing: entry (i,j) maps to index i + (j-1)*n
+    A_ij_P_j = zeros(n^2, n^2)
     for j in 1:n
-        if j == 1
-            x_j[j:n,j:n] = Matrix(I, n, n)
-            P_out[j:n] .= P
-        else
-            x_j[(j-1)*n+1:j*n, 1:n] = Matrix(I, n, n)
-            P_out[(j-1)*n+1:j*n] .= P
+        for i in 1:n
+            idx = i + (j-1)*n  # column-major index for (i,j)
+            A_ij_P_j[idx, idx] = P[j]  # P_j is the upper bound for x_j
         end
     end
-    x_j
-    #@constraint(model, -n_squared_identity * x_hat .+ x_j .+ A_ij_P_j * a .<= P_out)
 
-    # third McCormick envelope -\hat{x}_{ij} - a_ijP_j ≤ 0
-    #@constraint(model, n_squared_identity * x_hat .- A_ij_P_j * a .<= 0)
-
-    # fourth McCormick envelope \hat{x}_{ij} - x_j ≤ 0
-    #@constraint(model, n_squared_identity * x_hat .- x_j .<= 0)
+    # Construct x_j matrix: maps x[j] to all entries (i,j) in the bilinear term
+    # x_j[idx, j] = 1 where idx = i + (j-1)*n for all i
+    x_j = zeros(n^2, n)
+    P_out = zeros(n^2)
+    for j in 1:n
+        for i in 1:n
+            idx = i + (j-1)*n
+            x_j[idx, j] = 1.0
+            P_out[idx] = P[j]
+        end
+    end
 
     A_row = zeros(n, n^2)
     for i in 1:n
@@ -344,74 +277,81 @@ function lin_palma_w_grad_input(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{F
 
 
     # Create the big F matrix for the Palma ratio constraints
-    F = [zeros(n,n^2) A_row zeros(n,n) zeros(n,n)
-        zeros(n,n^2) -A_row zeros(n,n) zeros(n,n)
-        zeros(n,n^2) A_col zeros(n,n) zeros(n,n)
-        zeros(n,n^2) -A_col zeros(n,n) zeros(n,n)
-        -T zeros(n,n^2) zeros(n,n) zeros(n,n)
-        #############
+    # Variable vector: y = [y_xhat, y_a, y_pshed, (y_w - weights_prev)]
+    # Constraints:
+    #   Row 1-2: Row sum of permutation matrix = 1 (A_row * a = 1)
+    #   Row 3-4: Column sum of permutation matrix = 1 (A_col * a = 1)
+    #   Row 5: Sorting constraint (T * x_hat <= 0)
+    #   Row 6-9: McCormick envelopes
+    F = [zeros(n,n^2) A_row zeros(n,n) zeros(n,n)           # A_row * a <= 1
+        zeros(n,n^2) -A_row zeros(n,n) zeros(n,n)           # -A_row * a <= -1
+        zeros(n,n^2) A_col zeros(n,n) zeros(n,n)            # A_col * a <= 1
+        zeros(n,n^2) -A_col zeros(n,n) zeros(n,n)           # -A_col * a <= -1
+        T zeros(n-1,n^2) zeros(n-1,n) zeros(n-1,n)          # T * x_hat <= 0 (ascending order)
         # McCormick envelopes
-        ############
-        -n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
-        n_squared_identity  -A_ij_P_j  zeros(n^2,n) zeros(n^2,n)
-        -n_squared_identity A_ij_P_j x_j zeros(n^2,n)
-        n_squared_identity zeros(n^2,n^2) -x_j zeros(n^2,n)
-        #############
-        # BIG M
-        ##############
-        #-n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n) 
-        #n_squared_identity  -A_ij_P_j -x_j zeros(n^2,n)
-        #-n_squared_identity -A_ij_P_j x_j zeros(n^2,n)
-        #n_squared_identity -A_ij_P_j zeros(n^2,n) zeros(n^2,n)
-        #zeros(n,2*n^2) n_identity -dpshed_dw
-        #zeros(n,2*n^2) -n_identity dpshed_dw
+        -n_squared_identity zeros(n^2,n^2) zeros(n^2,n) zeros(n^2,n)   # -u <= 0 (envelope 1: u >= 0)
+        n_squared_identity -A_ij_P_j zeros(n^2,n) zeros(n^2,n)         # u - a*P <= 0 (envelope 3: u <= a*P)
+        -n_squared_identity A_ij_P_j x_j zeros(n^2,n)                  # -u + a*P + x <= P (envelope 2)
+        n_squared_identity zeros(n^2,n^2) -x_j zeros(n^2,n)            # u - x <= 0 (envelope 4: u <= x)
     ]
 
-   # x_tilde = vcat(x_hat, a, pshed_new, (weights_new.-weights_prev))
-    # Store the right hand side of the constraints into a vector named g
-    g = [ones(n)
-        -ones(n)
-        ones(n)
-        -ones(n)
-        zeros(n)
-        zeros(n^2)
-        -P_out
-        zeros(n^2)
-        zeros(n^2)
-        #zeros(n^2)
-        #-P_out
-        #-P_out
-        #zeros(n^2)
-        #pshed_prev
-        #-pshed_prev
+    # Right-hand side vector g (FIXED: McCormick envelope RHS values)
+    # Matches the constraint structure of F
+    g = [ones(n)           # A_row * a <= 1
+        -ones(n)           # -A_row * a <= -1
+        ones(n)            # A_col * a <= 1
+        -ones(n)           # -A_col * a <= -1
+        zeros(n-1)         # T * x_hat <= 0 (ascending order)
+        zeros(n^2)         # -u <= 0 (envelope 1)
+        zeros(n^2)         # u - a*P <= 0 (envelope 3) - FIXED: was -P_out
+        P_out              # -u + a*P + x <= P (envelope 2) - FIXED: was zeros
+        zeros(n^2)         # u - x <= 0 (envelope 4)
     ]
+
+    # Verify dimensions before adding constraint
+    @assert size(F, 2) == length(y) "F columns ($(size(F, 2))) must match y length ($(length(y)))"
+    @assert size(F, 1) == length(g) "F rows ($(size(F, 1))) must match g length ($(length(g)))"
 
     @constraint(model, F * y .<= g*σ)
-    A_long = [A zeros(n,n^2) zeros(n,2*n)]
-    # Create the vectors to extract the top 10% of load shed
+    # A_long extracts sorted values from y_xhat (McCormick aux = a * pshed)
+    # y = [y_xhat(n²), y_a(n²), y_pshed(n), y_w-weights_prev(n)]
+    A_long = [A_row zeros(n, n^2) zeros(n, 2*n)]
+
+    # Palma ratio = sum(top 10% sorted) / sum(bottom 40% sorted)
+    # Using Charnes-Cooper: normalize denominator = 1, minimize numerator
     top_10_percent_indices = zeros(n)
     top_10_percent_indices[ceil(Int, 0.9*n):n] .= 1.0
     bottom_40_percent_indices = zeros(n)
     bottom_40_percent_indices[1:floor(Int, 0.4*n)] .= 1.0
-    obj = transpose(top_10_percent_indices)*A_long*y
-    denominator_constraint = transpose(bottom_40_percent_indices)*A_long*y
-   # @constraint(model, denominator_constraint .== σ)
-    @objective(model, Max, 0)
+
+    # Numerator (top 10% sum, scaled by σ)
+    numerator_expr = transpose(top_10_percent_indices) * A_long * y
+    # Denominator (bottom 40% sum, scaled by σ) - normalized to 1 via Charnes-Cooper
+    denominator_expr = transpose(bottom_40_percent_indices) * A_long * y
+
+    # Charnes-Cooper normalization: denominator * σ = 1 (scaled denominator = 1)
+    @constraint(model, denominator_expr == 1.0)
+
+    # Minimize the Palma ratio (= numerator when denominator normalized to 1)
+    @objective(model, Min, numerator_expr)
 
     set_optimizer(model, Gurobi.Optimizer)
     # Disable dual reductions
     set_attribute(model, "DualReductions", 0)
 
     optimize!(model)
-    #  value.(pshed_new)
-    #    value(σ)
-    #    value.(weights_new)
     @info termination_status(model)
     println("Termination: ", termination_status(model))
     println("Primal status: ", primal_status(model))
     println("Dual status: ", dual_status(model))
 
-   return Array(value.(y_pshed)), Array(value.(weights_prev .+ y_w)), value(σ)
+    # Handle infeasibility - return unchanged values
+    if termination_status(model) in [MOI.INFEASIBLE, MOI.INFEASIBLE_OR_UNBOUNDED]
+        @warn "Palma optimization infeasible, returning unchanged weights"
+        return pshed_prev, weights_prev, 1.0
+    end
+
+    return Array(value.(y_pshed)), Array(value.(y_w)), value(σ)
 end
 
 
