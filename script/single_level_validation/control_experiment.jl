@@ -93,7 +93,7 @@ mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_swit
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
 # Run the integer case of the mld
-mld_int = FairLoadDelivery.solve_mc_mld_jain_integer(math, gurobi)
+mld_int = FairLoadDelivery.solve_mc_mld_proportional_fairness(math, gurobi)
 
 block_int = mld_int["solution"]["block"]
 switch_int = mld_int["solution"]["switch"]
