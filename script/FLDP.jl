@@ -286,7 +286,7 @@ end
         end
         pshed_comparison = scatter(pshed_lower_level, pshed_upper_level, title = "Load Shed Comparison ($fair_func)", xlabel = "Lower-Level Load Shed (kW)", ylabel = "Upper-Level Load Shed (kW)", marker = :o, label = "Iteration")
         for i in 1:iterations
-            Plots.annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], Plots.text(string(i), :left, :green, 30))
+            Plots.annotate!(pshed_comparison, pshed_lower_level[i], pshed_upper_level[i], text(string(i), :left, :green, 30))
         end
         # add a 45 degree line to the pshed_comparison plot 
         min_val = minimum([minimum(pshed_lower_level), minimum(pshed_upper_level)])
@@ -436,10 +436,13 @@ end
         best_feasibility, max_load_served = export_ac_feasibility_results(math_out, ac_feas, save_path)
 
         best_set, best_mld = find_best_mld_solution(math_out, ipopt)
-        final_load_shed = 0
-        for (load_id, load_data) in best_mld["solution"]["load"]
-            final_load_shed += sum(load_data["pshed"])
-        end
+        # final_load_shed = 0
+        # for (load_id, load_data) in best_mld["solution"]["load"]
+        #     final_load_shed += sum(load_data["pd"])
+        # end
+        @info "The length of the final load shed per bus in the best MLD solution is: $(length(best_mld["solution"]["load"]))"
+        @info "The final load shed per bus in the best MLD solution is: $(collect(best_mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(best_mld["solution"]["load"])))"
+        final_load_shed = sum(best_mld["solution"]["load"][string(i)]["pshed"] for i in 1:length(best_mld["solution"]["load"]))
         @info "Best MLD solution found from set $best_set with objective value: $(best_mld["objective"])"
         push!(final_load_shed_per_fair_func, (fair_func, final_load_shed))
         bar!(final_load_shed_v_fairness, [fair_func], [final_load_shed], xlabel = "Fairness Function", ylabel = "Final Load Shed (kW)", title = "Final Load Shed vs. Fairness Function", legend=false)
@@ -459,6 +462,6 @@ end
 #                     title = "Best AC Feasible Solution from Random Rounding",
 #                     width = 300, height=300
 # )
-plot_network_load_shed(best_mld["solution"], math;
-    output_file=joinpath(save_path, "network_load_shed.svg"),
-    layout=:ieee13)
+# plot_network_load_shed(best_mld["solution"], math;
+#     output_file=joinpath(save_path, "network_load_shed.svg"),
+#     layout=:ieee13)

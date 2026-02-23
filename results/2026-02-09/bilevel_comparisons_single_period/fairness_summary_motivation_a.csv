@@ -1,0 +1,6 @@
+Formulation,TotalServed_pct,TotalShed_kW,MaxShed_kW,ShedVariance,JainsIndex,PalmaRatio,GiniCoeff,CV_Served
+Efficiency,21.73,147.0,48.86,483.07,0.9422,0.6073,0.9295,0.2627
+Proportional,18.42,261.59,50.64,203.22,0.9653,0.5535,0.9396,0.201
+Min-Max,17.63,288.77,100.0,1953.11,0.7265,3.4061,0.827,0.6507
+Equality Min,17.54,292.18,100.0,1699.25,0.9659,0.7655,0.9438,0.2031
+Jain's Index,18.52,258.05,100.0,1836.38,0.7571,1.8082,0.8448,0.6008

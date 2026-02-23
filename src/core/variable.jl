@@ -158,30 +158,40 @@ function variable_mc_bus_voltage_magnitude_sqr(pm::_PMD.AbstractUBFModels; nw::I
 end
 
 function variable_mc_fair_load_weights(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
-    fbw_val = _PMD.ref(pm, nw, :load_weights)  
-    # Create parameter variables for each block weight
-    fair_load_weights = _PMD.var(pm, nw)[:fair_load_weights] = JuMP.@variable(
-        pm.model, 
-        fair_load_weights[j in keys(fbw_val)] in JuMP.Parameter(fbw_val[j]),
-        base_name = "fair_load_weights"
+    fbw_val = _PMD.ref(pm, nw, :load_weights)
+    # Create parameter variables for each block weight (anonymous syntax for multinetwork support)
+    fair_load_weights = JuMP.@variable(
+        pm.model,
+        [j in keys(fbw_val)] in JuMP.Parameter(fbw_val[j]),
+        base_name = "$(nw)_fair_load_weights"
     )
+    _PMD.var(pm, nw)[:fair_load_weights] = fair_load_weights
+    # Also register in model for backward compatibility with code that accesses model[:fair_load_weights]
+    if nw == 0 && !haskey(JuMP.object_dictionary(pm.model), :fair_load_weights)
+        pm.model[:fair_load_weights] = fair_load_weights
+    end
 
 #    report && _IM.sol_component_value(pm, pmd_it_sym, nw, :block, :fair_load_weights, _PMD.ids(pm, nw, :blocks), fair_load_weights)
 end
 
 function variable_mc_load_shed(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
-    loads = _PMD.ids(pm, nw, :load)  
-    # Create parameter variables for each block weight
+    loads = _PMD.ids(pm, nw, :load)
+    # Create variables for load shed (anonymous syntax for multinetwork support)
     pshed = _PMD.var(pm, nw)[:pshed] = JuMP.@variable(
-        pm.model, 
-        pshed[j in loads],
-        base_name = "pshed"
+        pm.model,
+        [j in loads],
+        base_name = "$(nw)_pshed"
     )
     qshed = _PMD.var(pm, nw)[:qshed] = JuMP.@variable(
-        pm.model, 
-        qshed[j in loads],
-        base_name = "qshed"
+        pm.model,
+        [j in loads],
+        base_name = "$(nw)_qshed"
     )
+    # Also register in model for backward compatibility with code that accesses model[:pshed]
+    if nw == 0 && !haskey(JuMP.object_dictionary(pm.model), :pshed)
+        pm.model[:pshed] = pshed
+        pm.model[:qshed] = qshed
+    end
     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :load, :pshed, _PMD.ids(pm, nw, :load), pshed)
     report && _IM.sol_component_value(pm, pmd_it_sym, nw, :load, :qshed, _PMD.ids(pm, nw, :load), qshed)
 end   

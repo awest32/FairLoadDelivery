@@ -1,0 +1,4 @@
+switch_name,phase,p,q,c_mag,current_rating,is_closed
+671692,1,0.0,0.0,0.0,80.0,false
+671692,2,0.0,0.0,0.0,80.0,false
+671692,3,0.0,0.0,0.0,80.0,false

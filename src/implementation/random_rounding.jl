@@ -96,14 +96,15 @@ Generate sets of Bernoulli variables based on relaxed switch probabilities.
 Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
 Returns an array of sample dictionaries.
 """
-function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64},n_samples::Int, rng::Int)
+function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64}, n_samples::Int, rng_seed::Int)
+    local_rng = Random.MersenneTwister(rng_seed)
     samples = Vector{Dict{Int, Float64}}(undef, n_samples)
 
     for i in 1:n_samples
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states_bern
             p_clamped = clamp(p, 0.0, 1.0)
-            sample[switch_id] = rand(Bernoulli(p_clamped))
+            sample[switch_id] = rand(local_rng, Bernoulli(p_clamped))
         end
         samples[i] = sample
     end
@@ -172,7 +173,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         #     >= sum(ref_round[s]["ps"][t]*z_storage[s] for (s, conns) in ref_round[:bus_conns_storage] for t in conns)
         #     - sum(ref_round[l]["pd"][t]*z_demand[l] for (l, conns) in ref_round[:bus_conns_load] for t in conns)
         #     ) 
-        print(model)
+        # print(model)
         optimize!(model)
         @info "Sample $i: Radiality check status: $(termination_status(model))"
         if termination_status(model) == MOI.OPTIMAL
@@ -193,6 +194,12 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
     end
     block_ids = sort(collect(keys(ref_round[:block])))
     load_ids = sort(collect(keys(ref_round[:load])))
+
+    if best_i === nothing
+        @warn "[radiality_check] No feasible radial topology found in any of $n_samples Bernoulli samples"
+        return nothing, Dict{Int,Float64}(), block_ids, zeros(length(block_ids)), load_ids, zeros(length(load_ids))
+    end
+
     return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
 end
 

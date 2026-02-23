@@ -22,6 +22,8 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
 
     math = PowerModelsDistribution.transform_data_model(eng)
 
+    # Store source voltage in per-unit for use in constraints
+    math["source_vm_pu"] = eng["voltage_source"]["source"]["vm"]
 
     # for (idx, switch) in math["switch"]
     #     switch["state"] = 1
@@ -50,39 +52,59 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
 
     # Update the voltage limits
     for (i,bus) in math["bus"]
-            bus["vmax"][:] .= 1.1
-            bus["vmin"][:] .= 0.9
+            bus["vmax"][:] .= 1.05
+            bus["vmin"][:] .= 0.95
     end
 
     # Update the current limits on the switches based upon the case
     if case == "ieee_13_aw_edit/motivation_a.dss"
         for (i,switch) in math["switch"]
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 308
+                switch["current_rating"][:] .= 700#308
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 322
+                switch["current_rating"][:] .= 700#322
+            end
+        end
+    elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
+        for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 700#308
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 700#322
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_b.dss"
        for (i,switch) in math["switch"]
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 304
+                switch["current_rating"][:] .= 700#304
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 305
+                switch["current_rating"][:] .= 700#305
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 80
+                switch["current_rating"][:] .= 700#80
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 310
+                switch["current_rating"][:] .= 700#310
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 264
+                switch["current_rating"][:] .= 700#264
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 70
+                switch["current_rating"][:] .= 700#70
             elseif switch["name"] == "646611"
-                switch["current_rating"][:] .= 264
+                switch["current_rating"][:] .= 700#264
+            end
+        end
+    elseif case == "ieee_13_aw_edit/motivation_d.dss"
+       for (i,switch) in math["switch"]
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 700#310
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 700#264
+            elseif switch["name"] == "671692"
+                switch["current_rating"][:] .= 700#70
+            elseif switch["name"] == "646611"
+                switch["current_rating"][:] .= 700#264
             end
         end
     end
@@ -131,8 +153,8 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     #critical_load = ["l4"]
     for (i,load) in math["load"]
         if load["name"] in critical_load
-            load["critical"] = 0
-            load["weight"] = 10
+            load["critical"] = 1
+            load["weight"] = 100000
             push!(critical_id,parse(Int,i))
             #println("Load $(load["name"]) at math load node $(i) is critical.")
         else
@@ -154,9 +176,21 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     end
 
     # Declare load blocks in the math model
+    bus_block_map = Dict{Int,Int}()
+    for (block_id, buses) in enumerate(lbs)
+        for bus in buses
+            bus_block_map[bus] = block_id
+        end
+    end
     math["block"] = Dict{String,Any}()
-    for (block, loads) in enumerate(lbs)
-        math["block"][string(block)] = Dict("id"=>block, "state"=>0)
+    for (block_id, _) in enumerate(lbs)
+        math["block"][string(block_id)] = Dict("id"=>block_id, "state"=>0, "loads"=>Int[])
+    end
+    for (load_id_str, load) in math["load"]
+        block_id = get(bus_block_map, load["load_bus"], 0)
+        if block_id > 0
+            push!(math["block"][string(block_id)]["loads"], parse(Int, load_id_str))
+        end
     end
     return eng, math, lbs, critical_id
 end
@@ -209,13 +243,17 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     end
     # Ensure the voltages are passed through correctly
     for (bus_id, bus_data) in data["bus"]
-        bus_data["vmax"][:] .= 1.1
-        bus_data["vmin"][:] .= 0.9
+        bus_data["vmax"][:] .= 1.05
+        bus_data["vmin"][:] .= 0.95
     end
+
+    # Get voltage scale if present (for voltage sensitivity analysis)
+    vscale = get(data, "vscale", 1.0)
+
     for (i,gen) in data["gen"]
         id = parse(Int,i)
         if gen["source_id"] == "voltage_source.source"
-            gen["vg"][:] .= ref[:gen][id]["vg"]
+            gen["vg"][:] .= ref[:gen][id]["vg"] .* vscale
             gen["vbase"] = ref[:gen][id]["vbase"]
         end
     end

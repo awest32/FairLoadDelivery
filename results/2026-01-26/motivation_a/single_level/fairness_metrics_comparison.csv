@@ -1,0 +1,9 @@
+Formulation,TotalServed_pct,TotalShed_kW,MaxShed_kW,ShedVariance,JainsIndex,PalmaRatio,GiniCoeff,CV_Served
+Efficient (Relaxed),50.0,1733.0,335.88,8731.17,0.7179,2.0924,0.3522,0.6488
+Efficient (Integer),40.85,2050.0,1155.0,99113.1,0.7333,1.0,0.2667,0.6242
+Equality Min (Relaxed),45.89,1875.32,232.94,6542.82,0.3819,-3.97218396936e7,0.6563,1.3168
+Equality Min (Integer),0.0,3466.0,1155.0,77558.21,NaN,Inf,NaN,Inf
+Prop Fair (Relaxed),47.37,1824.26,987.49,66232.05,0.8741,0.7581,0.2058,0.3928
+Prop Fair (Integer),40.85,2050.0,1155.0,99113.1,0.7333,1.0,0.2667,0.6242
+Jain Max (Relaxed),50.0,1733.0,277.35,5712.7,0.6595,2.353,0.4059,0.7438
+Jain Max (Integer),40.85,2050.0,1155.0,99113.1,0.7333,1.0,0.2667,0.6242

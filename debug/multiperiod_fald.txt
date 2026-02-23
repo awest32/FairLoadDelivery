@@ -1,0 +1,403 @@
+"""
+    fald_multiperiod.jl
+
+    Multiperiod Fair Allocation Load Delivery (FALD) bilevel optimization.
+    Solves the multiperiod version of the bilevel FALD problem where:
+    - Lower level: Parameterized MLD with implicit differentiation (one big multinetwork problem)
+    - Upper level: Fairness optimization using Jacobian from lower level
+
+    Workflow:
+    1. setup_network - Initialize network with generation limits
+    2. solve_relaxed_fald - Bilevel iterations with multinetwork DiffOpt
+    3. random_round - Bernoulli rounding for discrete variables
+    4. ac_feasibility - Validate AC power flow feasibility
+    5. plot - Visualize results
+
+    Block Diagonal Flag:
+    - block_diagonal=true: Independent periods, faster O(n_periods × n_loads²)
+    - block_diagonal=false: Coupled periods (for BESS), slower O(n_periods² × n_loads²)
+"""
+
+using Revise
+using MKL
+using FairLoadDelivery
+using PowerModelsDistribution
+using Ipopt, Gurobi
+using JuMP
+using DiffOpt
+using DataFrames
+using CSV
+using Dates
+using Plots
+using Statistics
+using LinearAlgebra
+
+# Include the shared network setup function
+include("../../src/implementation/network_setup.jl")
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+const CASE = "motivation_a"
+const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
+const LS_PERCENT = 0.8  # Generation limit as fraction of total load
+
+# 24-hour load profile (p.u.) - typical residential/commercial demand curve
+const LOAD_PROFILE_24H = [
+    0.45, 0.40, 0.38, 0.38, 0.40, 0.50, 0.65, 0.80, 0.90, 0.95,
+    0.95, 0.92, 0.90, 0.92, 0.95, 0.98, 1.00, 1.00, 0.98, 0.95,
+    0.85, 0.75, 0.60, 0.50
+]
+
+# 24-hour generation profile (p.u.) - base generation + solar variation
+const GEN_PROFILE_24H = [
+    0.50, 0.50, 0.50, 0.50, 0.50, 0.52, 0.55, 0.65, 0.75, 0.85,
+    0.92, 0.98, 1.00, 0.98, 0.92, 0.85, 0.75, 0.65, 0.55, 0.52,
+    0.50, 0.50, 0.50, 0.50
+]
+
+# Number of periods (can be 3 for quick test or 24 for full day)
+const N_PERIODS = 3
+const LOAD_SCALE_FACTORS =[0.4, 1.2, 1.25] # LOAD_PROFILE_24H[1:N_PERIODS]
+const GEN_SCALE_FACTORS = [0.95, 1.0, 0.8] # GEN_PROFILE_24H[1:N_PERIODS]
+
+# FALD parameters
+const FAIR_FUNC = "efficiency"  # "efficiency", "min_max", "jain"
+const ITERATIONS = 3  # Number of bilevel iterations
+const N_ROUNDS = 2  # Number of random rounding rounds
+const N_BERNOULLI_SAMPLES = 5  # Samples per round
+const BLOCK_DIAGONAL = true  # Use block-diagonal Jacobian (independent periods)
+
+# Solvers
+ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+gurobi_solver = optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+
+"""
+Create multinetwork data structure from a single network.
+Replicates the network N times with different load and generation scaling factors.
+"""
+function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int,
+                                   load_scales::Vector{Float64}, gen_scales::Vector{Float64})
+    mn_data = Dict{String,Any}(
+        "multinetwork" => true,
+        "per_unit" => get(base_math, "per_unit", true),
+        "name" => get(base_math, "name", "fald_multiperiod"),
+        "data_model" => get(base_math, "data_model", PowerModelsDistribution.MATHEMATICAL),
+        "nw" => Dict{String,Any}()
+    )
+
+    # Copy global keys
+    for key in ["baseMVA", "basekv", "bus_lookup", "settings"]
+        if haskey(base_math, key)
+            mn_data[key] = deepcopy(base_math[key])
+        end
+    end
+
+    # Create each time period network
+    for t in 1:n_periods
+        nw_id = string(t - 1)  # 0-indexed
+        nw_data = deepcopy(base_math)
+        delete!(nw_data, "multinetwork")
+
+        # Scale loads
+        load_scale = load_scales[t]
+        for (load_id, load) in nw_data["load"]
+            load["pd"] = load["pd"] .* load_scale
+            load["qd"] = load["qd"] .* load_scale
+        end
+
+        # Scale generation capacity
+        gen_scale = gen_scales[t]
+        for (gen_id, gen) in nw_data["gen"]
+            gen["pmax"] = gen["pmax"] .* gen_scale
+            gen["qmax"] = gen["qmax"] .* gen_scale
+        end
+
+        nw_data["time_period"] = t
+        nw_data["load_scale"] = load_scale
+        nw_data["gen_scale"] = gen_scale
+
+        mn_data["nw"][nw_id] = nw_data
+    end
+
+    return mn_data
+end
+
+"""
+Update weights in multinetwork data dictionary.
+"""
+function update_mn_weights!(mn_data::Dict{String, Any}, weights_new_mn::Dict{Int, Vector{Float64}})
+    for (nw_id_int, weights) in weights_new_mn
+        nw_id = string(nw_id_int)
+        for (i, w) in enumerate(weights)
+            mn_data["nw"][nw_id]["load"][string(i)]["weight"] = w
+        end
+    end
+end
+
+"""
+Summarize results from multiperiod FALD solution.
+"""
+function summarize_mn_fald_results(result::Dict, mn_data::Dict)
+    println("\n" * "=" ^ 70)
+    println("MULTIPERIOD FALD RESULTS")
+    println("=" ^ 70)
+
+    term_status = result["termination_status"]
+    if term_status != MOI.OPTIMAL && term_status != MOI.LOCALLY_SOLVED
+        println("ERROR: Problem did not solve successfully")
+        println("Status: $term_status")
+        return nothing
+    end
+
+    println("Termination Status: $term_status")
+    println("Objective Value: $(round(result["objective"], digits=4))")
+
+    results_df = DataFrame(
+        Period = Int[], LoadScale = Float64[], GenScale = Float64[],
+        TotalLoadRef = Float64[], TotalServed = Float64[], TotalShed = Float64[],
+        PctServed = Float64[], PctShed = Float64[]
+    )
+
+    nw_ids = sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
+
+    for nw_id in nw_ids
+        nw_data = mn_data["nw"][nw_id]
+        period = nw_data["time_period"]
+
+        if !haskey(result["solution"], "nw") || !haskey(result["solution"]["nw"], nw_id)
+            println("  Period $period: No solution found")
+            continue
+        end
+
+        nw_soln = result["solution"]["nw"][nw_id]
+
+        total_load_ref = sum(sum(load["pd"]) for (_, load) in nw_data["load"])
+        total_served = 0.0
+        for (load_id, load_data) in nw_data["load"]
+            if haskey(nw_soln, "load") && haskey(nw_soln["load"], load_id)
+                total_served += sum(nw_soln["load"][load_id]["pd"])
+            end
+        end
+
+        total_shed = total_load_ref - total_served
+        pct_served = total_load_ref > 0 ? (total_served / total_load_ref) * 100 : 0.0
+        pct_shed = total_load_ref > 0 ? (total_shed / total_load_ref) * 100 : 0.0
+
+        push!(results_df, (
+            Period = period,
+            LoadScale = nw_data["load_scale"],
+            GenScale = nw_data["gen_scale"],
+            TotalLoadRef = round(total_load_ref, digits=4),
+            TotalServed = round(total_served, digits=4),
+            TotalShed = round(total_shed, digits=4),
+            PctServed = round(pct_served, digits=2),
+            PctShed = round(pct_shed, digits=2)
+        ))
+
+        println("\n  Period $period (load=$(nw_data["load_scale"]), gen=$(nw_data["gen_scale"])):")
+        println("    Load ref: $(round(total_load_ref, digits=4)), Served: $(round(total_served, digits=4)), Shed: $(round(pct_shed, digits=2))%")
+    end
+
+    println("\n" * "-" ^ 70)
+    println("SUMMARY: Total served $(round(mean(results_df.PctServed), digits=2))% average")
+
+    return results_df
+end
+
+"""
+Create visualization of multiperiod FALD results.
+"""
+function plot_mn_fald_results(results_df::DataFrame, save_path::String)
+    periods = results_df.Period
+    served = results_df.TotalServed
+    total = results_df.TotalLoadRef
+
+    p = bar(periods, total, label="Reference Load", xlabel="Period", ylabel="Load (MW)",
+            title="FALD Multiperiod Results", color=:lightgray, alpha=0.5, bar_width=0.6)
+    bar!(periods, served, label="Served", color=:green, bar_width=0.4)
+
+    for i in 1:length(periods)
+        annotate!(periods[i], served[i] + 0.05*maximum(total),
+                  text("$(round(results_df.PctServed[i], digits=1))%", 8, :center))
+    end
+
+    savefig(p, save_path)
+    println("Plot saved to: $save_path")
+    return p
+end
+
+# ============================================================
+# MAIN FALD WORKFLOW
+# ============================================================
+
+"""
+    run_multiperiod_fald()
+
+Main entry point for multiperiod FALD bilevel optimization.
+"""
+function run_multiperiod_fald()
+    println("=" ^ 70)
+    println("FALD MULTIPERIOD BILEVEL OPTIMIZATION")
+    println("Case: $CASE, Periods: $N_PERIODS, Fairness: $FAIR_FUNC")
+    println("Block diagonal: $BLOCK_DIAGONAL")
+    println("=" ^ 70)
+
+    today = Dates.format(Dates.today(), "yyyy-mm-dd")
+    output_dir = joinpath(@__DIR__, "../..", "results", today, "fald_multiperiod", CASE, FAIR_FUNC)
+    mkpath(output_dir)
+
+    # STEP 1: Network setup
+    println("\n[1] Setting up base network...")
+    eng, math, lbs, _ = setup_network(CASE_FILE, LS_PERCENT, [])
+    println("  Loads: $(length(math["load"])), Switches: $(length(math["switch"]))")
+
+    # STEP 2: Create multinetwork data
+    println("\n[2] Creating multinetwork data...")
+    mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS, GEN_SCALE_FACTORS)
+
+    for nw_id in sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
+        nw = mn_data["nw"][nw_id]
+        total_load = sum(sum(l["pd"]) for (_, l) in nw["load"])
+        total_gen = sum(sum(g["pmax"]) for (_, g) in nw["gen"])
+        println("  Period $(nw["time_period"]): load=$(round(total_load, digits=4)), gen=$(round(total_gen, digits=4))")
+    end
+
+    # STEP 3: Bilevel FALD iterations
+    println("\n[3] Running bilevel FALD ($ITERATIONS iterations)...")
+
+    nw_ids_int = sort([parse(Int, k) for k in keys(mn_data["nw"])])
+    weights_mn = Dict{Int, Vector{Float64}}(
+        n => ones(length(mn_data["nw"][string(n)]["load"])) * 10.0 for n in nw_ids_int
+    )
+
+    for k in 1:ITERATIONS
+        println("\n  --- Iteration $k ---")
+
+        jacobian_mn, pshed_vals_mn, pshed_ids_mn, weight_vals_mn, weight_ids_mn, pm =
+            lower_level_soln_mn(mn_data, weights_mn, k; block_diagonal=BLOCK_DIAGONAL)
+
+        total_pshed = sum(sum(pshed_vals_mn[n]) for n in nw_ids_int)
+        println("    Lower-level shed: $(round(total_pshed, digits=6))")
+
+        if FAIR_FUNC == "efficiency"
+            pshed_new_mn, weights_new_mn = complete_efficiency_load_shed_mn(
+                jacobian_mn, pshed_vals_mn, weight_vals_mn, mn_data; block_diagonal=BLOCK_DIAGONAL)
+        elseif FAIR_FUNC == "min_max"
+            pshed_new_mn, weights_new_mn = min_max_load_shed_mn(
+                jacobian_mn, pshed_vals_mn, weight_vals_mn; block_diagonal=BLOCK_DIAGONAL)
+        elseif FAIR_FUNC == "jain"
+            pshed_new_mn, weights_new_mn = jains_fairness_index_mn(
+                jacobian_mn, pshed_vals_mn, weight_vals_mn; block_diagonal=BLOCK_DIAGONAL)
+        else
+            error("Unknown fairness function: $FAIR_FUNC")
+        end
+
+        total_pshed_upper = sum(sum(pshed_new_mn[n]) for n in nw_ids_int)
+        println("    Upper-level shed: $(round(total_pshed_upper, digits=6))")
+
+        weights_mn = weights_new_mn
+        update_mn_weights!(mn_data, weights_new_mn)
+    end
+
+    # STEP 4: Solve relaxed MLD
+    println("\n[4] Solving relaxed multinetwork MLD...")
+    mld_relaxed = solve_mn_mc_mld_switch_relaxed(mn_data, ipopt_solver)
+
+    results_df = summarize_mn_fald_results(mld_relaxed, mn_data)
+
+    # STEP 5: Random rounding per period
+    println("\n[5] Random rounding...")
+    mn_rounded_data = deepcopy(mn_data)
+    mld_rounded_results = Dict{String, Dict{String, Any}}()
+
+    for nw_id in sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
+        nw_data = mn_data["nw"][nw_id]
+        period = nw_data["time_period"]
+        math_period = deepcopy(nw_data)
+
+        imp_diff_model = instantiate_mc_model(math_period, LinDist3FlowPowerModel,
+            build_mc_mld_shedding_implicit_diff; ref_extensions=[ref_add_rounded_load_blocks!])
+        ref = imp_diff_model.ref[:it][:pmd][:nw][0]
+
+        nw_soln = mld_relaxed["solution"]["nw"][nw_id]
+        switch_states = Dict{Int64, Float64}(parse(Int, s_id) => s["state"] for (s_id, s) in nw_soln["switch"])
+        block_status = Dict{Int64, Float64}(parse(Int, b_id) => b["status"] for (b_id, b) in nw_soln["block"])
+
+        best_mld, best_obj = nothing, -Inf
+        for r in 1:N_ROUNDS
+            bernoulli_samples = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, 100*r + period)
+            index, sw_radial, block_ids, blk_radial, load_ids, load_status =
+                radiality_check(ref, switch_states, block_status, bernoulli_samples)
+
+            if index === nothing; continue; end
+
+            math_out = update_network(deepcopy(math_period),
+                Dict(zip(block_ids, blk_radial)), Dict(zip(load_ids, load_status)), sw_radial, ref, r)
+            mld_r = solve_mc_mld_shed_random_round(math_out, ipopt_solver)
+
+            if (mld_r["termination_status"] == MOI.OPTIMAL ||
+                mld_r["termination_status"] == MOI.LOCALLY_SOLVED) && mld_r["objective"] > best_obj
+                best_obj, best_mld = mld_r["objective"], mld_r
+                mn_rounded_data["nw"][nw_id] = math_out
+            end
+        end
+        if best_mld !== nothing
+            mld_rounded_results[nw_id] = best_mld
+            println("  Period $period: obj=$(round(best_obj, digits=4))")
+        else
+            error("  Period $period: No feasible rounded solution found")
+        end
+    end
+
+    # STEP 6: AC feasibility
+    println("\n[6] AC feasibility test...")
+    ac_results = Dict{String, Dict{String, Any}}()
+    for nw_id in keys(mld_rounded_results)
+        nw_data = mn_rounded_data["nw"][nw_id]
+        math_ac = deepcopy(nw_data)
+
+        # Set high gen capacity for slack
+        for (i, gen) in math_ac["gen"]
+            if gen["source_id"] == "voltage_source.source"
+                gen["pmax"] = gen["pmax"] .* 1000
+                gen["qmax"] = gen["qmax"] .* 1000
+            end
+        end
+
+        ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
+        ac_term = ac_result["termination_status"]
+        if ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ITERATION_LIMIT
+            ac_results[nw_id] = ac_result
+            println("  Period $(nw_data["time_period"]): AC converged")
+        else
+            println("  Period $(nw_data["time_period"]): AC FAILED ($ac_term)")
+        end
+    end
+
+    # STEP 7: Save and plot
+    println("\n[7] Saving results...")
+    if results_df !== nothing
+        CSV.write(joinpath(output_dir, "fald_multiperiod_results.csv"), results_df)
+        plot_mn_fald_results(results_df, joinpath(output_dir, "fald_multiperiod_results.svg"))
+    end
+
+    if !isempty(mld_rounded_results)
+        first_nw = sort(collect(keys(mld_rounded_results)))[1]
+        plot_network_load_shed(mld_rounded_results[first_nw]["solution"],
+            mn_rounded_data["nw"][first_nw]; output_file=joinpath(output_dir, "network_period_1.svg"))
+    end
+
+    println("\n" * "=" ^ 70)
+    println("FALD MULTIPERIOD COMPLETE - Results in: $output_dir")
+    println("=" ^ 70)
+
+    return mld_relaxed, mn_data, results_df, mld_rounded_results, ac_results
+end
+
+# Run the analysis
+mld_relaxed, mn_data, results_df, mld_rounded, ac_results = run_multiperiod_fald();

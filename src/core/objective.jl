@@ -1,4 +1,5 @@
 
+
 """
     objective_mc_min_fuel_cost_pwl_voll(pm::AbstractUnbalancedPowerModel)
 
@@ -188,8 +189,6 @@ end
 function objective_min_dist_rounded(pm::JuMP.Model; z_bern_switch::Dict{Int,Int64})#, z_bern_block::Dict{Int,Int64})
     switch_dist = sum( (z_bern_switch[i] - _PMD.var(pm, :switch_state, i))^2 for i in keys(z_bern_switch))
     println("Switch distance: $switch_dist")
-#     block_dist = sum((z_bern_block[i] - _PMD.var(pm, :z_block, i))^2 for i in keys(z_bern_block))
-#    println("Block distance: $block_dist")
     return JuMP.@NLobjective(pm.model, Min, switch_dist)# + block_dist)
 end
 

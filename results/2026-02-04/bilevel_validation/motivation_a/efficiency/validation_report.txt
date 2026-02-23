@@ -1,0 +1,51 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_a
+  Fairness Function: efficiency
+  Iterations: 2
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [+] gen_forces_shedding: PASS
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [+] voltage_limits: PASS
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] block_label_consistency: PASS
+    [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "1", phase = 1, s_squared = 567898.3206272118, limit = 490000.0, utilization_pct = 107.65575528253612, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "2", phase = 2, s_squared = 626922.5446305329, limit = 490000.0, utilization_pct = 113.11205791391596, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "2", phase = 3, s_squared = 525624.6824870309, limit = 490000.0, utilization_pct = 103.57139728935793, z_switch = 1.0, w = 1.0, rating = 700.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 3
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 23 checks, 22 passed, 1 failed
+======================================================================

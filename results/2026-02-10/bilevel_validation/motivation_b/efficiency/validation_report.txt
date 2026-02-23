@@ -1,0 +1,69 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_b
+  Fairness Function: efficiency
+  Iterations: 1
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [X] voltage_limits: FAIL
+        - (bus_id = "12", phase = 1, w = 0.7528392225125029, type = "undervoltage", limit = 0.81)
+        - (bus_id = "12", phase = 2, w = 0.7421999863942484, type = "undervoltage", limit = 0.81)
+        - (bus_id = "12", phase = 3, w = 0.7414244714711286, type = "undervoltage", limit = 0.81)
+        - (bus_id = "5", phase = 1, w = 0.7468004979078516, type = "undervoltage", limit = 0.81)
+        - (bus_id = "5", phase = 2, w = 0.7472932849674192, type = "undervoltage", limit = 0.81)
+        - (bus_id = "5", phase = 3, w = 0.7440019830237452, type = "undervoltage", limit = 0.81)
+        - (bus_id = "15", phase = 1, w = 0.7528392291323316, type = "undervoltage", limit = 0.81)
+        - (bus_id = "15", phase = 2, w = 0.7421999813458531, type = "undervoltage", limit = 0.81)
+        - (bus_id = "15", phase = 3, w = 0.7414244734147103, type = "undervoltage", limit = 0.81)
+        - (bus_id = "16", phase = 1, w = 0.7564605672424446, type = "undervoltage", limit = 0.81)
+        - (bus_id = "16", phase = 2, w = 0.7554438694892134, type = "undervoltage", limit = 0.81)
+        - (bus_id = "16", phase = 3, w = 0.7628949916155102, type = "undervoltage", limit = 0.81)
+        - (bus_id = "10", phase = 1, w = 0.7564605485532796, type = "undervoltage", limit = 0.81)
+        - (bus_id = "10", phase = 2, w = 0.7554438579230086, type = "undervoltage", limit = 0.81)
+        - (bus_id = "10", phase = 3, w = 0.7628949763975075, type = "undervoltage", limit = 0.81)
+        - (bus_id = "3", phase = 1, w = 0.7468136400788477, type = "undervoltage", limit = 0.81)
+        - (bus_id = "3", phase = 2, w = 0.7473006909265777, type = "undervoltage", limit = 0.81)
+        - (bus_id = "3", phase = 3, w = 0.7440130407812393, type = "undervoltage", limit = 0.81)
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] block_label_consistency: PASS
+    [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "2", phase = 1, s_squared = 576821.9860864196, limit = 490000.0, utilization_pct = 108.49828232313075, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "3", phase = 2, s_squared = 625344.6637118917, limit = 490000.0, utilization_pct = 112.9696242098744, z_switch = 1.0, w = 1.0, rating = 700.0)
+        - (switch_id = "3", phase = 3, s_squared = 532967.6806508584, limit = 490000.0, utilization_pct = 104.29233644834241, z_switch = 1.0, w = 1.0, rating = 700.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 3
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 23 checks, 20 passed, 3 failed
+======================================================================

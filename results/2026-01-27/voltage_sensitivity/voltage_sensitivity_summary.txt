@@ -1,0 +1,86 @@
+VOLTAGE SENSITIVITY ANALYSIS SUMMARY
+Generated: 2026-01-27T14:24:41.378
+Case: motivation_a
+Voltage scales tested: [0.9, 0.95, 0.975, 1.0, 1.025, 1.05, 1.1]
+======================================================================
+
+RESULTS BY SOURCE VOLTAGE
+----------------------------------------------------------------------
+
+Source Voltage: 0.9 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 0.95 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 0.975 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 1.0 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 1.025 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 1.05 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+Source Voltage: 1.1 pu
+  Proportional   : 58.2% served, V_min=1.091, V_max=1.099
+  Efficiency     : 57.7% served, V_min=1.09, V_max=1.1
+  Min-Max        : 51.5% served, V_min=1.094, V_max=1.1
+  Equality Min   : 57.9% served, V_min=1.09, V_max=1.099
+  Jain's Index   : 57.9% served, V_min=1.091, V_max=1.099
+
+======================================================================
+BEST SOURCE VOLTAGE BY FAIRNESS FUNCTION
+----------------------------------------------------------------------
+
+Proportional:
+  Best voltage: 0.9 pu
+  Served: 58.24%
+  V_min: 1.091, V_max: 1.099
+
+Efficiency:
+  Best voltage: 0.9 pu
+  Served: 57.72%
+  V_min: 1.09, V_max: 1.1
+
+Min-Max:
+  Best voltage: 0.9 pu
+  Served: 51.53%
+  V_min: 1.094, V_max: 1.1
+
+Equality Min:
+  Best voltage: 0.9 pu
+  Served: 57.88%
+  V_min: 1.09, V_max: 1.099
+
+Jain's Index:
+  Best voltage: 0.9 pu
+  Served: 57.88%
+  V_min: 1.091, V_max: 1.099
