@@ -19,7 +19,7 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_a"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 2 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
@@ -260,10 +260,15 @@ function extract_load_shed(mld::Dict)
     return total_pshed, total_pd_served
 end
 
-function extract_per_load_data(mld::Dict, math::Dict)
+function extract_per_load_data(mld::Dict, math::Dict; original_math::Union{Dict,Nothing}=nothing)
     """Extract per-bus shed and served percentages (P and Q), one entry per bus.
-    Since z_demand is per-load (all phases shed equally), the percentage is
-    identical across phases, so we only need one phase per bus."""
+    Original demand is taken from `original_math` when provided, since `math` may be
+    a post-rounding copy where de-energized loads have pd/qd zeroed out.
+    Shed = original_demand - served. Loads not in solution are fully shed.
+    `something(a, b)` is a Julia built-in that returns the first non-nothing argument."""
+
+    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
+    orig_math = something(original_math, math)
 
     # Group loads by bus
     bus_loads = Dict{Int, Vector{Int}}()  # bus_id => [load_ids...]
@@ -282,22 +287,43 @@ function extract_per_load_data(mld::Dict, math::Dict)
     qshed_pct = Float64[]
     qd_served_pct = Float64[]
 
+    sol_load = get(get(mld, "solution", Dict()), "load", Dict{String,Any}())
+
     for bus_id in bus_ids
-        # Take the first load at this bus (percentages are the same across phases)
-        lid = first(bus_loads[bus_id])
-        load_data = mld["solution"]["load"][string(lid)]
-        pshed = sum(load_data["pshed"])
-        pd_served = sum(load_data["pd"])
-        qshed = sum(load_data["qshed"])
-        qd_served = sum(load_data["qd"])
+        # Aggregate original demand and served across all loads at this bus
+        pd_total = 0.0
+        qd_total = 0.0
+        pd_served = 0.0
+        qd_served = 0.0
 
-        pd_total = pd_served + pshed
-        qd_total = qd_served + qshed
+        for lid in bus_loads[bus_id]
+            lid_str = string(lid)
+            # Original demand from pre-rounding math
+            orig_load = orig_math["load"][lid_str]
+            pd_total += sum(orig_load["pd"])
+            qd_total += sum(orig_load["qd"])
 
-        push!(pshed_pct, (pshed / pd_total) * 100)
-        push!(pd_served_pct, (pd_served / pd_total) * 100)
-        push!(qshed_pct, (qshed / qd_total) * 100)
-        push!(qd_served_pct, (qd_served / qd_total) * 100)
+            # Served from solution; missing loads are fully shed (served = 0)
+            if haskey(sol_load, lid_str)
+                load_sol = sol_load[lid_str]
+                if haskey(load_sol, "pd")
+                    pd_s = load_sol["pd"]
+                    pd_served += isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
+                end
+                if haskey(load_sol, "qd")
+                    qd_s = load_sol["qd"]
+                    qd_served += isa(qd_s, AbstractArray) ? sum(qd_s) : qd_s
+                end
+            end
+        end
+
+        pshed = pd_total - pd_served
+        qshed = qd_total - qd_served
+
+        push!(pshed_pct, pd_total > 0 ? (pshed / pd_total) * 100 : 0.0)
+        push!(pd_served_pct, pd_total > 0 ? (pd_served / pd_total) * 100 : 0.0)
+        push!(qshed_pct, qd_total > 0 ? (qshed / qd_total) * 100 : 0.0)
+        push!(qd_served_pct, qd_total > 0 ? (qd_served / qd_total) * 100 : 0.0)
     end
 
     return bus_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct

@@ -30,34 +30,6 @@ function constraint_load_shed_definition(pm::_PMD.AbstractUnbalancedPowerModel; 
     )
 end
 
-# function constraint_mc_isolate_block(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
-#     for (s, switch) in _PMD.ref(pm, nw, :switch)
-#             z_block_fr = _PMD.var(pm, nw, :z_block)[_PMD.ref(pm, nw, :bus_block_map)[switch["f_bus"]]]
-#             z_block_to = _PMD.var(pm, nw, :z_block)[_PMD.ref(pm, nw, :bus_block_map)[switch["t_bus"]]]
-
-#             γ = _PMD.var(pm, nw, :switch_state, s)
-#             JuMP.@constraint(pm.model,  (z_block_fr - z_block_to) <=  (1-γ))
-#             JuMP.@constraint(pm.model,  (z_block_fr - z_block_to) >= -(1-γ))
-#     end
-#         # Binary enforcement for blocks
-#      for b in _PMD.ids(pm, nw, :blocks)
-#          z_block = _PMD.var(pm, nw, :z_block, b)
-
-#          n_gen = length(_PMD.ref(pm, nw, :block_gens, b))
-#          n_strg = length(_PMD.ref(pm, nw, :block_storages, b))
-#          n_neg_loads = length([_b for (_b,ls) in _PMD.ref(pm, nw, :block_loads) if any(any(_PMD.ref(pm, nw, :load, l, "pd") .< 0) for l in ls)])
-
-#     #     # Sum of switch states connected to this block
-# 	   # @info _PMD.var(pm, nw, :switch_state) _PMD.ids(pm, nw, :block_switches)  _PMD.ids(pm, nw, :switch_dispatchable)
-#          switch_sum = sum(_PMD.var(pm, nw, :switch_state, s) for s in _PMD.ids(pm, nw, :block_switches) if s in _PMD.ids(pm, nw, :switch_dispatchable))
-        
-#     #     # Total resources available to the block
-#          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
-
-#     #     # EXISTING: Upper bound constraint
-#          JuMP.@constraint(pm.model, z_block <= total_resources)
-#     end  
-# end
 function constraint_mc_isolate_block(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
     for (s, switch) in _PMD.ref(pm, nw, :switch)
             z_block_fr = _PMD.var(pm, nw, :z_block)[_PMD.ref(pm, nw, :bus_block_map)[switch["f_bus"]]]
@@ -136,11 +108,11 @@ function constraint_mc_isolate_block_jump(model::JuMP.Model,ref::Dict{Symbol,Any
          n_neg_loads = length([_b for (_b,ls) in ref[:block_loads] if any(any(ref[:load][l]["pd"] .< 0) for l in ls)])
 
         # Sum of switch states connected to this block
-         switch_sum = sum(model[:z_switch][s] for s in collect(ref[:block_switches][b]))# if s in collect(keys(ref[:switch_dispatchable])))
+         switch_sum = sum(model[:z_switch][s] for s in collect(ref[:block_switches][b]); init=0.0)# if s in collect(keys(ref[:switch_dispatchable])))
         
         # Total resources available to the block
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
-        @info "Block $b: n_gen=$n_gen, n_strg=$n_strg, n_neg_loads=$n_neg_loads, switch_sum=$switch_sum, total_resources=$total_resources"
+       # @info "Block $b: n_gen=$n_gen, n_strg=$n_strg, n_neg_loads=$n_neg_loads, switch_sum=$switch_sum, total_resources=$total_resources"
         # EXISTING: Upper bound constraint
          JuMP.@constraint(model, z_block <= total_resources)
 
@@ -170,7 +142,7 @@ function constraint_mc_isolate_block_ref(pm::_PMD.AbstractUnbalancedPowerModel; 
 
     #     # Sum of switch states connected to this block
 	    #@info _PMD.ref(pm, nw, :switch) _PMD.ids(pm, nw, :block_switches)  _PMD.ids(pm, nw, :switch_dispatchable)
-         switch_sum = sum(_PMD.ref(pm, nw, :switch, s)["state"] for s in _PMD.ids(pm, nw, :block_switches) if s in _PMD.ids(pm, nw, :switch_dispatchable))
+         switch_sum = sum(_PMD.ref(pm, nw, :switch, s)["state"] for s in _PMD.ref(pm, nw, :block_switches, b); init=0)
         
     #     # Total resources available to the block
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum

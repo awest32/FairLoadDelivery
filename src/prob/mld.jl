@@ -134,10 +134,10 @@ function solve_mc_mld_shed_implicit_diff(data::Dict{String,<:Any}, solver; kwarg
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_implicit_diff; ref_extensions=[ref_add_rounded_load_blocks!], kwargs...)
 end
 
-
 function solve_mc_mld_weight_update(data::Dict{String,<:Any}, solver; kwargs...)
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_weight_update; ref_extensions=[ref_update_weights!], kwargs...)
 end
+
 """
 Build the multiperiod MLD problem using FairLoadDelivery constraints.
 This creates variables and constraints for each time period with proper
@@ -335,7 +335,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     #objective_mc_min_fuel_cost_pwl_voll(pm)
     # Regularization keeps pd interior, fixing DiffOpt sensitivity computation
     # See script/reformulation/debug/ for analysis
-    objective_fairly_weighted_max_load_served(pm; regularization=0.1)
+    objective_fairly_weighted_max_load_served_regd(pm; regularization=0.1)
     #objective_fair_max_load_served(pm,"jain")
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)
@@ -343,7 +343,7 @@ end
 
 "Multinetwork load shedding problem for Branch Flow model "
 function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
- _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
@@ -418,7 +418,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -452,24 +452,24 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
 end
 
 function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModels)
- _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+ _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	_PMD.variable_mc_bus_voltage_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
     # # The on-off variable is making the solution error at the report statement in the variable function
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false)
  
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
 
@@ -515,7 +515,7 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
     end
 
     for i in _PMD.ids(pm, :switch)
-        constraint_switch_state_on_off(pm,i; relax=true)
+        constraint_switch_state_on_off(pm,i; relax=false)
          # The switch thermal limit is not implemented in PowerModelsDistribution yet
          _PMD.constraint_mc_switch_thermal_limit(pm, i)
         # # The ampacity constraint is similar but instead of p^2 + q^2 <= w * s^2, it is p^2 + q^2 <= z * w * s^2
@@ -527,7 +527,7 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)

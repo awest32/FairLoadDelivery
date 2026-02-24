@@ -104,6 +104,8 @@ function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64}, n_sa
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states_bern
             p_clamped = clamp(p, 0.0, 1.0)
+            @info " The Bernoulli switch state for round $i is $p"
+            @info " The clamped Bernoulli switch state for round $i is $p_clamped"
             sample[switch_id] = rand(local_rng, Bernoulli(p_clamped))
         end
         samples[i] = sample
@@ -142,17 +144,25 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
     for i in 1:n_samples
         model = JuMP.Model()
         set_optimizer(model, optimizer)
-        set_attribute(model, "DualReductions", 0)
-        @variable(model, z_block[1:length(block_ids)],Bin)
-        @variable(model, z_switch[1:length(ref_round[:switch])])
-        @variable(model, z_demand[1:length(ref_round[:load])])
-        @variable(model, z_gen[1:length(ref_round[:gen])])
-        @variable(model, z_storage[1:length(ref_round[:storage])])
-        @variable(model, z_voltage[1:length(ref_round[:bus])])
-        @variable(model, z_shunt[1:length(ref_round[:shunt])])
+        #set_attribute(model, "DualReductions", 0)
+        @variable(model, z_switch[1:length(ref_round[:switch])].>= 0)
+        @variable(model, z_block[1:length(block_ids)] .>= 0)
+        @variable(model, z_demand[1:length(ref_round[:load])].>= 0)
+        @variable(model, z_gen[1:length(ref_round[:gen])].>= 0)
+        @variable(model, z_storage[1:length(ref_round[:storage])].>= 0)
+        @variable(model, z_voltage[1:length(ref_round[:bus])].>= 0)
+        @variable(model, z_shunt[1:length(ref_round[:shunt])].>= 0)
+        
         for s in switch_ids
             @constraint(model, z_switch[s] == bernoulli_samples[i][s])
         end
+        @constraint(model, z_block[1:length(block_ids)] .<= 1)
+        @constraint(model, z_demand[1:length(ref_round[:load])] .<= 1)
+        @constraint(model, z_gen[1:length(ref_round[:gen])] .<= 1)
+        @constraint(model, z_storage[1:length(ref_round[:storage])] .<= 1)
+        @constraint(model, z_voltage[1:length(ref_round[:bus])] .<= 1)
+        @constraint(model, z_shunt[1:length(ref_round[:shunt])] .<= 1)
+
         # radiality
         FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, z_switch)
         FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
@@ -168,15 +178,9 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         FairLoadDelivery.constraint_connect_block_shunt_jump(model, ref_round)
         FairLoadDelivery.constraint_connect_block_storage_jump(model, ref_round)
 
-        # Constraint to ensure generation matches the load served
-        # @constraint(model, sum(ref_round[g]["pg"][t]*z_gen[g] for (g, conns) in ref_round[:bus_conns_gen] for t in conns)
-        #     >= sum(ref_round[s]["ps"][t]*z_storage[s] for (s, conns) in ref_round[:bus_conns_storage] for t in conns)
-        #     - sum(ref_round[l]["pd"][t]*z_demand[l] for (l, conns) in ref_round[:bus_conns_load] for t in conns)
-        #     ) 
-        # print(model)
         optimize!(model)
         @info "Sample $i: Radiality check status: $(termination_status(model))"
-        if termination_status(model) == MOI.OPTIMAL
+        if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.LOCALLY_SOLVED || termination_status(model) == MOI.ALMOST_LOCALLY_SOLVED
             d = sum((bernoulli_samples[i][s] - zs_relaxed[s])^2 for s in switch_ids)
             if d < best_dist
                 best_dist = d
@@ -190,7 +194,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         #     redirect_stdout(io) do
         #         print(model)
         #     end
-        # end
+        #end
     end
     block_ids = sort(collect(keys(ref_round[:block])))
     load_ids = sort(collect(keys(ref_round[:load])))
@@ -198,9 +202,9 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
     if best_i === nothing
         @warn "[radiality_check] No feasible radial topology found in any of $n_samples Bernoulli samples"
         return nothing, Dict{Int,Float64}(), block_ids, zeros(length(block_ids)), load_ids, zeros(length(load_ids))
+    else
+        return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
     end
-
-    return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
 end
 
 """

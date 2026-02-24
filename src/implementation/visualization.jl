@@ -106,16 +106,23 @@ function get_bus_voltage_per_phase(solution::Dict{String,Any}, math::Dict{String
 end
 
 """
-    aggregate_load_shed_by_bus(solution::Dict{String,Any}, math::Dict{String,Any})
+    aggregate_load_shed_by_bus_per_phase(solution, math; original_math=nothing)
 
 Aggregate load shed values by bus from solution and math dictionaries.
+
+Original demand is taken from `original_math` when provided, since `math` may be
+a post-rounding copy where de-energized loads have pd/qd zeroed out.
+Loads missing from the solution are treated as fully shed.
+`something(a, b)` is a Julia built-in that returns the first non-nothing argument.
 
 Returns:
 - bus_load_phases_p: Dict{String => Dict{Int => (original_p, shed_p)}} for active power
 - bus_load_phases_q: Dict{String => Dict{Int => (original_q, shed_q)}} for reactive power
 - bus_terminals: Dict{String => Vector{Int}} mapping bus name to phase terminals
 """
-function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::Dict{String,Any})
+function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::Dict{String,Any}; original_math::Union{Dict{String,Any},Nothing}=nothing)
+    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
+    orig_math = something(original_math, math)
     # Build bus ID to name mapping
     bus_id_to_name = build_bus_name_maps(math)
     # Aggregate load shed by bus for both P and Q
@@ -132,10 +139,13 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
         pshed = zeros(3)
         qshed = zeros(3)
 
+        # Get original demand from original_math (not the rounded math)
+        orig_load = orig_math["load"][load_id_str]
+
         for (id, c) in enumerate(load["connections"])
-            # Original demand
-            original_pd[c] = load["pd"][id]
-            original_qd[c] = load["qd"][id]
+            # Original demand from the pre-rounding math
+            original_pd[c] = orig_load["pd"][id]
+            original_qd[c] = orig_load["qd"][id]
 
             # Merge terminals rather than overwrite (handles split buses like 634a/b/c)
             if haskey(bus_terminals, bus_name)
@@ -159,6 +169,10 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
                     served_val = isa(qd_served, AbstractArray) ? qd_served[id] : qd_served
                     qshed[c] = original_qd[c] - served_val
                 end
+            else
+                # Load not in solution (de-energized) => fully shed
+                pshed[c] = original_pd[c]
+                qshed[c] = original_qd[c]
             end
 
             # Map active power to bus
@@ -812,25 +826,29 @@ Returns (x_positions, y_positions) vectors.
 # end
 
 """
-    plot_network_load_shed(solution::Dict{String,Any}, math::Dict{String,Any};
-        output_file::String="network_load_shed.svg",
-        layout::Symbol=:tree,
-        width::Int=14,
-        height::Int=10)
+    plot_network_load_shed(solution, math; output_file, layout, width, height, ac_flag, original_math)
 
 Plot IEEE 13 bus one-line diagram with final load shed values per bus.
 
+Original demand is taken from `original_math` when provided, since `math` may be
+a post-rounding copy where de-energized loads have pd/qd zeroed out.
+Total load on the network always reflects the true original demand, and
+shed = original_demand - served.
+
 # Arguments
-- `solution`: Solution dictionary from MLD solve (e.g., best_mld["solution"] or best_feasibility["solution"])
+- `solution`: Solution dictionary from MLD solve (e.g., best_mld["solution"])
 - `math`: Math dictionary containing network topology and bus mapping
+- `original_math`: (optional) Pre-rounding math dictionary with true original load demands
 - `output_file`: Path to save the SVG output
-- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram, :tree for hierarchical, :spring for force-directed
-- `width`, `height`: Dimensions in inches
+- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram
+- `width`, `height`: Dimensions in cm
+- `ac_flag`: Whether solution is from an AC power flow solve
 
 # Example
 ```julia
 plot_network_load_shed(best_mld["solution"], math_out[best_set];
-    output_file="results/network_load_shed.svg")
+    output_file="results/network_load_shed.svg",
+    original_math=math)
 ```
 """
 function plot_network_load_shed(
@@ -840,14 +858,17 @@ function plot_network_load_shed(
     layout::Symbol=:ieee13,
     width::Int=18,
     height::Int=12,
-    ac_flag::Bool=false
+    ac_flag::Bool=false,
+    original_math::Union{Dict{String,Any},Nothing}=nothing
 )
     println("Creating schematic network visualization...")
+    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
+    orig_math = something(original_math, math)
 
     # --- Data extraction via helpers ---
     bus_id_to_name = build_bus_name_maps(math)
     bus_voltages = get_bus_voltage_per_phase(solution, math)
-    bus_load_phases_p, bus_load_phases_q, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math)
+    bus_load_phases_p, bus_load_phases_q, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math; original_math=orig_math)
     bus_gen_data = extract_gen_utilization_per_phase(solution, math)
     switch_info = extract_switch_utilization_per_phase(solution, math, bus_voltages; ac_flag=ac_flag)
 
@@ -1287,22 +1308,25 @@ function plot_network_load_shed(
 
     # Print summary and save switch CSV alongside the SVG
     csv_file = replace(output_file, ".svg" => "_switch_flow.csv")
-    print_load_shed_summary(solution, math; ac_flag=ac_flag, csv_file=csv_file)
+    print_load_shed_summary(solution, math; ac_flag=ac_flag, csv_file=csv_file, original_math=orig_math)
 
     return output_file
 end
 
 """
-    print_load_shed_summary(solution, math; ac_flag=false, csv_file="")
+    print_load_shed_summary(solution, math; ac_flag=false, csv_file="", original_math=nothing)
 
 Print summary of load shedding results and optionally save switch power flow data to CSV.
+Uses `original_math` for true demand when provided (see `aggregate_load_shed_by_bus_per_phase`).
 """
-function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,Any}; ac_flag::Bool=false, csv_file::String="")
+function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,Any}; ac_flag::Bool=false, csv_file::String="", original_math::Union{Dict{String,Any},Nothing}=nothing)
+    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
+    orig_math = something(original_math, math)
     println("\n" * "="^60)
     println("LOAD SHEDDING SUMMARY BY BUS")
     println("="^60)
 
-    bus_load_phases_p, bus_load_phases_q, _ = aggregate_load_shed_by_bus_per_phase(solution, math)
+    bus_load_phases_p, bus_load_phases_q, _ = aggregate_load_shed_by_bus_per_phase(solution, math; original_math=orig_math)
 
     total_demand = 0.0
     total_served = 0.0
@@ -1339,9 +1363,10 @@ function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,A
             for lid in load_ids
                 lid_str = string(lid)
                 load = math["load"][lid_str]
+                orig_load = orig_math["load"][lid_str]
                 push!(block_buses, get(bus_id_to_name, load["load_bus"], string(load["load_bus"])))
                 for (id, c) in enumerate(load["connections"])
-                    orig = load["pd"][id]
+                    orig = orig_load["pd"][id]
                     served = 0.0
                     if haskey(solution, "load") && haskey(solution["load"], lid_str) && haskey(solution["load"][lid_str], "pd")
                         pd_served = solution["load"][lid_str]["pd"]
@@ -1448,12 +1473,18 @@ function extract_voltage_by_bus_name(solution::Dict, math::Dict)
 end
 
 """
-    extract_per_bus_loadshed(solution, math)
+    extract_per_bus_loadshed(solution, math; original_math=nothing)
 
 Extract total load shed per bus (summed across phases) as percentages of original demand.
+Original demand is taken from `original_math` when provided, since `math` may be
+a post-rounding copy where de-energized loads have pd/qd zeroed out.
+Loads missing from the solution are treated as fully shed (served = 0).
+
 Returns `(bus_names::Vector{String}, pshed_pct::Vector{Float64}, qshed_pct::Vector{Float64})`.
 """
-function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,Any})
+function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,Any}; original_math::Union{Dict{String,Any},Nothing}=nothing)
+    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
+    orig_math = something(original_math, math)
     bus_id_to_name = build_bus_name_maps(math)
 
     bus_pd_orig = Dict{String, Float64}()
@@ -1464,14 +1495,25 @@ function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,
     for (lid, load) in math["load"]
         bus_name = bus_id_to_name[load["load_bus"]]
 
-        pd_orig = sum(load["pd"])
-        qd_orig = sum(load["qd"])
+        # Original demand from pre-rounding math
+        orig_load = orig_math["load"][lid]
+        pd_orig = sum(orig_load["pd"])
+        qd_orig = sum(orig_load["qd"])
 
-        load_sol = solution["load"][lid]
-        pd_s = load_sol["pd"]
-        pd_served = isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
-        qd_s = load_sol["qd"]
-        qd_served = isa(qd_s, AbstractArray) ? sum(qd_s) : qd_s
+        # Served from solution; loads not in solution are fully shed (served = 0)
+        pd_served = 0.0
+        qd_served = 0.0
+        if haskey(solution, "load") && haskey(solution["load"], lid)
+            load_sol = solution["load"][lid]
+            if haskey(load_sol, "pd")
+                pd_s = load_sol["pd"]
+                pd_served = isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
+            end
+            if haskey(load_sol, "qd")
+                qd_s = load_sol["qd"]
+                qd_served = isa(qd_s, AbstractArray) ? sum(qd_s) : qd_s
+            end
+        end
 
         pshed = pd_orig - pd_served
         qshed = qd_orig - qd_served
@@ -1487,8 +1529,8 @@ function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,
     qshed_pct = Float64[]
 
     for bn in bus_names
-        push!(pshed_pct, (bus_pshed[bn] / bus_pd_orig[bn]) * 100)
-        push!(qshed_pct, (bus_qshed[bn] / bus_qd_orig[bn]) * 100)
+        push!(pshed_pct, bus_pd_orig[bn] > 0 ? (bus_pshed[bn] / bus_pd_orig[bn]) * 100 : 0.0)
+        push!(qshed_pct, bus_qd_orig[bn] > 0 ? (bus_qshed[bn] / bus_qd_orig[bn]) * 100 : 0.0)
     end
 
     return bus_names, pshed_pct, qshed_pct

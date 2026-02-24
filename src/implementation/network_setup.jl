@@ -59,6 +59,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     # Update the current limits on the switches based upon the case
     if case == "ieee_13_aw_edit/motivation_a.dss"
         for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= 700#308
             elseif switch["name"] == "632645"
@@ -67,6 +68,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
         end
     elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
         for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= 700#308
             elseif switch["name"] == "632645"
@@ -75,6 +77,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
         end
     elseif case == "ieee_13_aw_edit/motivation_b.dss"
        for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= 700#304
             elseif switch["name"] == "632645"
@@ -85,18 +88,20 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
         end
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#310
+                switch["current_rating"][:] .= 310
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#264
+                switch["current_rating"][:] .= 264
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 700#70
+                switch["current_rating"][:] .= 70
             elseif switch["name"] == "646611"
-                switch["current_rating"][:] .= 700#264
+                switch["current_rating"][:] .= 264
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
        for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= 700#310
             elseif switch["name"] == "632645"
@@ -198,16 +203,16 @@ end
 function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load_selection::Dict{}, switch_selection::Dict{}, ref::Dict{}, r)
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
-        @info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
+        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        #@info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
         data["switch"][string(switch_id)]["state"] = switch_state
         data["switch"][string(switch_id)]["status"] = switch_state
-        #data["switch"][string(switch_id)]["dispatchable"] = 0.0
-        @info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
+        #@info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
     end
     # De-energize load blocks based on the block status from the relaxed solution
     for (load_id, load_data) in data["load"]
         if load_selection[parse(Int,load_id)] <= 0.0
-            @info "De-energizing load $load_id in round $r"
+           #@info "De-energizing load $load_id in round $r"
             for phase in 1:length(load_data["pd"])
                  load_data["pd"][phase] = 0.0
                  load_data["qd"][phase] = 0.0
@@ -222,7 +227,7 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
         for (shunt_id, shunt_data) in data["shunt"]
             block_id = ref[:shunt_block_map][parse(Int,shunt_id)]
             if block_selection[block_id] <= 0.0
-                @info "De-energizing shunt $shunt_id in round $r"
+                #@info "De-energizing shunt $shunt_id in round $r"
                 data["shunt"][shunt_id]["status"] = 0.0
             end
         end
@@ -230,10 +235,10 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     # De-energize branches based on the block status from the relaxed solution
     for (block_id, branches) in ref[:block_branches]
         for branch_id in branches
-            @info "Branch $branch_id is in block $block_id"
+           # @info "Branch $branch_id is in block $block_id"
             if block_selection[block_id] <= 0.0
-                @info "De-energizing branch $branch_id in round $r"
-                @info typeof(branch_id)
+                # @info "De-energizing branch $branch_id in round $r"
+                # @info typeof(branch_id)
                 data["branch"][string(branch_id)]["status"] = 0.0
                 data["branch"][string(branch_id)]["br_status"] = 0.0
                 data["branch"][string(branch_id)]["dispatchable"] = 0.0

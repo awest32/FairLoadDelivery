@@ -96,7 +96,7 @@ mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_swit
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
 # Run the integer case of the mld
-mld_int = FairLoadDelivery.solve_mc_mld_proportional_fairness(math, gurobi)
+mld_int = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
 
 block_int = mld_int["solution"]["block"]
 switch_int = mld_int["solution"]["switch"]
@@ -276,7 +276,7 @@ for (i, sw) in math_test["switch"]
         println("  Forced switch $(sw["name"]) (id=$i) to state=0")
     end
 end
-mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round(math_test, ipopt)
+mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_test, gurobi)
 println("Termination: $(mld_test["termination_status"])")
 plot_network_load_shed(mld_test["solution"], math_test;
     output_file=joinpath(control_exp_folder, "network_block_deenergize_test.svg"),

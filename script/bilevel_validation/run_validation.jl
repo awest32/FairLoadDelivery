@@ -38,9 +38,9 @@ include("validation_utils.jl")
 const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
-const ITERATIONS = 2
-const FAIR_FUNC = "proportional"  # simplest fairness function for testing
-const N_ROUNDS = 2
+const ITERATIONS = 10
+const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
+const N_ROUNDS = 5
 const N_BERNOULLI_SAMPLES = 6
 
 # Solvers
@@ -333,22 +333,19 @@ for (b_id, status) in sort(collect(block_status))
     println("    Block $b_id: status = $(round(status, digits=4))")
 end
 
-# Determine the number of rounding rounds and bernoulli samples per round
-n_rounds = 2  # Multiple rounds for testing
-n_bernoulli_samples = N_BERNOULLI_SAMPLES
 
 # Storage for results from each round
 bernoulli_switch_selection_exp = Vector{Dict{Int, Float64}}()
 bernoulli_block_selection_exp = Vector{Dict{Int, Float64}}()
-bernoulli_load_selection_exp = Vector{Dict{Int, Float64}}()
+bernoulli_load_selection_exp = Vector{Dict{Int, Float64}}() 
 bernoulli_selection_index = []
 bernoulli_samples = Dict{Int, Vector{Dict{Int, Float64}}}()
 
 # Run multiple rounds of bernoulli rounding with different RNG seeds
-for r in 1:n_rounds
+for r in 1:N_ROUNDS
     rng = 100 * r
     # Generate bernoulli samples for switches and blocks
-    bernoulli_samples[r] = generate_bernoulli_samples(switch_states, n_bernoulli_samples, rng)
+    bernoulli_samples[r] = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, rng)
 
     # Find the best bernoulli sample that is topology feasible and closest to the relaxed solution
     index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status = radiality_check(ref, switch_states, block_status, bernoulli_samples[r])
@@ -376,7 +373,7 @@ print_check_result("Radial topology found", passed_radial)
 # Check that rounded values are binary (1.0 or 0.0)
 binary_check_passed = true
 non_binary_values = []
-for r in 1:n_rounds
+for r in 1:N_ROUNDS
     if bernoulli_selection_index[r] === nothing
         continue
     end
@@ -407,13 +404,13 @@ print_check_result("Rounded values are binary (0.0 or 1.0)", binary_check_passed
 
 # Create copies of math dictionary for each round and apply rounded states
 math_random_test = Vector{Dict{String, Any}}()
-for r in 1:n_rounds
+for r in 1:N_ROUNDS
     math_copy = deepcopy(math_new)
     push!(math_random_test, math_copy)
 end
 
-math_out = Vector{Union{Dict{String, Any}, Nothing}}(nothing, n_rounds)
-for r in 1:n_rounds
+math_out = Vector{Union{Dict{String, Any}, Nothing}}(nothing, N_ROUNDS)
+for r in 1:N_ROUNDS
     if bernoulli_selection_index[r] === nothing
         println("  Skipping round $r (no feasible radial topology)")
         continue
@@ -431,10 +428,14 @@ for r in 1:n_rounds
         ref, r
     )
 end
+if math_out == [nothing for _ in 1:N_ROUNDS]
+    @error "[$CASE/$FAIR_FUNC] FAILED — no feasible radial topology found across all $N_ROUNDS rounds. Check warnings above for failure stage RADIAL FEASIBILITY."
+    error("No feasible solution — cannot proceed to rounding checks")
+end
 
 # Voltage source consistency after rounding (check all valid rounds)
 vs_ok_round = true
-for r in 1:n_rounds
+for r in 1:N_ROUNDS
     if math_out[r] === nothing
         continue
     end
@@ -454,17 +455,17 @@ print_check_result("Voltage source consistency after rounding", vs_ok_round)
 # Solve rounded MLD for each round and check limits
 mld_rounded_results = Vector{Dict{String, Any}}()
 math_rounded_results = Vector{Dict{String, Any}}()
-for r in 1:n_rounds
+for r in 1:N_ROUNDS
     if math_out[r] === nothing
         @warn "[$CASE/$FAIR_FUNC] Skipping rounded MLD for round $r (no feasible radial topology)"
         continue
     end
     println("\n  Solving rounded MLD for round $r...")
-    mld_rounded_r = FairLoadDelivery.solve_mc_mld_shed_random_round(math_out[r], ipopt_solver)
+    mld_rounded_r = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_out[r], gurobi_solver)
     rounded_term = mld_rounded_r["termination_status"]
     passed_term = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED || rounded_term == MOI.ALMOST_LOCALLY_SOLVED)
     rounding_checks["rounded_mld_converged_r$r"] = Dict("passed" => passed_term, "details" => ["Status: $rounded_term"])
-    print_check_result("Rounded MLD converged (round $r)", passed_term, "Status: $rounded_term")
+    print_check_result("Rounded MLD converge status (round $r)", passed_term, "Status: $rounded_term")
 
     if passed_term
         push!(mld_rounded_results, mld_rounded_r)
@@ -505,7 +506,7 @@ end
 
 # Use the first valid round's results for subsequent steps
 if isempty(mld_rounded_results)
-    @error "[$CASE/$FAIR_FUNC] FAILED — no feasible rounded MLD solution found across all $n_rounds rounds. Check warnings above for failure stage (RADIAL FEASIBILITY or ROUNDED MLD SOLVE)."
+    @error "[$CASE/$FAIR_FUNC] FAILED — no feasible rounded MLD solution found across all $N_ROUNDS rounds. Check warnings above for failure stage ROUNDED MLD SOLVE."
     error("No feasible solution — cannot proceed to AC feasibility test")
 end
 best_set, best_mld = find_best_mld_solution(mld_rounded_results, ipopt)

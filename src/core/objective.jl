@@ -202,7 +202,7 @@ function objective_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerMode
     sum(weighted_load_served))
 end
 
-function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true, regularization::Float64=0.0)
+function objective_fairly_weighted_max_load_served_regd(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true, regularization::Float64=0.0)
     fair_load_weights = _PMD.var(pm, nw, :fair_load_weights)
     weighted_load_served = []
     regularization_term = []
@@ -210,15 +210,32 @@ function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPo
         pd_var = _PMD.var(pm, nw, :pd)[d]
         push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
         # Quadratic regularization to keep pd interior (fixes DiffOpt sensitivity computation)
-        if regularization > 0
+        if regularization > 0.0
             push!(regularization_term, sum(pd_var .^ 2))
         end
     end
     #@info fair_load_weights
     #@info _PMD.var(pm, nw, :pd)
-    if regularization > 0
+    if regularization > 0.0
         return JuMP.@objective(pm.model, Max,
             sum(weighted_load_served) - regularization * sum(regularization_term))
+    else
+        return JuMP.@objective(pm.model, Max,
+            sum(weighted_load_served))
+    end
+end
+
+function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true)
+    fair_load_weights = _PMD.var(pm, nw, :fair_load_weights)
+    weighted_load_served = []
+    for d in _PMD.ids(pm, nw, :load)
+        pd_var = _PMD.var(pm, nw, :pd)[d]
+        push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
+    end
+    #@info fair_load_weights
+    @info _PMD.var(pm, nw, :pd)
+    if isempty(_PMD.var(pm, nw, :pd))
+        return JuMP.@objective(pm.model, Max, 0.0)
     else
         return JuMP.@objective(pm.model, Max,
             sum(weighted_load_served))
