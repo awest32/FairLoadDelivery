@@ -31,6 +31,7 @@ using Dates
 
 # Load validation utilities
 include("validation_utils.jl")
+include("../../src/implementation/other_fair_funcs.jl")
 
 # ============================================================
 # CONFIGURATION
@@ -38,9 +39,9 @@ include("validation_utils.jl")
 const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
-const ITERATIONS = 10
+const ITERATIONS = 5
 const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
-const N_ROUNDS = 5
+const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 6
 
 # Solvers
@@ -524,32 +525,9 @@ ac_checks = Dict{String, Any}()
 ac_summary = Dict{String, Any}()
 
 # Set generation capacity high for AC feasibility (slack bus)
-math_ac = deepcopy(math_rounded)
-for (i, gen) in math_ac["gen"]
-    if gen["source_id"] == "voltage_source.source"
-        pd_phase1 = 0.0; pd_phase2 = 0.0; pd_phase3 = 0.0
-        qd_phase1 = 0.0; qd_phase2 = 0.0; qd_phase3 = 0.0
-        for (ind, d) in math_ac["load"]
-            for (idx, con) in enumerate(d["connections"])
-                if con == 1
-                    pd_phase1 += d["pd"][idx]; qd_phase1 += d["qd"][idx]
-                elseif con == 2
-                    pd_phase2 += d["pd"][idx]; qd_phase2 += d["qd"][idx]
-                elseif con == 3
-                    pd_phase3 += d["pd"][idx]; qd_phase3 += d["qd"][idx]
-                end
-            end
-        end
-        gen["pmax"][1] = pd_phase1 * 1000
-        gen["qmax"][1] = qd_phase1 * 1000
-        gen["pmax"][2] = pd_phase2 * 1000
-        gen["qmax"][2] = qd_phase2 * 1000
-        gen["pmax"][3] = pd_phase3 * 1000
-        gen["qmax"][3] = qd_phase3 * 1000
-        gen["pmin"][:] .= 0
-        gen["qmin"][:] .= 0
-    end
-end
+#math_ac = deepcopy(math_rounded)
+math_ac = ac_network_update(math_rounded, ref)
+
 
 # Run AC power flow
 println("  Running AC power flow (IVRUPowerModel)...")

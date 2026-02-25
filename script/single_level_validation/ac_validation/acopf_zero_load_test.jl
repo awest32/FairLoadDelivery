@@ -34,10 +34,10 @@ global solver = gurobi
 dir = dirname(@__FILE__)
 
 #case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
-case = "ieee_13_aw_edit/motivation_b.dss"
+case = "ieee_13_aw_edit/motivation_c.dss"
 #case = "ieee_13_aw_edit/motivation_a.dss"
 casepath = "data/$case"
-file = joinpath(dir, "..", casepath)
+file = joinpath(dir, "..",".." , "..",casepath)
 
 data = case 
 vscale = 1
@@ -67,15 +67,15 @@ get(eng, "time_series", Dict())
 
 for (i,bus) in math["bus"]
 
-		bus["vmax"][:] .= 1.1
-		bus["vmin"][:] .= 0.9
+		bus["vmax"][:] .= 1.05
+		bus["vmin"][:] .= 0.95
 end
 
 
 # Ensure the generation from the source bus is less than the max load
 # First calculate the total load
 served = [] #Dict{Any,Any}()
-ls_percent = 0.9
+ls_percent = 100000000000
 for (i,gen) in math["gen"]
     if gen["source_id"] == "voltage_source.source"
         pd_phase1=0
@@ -134,7 +134,7 @@ for (switch_id, switch) in enumerate(math["switch"])
     math["switch"][string(switch_id)]["branch_id"] = 0
     for (branch_id, branch) in enumerate(math["branch"])
             if branch[2]["source_id"] == switch[2]["source_id"]
-                switch[2]["branch_id"] = branch_id  # Assuming you have this mapping
+                switch[2]["branch_id"] = branch_id 
             end
     end
 end

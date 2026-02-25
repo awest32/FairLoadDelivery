@@ -216,12 +216,16 @@ function objective_fairly_weighted_max_load_served_regd(pm::_PMD.AbstractUnbalan
     end
     #@info fair_load_weights
     #@info _PMD.var(pm, nw, :pd)
-    if regularization > 0.0
-        return JuMP.@objective(pm.model, Max,
-            sum(weighted_load_served) - regularization * sum(regularization_term))
+    if isempty(_PMD.var(pm, nw, :pd))
+         return JuMP.@objective(pm.model, Max, 0.0)
     else
-        return JuMP.@objective(pm.model, Max,
-            sum(weighted_load_served))
+        if regularization > 0.0
+            return JuMP.@objective(pm.model, Max,
+                sum(weighted_load_served) - regularization * sum(regularization_term))
+        else
+            return JuMP.@objective(pm.model, Max,
+                sum(weighted_load_served))
+        end
     end
 end
 
@@ -233,7 +237,7 @@ function objective_fairly_weighted_max_load_served(pm::_PMD.AbstractUnbalancedPo
         push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
     end
     #@info fair_load_weights
-    @info _PMD.var(pm, nw, :pd)
+    #@info _PMD.var(pm, nw, :pd)
     if isempty(_PMD.var(pm, nw, :pd))
         return JuMP.@objective(pm.model, Max, 0.0)
     else

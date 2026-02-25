@@ -21,8 +21,8 @@ using Statistics
 # ============================================================
 const CASES = ["motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
-const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 2 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
+const LS_PERCENT = 1.0 #20% load shed, 80% generation capacity
+const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 6
 
@@ -704,7 +704,7 @@ function run_comparison()
         println("\n>>> Processing case: $case")
 
         # Setup network
-        eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, [])
+        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, [])
         fair_weights = Float64[load["weight"] for (_, load) in math["load"]]
         total_demand = get_total_demand(math)
 

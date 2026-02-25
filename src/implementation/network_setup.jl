@@ -90,13 +90,13 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 310
+                switch["current_rating"][:] .= 700#310
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 264
+                switch["current_rating"][:] .= 700#264
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 70
+                switch["current_rating"][:] .= 700#70   
             elseif switch["name"] == "646611"
-                switch["current_rating"][:] .= 264
+                switch["current_rating"][:] .= 700#264
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
@@ -267,3 +267,32 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+
+function ac_network_update(data_in::Dict{String,Any}, ref::Dict{})
+    data = deepcopy(data_in)
+    # Get voltage scale if present (for voltage sensitivity analysis)
+    vscale = get(data, "vscale", 1.0)
+
+    for (i,gen) in data["gen"]
+        id = parse(Int,i)
+        if gen["source_id"] == "voltage_source.source"
+            gen["vg"][:] .= ref[:gen][id]["vg"] .* vscale
+            gen["vbase"] = ref[:gen][id]["vbase"]
+            # Ensure the generation from the source bus is infinitely large to avoid infeasibility in the AC power flow
+            gen["pmax"][:] .= Inf
+            gen["qmax"][:] .= Inf
+            gen["pmin"][:] .= 0
+            gen["qmin"][:] .= 0
+            gen["gen_status"] = 1.0
+        end
+    end
+    # Ensure all substation blocks are energized to avoid infeasibility in the AC power flow
+    for b in ref[:substation_blocks]
+        data["block"][string(b)]["state"] = 1
+    end
+   
+
+     # Ensure the voltages are passed through correctly
+
+    return data
+end

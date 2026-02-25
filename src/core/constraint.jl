@@ -4,9 +4,10 @@ function constraint_source_voltage_bounds(pm::_PMD.AbstractUnbalancedPowerModel;
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         if gen["source_id"] == "voltage_source.source"
             for  w in _PMD.var(pm, nw, :w, i)
-                # JuMP.@constraint(pm.model, w <= (v_pu * 1.02)^2)
-                # JuMP.@constraint(pm.model, w >= (v_pu * 0.98)^2)
-                JuMP.fix(w, v_pu^2; force = true)
+                #  JuMP.@constraint(pm.model, w <= (1.05)^2)
+                #  JuMP.@constraint(pm.model, w >= (1)^2)
+                JuMP.fix(w, 1.0^2; force = true)
+                #JuMP.@constraint(pm.model, w == 1.03^2)
             end
         end
     end
@@ -51,45 +52,22 @@ function constraint_mc_isolate_block(pm::_PMD.AbstractUnbalancedPowerModel; nw::
          switch_sum = sum(_PMD.var(pm, nw, :switch_state, s) for s in _PMD.ref(pm, nw, :block_switches, b); init=0)
         
     #     # Total resources available to the block
+
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
 
     #     # EXISTING: Upper bound constraint
-         JuMP.@constraint(pm.model, z_block <= total_resources)
+        if !(b in _PMD.ref(pm, nw, :substation_blocks))
+            JuMP.@constraint(pm.model, z_block <= total_resources)
+        end
 
-         # Force substation blocks to be on
-         if b in _PMD.ref(pm, nw, :substation_blocks)
-             JuMP.@constraint(pm.model, z_block == 1)
-         end
+        # Force substation blocks to be on
+        if b in _PMD.ref(pm, nw, :substation_blocks)
+            JuMP.@constraint(pm.model, z_block == 1)
+        end
     end
 end
 
-# function constraint_mc_isolate_block_jump(model::JuMP.Model,ref::Dict{Symbol,Any})
-#     for (s, switch) in ref[:switch]
-#             z_block_fr = model[:z_block][ref[:bus_block_map][switch["f_bus"]]]
-#             z_block_to = model[:z_block][ref[:bus_block_map][switch["t_bus"]]]
 
-#             γ = model[:z_switch][s]
-#             JuMP.@constraint(model,  (z_block_fr - z_block_to) <=  (1-γ))
-#             JuMP.@constraint(model,  (z_block_fr - z_block_to) >= -(1-γ))
-#     end
-#         # Binary enforcement for blocks
-#      for b in collect(keys(ref[:blocks]))
-#          z_block = model[:z_block][b]
-
-#          n_gen = length(ref[:block_gens][b])
-#          n_strg = length(ref[:block_storages][b])
-#          n_neg_loads = length([_b for (_b,ls) in ref[:block_loads] if any(any(ref[:load][l]["pd"] .< 0) for l in ls)])
-
-#         # Sum of switch states connected to this block
-#          switch_sum = sum(model[:z_switch][s] for s in collect(ref[:block_switches][b]))# if s in collect(keys(ref[:switch_dispatchable])))
-        
-#         # Total resources available to the block
-#          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
-#         @info "Block $b: n_gen=$n_gen, n_strg=$n_strg, n_neg_loads=$n_neg_loads, switch_sum=$switch_sum, total_resources=$total_resources"
-#         # EXISTING: Upper bound constraint
-#          JuMP.@constraint(model, z_block <= total_resources)
-#     end  
-# end
 function constraint_mc_isolate_block_jump(model::JuMP.Model,ref::Dict{Symbol,Any})
     for (s, switch) in ref[:switch]
             z_block_fr = model[:z_block][ref[:bus_block_map][switch["f_bus"]]]
@@ -113,9 +91,10 @@ function constraint_mc_isolate_block_jump(model::JuMP.Model,ref::Dict{Symbol,Any
         # Total resources available to the block
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
        # @info "Block $b: n_gen=$n_gen, n_strg=$n_strg, n_neg_loads=$n_neg_loads, switch_sum=$switch_sum, total_resources=$total_resources"
-        # EXISTING: Upper bound constraint
-         JuMP.@constraint(model, z_block <= total_resources)
-
+         # EXISTING: Upper bound constraint
+        if !(b in ref[:substation_blocks])
+            JuMP.@constraint(model, z_block <= total_resources)
+        end
          # Force substation blocks to be on
          if b in ref[:substation_blocks]
              JuMP.@constraint(model, z_block == 1)
@@ -456,13 +435,13 @@ end
 function constraint_block_budget(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
     max_blocks = length(_PMD.ids(pm, nw, :blocks))
     max_block_con = JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :z_block, b) for b in _PMD.ids(pm, nw, :blocks)) <= max_blocks)
-    min_block_con =JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :z_block, b) for b in _PMD.ids(pm, nw, :blocks)) >= 0)
+    min_block_con =JuMP.@constraint(pm.model, sum(_PMD.var(pm, nw, :z_block, b) for b in _PMD.ids(pm, nw, :blocks)) >= 1)
 end
 
 function constraint_block_budget_jump(model::JuMP.Model, ref::Dict{Symbol,Any})
     max_blocks = length(ref[:block])
     max_block_con = JuMP.@constraint(model, sum(model[:z_block][b] for b in keys(ref[:block])) <= max_blocks)
-    min_block_con = JuMP.@constraint(model, sum(model[:z_block][b] for b in keys(ref[:block])) >= 0)
+    min_block_con = JuMP.@constraint(model, sum(model[:z_block][b] for b in keys(ref[:block])) >= 1)
 end
 
 function constraint_rounded_switch_states(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, z_bern::Dict{Int,Int})
@@ -689,7 +668,7 @@ function constraint_connect_block_load_jump(model::JuMP.Model,reference::Dict{Sy
     for (i, load) in reference[:load]
         z_demand =model[:z_demand][i]
         z_block = model[:z_block][reference[:load_block_map][i]]
-        JuMP.@constraint(model,  z_demand <= z_block)
+        JuMP.@constraint(model,  z_demand == z_block)
          # Find the voltage variable for the load's bus and phase
         bus = reference[:load][i]["load_bus"]
         z_voltage = model[:z_voltage][bus]
@@ -755,11 +734,14 @@ function constraint_connect_block_gen(pm::_PMD.AbstractUnbalancedPowerModel; nw:
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         z_gen = _PMD.var(pm, nw, :z_gen, i)
         z_block = _PMD.var(pm, nw, :z_block, _PMD.ref(pm, nw, :gen_block_map, i))
-        JuMP.@constraint(pm.model, z_gen <= z_block)
-         # Find the voltage variable for the gen's bus and phase
-        bus = _PMD.ref(pm, nw, :gen, i, "gen_bus")
-        z_voltage = _PMD.var(pm, nw, :z_voltage, bus)
-        JuMP.@constraint(pm.model, z_gen <= z_voltage)
+        if gen["source_id"] != "voltage_source.source"
+            JuMP.@constraint(pm.model, z_gen <= z_block)
+            # Find the voltage variable for the gen's bus and phase
+            bus = _PMD.ref(pm, nw, :gen, i, "gen_bus")
+            z_voltage = _PMD.var(pm, nw, :z_voltage, bus)
+            JuMP.@constraint(pm.model, z_gen <= z_voltage)
+        end
+      
     end
 end
 
@@ -767,11 +749,13 @@ function constraint_connect_block_gen_jump(model::JuMP.Model,reference::Dict{Sym
     for (i, gen) in reference[:gen]
         z_gen = model[:z_gen][i]
         z_block = model[:z_block][reference[:gen_block_map][i]]
-        JuMP.@constraint(model, z_gen <= z_block)
-         # Find the voltage variable for the gen's bus and phase
-        bus = reference[:gen][i]["gen_bus"]
-        z_voltage = model[:z_voltage][bus]
-        JuMP.@constraint(model, z_gen <= z_voltage)
+       if gen["source_id"] != "voltage_source.source"
+            JuMP.@constraint(model, z_gen <= z_block)
+            # Find the voltage variable for the gen's bus and phase
+            bus = reference[:gen][i]["gen_bus"]
+            z_voltage = model[:z_voltage][bus]
+            JuMP.@constraint(model, z_gen <= z_voltage)
+       end
     end
 end
 
@@ -1522,39 +1506,9 @@ function constraint_mc_switch_ampacity(pm::_PMD.LPUBFDiagModel, nw::Int, f_idx::
     qsw_fr = [_PMD.var(pm, nw, :qsw, f_idx)[c] for c in f_connections]
     w_fr = [_PMD.var(pm, nw, :w, f_idx[2])[c] for c in f_connections]
 
-    # psw_sqr_fr = [JuMP.@variable(pm.model, base_name="psw_sqr_$(f_idx)[$(c)]") for c in f_connections]
-    # qsw_sqr_fr = [JuMP.@variable(pm.model, base_name="qsw_sqr_$(f_idx)[$(c)]") for c in f_connections]
-
-    # get the active reactive power variables of the switch arcs 
-    # psw = _PMD.var(pm, nw, :psw, f_idx)
-    # qsw = _PMD.var(pm, nw, :qsw, f_idx)
-
     z_switch = _PMD.var(pm, nw, :switch_state, f_idx[1])
-    # for (idx,c) in enumerate(f_connections)
-    #     if isfinite(c_rating[idx])
-    #         p_lb, p_ub = _IM.variable_domain(psw_fr[idx])
-    #         q_lb, q_ub = _IM.variable_domain(qsw_fr[idx])
-    #         w_ub = _IM.variable_domain(w_fr[idx])[2]
-
-    #         if (!isfinite(p_lb) || !isfinite(p_ub)) && isfinite(w_ub)
-    #             p_ub = sum(c_rating[isfinite.(c_rating)]) * w_ub
-    #             p_lb = -p_ub
-    #         end
-    #         if (!isfinite(q_lb) || !isfinite(q_ub)) && isfinite(w_ub)
-    #             q_ub = sum(c_rating[isfinite.(c_rating)]) * w_ub
-    #             q_lb = -q_ub
-    #         end
-
-    #         all(isfinite(b) for b in [p_lb, p_ub]) && _PMD.PolyhedralRelaxations.construct_univariate_relaxation!(pm.model, x->x^2, psw_fr[idx], psw_sqr_fr[idx], [p_lb, p_ub], false)
-    #         all(isfinite(b) for b in [q_lb, q_ub]) && _PMD.PolyhedralRelaxations.construct_univariate_relaxation!(pm.model, x->x^2, qsw_fr[idx], qsw_sqr_fr[idx], [q_lb, q_ub], false)
-    #     end
-    # end
-
-   # _PMD.con(pm, nw, :mu_cm_switch)[f_idx] = mu_cm_fr = [JuMP.@constraint(pm.model, psw_sqr_fr[idx] + qsw_sqr_fr[idx] .<= z_switch[idx] * w_fr[idx] * c_rating[idx]^2) for idx in findall(c_rating .< Inf)]
 
    _PMD.con(pm, nw, :mu_cm_switch)[f_idx] = mu_cm_fr = [JuMP.@constraint(pm.model, psw_fr[idx]^2 + qsw_fr[idx]^2 <= z_switch * w_fr[idx] * c_rating[idx]^2) for idx in findall(c_rating .< Inf)]
-
-   # _PMD.con(pm, nw, :mu_cm_switch)[f_idx] = mu_cm_fr = [JuMP.@constraint(pm.model, psw_sqr_fr[idx] + qsw_sqr_fr[idx] .<= z_switch * 1.05^2 * c_rating[idx]^2) for idx in findall(c_rating .< Inf)]
 
     if _IM.report_duals(pm)
         _PMD.sol(pm, nw, :switch, f_idx[1])[:mu_cm_fr] = mu_cm_fr

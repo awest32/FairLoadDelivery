@@ -166,6 +166,9 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         # radiality
         FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, z_switch)
         FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
+        for b in ref_round[:substation_blocks]
+            @constraint(model, z_block[b] == 1)
+        end
         #FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
 
         # Must be disabled if there is no generation in the network

@@ -35,9 +35,9 @@ dir = dirname(@__FILE__)
 
 #case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
 #case = "ieee_13_aw_edit/motivation_b.dss"
-case = "ieee_13_aw_edit/motivation_b.dss"
+case = "ieee_13_aw_edit/motivation_c.dss"
 casepath = "data/$case"
-file = joinpath(dir, "..", casepath)
+file = joinpath(dir, "..", "..", "..", casepath)
 
 data = case 
 vscale = 1
@@ -67,15 +67,15 @@ get(eng, "time_series", Dict())
 
 for (i,bus) in math["bus"]
 
-		bus["vmax"][:] .= 1.1
-		bus["vmin"][:] .= 0.9
+		bus["vmax"][:] .= 1.05
+		bus["vmin"][:] .= 0.95
 end
 
 
 # Ensure the generation from the source bus is less than the max load
 # First calculate the total load
 served = [] #Dict{Any,Any}()
-ls_percent = 0.9
+ls_percent = 1000000
 for (i,gen) in math["gen"]
     if gen["source_id"] == "voltage_source.source"
         pd_phase1=0
@@ -156,12 +156,15 @@ block_selection = Dict{Int,Float64}()
 # for (block_id, block) in (math["block"])
 #     block_selection[parse(Int,block_id)] = 0.0
 # end
-block_selection[1] = 1.0
+block_selection[1] = 0.0
 block_selection[2] = 0.0
-block_selection[3] = 1.0
+block_selection[3] = 0.0
+block_selection[4] = 0.0
 
-switch_selection[1] = 1.0
-switch_selection[2] = 1.0
+
+
+switch_selection[1] = 0.0
+switch_selection[2] = 0.0
 switch_selection[3] = 0.0
 
 opf = instantiate_mc_model(math, IVRUPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
@@ -175,7 +178,6 @@ for (block, loads) in ref[:block_loads]
     end
 end
 math_out = update_network(math,block_selection, load_selection, switch_selection, ref, 1)
-
 opf_new = instantiate_mc_model(math_out, IVRUPowerModel, build_mc_opf; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 set_optimizer(opf_new.model, ipopt)
 optimize!(opf_new.model)

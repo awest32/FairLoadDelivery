@@ -49,7 +49,6 @@ gen_cap = 0.8
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
 # Create the folder to store the results
     today = Dates.today()
-
     # Create a results folder
     if !isdir("results")
         mkdir("results")
@@ -164,18 +163,15 @@ println("=== End Debug ===")
 
 # Plot the squared voltage at each switch for both the integer and relaxed cases
 switch_ids = sort(parse.(Int, collect(keys(mld_relaxed["solution"]["switch"]))))
+bus_ids = sort(parse.(Int, collect(keys(mld_relaxed["solution"]["bus"]))))
+bus_w =[]
+for id in bus_ids
+    b = math["bus"][string(id)]
 
-fbus_w = Vector{Vector{Float64}}()
-tbus_w = Vector{Vector{Float64}}()
+    #v = mld_relaxed["solution"]["bus"][string(id)]["v"]
+    w = mld_relaxed["solution"]["bus"][string(id)]["w"]
 
-for sid in switch_ids
-    sw = math["switch"][string(sid)]
-
-    fbus = string(sw["f_bus"])
-    tbus = string(sw["t_bus"])
-
-    push!(fbus_w, mld_relaxed["solution"]["bus"][fbus]["w"])
-    push!(tbus_w, mld_relaxed["solution"]["bus"][tbus]["w"])
+    push!(bus_w, w)
 end
 
 
@@ -222,33 +218,28 @@ phase_labels = ["Phase A", "Phase B", "Phase C"]
 markers = [:circle, :diamond, :utriangle]
 
 plt = scatter(
-    xlabel = "Switch ID",
+    xlabel = "Bus ID",
     ylabel = "Voltage² (p.u.)",
-    title = "Squared Voltage at Switch Buses"
+    title = "Squared Voltage at Bus"
 )
 
 for (p, lab, m) in zip(phases, phase_labels, markers)
-    scatter!(plt, switch_ids, [w[p] for w in fbus_w],
-        label = "FBus $lab",
+    scatter!(plt, bus_ids, [w[p] for w in bus_w],
+        label = "Bus $lab",
         marker = m
-    )
-    scatter!(plt, switch_ids, [w[p] for w in tbus_w],
-        label = "TBus $lab",
-        marker = m,
-        linestyle = :dash
     )
 end
 
 # Voltage limits
-plot!(plt, switch_ids, fill(0.9^2, length(switch_ids)),
+plot!(plt, bus_ids, fill(0.95^2, length(bus_ids)),
       label = "Min Limit", line = (:dot, :black))
-plot!(plt, switch_ids, fill(1.1^2, length(switch_ids)),
+plot!(plt, bus_ids, fill(1.05^2, length(bus_ids)),
       label = "Max Limit", line = (:dot, :black))
 
 # Save all the plots and the tables into the results folder
+savefig(plt, joinpath(control_exp_folder,"v_squared_bus.svg"))
 savefig(pshed_block, joinpath(control_exp_folder,"pshed_block"))
 savefig(qshed_block, joinpath(control_exp_folder,"qshed_block"))
-savefig(plt, joinpath(control_exp_folder, "v_squared_switch_3phase.svg"))
 CSV.write(joinpath(control_exp_folder,"block_summary"), block_df)
 CSV.write(joinpath(control_exp_folder,"switch_summary"), switch_df)
 
@@ -282,3 +273,25 @@ plot_network_load_shed(mld_test["solution"], math_test;
     output_file=joinpath(control_exp_folder, "network_block_deenergize_test.svg"),
     layout=:ieee13)
 
+
+
+
+math["block"] = Dict{String,Any}()
+for (block, loads) in enumerate(lbs)
+    math["block"][string(block)] = Dict("id"=>block, "state"=>0)
+end
+switch_selection = Dict{Int,Int}()
+load_selection = Dict{Int,Float64}()
+block_selection = Dict{Int,Float64}()
+for (switch_id, switch) in math["switch"]
+    switch_selection[parse(Int,switch_id)] = math["switch"][switch_id]["state"]
+end
+for (load_id, load) in  (math["load"])
+    load_selection[parse(Int,load_id)] = math["load"][load_id]["status"]
+end
+for (block_id, block) in (math["block"])
+    block_selection[parse(Int,block_id)] = math["block"][block_id]["state"]
+end
+math_ac = ac_network_update(math, ref)
+
+pm_ivr_soln = solve_mc_pf(math_ac, IVRUPowerModel, ipopt)

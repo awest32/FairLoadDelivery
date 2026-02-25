@@ -164,7 +164,7 @@ Set mode=snap
 Set algorithm=normal
 
 Solve
-BusCoords IEEE13Node_BusXY.csv
+!BusCoords IEEE13Node_BusXY.csv
 
 // Show
 Show Voltages LN Nodes

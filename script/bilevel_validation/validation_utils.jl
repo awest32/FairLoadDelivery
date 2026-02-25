@@ -154,7 +154,7 @@ function check_switch_ampacity(result::Dict, math::Dict)
     utilizations = Dict{String, Float64}()
 
     if !haskey(result, "solution") || !haskey(result["solution"], "switch")
-        return true, [], Dict("checked" => 0, "message" => "No switch solution")
+        return true, [], Dict("checked" => 0, "violations" => 0, "message" => "No switch solution")
     end
 
     for (switch_id, switch) in math["switch"]

@@ -154,7 +154,7 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
 
         # Variables (same as FairLoadDelivery's build_mc_mld_switchable_relaxed)
         _PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=true)
-        _PMD.variable_mc_bus_voltage_on_off(pm; nw=n)
+        variable_mc_bus_voltage_magnitude_sqr_on_off(pm; nw=n)
 
         _PMD.variable_mc_branch_power(pm; nw=n)
         _PMD.variable_mc_branch_current(pm; nw=n)
@@ -233,10 +233,10 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     @info pm.model typeof(pm.model)
     
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
-	_PMD.variable_mc_branch_current(pm)
+	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=true)
     _PMD.variable_mc_shunt_indicator(pm; relax=true)
@@ -344,10 +344,10 @@ end
 "Multinetwork load shedding problem for Branch Flow model "
 function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
-	_PMD.variable_mc_branch_current(pm)
+	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=true)
     _PMD.variable_mc_shunt_indicator(pm; relax=true)
@@ -418,7 +418,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -453,10 +453,10 @@ end
 
 function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModels)
  _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
-	_PMD.variable_mc_branch_current(pm)
+	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
     _PMD.variable_mc_shunt_indicator(pm; relax=false)
@@ -527,7 +527,7 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -563,14 +563,16 @@ end
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	#variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
+    variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
+
 
     _PMD.variable_mc_branch_power(pm)
-	_PMD.variable_mc_branch_current(pm)
+	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
     _PMD.variable_mc_shunt_indicator(pm; relax=true)
-    _PMD.variable_mc_transformer_power(pm)
+    #_PMD.variable_mc_transformer_power(pm)
 
     _PMD.variable_mc_gen_indicator(pm; relax=true)
     _PMD.variable_mc_generator_power_on_off(pm)
@@ -600,7 +602,6 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
      
     for i in _PMD.ids(pm, :gen)
         _PMD.constraint_mc_generator_power(pm, i)
-        #constraint_mc_gen_power_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :bus)
@@ -686,10 +687,11 @@ end
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	#variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
+    variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
-	_PMD.variable_mc_branch_current(pm)
+	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=true)
     _PMD.variable_mc_shunt_indicator(pm; relax=true)
@@ -813,7 +815,7 @@ Based on switchable_relaxed formulation but with equality_min objective.
 """
 function build_mc_mld_equality_min(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -897,7 +899,7 @@ Minimizes the maximum load shed across all loads with binary switch/block variab
 """
 function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -983,7 +985,7 @@ Based on switchable_relaxed formulation but with equality_min objective.
 """
 function build_mc_mld_min_max(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1067,7 +1069,7 @@ Minimizes the maximum load shed across all loads with binary switch/block variab
 """
 function build_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1153,7 +1155,7 @@ Maximizes sum of log(load_served) across all loads.
 """
 function build_mc_mld_proportional_fairness(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1238,7 +1240,7 @@ Maximizes sum of log(load_served) with binary switch/block variables.
 """
 function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1323,7 +1325,7 @@ Maximizes total served while penalizing inequality in served fractions.
 """
 function build_mc_mld_jain(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1407,7 +1409,7 @@ MLD problem with Jain's index promoting objective (INTEGER).
 """
 function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1492,7 +1494,7 @@ Minimizes range of served fractions (max - min).
 """
 function build_mc_mld_palma(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1574,7 +1576,7 @@ MLD problem with Palma ratio promoting objective (INTEGER).
 """
 function build_mc_mld_palma_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1657,7 +1659,7 @@ Minimizes sum of pairwise absolute differences of served fractions.
 """
 function build_mc_mld_gini(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1741,7 +1743,7 @@ MLD problem with Gini coefficient promoting objective (INTEGER).
 """
 function build_mc_mld_gini_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
@@ -1902,7 +1904,7 @@ end
 
 function build_mc_mld_weight_update(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
- 	_PMD.variable_mc_bus_voltage_on_off(pm)
+ 	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)

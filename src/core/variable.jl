@@ -1,4 +1,36 @@
 
+
+
+"voltage variable magnitude squared (relaxed form)"
+function variable_mc_bus_voltage_magnitude_sqr_on_off(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+    terminals = Dict(i => bus["terminals"] for (i,bus) in _PMD.ref(pm, nw, :bus))
+    w = _PMD.var(pm, nw)[:w] = Dict(i => JuMP.@variable(pm.model,
+        [t in terminals[i]], base_name="$(nw)_w_$(i)",
+        start = _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), "w_start", t, _PMD.comp_start_value(_PMD.ref(pm, nw, :bus, i), ["vm_start", "vm", "vmin"], t, 1.0)^2)
+    ) for i in _PMD.ids(pm, nw, :bus))
+
+    if bounded
+        for (i, bus) in _PMD.ref(pm, nw, :bus)
+            for (j, gen) in _PMD.ref(pm, nw, :gen)
+                if i == gen["gen_bus"] && gen["source_id"] == "voltage_source.source"
+                    for (idx, t) in enumerate(terminals[i])
+                        FairLoadDelivery.set_upper_bound(w[i][t], 1.03)
+                        FairLoadDelivery.set_lower_bound(w[i][t], 1.03)
+                    end
+                else
+                    for (idx, t) in enumerate(terminals[i])
+                        FairLoadDelivery.set_upper_bound(w[i][t], bus["vmax"][idx]^2)
+                        FairLoadDelivery.set_lower_bound(w[i][t], bus["vmin"][idx]^2)
+                    end                    
+                end
+            end
+        end
+    end
+
+    report && _IM.sol_component_value(pm, pmd_it_sym, nw, :bus, :w, _PMD.ids(pm, nw, :bus), w)
+end
+
+
 """
     variable_block_indicator(
         pm::AbstractUnbalancedPowerModel;
