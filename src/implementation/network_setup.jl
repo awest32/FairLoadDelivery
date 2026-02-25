@@ -200,7 +200,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     return eng, math, lbs, critical_id
 end
 
-function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load_selection::Dict{}, switch_selection::Dict{}, ref::Dict{}, r)
+function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load_selection::Dict{}, switch_selection::Dict{})
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
         data["switch"][string(switch_id)]["dispatchable"] = 1.0
@@ -267,6 +267,25 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+
+function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any})
+    data = deepcopy(data_in)
+    for (switch_id, switch_dict) in solution_in["switch"]
+  #      @info "Updating switch $switch_id to state $(switch_dict["state"]) in update_network function"
+        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        data["switch"][string(switch_id)]["state"] = switch_dict["state"]
+        data["switch"][string(switch_id)]["status"] = switch_dict["state"]
+   #     @info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
+    end
+
+     # Ensure the voltages are passed through correctly
+    for (bus_id, bus_data) in data["bus"]
+        bus_data["vmax"][:] .= 1.05
+        bus_data["vmin"][:] .= 0.95
+    end
+    
+    return data
+end
 
 function ac_network_update(data_in::Dict{String,Any}, ref::Dict{})
     data = deepcopy(data_in)

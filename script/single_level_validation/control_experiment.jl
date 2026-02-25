@@ -262,11 +262,14 @@ println("BLOCK DE-ENERGIZATION TEST: forcing 671692 and 646611 open")
 println("="^60)
 math_test = deepcopy(math)
 for (i, sw) in math_test["switch"]
-    if sw["name"] in ("671692", "646611")
+    if sw["name"] in ("646611", "634675")
         sw["state"] = 0
         println("  Forced switch $(sw["name"]) (id=$i) to state=0")
+    else
+        sw["state"] = 1
     end
 end
+math_test = update_network(mld_int["solution"], math)
 mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_test, gurobi)
 println("Termination: $(mld_test["termination_status"])")
 plot_network_load_shed(mld_test["solution"], math_test;

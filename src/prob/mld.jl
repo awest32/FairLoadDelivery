@@ -157,7 +157,7 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
         variable_mc_bus_voltage_magnitude_sqr_on_off(pm; nw=n)
 
         _PMD.variable_mc_branch_power(pm; nw=n)
-        _PMD.variable_mc_branch_current(pm; nw=n)
+        #_PMD.variable_mc_branch_current(pm; nw=n)
         _PMD.variable_mc_switch_power(pm; nw=n)
         _PMD.variable_mc_switch_state(pm; nw=n, relax=true)
         _PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
@@ -307,7 +307,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -418,7 +418,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -527,11 +527,11 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    constraint_source_voltage_bounds(pm)
+    ##constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
-    #constraint_mc_radiality(pm)
-    constraint_mc_block_energization_consistency_bigm(pm)
+    # #constraint_mc_radiality(pm)
+     constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)
@@ -547,22 +547,22 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
     constraint_connect_block_shunt(pm)
     constraint_connect_block_storage(pm)
 
-    #constraint_set_block_state_rounded(pm)
+    # #constraint_set_block_state_rounded(pm)
     constraint_set_switch_state_rounded(pm)
     
-    #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
-    #_PMD.objective_mc_min_fuel_cost(pm)
-    #objective_mc_min_fuel_cost_pwl_voll(pm)
+    # #_PMD.objective_mc_min_load_setpoint_delta_simple(pm)
+    # #_PMD.objective_mc_min_fuel_cost(pm)
+    # #objective_mc_min_fuel_cost_pwl_voll(pm)
     objective_fairly_weighted_max_load_served(pm)
-    #objective_fair_max_load_served(pm,"jain")
-    #objective_fairly_weighted_max_load_served_with_penalty(pm)
-    #objective_fairly_weighted_min_load_shed(pm)
+    # #objective_fair_max_load_served(pm,"jain")
+    # #objective_fairly_weighted_max_load_served_with_penalty(pm)
+    # #objective_fairly_weighted_min_load_shed(pm)
 
 end
 
 "Load shedding problem for Branch Flow model with load blocks and radiality constraints and variables "
 function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	#variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
     variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
@@ -571,17 +571,17 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
 	#_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     #_PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
     # # The on-off variable is making the solution error at the report statement in the variable function
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=false)
  
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     # #variable_mc_demand_indicator(pm; relax=true)
     variable_mc_load_shed(pm)
     constraint_load_shed_definition(pm)
@@ -646,7 +646,7 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # #constraint_mc_radiality(pm)
@@ -772,7 +772,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :transformer)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # constraint_mc_radiality(pm)
@@ -874,7 +874,7 @@ function build_mc_mld_equality_min(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -958,7 +958,7 @@ function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1044,7 +1044,7 @@ function build_mc_mld_min_max(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1128,7 +1128,7 @@ function build_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1214,7 +1214,7 @@ function build_mc_mld_proportional_fairness(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1299,7 +1299,7 @@ function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1384,7 +1384,7 @@ function build_mc_mld_jain(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1468,7 +1468,7 @@ function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1718,7 +1718,7 @@ function build_mc_mld_gini(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1802,7 +1802,7 @@ function build_mc_mld_gini_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    constraint_source_voltage_bounds(pm)
+    #constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 

@@ -15,8 +15,8 @@ const TEST_CASE = "ieee_13_aw_edit/motivation_a.dss"
 const GEN_CAP = 1000.0  # Limited generation to force load shedding
 
 # Voltage limits (per unit squared)
-const V_MIN_SQ = 0.81  # 0.9^2
-const V_MAX_SQ = 1.21  # 1.1^2
+const V_MIN_SQ = 0.95^2  # 0.9^2
+const V_MAX_SQ = 1.05^2  # 1.1^2
 const TOLERANCE = 1e-4
 
 """

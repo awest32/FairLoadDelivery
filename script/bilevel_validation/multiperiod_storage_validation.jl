@@ -223,7 +223,7 @@ end
 """
 Validate voltage limits with tolerance.
 """
-function validate_voltages(solution::Dict, math::Dict; v_min=0.9, v_max=1.1, tol=1e-6)
+function validate_voltages(solution::Dict, math::Dict; v_min=0.95, v_max=1.05, tol=1e-6)
     violations = String[]
 
     V_MIN_SQ = v_min^2

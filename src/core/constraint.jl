@@ -497,12 +497,12 @@ function constraint_mc_switch_state_on_off(pm::_PMD.AbstractUnbalancedWModels, n
     M = 1.05^2
 
     for (fc, tc) in zip(f_connections, t_connections)
-        if relax
+        #if relax
             JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] <=  M * (1-z_switch))
             JuMP.@constraint(pm.model, w_fr[fc] - w_to[tc] >= -M * (1-z_switch))
-        else
-            JuMP.@constraint(pm.model, z_switch => {w_fr[fc] == w_to[tc]})
-        end
+        #else
+         #   JuMP.@constraint(pm.model, z_switch => {w_fr[fc] == w_to[tc]})
+        #end
     end
 end
 
@@ -740,6 +740,8 @@ function constraint_connect_block_gen(pm::_PMD.AbstractUnbalancedPowerModel; nw:
             bus = _PMD.ref(pm, nw, :gen, i, "gen_bus")
             z_voltage = _PMD.var(pm, nw, :z_voltage, bus)
             JuMP.@constraint(pm.model, z_gen <= z_voltage)
+        else
+            JuMP.@constraint(pm.model, z_gen == 1)
         end
       
     end
@@ -755,6 +757,8 @@ function constraint_connect_block_gen_jump(model::JuMP.Model,reference::Dict{Sym
             bus = reference[:gen][i]["gen_bus"]
             z_voltage = model[:z_voltage][bus]
             JuMP.@constraint(model, z_gen <= z_voltage)
+       else
+            JuMP.@constraint(model, z_gen == 1)
        end
     end
 end
@@ -812,8 +816,12 @@ function constraint_connect_block_voltage(pm::_PMD.AbstractUnbalancedPowerModel;
     for (i, bus) in _PMD.ref(pm, nw, :bus)
         z_block = _PMD.var(pm, nw, :z_block, _PMD.ref(pm, nw, :bus_block_map, i))
         z_voltage = _PMD.var(pm, nw, :z_voltage, i)
-        for t in bus["terminals"]
-            JuMP.@constraint(pm.model, z_voltage <= z_block)
+        for (g, gen) in _PMD.ref(pm, nw, :gen)
+            if gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source"
+                JuMP.@constraint(pm.model, z_voltage == 1)
+            else
+                JuMP.@constraint(pm.model, z_voltage <= z_block)
+            end
         end
     end
 end

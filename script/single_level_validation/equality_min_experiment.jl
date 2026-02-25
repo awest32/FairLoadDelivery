@@ -178,8 +178,8 @@ println("="^60)
 
 # Check voltage bounds
 println("\n=== Voltage Check (v² should be in [0.81, 1.21]) ===")
-v_min_sq = 0.81
-v_max_sq = 1.21
+v_min_sq = 0.95^2
+v_max_sq = 1.05^2
 voltage_violations = 0
 
 for (bus_id, bus_soln) in mld_equality_min["solution"]["bus"]
