@@ -131,7 +131,7 @@ function solve_mc_mld_shed_random_round_integer(data::Dict{String,<:Any}, solver
     return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_random_rounding_integer; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
 function solve_mc_mld_shed_implicit_diff(data::Dict{String,<:Any}, solver; kwargs...)
-    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_implicit_diff; ref_extensions=[ref_add_rounded_load_blocks!], kwargs...)
+    return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_mc_mld_shedding_implicit_diff; ref_extensions=[ref_add_load_blocks!], kwargs...)
 end
 
 function solve_mc_mld_weight_update(data::Dict{String,<:Any}, solver; kwargs...)

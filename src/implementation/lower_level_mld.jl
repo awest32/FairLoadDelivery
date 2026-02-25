@@ -76,7 +76,7 @@ function lower_level_soln(math, weights_new, k)
     #     pshed[string(load_id)] = load["pshed"]
     # end
 
-    mld_paramed = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
+    mld_paramed = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
     ref = mld_paramed.ref[:it][:pmd][:nw][0]
 
 
