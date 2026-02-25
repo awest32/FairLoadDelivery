@@ -106,23 +106,16 @@ function get_bus_voltage_per_phase(solution::Dict{String,Any}, math::Dict{String
 end
 
 """
-    aggregate_load_shed_by_bus_per_phase(solution, math; original_math=nothing)
+    aggregate_load_shed_by_bus(solution::Dict{String,Any}, math::Dict{String,Any})
 
 Aggregate load shed values by bus from solution and math dictionaries.
-
-Original demand is taken from `original_math` when provided, since `math` may be
-a post-rounding copy where de-energized loads have pd/qd zeroed out.
-Loads missing from the solution are treated as fully shed.
-`something(a, b)` is a Julia built-in that returns the first non-nothing argument.
 
 Returns:
 - bus_load_phases_p: Dict{String => Dict{Int => (original_p, shed_p)}} for active power
 - bus_load_phases_q: Dict{String => Dict{Int => (original_q, shed_q)}} for reactive power
 - bus_terminals: Dict{String => Vector{Int}} mapping bus name to phase terminals
 """
-function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::Dict{String,Any}; original_math::Union{Dict{String,Any},Nothing}=nothing)
-    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
-    orig_math = something(original_math, math)
+function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::Dict{String,Any})
     # Build bus ID to name mapping
     bus_id_to_name = build_bus_name_maps(math)
     # Aggregate load shed by bus for both P and Q
@@ -139,13 +132,10 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
         pshed = zeros(3)
         qshed = zeros(3)
 
-        # Get original demand from original_math (not the rounded math)
-        orig_load = orig_math["load"][load_id_str]
-
         for (id, c) in enumerate(load["connections"])
-            # Original demand from the pre-rounding math
-            original_pd[c] = orig_load["pd"][id]
-            original_qd[c] = orig_load["qd"][id]
+            # Original demand
+            original_pd[c] = load["pd"][id]
+            original_qd[c] = load["qd"][id]
 
             # Merge terminals rather than overwrite (handles split buses like 634a/b/c)
             if haskey(bus_terminals, bus_name)
@@ -157,6 +147,9 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
             end
 
             # Get per-phase served load from solution, shed = original - served
+            # Default: if pd/qd missing, assume served=0 (full shed)
+            pshed[c] = original_pd[c]
+            qshed[c] = original_qd[c]
             if haskey(solution, "load") && haskey(solution["load"], load_id_str)
                 load_soln = solution["load"][load_id_str]
                 if haskey(load_soln, "pd")
@@ -169,10 +162,6 @@ function aggregate_load_shed_by_bus_per_phase(solution::Dict{String,Any}, math::
                     served_val = isa(qd_served, AbstractArray) ? qd_served[id] : qd_served
                     qshed[c] = original_qd[c] - served_val
                 end
-            else
-                # Load not in solution (de-energized) => fully shed
-                pshed[c] = original_pd[c]
-                qshed[c] = original_qd[c]
             end
 
             # Map active power to bus
@@ -391,31 +380,460 @@ function extract_switch_utilization_per_phase(solution::Dict{String,Any}, math::
     return switch_info
 end
 
+"""
+Simple static SVG visualization of load shedding results
+Saves directly as SVG for publication quality
+Uses math dictionary directly instead of PowerModels reference.
+"""
+# function visualize_network_svg(solution::Dict{String,Any}, math::Dict{String,Any}; output_file="network_topology.svg", width=12, height=8)
+
+#     println("Creating network visualization...")
+
+#     # Build graph and extract data
+#     g, bus_labels, bus_data = build_network_graph(solution, math)
+
+#     # Get positions using spring layout
+#     layout_func = spring_layout
+#     locs_x, locs_y = layout_func(g)
+
+#     # Normalize positions to [0, 1]
+#     locs_x = (locs_x .- minimum(locs_x)) ./ (maximum(locs_x) - minimum(locs_x))
+#     locs_y = (locs_y .- minimum(locs_y)) ./ (maximum(locs_y) - minimum(locs_y))
+
+#     # Get colors and sizes
+#     node_colors = get_node_colors(bus_data)
+#     node_sizes = get_node_sizes(bus_data)
+#     edge_colors, edge_widths = get_edge_properties(solution, math, g)
+
+#     # Create plot
+#     p = gplot(g, locs_x, locs_y,
+#         nodelabel=bus_labels,
+#         nodelabelc=colorant"black",
+#         nodelabeldist=1.5,
+#         nodelabelsize=3.0,
+#         nodefillc=node_colors,
+#         nodestrokec=colorant"black",
+#         nodesize=node_sizes,
+#         edgestrokec=edge_colors,
+#         edgelinewidth=edge_widths,
+#         EDGELINEWIDTH=0.5,
+#         layout=nothing  # Use provided positions
+#     )
+
+#     # Add title and legend
+#     title_text = "Load Shedding Network Topology"
+
+#     # Draw to SVG
+#     draw(SVG(output_file, width*inch, height*inch), p)
+
+#     println("✓ Network visualization saved to $output_file")
+
+#     # Print summary
+#     print_summary(solution, math)
+
+#     return output_file
+# end
 
 """
-    plot_network_load_shed(solution, math; output_file, layout, width, height, ac_flag, original_math)
+Build graph structure from math dictionary
+"""
+# function build_network_graph(solution::Dict{String,Any}, math::Dict{String,Any})
+#     # Get bus mapping
+#     bus_ids = sort([parse(Int, k) for k in keys(math["bus"])])
+#     bus_to_idx = Dict(bus_id => idx for (idx, bus_id) in enumerate(bus_ids))
+#     n_buses = length(bus_ids)
+
+#     # Create graph
+#     g = SimpleGraph(n_buses)
+
+#     # Add edges from branches
+#     if haskey(math, "branch")
+#         for (_, branch) in math["branch"]
+#             f_bus = branch["f_bus"]
+#             t_bus = branch["t_bus"]
+#             if haskey(bus_to_idx, f_bus) && haskey(bus_to_idx, t_bus)
+#                 add_edge!(g, bus_to_idx[f_bus], bus_to_idx[t_bus])
+#             end
+#         end
+#     end
+
+#     # Add edges from switches
+#     if haskey(math, "switch")
+#         for (_, switch) in math["switch"]
+#             f_bus = switch["f_bus"]
+#             t_bus = switch["t_bus"]
+#             if haskey(bus_to_idx, f_bus) && haskey(bus_to_idx, t_bus)
+#                 add_edge!(g, bus_to_idx[f_bus], bus_to_idx[t_bus])
+#             end
+#         end
+#     end
+
+#     # Create bus labels and data
+#     bus_labels = []
+#     bus_data = []
+
+#     for bus_id in bus_ids
+#         bus = math["bus"][string(bus_id)]
+
+#         # Get voltage
+#         voltage = 1.0
+#         if haskey(solution, "bus") && haskey(solution["bus"], string(bus_id))
+#             if haskey(solution["bus"][string(bus_id)], "vm")
+#                 vm = solution["bus"][string(bus_id)]["vm"]
+#                 voltage = mean(vm)
+#             end
+#         end
+
+#         # Check if generator bus
+#         is_generator = false
+#         if haskey(math, "gen")
+#             is_generator = any(gen["gen_bus"] == bus_id for (_, gen) in math["gen"])
+#         end
+
+#         # Get load info
+#         load_demand = 0.0
+#         load_served = 0.0
+#         if haskey(math, "load")
+#             for (load_id, load) in math["load"]
+#                 if load["load_bus"] == bus_id
+#                     load_demand += sum(load["pd"])
+#                     if haskey(solution, "load") && haskey(solution["load"], load_id)
+#                         load_soln = solution["load"][load_id]
+#                         if haskey(load_soln, "pd_bus")
+#                             load_served += sum(load_soln["pd_bus"])
+#                         elseif haskey(load_soln, "pd")
+#                             load_served += sum(load_soln["pd"])
+#                         elseif haskey(load_soln, "pshed")
+#                             # Calculate served from demand - shed
+#                             load_served += sum(load["pd"]) - sum(load_soln["pshed"])
+#                         end
+#                     end
+#                 end
+#             end
+#         end
+
+#         # Create label
+#         bus_name = split(string(bus["source_id"]), ".")[end]
+#         if load_demand > 0
+#             label = "$bus_name\n$(round(load_served, digits=0))/$(round(load_demand, digits=0))"
+#         else
+#             label = bus_name
+#         end
+
+#         push!(bus_labels, label)
+#         push!(bus_data, Dict(
+#             "voltage" => voltage,
+#             "is_generator" => is_generator,
+#             "load_demand" => load_demand,
+#             "load_served" => load_served
+#         ))
+#     end
+
+#     return g, bus_labels, bus_data
+# end
+
+"""
+Get node colors based on voltage and load status
+Uses shading (lightness) for load serving percentage - darker = more shed
+"""
+# function get_node_colors(bus_data)
+#     colors = []
+
+#     for data in bus_data
+#         if data["is_generator"]
+#             # Generator = yellow/gold
+#             push!(colors, colorant"gold")
+#         elseif data["load_demand"] > 0
+#             # Load bus - use shading from dark red (0% served) to bright green (100% served)
+#             served_pct = data["load_served"] / data["load_demand"]
+
+#             # Option 1: Red shading (darker = more shed)
+#             # lightness = 0.3 + 0.6 * served_pct  # 30% lightness (dark) to 90% lightness (bright)
+#             # color = HSL(0, 0.8, lightness)  # Red hue with varying lightness
+
+#             # Option 2: Single color with opacity/brightness
+#             # Darker = more shed, Brighter = more served
+#             lightness = 0.25 + 0.65 * served_pct  # 25% to 90% lightness
+#             color = HSL(210, 0.7, lightness)  # Blue hue with varying lightness
+
+#             push!(colors, color)
+#         else
+#             # Regular bus - light gray
+#             push!(colors, colorant"lightgray")
+#         end
+#     end
+
+#     return colors
+# end
+
+"""
+Get node sizes
+"""
+# function get_node_sizes(bus_data)
+#     sizes = []
+
+#     for data in bus_data
+#         if data["is_generator"]
+#             push!(sizes, 0.08)  # Larger for generators
+#         elseif data["load_demand"] > 0
+#             push!(sizes, 0.06)  # Medium for loads
+#         else
+#             push!(sizes, 0.04)  # Smaller for regular buses
+#         end
+#     end
+
+#     return sizes
+# end
+
+"""
+Get edge colors and widths based on status and power flow
+"""
+# function get_edge_properties(solution::Dict{String,Any}, math::Dict{String,Any}, g)
+#     edge_colors = []
+#     edge_widths = []
+
+#     # Create edge index mapping
+#     bus_ids = sort([parse(Int, k) for k in keys(math["bus"])])
+#     bus_to_idx = Dict(bus_id => idx for (idx, bus_id) in enumerate(bus_ids))
+
+#     # Track which edges we've added
+#     edge_data = Dict()
+
+#     # Add branch data
+#     if haskey(math, "branch")
+#         for (branch_id, branch) in math["branch"]
+#             f_bus = branch["f_bus"]
+#             t_bus = branch["t_bus"]
+#             if haskey(bus_to_idx, f_bus) && haskey(bus_to_idx, t_bus)
+#                 f_idx = bus_to_idx[f_bus]
+#                 t_idx = bus_to_idx[t_bus]
+#                 edge = minmax(f_idx, t_idx)
+
+#                 power = 0.0
+#                 if haskey(solution, "branch") && haskey(solution["branch"], branch_id)
+#                     if haskey(solution["branch"][branch_id], "pf")
+#                         pf = solution["branch"][branch_id]["pf"]
+#                         power = sum(abs.(pf))
+#                     end
+#                 end
+
+#                 edge_data[edge] = Dict("power" => power, "status" => "closed", "type" => "branch")
+#             end
+#         end
+#     end
+
+#     # Add switch data
+#     if haskey(math, "switch") && haskey(solution, "switch")
+#         for (switch_id, switch) in math["switch"]
+#             f_bus = switch["f_bus"]
+#             t_bus = switch["t_bus"]
+#             if haskey(bus_to_idx, f_bus) && haskey(bus_to_idx, t_bus)
+#                 f_idx = bus_to_idx[f_bus]
+#                 t_idx = bus_to_idx[t_bus]
+#                 edge = minmax(f_idx, t_idx)
+
+#                 status = "closed"
+#                 power = 0.0
+
+#                 if haskey(solution["switch"], switch_id)
+#                     switch_state = solution["switch"][switch_id]["state"]
+#                     status = all(switch_state .> 0.5) ? "closed" : "open"
+
+#                     if status == "closed" && haskey(solution["switch"][switch_id], "pf")
+#                         pf = solution["switch"][switch_id]["pf"]
+#                         power = sum(abs.(pf))
+#                     end
+#                 end
+
+#                 edge_data[edge] = Dict("power" => power, "status" => status, "type" => "switch")
+#             end
+#         end
+#     end
+
+#     # Assign colors and widths to edges in graph order
+#     for edge in edges(g)
+#         e = minmax(src(edge), dst(edge))
+
+#         if haskey(edge_data, e)
+#             data = edge_data[e]
+
+#             # Color by status
+#             if data["status"] == "open"
+#                 push!(edge_colors, colorant"gray")
+#                 push!(edge_widths, 1.0)
+#             else
+#                 push!(edge_colors, colorant"blue")
+#                 # Width by power flow
+#                 if data["power"] > 1000
+#                     push!(edge_widths, 3.0)
+#                 elseif data["power"] > 500
+#                     push!(edge_widths, 2.0)
+#                 else
+#                     push!(edge_widths, 1.5)
+#                 end
+#             end
+#         else
+#             push!(edge_colors, colorant"blue")
+#             push!(edge_widths, 1.5)
+#         end
+#     end
+
+#     return edge_colors, edge_widths
+# end
+
+"""
+Print summary statistics
+"""
+# function print_summary(solution::Dict{String,Any}, math::Dict{String,Any})
+#     println("\n" * "="^60)
+#     println("LOAD SHEDDING SUMMARY")
+#     println("="^60)
+
+#     # Generator info
+#     total_gen_capacity = 0.0
+#     total_gen_output = 0.0
+
+#     if haskey(math, "gen")
+#         for (gen_id, gen) in math["gen"]
+#             total_gen_capacity += sum(gen["pmax"])
+#             if haskey(solution, "gen") && haskey(solution["gen"], gen_id)
+#                 if haskey(solution["gen"][gen_id], "pg")
+#                     pg = solution["gen"][gen_id]["pg"]
+#                     total_gen_output += sum(pg)
+#                 end
+#             end
+#         end
+#     end
+
+#     println("Generation Capacity: $(round(total_gen_capacity, digits=1)) kW")
+#     if total_gen_capacity > 0
+#         println("Generation Output:   $(round(total_gen_output, digits=1)) kW ($(round(total_gen_output/total_gen_capacity*100, digits=1))%)")
+#     end
+
+#     # Load info
+#     total_demand = 0.0
+#     total_served = 0.0
+
+#     if haskey(math, "load")
+#         for (load_id, load) in math["load"]
+#             total_demand += sum(load["pd"])
+#             if haskey(solution, "load") && haskey(solution["load"], load_id)
+#                 load_soln = solution["load"][load_id]
+#                 if haskey(load_soln, "pd_bus")
+#                     total_served += sum(load_soln["pd_bus"])
+#                 elseif haskey(load_soln, "pd")
+#                     total_served += sum(load_soln["pd"])
+#                 elseif haskey(load_soln, "pshed")
+#                     total_served += sum(load["pd"]) - sum(load_soln["pshed"])
+#                 end
+#             end
+#         end
+#     end
+
+#     total_shed = total_demand - total_served
+
+#     println("\nLoad Demand: $(round(total_demand, digits=1)) kW")
+#     if total_demand > 0
+#         println("Load Served: $(round(total_served, digits=1)) kW ($(round(total_served/total_demand*100, digits=1))%)")
+#         println("Load Shed:   $(round(total_shed, digits=1)) kW ($(round(total_shed/total_demand*100, digits=1))%)")
+#     end
+
+#     # Switch info
+#     if haskey(math, "switch")
+#         n_switches = length(math["switch"])
+#         n_open = 0
+
+#         if haskey(solution, "switch")
+#             for (_, switch_soln) in solution["switch"]
+#                 if haskey(switch_soln, "state") && all(switch_soln["state"] .< 0.5)
+#                     n_open += 1
+#                 end
+#             end
+#         end
+
+#         println("\nSwitches: $(n_switches - n_open) closed, $n_open open")
+#     end
+
+#     println("="^60)
+# end
+
+
+
+"""
+    hierarchical_tree_layout(g::SimpleGraph, root::Int)
+
+Compute hierarchical tree layout with root at top.
+Returns (x_positions, y_positions) vectors.
+"""
+# function hierarchical_tree_layout(g::SimpleGraph, root::Int)
+#     n = nv(g)
+#     x_pos = zeros(Float64, n)
+#     y_pos = zeros(Float64, n)
+
+#     # BFS to determine level of each node
+#     visited = falses(n)
+#     level = zeros(Int, n)
+#     parent = zeros(Int, n)
+
+#     queue = [root]
+#     visited[root] = true
+#     level[root] = 0
+
+#     while !isempty(queue)
+#         node = popfirst!(queue)
+#         for neighbor in neighbors(g, node)
+#             if !visited[neighbor]
+#                 visited[neighbor] = true
+#                 level[neighbor] = level[node] + 1
+#                 parent[neighbor] = node
+#                 push!(queue, neighbor)
+#             end
+#         end
+#     end
+
+#     # Group nodes by level
+#     max_level = maximum(level)
+#     nodes_at_level = [Int[] for _ in 0:max_level]
+#     for i in 1:n
+#         push!(nodes_at_level[level[i]+1], i)
+#     end
+
+#     # Assign y positions (level determines y)
+#     for i in 1:n
+#         y_pos[i] = 1.0 - level[i] / max(max_level, 1)
+#     end
+
+#     # Assign x positions (spread nodes at each level)
+#     for (lv, nodes) in enumerate(nodes_at_level)
+#         n_nodes = length(nodes)
+#         for (idx, node) in enumerate(nodes)
+#             x_pos[node] = (idx - 0.5) / max(n_nodes, 1)
+#         end
+#     end
+
+#     return x_pos, y_pos
+# end
+
+"""
+    plot_network_load_shed(solution::Dict{String,Any}, math::Dict{String,Any};
+        output_file::String="network_load_shed.svg",
+        layout::Symbol=:tree,
+        width::Int=14,
+        height::Int=10)
 
 Plot IEEE 13 bus one-line diagram with final load shed values per bus.
 
-Original demand is taken from `original_math` when provided, since `math` may be
-a post-rounding copy where de-energized loads have pd/qd zeroed out.
-Total load on the network always reflects the true original demand, and
-shed = original_demand - served.
-
 # Arguments
-- `solution`: Solution dictionary from MLD solve (e.g., best_mld["solution"])
+- `solution`: Solution dictionary from MLD solve (e.g., best_mld["solution"] or best_feasibility["solution"])
 - `math`: Math dictionary containing network topology and bus mapping
-- `original_math`: (optional) Pre-rounding math dictionary with true original load demands
 - `output_file`: Path to save the SVG output
-- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram
-- `width`, `height`: Dimensions in cm
-- `ac_flag`: Whether solution is from an AC power flow solve
+- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram, :tree for hierarchical, :spring for force-directed
+- `width`, `height`: Dimensions in inches
 
 # Example
 ```julia
 plot_network_load_shed(best_mld["solution"], math_out[best_set];
-    output_file="results/network_load_shed.svg",
-    original_math=math)
+    output_file="results/network_load_shed.svg")
 ```
 """
 function plot_network_load_shed(
@@ -425,17 +843,14 @@ function plot_network_load_shed(
     layout::Symbol=:ieee13,
     width::Int=18,
     height::Int=12,
-    ac_flag::Bool=false,
-    original_math::Union{Dict{String,Any},Nothing}=nothing
+    ac_flag::Bool=false
 )
     println("Creating schematic network visualization...")
-    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
-    orig_math = something(original_math, math)
 
     # --- Data extraction via helpers ---
     bus_id_to_name = build_bus_name_maps(math)
     bus_voltages = get_bus_voltage_per_phase(solution, math)
-    bus_load_phases_p, bus_load_phases_q, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math; original_math=orig_math)
+    bus_load_phases_p, bus_load_phases_q, bus_terminals = aggregate_load_shed_by_bus_per_phase(solution, math)
     bus_gen_data = extract_gen_utilization_per_phase(solution, math)
     switch_info = extract_switch_utilization_per_phase(solution, math, bus_voltages; ac_flag=ac_flag)
 
@@ -875,25 +1290,22 @@ function plot_network_load_shed(
 
     # Print summary and save switch CSV alongside the SVG
     csv_file = replace(output_file, ".svg" => "_switch_flow.csv")
-    print_load_shed_summary(solution, math; ac_flag=ac_flag, csv_file=csv_file, original_math=orig_math)
+    print_load_shed_summary(solution, math; ac_flag=ac_flag, csv_file=csv_file)
 
     return output_file
 end
 
 """
-    print_load_shed_summary(solution, math; ac_flag=false, csv_file="", original_math=nothing)
+    print_load_shed_summary(solution, math; ac_flag=false, csv_file="")
 
 Print summary of load shedding results and optionally save switch power flow data to CSV.
-Uses `original_math` for true demand when provided (see `aggregate_load_shed_by_bus_per_phase`).
 """
-function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,Any}; ac_flag::Bool=false, csv_file::String="", original_math::Union{Dict{String,Any},Nothing}=nothing)
-    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
-    orig_math = something(original_math, math)
+function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,Any}; ac_flag::Bool=false, csv_file::String="")
     println("\n" * "="^60)
     println("LOAD SHEDDING SUMMARY BY BUS")
     println("="^60)
 
-    bus_load_phases_p, bus_load_phases_q, _ = aggregate_load_shed_by_bus_per_phase(solution, math; original_math=orig_math)
+    bus_load_phases_p, bus_load_phases_q, _ = aggregate_load_shed_by_bus_per_phase(solution, math)
 
     total_demand = 0.0
     total_served = 0.0
@@ -930,10 +1342,9 @@ function print_load_shed_summary(solution::Dict{String,Any}, math::Dict{String,A
             for lid in load_ids
                 lid_str = string(lid)
                 load = math["load"][lid_str]
-                orig_load = orig_math["load"][lid_str]
                 push!(block_buses, get(bus_id_to_name, load["load_bus"], string(load["load_bus"])))
                 for (id, c) in enumerate(load["connections"])
-                    orig = orig_load["pd"][id]
+                    orig = load["pd"][id]
                     served = 0.0
                     if haskey(solution, "load") && haskey(solution["load"], lid_str) && haskey(solution["load"][lid_str], "pd")
                         pd_served = solution["load"][lid_str]["pd"]
@@ -1040,18 +1451,12 @@ function extract_voltage_by_bus_name(solution::Dict, math::Dict)
 end
 
 """
-    extract_per_bus_loadshed(solution, math; original_math=nothing)
+    extract_per_bus_loadshed(solution, math)
 
 Extract total load shed per bus (summed across phases) as percentages of original demand.
-Original demand is taken from `original_math` when provided, since `math` may be
-a post-rounding copy where de-energized loads have pd/qd zeroed out.
-Loads missing from the solution are treated as fully shed (served = 0).
-
 Returns `(bus_names::Vector{String}, pshed_pct::Vector{Float64}, qshed_pct::Vector{Float64})`.
 """
-function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,Any}; original_math::Union{Dict{String,Any},Nothing}=nothing)
-    # something(a, b): Julia built-in — returns `a` if not nothing, else `b`
-    orig_math = something(original_math, math)
+function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,Any})
     bus_id_to_name = build_bus_name_maps(math)
 
     bus_pd_orig = Dict{String, Float64}()
@@ -1062,28 +1467,24 @@ function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,
     for (lid, load) in math["load"]
         bus_name = bus_id_to_name[load["load_bus"]]
 
-        # Original demand from pre-rounding math
-        orig_load = orig_math["load"][lid]
-        pd_orig = sum(orig_load["pd"])
-        qd_orig = sum(orig_load["qd"])
+        pd_orig = sum(load["pd"])
+        qd_orig = sum(load["qd"])
 
-        # Served from solution; loads not in solution are fully shed (served = 0)
-        pd_served = 0.0
-        qd_served = 0.0
+        pshed = pd_orig
+        qshed = qd_orig
         if haskey(solution, "load") && haskey(solution["load"], lid)
             load_sol = solution["load"][lid]
             if haskey(load_sol, "pd")
                 pd_s = load_sol["pd"]
                 pd_served = isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
+                pshed = pd_orig - pd_served
             end
             if haskey(load_sol, "qd")
                 qd_s = load_sol["qd"]
                 qd_served = isa(qd_s, AbstractArray) ? sum(qd_s) : qd_s
+                qshed = qd_orig - qd_served
             end
         end
-
-        pshed = pd_orig - pd_served
-        qshed = qd_orig - qd_served
 
         bus_pd_orig[bus_name] = get(bus_pd_orig, bus_name, 0.0) + pd_orig
         bus_qd_orig[bus_name] = get(bus_qd_orig, bus_name, 0.0) + qd_orig
@@ -1096,8 +1497,8 @@ function extract_per_bus_loadshed(solution::Dict{String,Any}, math::Dict{String,
     qshed_pct = Float64[]
 
     for bn in bus_names
-        push!(pshed_pct, bus_pd_orig[bn] > 0 ? (bus_pshed[bn] / bus_pd_orig[bn]) * 100 : 0.0)
-        push!(qshed_pct, bus_qd_orig[bn] > 0 ? (bus_qshed[bn] / bus_qd_orig[bn]) * 100 : 0.0)
+        push!(pshed_pct, (bus_pshed[bn] / bus_pd_orig[bn]) * 100)
+        push!(qshed_pct, (bus_qshed[bn] / bus_qd_orig[bn]) * 100)
     end
 
     return bus_names, pshed_pct, qshed_pct

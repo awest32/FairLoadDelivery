@@ -124,24 +124,33 @@ function export_results(math::Dict, exp_folder::String, gen_cap::Float64, fair_f
     # Plot the active power load shed vs the block id
     # Calculate the total active power in each block
     lbs = ref[:block_loads]
+    block_ids_sorted = sort(collect(keys(lbs)))
     block_p = []
     block_q = []
-    for (id, block) in sort(lbs)
-        block_load_p = 0
-        block_load_q = 0
-        for load in block
-            block_load_p += mld["solution"]["load"][string(load)]["pshed"]
-            block_load_q += mld["solution"]["load"][string(load)]["qshed"]
+    for id in block_ids_sorted
+        block_load_p = 0.0
+        block_load_q = 0.0
+        for load in lbs[id]
+            lid_str = string(load)
+            load_data = math["load"][lid_str]
+            if haskey(mld["solution"], "load") && haskey(mld["solution"]["load"], lid_str)
+                load_sol = mld["solution"]["load"][lid_str]
+                block_load_p += get(load_sol, "pshed", sum(load_data["pd"]))
+                block_load_q += get(load_sol, "qshed", sum(load_data["qd"]))
+            else
+                block_load_p += sum(load_data["pd"])
+                block_load_q += sum(load_data["qd"])
+            end
         end
         push!(block_p, block_load_p)
         push!(block_q, block_load_q)
     end
-    scatter!(pshed_block, collect(keys(block)), block_p)
+    scatter!(pshed_block, block_ids_sorted, block_p)
     xlabel!(pshed_block, "Load Block")
     ylabel!(pshed_block, "Load Shed (kW)")
     title!(pshed_block, "Active Power Load Shed per Block")
 
-    scatter!(qshed_block, collect(keys(block)), block_q)
+    scatter!(qshed_block, block_ids_sorted, block_q)
     xlabel!(qshed_block, "Load Block")
     ylabel!(qshed_block, "Load Shed (kW)")
     title!(qshed_block, "Reactive Power Load Shed per Block")
