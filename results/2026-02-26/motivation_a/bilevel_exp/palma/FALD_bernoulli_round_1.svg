@@ -13,1304 +13,1222 @@
     <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
   </marker>
 </defs>
-<g stroke-width="0.3" stroke="#808080" fill="#FFFFFF" id="img-54838352-1">
+<g stroke-width="0.3" stroke="#808080" fill="#FFFFFF" id="img-553967fb-1">
   <g transform="translate(155.7,36.48)">
     <path d="M-23.4,-29.88 L23.4,-29.88 23.4,29.88 -23.4,29.88  z" class="primitive"/>
   </g>
 </g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#008B8B" id="img-54838352-2">
-  <g transform="translate(13.68,45.6)">
-    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
-  </g>
-</g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#808080" id="img-54838352-3">
-  <g transform="translate(119.52,45.6)">
-    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
-  </g>
-</g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#4682B4" id="img-54838352-4">
-  <g transform="translate(80.46,26.4)">
-    <path fill="none" d="M-13.86,0 L13.86,0 " class="primitive"/>
-  </g>
-</g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#800080" id="img-54838352-5">
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#008B8B" id="img-553967fb-2">
   <g transform="translate(52.74,26.4)">
     <path fill="none" d="M13.86,0 L-13.86,0 " class="primitive"/>
   </g>
 </g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#4682B4" id="img-54838352-6">
-  <g transform="translate(80.46,64.8)">
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#008B8B" id="img-553967fb-3">
+  <g transform="translate(80.46,26.4)">
     <path fill="none" d="M-13.86,0 L13.86,0 " class="primitive"/>
   </g>
 </g>
-<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#808080" id="img-54838352-7">
-  <g transform="translate(66.6,55.2)">
-    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-8">
-  <g transform="translate(47.7,64.8)">
-    <path fill="none" d="M18.9,0 L-18.9,0 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-9">
-  <g transform="translate(66.6,16.8)">
-    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-10">
-  <g transform="translate(106.92,64.8)">
-    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-11">
-  <g transform="translate(28.8,75.6)">
-    <path fill="none" d="M0,-10.8 L0,10.8 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-12">
-  <g transform="translate(26.28,26.4)">
-    <path fill="none" d="M12.6,0 L-12.6,0 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-13">
-  <g transform="translate(106.92,26.4)">
-    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-14">
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-4">
   <g transform="translate(21.24,64.8)">
     <path fill="none" d="M7.56,0 L-7.56,0 " class="primitive"/>
   </g>
 </g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-15">
-  <g transform="translate(66.6,36)">
-    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
-  </g>
-</g>
-<g stroke-width="1.42" stroke="#008B8B" id="img-54838352-16">
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-5">
   <g transform="translate(74.16,75.6)">
     <path fill="none" d="M-7.56,-10.8 L7.56,10.8 " class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-17">
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-6">
+  <g transform="translate(106.92,26.4)">
+    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-7">
+  <g transform="translate(26.28,26.4)">
+    <path fill="none" d="M12.6,0 L-12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-8">
+  <g transform="translate(13.68,45.6)">
+    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-9">
+  <g transform="translate(66.6,16.8)">
+    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-10">
+  <g transform="translate(28.8,75.6)">
+    <path fill="none" d="M0,-10.8 L0,10.8 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-11">
+  <g transform="translate(47.7,64.8)">
+    <path fill="none" d="M18.9,0 L-18.9,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-12">
+  <g transform="translate(119.52,45.6)">
+    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-13">
+  <g transform="translate(66.6,36)">
+    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-14">
+  <g transform="translate(106.92,64.8)">
+    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-15">
   <g transform="translate(94.32,35.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-18">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-16">
   <g transform="translate(94.32,33.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-19">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-17">
   <g transform="translate(94.32,31.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-20">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-18">
   <g transform="translate(74.52,95.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-21">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-19">
   <g transform="translate(74.52,93.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-22">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-20">
   <g transform="translate(74.52,91.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-23">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-21">
   <g transform="translate(59.4,62.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-24">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-22">
   <g transform="translate(59.4,59.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-25">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-23">
   <g transform="translate(59.4,57.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-26">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-24">
   <g transform="translate(59.4,55.08)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-27">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-25">
   <g transform="translate(59.4,52.68)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-28">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-26">
   <g transform="translate(59.4,50.28)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-29">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-27">
   <g transform="translate(21.6,98.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-30">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-28">
   <g transform="translate(21.6,95.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-31">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-29">
   <g transform="translate(21.6,93.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-32">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-30">
   <g transform="translate(21.6,91.08)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-33">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-31">
   <g transform="translate(6.48,76.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-34">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-32">
   <g transform="translate(6.48,74.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-35">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-33">
   <g transform="translate(6.48,71.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-36">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-34">
   <g transform="translate(6.48,69.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-37">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-35">
   <g transform="translate(117.18,43.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-38">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-36">
   <g transform="translate(117.18,40.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-39">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-37">
   <g transform="translate(117.18,38.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-40">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-38">
   <g transform="translate(117.18,35.88)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-41">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-39">
   <g transform="translate(117.18,33.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-42">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-40">
   <g transform="translate(117.18,31.08)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-43">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-41">
   <g transform="translate(11.34,40.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-44">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-42">
   <g transform="translate(11.34,38.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-45">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-43">
   <g transform="translate(11.34,35.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-46">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-44">
   <g transform="translate(11.34,33.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-47">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-45">
   <g transform="translate(11.34,31.08)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-48">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-46">
   <g transform="translate(59.4,35.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-49">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-47">
   <g transform="translate(59.4,33.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-50">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-48">
   <g transform="translate(59.4,31.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-51">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-49">
   <g transform="translate(28.8,74.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-52">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-50">
   <g transform="translate(28.8,71.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-53">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-51">
   <g transform="translate(28.8,69.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-54">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-52">
   <g transform="translate(66.6,16.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-55">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-53">
   <g transform="translate(66.6,14.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-56">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-54">
   <g transform="translate(66.6,11.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-57">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-55">
   <g transform="translate(61.92,81.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-58">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-56">
   <g transform="translate(61.92,79.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-59">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-57">
   <g transform="translate(61.92,76.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-60">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-58">
   <g transform="translate(61.92,74.28)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-61">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-59">
   <g transform="translate(61.92,71.88)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-62">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-60">
   <g transform="translate(61.92,69.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-63">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-61">
   <g transform="translate(38.88,38.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-64">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-62">
   <g transform="translate(38.88,35.88)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-65">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-63">
   <g transform="translate(38.88,33.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-66">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-64">
   <g transform="translate(38.88,31.08)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-67">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-65">
   <g transform="translate(94.32,79.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-68">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-66">
   <g transform="translate(94.32,76.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-69">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-67">
   <g transform="translate(94.32,74.28)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-70">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-68">
   <g transform="translate(94.32,71.88)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-71">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-69">
   <g transform="translate(94.32,69.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-72">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-70">
   <g transform="translate(112.32,81.48)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-73">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-71">
   <g transform="translate(112.32,79.08)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-74">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-72">
   <g transform="translate(112.32,76.68)">
     <path d="M-10.8,-0.96 L10.8,-0.96 10.8,0.96 -10.8,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-75">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-73">
   <g transform="translate(112.32,74.28)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-76">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-74">
   <g transform="translate(112.32,71.88)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-77">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-75">
   <g transform="translate(112.32,69.48)">
     <path d="M-12.6,-0.96 L12.6,-0.96 12.6,0.96 -12.6,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-78">
-  <g transform="translate(9.18,50.4)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-79">
-  <g transform="translate(9.18,48)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-80">
-  <g transform="translate(9.18,45.6)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-81">
-  <g transform="translate(80.46,34.2)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-82">
-  <g transform="translate(80.46,31.8)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-83">
-  <g transform="translate(80.46,29.4)">
-    <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
-  </g>
-</g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-84">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-76">
   <g transform="translate(52.74,28.2)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-85">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-77">
   <g transform="translate(52.74,25.8)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-86">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-78">
   <g transform="translate(52.74,23.4)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-87">
-  <g transform="translate(80.46,72.6)">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-79">
+  <g transform="translate(80.46,34.2)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-88">
-  <g transform="translate(80.46,70.2)">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-80">
+  <g transform="translate(80.46,31.8)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-54838352-89">
-  <g transform="translate(80.46,67.8)">
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-81">
+  <g transform="translate(80.46,29.4)">
     <path d="M-9,-0.96 L9,-0.96 9,0.96 -9,0.96  z" class="primitive"/>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-90">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-82">
   <g transform="translate(94.32,35.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 1.001 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-91">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-83">
   <g transform="translate(94.32,33)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-92">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-84">
   <g transform="translate(94.32,30.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.009 pu</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-93">
+<g fill="#000000" font-size="3.18" id="img-553967fb-85">
   <g transform="translate(94.32,22.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">633</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-94">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-86">
   <g transform="translate(74.52,95.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-95">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-87">
   <g transform="translate(74.52,93)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.011 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.004 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-96">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-88">
   <g transform="translate(74.52,90.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.002 pu</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-97">
+<g fill="#000000" font-size="3.18" id="img-553967fb-89">
   <g transform="translate(74.52,82.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">680</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-98">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-90">
   <g transform="translate(59.4,61.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.999 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-99">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-91">
   <g transform="translate(59.4,59.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.014 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-100">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-92">
   <g transform="translate(59.4,57)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.007 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.009 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-101">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-93">
   <g transform="translate(59.4,54.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S3: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-102">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-94">
   <g transform="translate(59.4,52.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S2: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-103">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-95">
   <g transform="translate(59.4,49.8)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S1: 0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-104">
+<g fill="#000000" font-size="3.18" id="img-553967fb-96">
   <g transform="translate(59.4,41.4)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">670 (L10,14,8)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-105">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-97">
   <g transform="translate(21.6,97.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-106">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-98">
   <g transform="translate(21.6,95.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.01 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.004 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-107">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-99">
   <g transform="translate(21.6,93)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 0.998 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.002 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-108">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-100">
   <g transform="translate(21.6,90.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S1: 0%</text>
+      <text text-anchor="middle" dy="0.6em">S1: 100%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-109">
+<g fill="#000000" font-size="3.18" id="img-553967fb-101">
   <g transform="translate(21.6,82.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">652 (L5)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-110">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-102">
   <g transform="translate(6.48,76.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.997 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-111">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-103">
   <g transform="translate(6.48,73.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.008 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-112">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-104">
   <g transform="translate(6.48,71.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.006 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-113">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-105">
   <g transform="translate(6.48,69)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S3: 100%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-114">
+<g fill="#000000" font-size="3.18" id="img-553967fb-106">
   <g transform="translate(6.48,60.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">611 (L15)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-115">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-107">
   <g transform="translate(117.18,42.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-116">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-108">
   <g transform="translate(117.18,40.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.003 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.022 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-117">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-109">
   <g transform="translate(117.18,37.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.003 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.005 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-118">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-110">
   <g transform="translate(117.18,35.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S3: 0%</text>
+      <text text-anchor="middle" dy="0.6em">S3: 100%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-119">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-111">
   <g transform="translate(117.18,33)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S2: 0%</text>
+      <text text-anchor="middle" dy="0.6em">S2: 100%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-120">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-112">
   <g transform="translate(117.18,30.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S1: 0%</text>
+      <text text-anchor="middle" dy="0.6em">S1: 100%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-121">
+<g fill="#000000" font-size="3.18" id="img-553967fb-113">
   <g transform="translate(117.18,22.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">634 (L1,11,9)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-122">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-114">
   <g transform="translate(11.34,40.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.997 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-123">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-115">
   <g transform="translate(11.34,37.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.008 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-124">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-116">
   <g transform="translate(11.34,35.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.006 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-125">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-117">
   <g transform="translate(11.34,33)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S3: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-126">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-118">
   <g transform="translate(11.34,30.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S2: 0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-127">
+<g fill="#000000" font-size="3.18" id="img-553967fb-119">
   <g transform="translate(11.34,22.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">646 (L6)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-128">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-120">
   <g transform="translate(59.4,35.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 1.001 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-129">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-121">
   <g transform="translate(59.4,33)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-130">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-122">
   <g transform="translate(59.4,30.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.009 pu</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-131">
+<g fill="#000000" font-size="3.18" id="img-553967fb-123">
   <g transform="translate(59.4,22.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">632</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-132">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-124">
   <g transform="translate(28.8,73.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-133">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-125">
   <g transform="translate(28.8,71.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.009 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.004 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-134">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-126">
   <g transform="translate(28.8,69)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.002 pu</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-135">
+<g fill="#000000" font-size="3.18" id="img-553967fb-127">
   <g transform="translate(28.8,60.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">684</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#228B22" font-size="2.12" id="img-54838352-136">
+<g font-family="sans-serif" fill="#228B22" font-size="2.12" id="img-553967fb-128">
   <g transform="translate(66.6,18.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">Gen: source</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-137">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-129">
   <g transform="translate(66.6,16.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">V3: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-138">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-130">
   <g transform="translate(66.6,13.8)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">V2: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-139">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-131">
   <g transform="translate(66.6,11.4)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">V1: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-140">
+<g fill="#000000" font-size="3.18" id="img-553967fb-132">
   <g transform="translate(66.6,3)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">rg60</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-141">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-133">
   <g transform="translate(61.92,81)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-142">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-134">
   <g transform="translate(61.92,78.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.011 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.004 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-143">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-135">
   <g transform="translate(61.92,76.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.004 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.002 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-144">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-136">
   <g transform="translate(61.92,73.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S3: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S3: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-145">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-137">
   <g transform="translate(61.92,71.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S2: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S2: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-146">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-138">
   <g transform="translate(61.92,69)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S1: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S1: 0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-147">
+<g fill="#000000" font-size="3.18" id="img-553967fb-139">
   <g transform="translate(61.92,60.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">671 (L3)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-148">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-140">
   <g transform="translate(38.88,37.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 1.001 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-149">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-141">
   <g transform="translate(38.88,35.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.015 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-150">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-142">
   <g transform="translate(38.88,33)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V1: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V1: 1.009 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-151">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-143">
   <g transform="translate(38.88,30.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S2: 0%</text>
+      <text text-anchor="middle" dy="0.6em">S2: 100%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-152">
+<g fill="#000000" font-size="3.18" id="img-553967fb-144">
   <g transform="translate(38.88,22.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">645 (L7)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-153">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-145">
   <g transform="translate(94.32,78.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.005 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.992 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-154">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-146">
   <g transform="translate(94.32,76.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.011 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.023 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-155">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-147">
   <g transform="translate(94.32,73.8)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">V1: 1.004 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-156">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-148">
   <g transform="translate(94.32,71.4)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S3: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-157">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-149">
   <g transform="translate(94.32,69)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">S1: 0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-158">
+<g fill="#000000" font-size="3.18" id="img-553967fb-150">
   <g transform="translate(94.32,60.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">692 (L13)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-159">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-151">
   <g transform="translate(112.32,81)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V3: 1.006 pu</text>
+      <text text-anchor="middle" dy="0.6em">V3: 0.994 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-160">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-152">
   <g transform="translate(112.32,78.6)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">V2: 1.012 pu</text>
+      <text text-anchor="middle" dy="0.6em">V2: 1.022 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-161">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-153">
   <g transform="translate(112.32,76.2)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.6em">V1: 1.005 pu</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-162">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-154">
   <g transform="translate(112.32,73.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S3: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S3: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-163">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-155">
   <g transform="translate(112.32,71.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S2: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S2: 0%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-54838352-164">
+<g font-family="sans-serif" fill="#000000" font-size="2.12" id="img-553967fb-156">
   <g transform="translate(112.32,69)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.6em">S1: 100%</text>
+      <text text-anchor="middle" dy="0.6em">S1: 0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-165">
+<g fill="#000000" font-size="3.18" id="img-553967fb-157">
   <g transform="translate(112.32,60.6)">
     <g class="primitive">
       <text text-anchor="middle" dy="-0em">675 (L12,2,4)</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-166">
-  <g transform="translate(9.18,50.4)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ3: 25.7%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-167">
-  <g transform="translate(9.18,48)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ2: 46.1%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#008B8B" font-size="2.12" id="img-54838352-168">
-  <g transform="translate(9.18,45.6)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ1: 51.7%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-169">
-  <g transform="translate(80.46,34.2)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ3: 24.7%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-170">
-  <g transform="translate(80.46,31.8)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ2: 24.7%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-171">
-  <g transform="translate(80.46,29.4)">
-    <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ1: 41.4%</text>
-    </g>
-  </g>
-</g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-172">
+<g font-family="sans-serif" fill="#008B8B" font-size="2.12" id="img-553967fb-158">
   <g transform="translate(52.74,28.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ3: 48.0%</text>
+      <text text-anchor="middle" dy="0.35em">φ3: 67.6%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#800080" font-size="2.12" id="img-54838352-173">
+<g font-family="sans-serif" fill="#008B8B" font-size="2.12" id="img-553967fb-159">
   <g transform="translate(52.74,25.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ2: 89.5%</text>
+      <text text-anchor="middle" dy="0.35em">φ2: 65.7%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#008B8B" font-size="2.12" id="img-54838352-174">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-160">
   <g transform="translate(52.74,23.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ1: 51.6%</text>
+      <text text-anchor="middle" dy="0.35em">φ1: 39.4%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-175">
-  <g transform="translate(80.46,72.6)">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-161">
+  <g transform="translate(80.46,34.2)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ3: 25.7%</text>
+      <text text-anchor="middle" dy="0.35em">φ3: 30.3%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-176">
-  <g transform="translate(80.46,70.2)">
+<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-553967fb-162">
+  <g transform="translate(80.46,31.8)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ2: 45.7%</text>
+      <text text-anchor="middle" dy="0.35em">φ2: 5.3%</text>
     </g>
   </g>
 </g>
-<g font-family="sans-serif" fill="#4682B4" font-size="2.12" id="img-54838352-177">
-  <g transform="translate(80.46,67.8)">
+<g font-family="sans-serif" fill="#008B8B" font-size="2.12" id="img-553967fb-163">
+  <g transform="translate(80.46,29.4)">
     <g class="primitive">
-      <text text-anchor="middle" dy="0.35em">φ1: 25.7%</text>
+      <text text-anchor="middle" dy="0.35em">φ1: 66.0%</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-178">
+<g fill="#000000" font-size="3.18" id="img-553967fb-164">
   <g transform="translate(140.4,63.36)">
     <g class="primitive">
       <text dy="0.35em">75-100% shed</text>
     </g>
   </g>
 </g>
-<g stroke-width="0.2" stroke="#000000" fill="#ADCFEB" id="img-54838352-179">
+<g stroke-width="0.2" stroke="#000000" fill="#ADCFEB" id="img-553967fb-165">
   <g transform="translate(136.44,63.36)">
     <circle cx="0" cy="0" r="1.44" class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-180">
+<g fill="#000000" font-size="3.18" id="img-553967fb-166">
   <g transform="translate(140.4,59.52)">
     <g class="primitive">
       <text dy="0.35em">50-75% shed</text>
     </g>
   </g>
 </g>
-<g stroke-width="0.2" stroke="#000000" fill="#5C9FD6" id="img-54838352-181">
+<g stroke-width="0.2" stroke="#000000" fill="#5C9FD6" id="img-553967fb-167">
   <g transform="translate(136.44,59.52)">
     <circle cx="0" cy="0" r="1.44" class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-182">
+<g fill="#000000" font-size="3.18" id="img-553967fb-168">
   <g transform="translate(140.4,55.68)">
     <g class="primitive">
       <text dy="0.35em">25-50% shed</text>
     </g>
   </g>
 </g>
-<g stroke-width="0.2" stroke="#000000" fill="#2E7AB8" id="img-54838352-183">
+<g stroke-width="0.2" stroke="#000000" fill="#2E7AB8" id="img-553967fb-169">
   <g transform="translate(136.44,55.68)">
     <circle cx="0" cy="0" r="1.44" class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-184">
+<g fill="#000000" font-size="3.18" id="img-553967fb-170">
   <g transform="translate(140.4,51.84)">
     <g class="primitive">
       <text dy="0.35em">0-25% shed</text>
     </g>
   </g>
 </g>
-<g stroke-width="0.2" stroke="#000000" fill="#1F517A" id="img-54838352-185">
+<g stroke-width="0.2" stroke="#000000" fill="#1F517A" id="img-553967fb-171">
   <g transform="translate(136.44,51.84)">
     <circle cx="0" cy="0" r="1.44" class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-186">
+<g fill="#000000" font-size="3.18" id="img-553967fb-172">
   <g transform="translate(135,48)">
     <g class="primitive">
       <text dy="0.6em">Load Bus (% shed):</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-187">
+<g fill="#000000" font-size="3.18" id="img-553967fb-173">
   <g transform="translate(139.5,44.16)">
     <g class="primitive">
       <text dy="0.35em">Outside 0.95-1.05 pu</text>
     </g>
   </g>
 </g>
-<g fill="#8B008B" font-size="3.18" id="img-54838352-188">
+<g fill="#8B008B" font-size="3.18" id="img-553967fb-174">
   <g transform="translate(135,44.16)">
     <g class="primitive">
       <text dy="0.35em">V:</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-189">
+<g fill="#000000" font-size="3.18" id="img-553967fb-175">
   <g transform="translate(139.5,40.32)">
     <g class="primitive">
       <text dy="0.35em">0.95-0.97 or 1.03-1.05 pu</text>
     </g>
   </g>
 </g>
-<g fill="#DAA520" font-size="3.18" id="img-54838352-190">
+<g fill="#DAA520" font-size="3.18" id="img-553967fb-176">
   <g transform="translate(135,40.32)">
     <g class="primitive">
       <text dy="0.35em">V:</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-191">
+<g fill="#000000" font-size="3.18" id="img-553967fb-177">
   <g transform="translate(139.5,36.48)">
     <g class="primitive">
       <text dy="0.35em">0.97-1.03 pu (normal)</text>
     </g>
   </g>
 </g>
-<g fill="#4682B4" font-size="3.18" id="img-54838352-192">
+<g fill="#4682B4" font-size="3.18" id="img-553967fb-178">
   <g transform="translate(135,36.48)">
     <g class="primitive">
       <text dy="0.35em">V:</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-193">
+<g fill="#000000" font-size="3.18" id="img-553967fb-179">
   <g transform="translate(135,32.64)">
     <g class="primitive">
       <text dy="0.6em">Bus Voltage:</text>
     </g>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-194">
+<g fill="#000000" font-size="3.18" id="img-553967fb-180">
   <g transform="translate(144,28.8)">
     <g class="primitive">
       <text dy="0.35em">Open</text>
     </g>
   </g>
 </g>
-<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#808080" id="img-54838352-195">
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#808080" id="img-553967fb-181">
   <g transform="translate(138.6,28.8)">
     <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-196">
+<g fill="#000000" font-size="3.18" id="img-553967fb-182">
   <g transform="translate(144,24.96)">
     <g class="primitive">
       <text dy="0.35em">>100% (violation)</text>
     </g>
   </g>
 </g>
-<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#FF0000" id="img-54838352-197">
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#FF0000" id="img-553967fb-183">
   <g transform="translate(138.6,24.96)">
     <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-198">
+<g fill="#000000" font-size="3.18" id="img-553967fb-184">
   <g transform="translate(144,21.12)">
     <g class="primitive">
       <text dy="0.35em">80-100%</text>
     </g>
   </g>
 </g>
-<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#800080" id="img-54838352-199">
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#800080" id="img-553967fb-185">
   <g transform="translate(138.6,21.12)">
     <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-200">
+<g fill="#000000" font-size="3.18" id="img-553967fb-186">
   <g transform="translate(144,17.28)">
     <g class="primitive">
       <text dy="0.35em">50-80%</text>
     </g>
   </g>
 </g>
-<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#008B8B" id="img-54838352-201">
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#008B8B" id="img-553967fb-187">
   <g transform="translate(138.6,17.28)">
     <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-202">
+<g fill="#000000" font-size="3.18" id="img-553967fb-188">
   <g transform="translate(144,13.44)">
     <g class="primitive">
       <text dy="0.35em">Under 50%</text>
     </g>
   </g>
 </g>
-<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#4682B4" id="img-54838352-203">
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#4682B4" id="img-553967fb-189">
   <g transform="translate(138.6,13.44)">
     <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
   </g>
 </g>
-<g fill="#000000" font-size="3.18" id="img-54838352-204">
+<g fill="#000000" font-size="3.18" id="img-553967fb-190">
   <g transform="translate(135,9.6)">
     <g class="primitive">
       <text dy="0.6em">Switch Utilization:</text>
     </g>
   </g>
 </g>
-<g stroke="#A9A9A9" fill="#808080" id="img-54838352-205">
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-191">
   <g transform="translate(94.32,26.4)">
     <circle cx="0" cy="0" r="2.16" class="primitive"/>
   </g>
 </g>
-<g stroke="#A9A9A9" fill="#808080" id="img-54838352-206">
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-192">
   <g transform="translate(81.72,86.4)">
     <circle cx="0" cy="0" r="2.16" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-207">
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-193">
   <g transform="translate(66.6,45.6)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-208">
+<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-553967fb-194">
   <g transform="translate(28.8,86.4)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-54838352-209">
+<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-553967fb-195">
   <g transform="translate(13.68,64.8)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-210">
+<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-553967fb-196">
   <g transform="translate(119.52,26.4)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-211">
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-197">
   <g transform="translate(13.68,26.4)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke="#A9A9A9" fill="#808080" id="img-54838352-212">
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-198">
   <g transform="translate(66.6,26.4)">
     <circle cx="0" cy="0" r="2.16" class="primitive"/>
   </g>
 </g>
-<g stroke="#A9A9A9" fill="#808080" id="img-54838352-213">
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-199">
   <g transform="translate(28.8,64.8)">
     <circle cx="0" cy="0" r="2.16" class="primitive"/>
   </g>
 </g>
-<g stroke="#A9A9A9" fill="#808080" id="img-54838352-214">
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-200">
   <g transform="translate(66.6,7.2)">
     <circle cx="0" cy="0" r="2.16" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-54838352-215">
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-201">
   <g transform="translate(66.6,64.8)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-216">
+<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-553967fb-202">
   <g transform="translate(38.88,26.4)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-54838352-217">
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-203">
   <g transform="translate(94.32,64.8)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>
 </g>
-<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-54838352-218">
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-204">
   <g transform="translate(119.52,64.8)">
     <circle cx="0" cy="0" r="3.24" class="primitive"/>
   </g>

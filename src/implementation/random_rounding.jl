@@ -181,8 +181,8 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         FairLoadDelivery.constraint_connect_block_shunt_jump(model, ref_round)
         FairLoadDelivery.constraint_connect_block_storage_jump(model, ref_round)
 
-        optimize!(model)
-        @info "Sample $i: Radiality check status: $(termination_status(model))"
+        optimize!(model);
+        #@info "Sample $i: Radiality check status: $(termination_status(model))"
         if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.LOCALLY_SOLVED || termination_status(model) == MOI.ALMOST_LOCALLY_SOLVED
             d = sum((bernoulli_samples[i][s] - zs_relaxed[s])^2 for s in switch_ids)
             if d < best_dist

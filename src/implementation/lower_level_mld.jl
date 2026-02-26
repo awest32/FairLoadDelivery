@@ -52,10 +52,10 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
             DiffOpt.set_forward_parameter(model, weight_params[wkey], perturbation)
         end
 
-        optimize!(model)
+        optimize!(model);
 
         # Compute derivatives
-        DiffOpt.forward_differentiate!(model)
+        DiffOpt.forward_differentiate!(model);
         
         # Extract column j: [∂pshed[1]/∂weight[j], ∂pshed[2]/∂weight[j], ...]
         for (i, pkey) in enumerate(pshed_keys)
@@ -137,36 +137,3 @@ function plot_load_shed_per_bus(pshed_val, pshed_ids, k, save_path)
     savefig(bar_plot, "$save_path/load_shedding_per_load_k$(k).svg")  # save as SVG
     println("Bar plot saved as load_shedding_per_load_k$(k).svg")
 end
-#plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids)
-
-# Solve the MILP MLD problem
-# mld_mip_soln = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
-
-# Extract the fixed variables from the MLD solution
-# math_mip = deepcopy(math)
-# for (switch_id, switch) in enumerate(math_mip["switch"])
-#     #@info "Setting switch $switch_id to state to $(mld_mip_soln["solution"]["switch"][string(switch_id)]["state"]) from MIP solution."
-#     switch_var = mld_mip_soln["solution"]["switch"][string(switch_id)]["state"]
-#     #@info "Switch variable before rounding: $switch_var"
-#     math_mip["switch"][string(switch_id)]["state"] = round(Int, switch_var)
-# end
-# for (block_id, block) in enumerate(math_mip["block"])
-#     block_var = mld_mip_soln["solution"]["block"][string(block_id)]["status"]
-#     math_mip["block"][string(block_id)]["state"] = round(Int, block_var)
-# end
-
-# # Solve the AC OPF MLD with fixed discrete variables from the MIP solution
-# #ac_mld_fixed_soln = FairLoadDelivery.solve_mc_pf_aw(math_mip, ipopt)
-
-# # Solve the continues rounded mld using the mip solutions
-# mld_fixed_soln = FairLoadDelivery.solve_mc_mld_shed_random_round(math_mip, ipopt)
-
-# #print the switch and load block states
-# println("Switch states from MLD MIP solution:")
-# for (switch_id, switch) in (math_mip["switch"])
-#     println("Switch $switch_id state: $(switch["state"])")
-# end
-# println("Load block states from MLD MIP solution:")
-# for (block_id, block) in (math_mip["block"])
-#     println("Block $block_id state: $(block["state"])")
-# end

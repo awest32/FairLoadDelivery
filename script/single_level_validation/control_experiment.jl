@@ -263,14 +263,14 @@ println("="^60)
 math_test = deepcopy(math)
 for (i, sw) in math_test["switch"]
     if sw["name"] in ("646611", "634675")
-        sw["state"] = 0
+        sw["state"] = 1.0
         println("  Forced switch $(sw["name"]) (id=$i) to state=0")
     else
-        sw["state"] = 1
+        sw["state"] = 0.0
     end
 end
-math_test = update_network(mld_int["solution"], math)
-mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_test, gurobi)
+#math_test = update_network(mld_int["solution"], math)
+mld_test = FairLoadDelivery.solve_mc_mld_shed_random_round(math_test, ipopt)
 println("Termination: $(mld_test["termination_status"])")
 plot_network_load_shed(mld_test["solution"], math_test;
     output_file=joinpath(control_exp_folder, "network_block_deenergize_test.svg"),

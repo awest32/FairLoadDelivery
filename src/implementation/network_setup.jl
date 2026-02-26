@@ -89,15 +89,20 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
-            if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#310
-            elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#264
-            elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 700#70   
-            elseif switch["name"] == "646611"
-                switch["current_rating"][:] .= 700#264
-            end
+            switch["current_rating"][:] .= 200
+            # if switch["name"] == "632633"
+            #     switch["current_rating"][:] .= 700#310
+            # elseif switch["name"] == "632645"
+            #     switch["current_rating"][:] .= 700#264
+            # elseif switch["name"] == "671692"
+            #     switch["current_rating"][:] .= 700#70   
+            # elseif switch["name"] == "646611"
+            #     switch["current_rating"][:] .= 700#264
+            # elseif switch["name"] == "634675"
+            #     switch["current_rating"][:] .= 700
+            # elseif switch["name"] == "670671"
+            #     switch["current_rating"][:] .= 700
+            # end
         end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
        for (i,switch) in math["switch"]
@@ -267,7 +272,35 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
+function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any})
+    data = deepcopy(data_in)
+    for (switch_id, switch_state) in switch_selection
+        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        #@info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
+        data["switch"][string(switch_id)]["state"] = switch_state
+        data["switch"][string(switch_id)]["status"] = switch_state
+        #@info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
+    end
+    # Ensure the voltages are passed through correctly
+    for (bus_id, bus_data) in data["bus"]
+        bus_data["vmax"][:] .= 1.05
+        bus_data["vmin"][:] .= 0.95
+    end
 
+    # Get voltage scale if present (for voltage sensitivity analysis)
+    vscale = get(data, "vscale", 1.0)
+
+    for (i,gen) in data["gen"]
+        id = parse(Int,i)
+        if gen["source_id"] == "voltage_source.source"
+            gen["vg"][:] .= ref[:gen][id]["vg"] .* vscale
+            gen["vbase"] = ref[:gen][id]["vbase"]
+        end
+    end
+
+    # Out put if the voltages are close to 1pu, if see voltage drop 10% 5% the will be an issue
+    return data
+end
 function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any})
     data = deepcopy(data_in)
     for (switch_id, switch_dict) in solution_in["switch"]
@@ -287,7 +320,7 @@ function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any
     return data
 end
 
-function ac_network_update(data_in::Dict{String,Any}, ref::Dict{})
+function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any})
     data = deepcopy(data_in)
     # Get voltage scale if present (for voltage sensitivity analysis)
     vscale = get(data, "vscale", 1.0)

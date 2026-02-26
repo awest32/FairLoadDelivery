@@ -71,7 +71,6 @@ final_weight_ids = Int[]
 final_weights = Float64[]
 for k in 1:ITERATIONS
     println("\n  --- Iteration $k ---")
-  k=1
     # Solve lower-level problem and get sensitivities
     dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, _ = lower_level_soln(math_new, fair_weights, 1)
     # Apply fairness function

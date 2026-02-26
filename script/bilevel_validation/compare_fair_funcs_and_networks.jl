@@ -20,8 +20,8 @@ using Statistics
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
-const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
-const LS_PERCENT = 1.0 #20% load shed, 80% generation capacity
+const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain", "palma"]#min_max throws error for motivation_c
+const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 6
@@ -76,6 +76,14 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
             pshed_new, fair_weight_vals = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals)
         elseif fair_func == "jain"
             pshed_new, fair_weight_vals = jains_fairness_index(dpshed, pshed_val, weight_vals)
+        elseif fair_func == "palma"
+            pd = Float64[]
+            for (load_id, load_dict) in math_new["load"]
+                push!(pd, sum(load_dict["pd"]))
+            end
+            pshed_new, fair_weight_vals = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd)
+        else
+            error("Unknown fairness function: $fair_func")
         end
 
         # Update weights in math dictionary
