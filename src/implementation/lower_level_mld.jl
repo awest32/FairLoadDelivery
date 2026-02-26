@@ -86,7 +86,7 @@ function lower_level_soln(math, weights_new, k)
     else
         weights_prev = weights_new
     end
-
+    @info "Iteration $k: Solving lower-level MLD with weights: $weights_prev, with type: $(typeof(weights_prev))"
     # Use the parameterized MLD solution to perform implicit differentiation with DiffOpt.jl
     dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
     return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref

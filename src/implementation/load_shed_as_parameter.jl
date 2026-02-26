@@ -448,8 +448,8 @@ function lin_palma_reformulated(
 )
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
-        trust_radius = 0.5,
-        w_bounds = (0.0, 10.0),
+        trust_radius = 0.1,
+        w_bounds = (1.0, 10.0),
         relax_binary = false  # Binary required; McCormick relaxation needs testing
     )
 
