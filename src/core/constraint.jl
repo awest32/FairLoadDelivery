@@ -488,6 +488,40 @@ function constraint_switch_state_on_off(pm::_PMD.AbstractUnbalancedPowerModel, i
     FairLoadDelivery.constraint_mc_switch_state_on_off(pm, nw, i, f_bus, t_bus, switch["f_connections"], switch["t_connections"]; relax=relax)
     nothing
 end
+""
+function constraint_mc_storage_on_off(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)::Nothing
+    storage = _PMD.ref(pm, nw, :storage, i)
+    charge_ub = storage["charge_rating"]
+    discharge_ub = storage["discharge_rating"]
+
+    ncnds = length(storage["connections"])
+    pmin = zeros(ncnds)
+    pmax = zeros(ncnds)
+    qmin = zeros(ncnds)
+    qmax = zeros(ncnds)
+
+    inj_lb, inj_ub = _PMD.ref_calc_storage_injection_bounds(_PMD.ref(pm, nw, :storage), _PMD.ref(pm, nw, :bus))
+    for (idx,c) in enumerate(storage["connections"])
+        pmin[idx] = inj_lb[i][idx]
+        pmax[idx] = inj_ub[i][idx]
+        qmin[idx] = max(inj_lb[i][idx], _PMD.ref(pm, nw, :storage, i, "qmin"))
+        qmax[idx] = min(inj_ub[i][idx], _PMD.ref(pm, nw, :storage, i, "qmax"))
+    end
+
+    constraint_mc_storage_on_off(pm, nw, i, storage["connections"], maximum(pmin), minimum(pmax), maximum(qmin), minimum(qmax), charge_ub, discharge_ub)
+    nothing
+end
+function constraint_mc_storage_on_off(pm::_PMD.AbstractUnbalancedPowerModel, nw::Int, i::Int, connections::Vector{Int}, pmin::Float64, pmax::Float64, qmin::Float64, qmax::Float64, charge_ub, discharge_ub)
+    z_storage = _PMD.var(pm, nw, :z_storage, i)
+    ps = [_PMD.var(pm, nw, :ps, i)[c] for c in connections]
+    qs = [_PMD.var(pm, nw, :qs, i)[c] for c in connections]
+
+    JuMP.@constraint(pm.model, ps .<= z_storage.*pmax)
+    JuMP.@constraint(pm.model, ps .>= z_storage.*pmin)
+
+    JuMP.@constraint(pm.model, qs .<= z_storage.*qmax)
+    JuMP.@constraint(pm.model, qs .>= z_storage.*qmin)
+end
 
 function constraint_mc_switch_state_on_off(pm::_PMD.AbstractUnbalancedWModels, nw::Int, i::Int, f_bus::Int, t_bus::Int, f_connections::Vector{Int}, t_connections::Vector{Int}; relax::Bool=true)
     w_fr = _PMD.var(pm, nw, :w, f_bus)

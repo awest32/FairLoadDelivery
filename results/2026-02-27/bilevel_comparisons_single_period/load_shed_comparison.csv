@@ -1,0 +1,2 @@
+case,fair_func,total_demand,final_pshed,final_pd_served,pct_shed,pct_served,relaxed_pshed_final,objective
+motivation_c,equality_min,3466.0,2338.0,1128.0,67.45527986151183,32.544720138488174,1986.6479295403942,11237.747744202108

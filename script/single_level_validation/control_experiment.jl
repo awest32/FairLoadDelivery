@@ -43,7 +43,7 @@ gurobi = Gurobi.Optimizer
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_c"
+case = "ieee123_aw_mod"# "motivation_c"
 gen_cap = 0.8
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
@@ -164,14 +164,16 @@ println("=== End Debug ===")
 # Plot the squared voltage at each switch for both the integer and relaxed cases
 switch_ids = sort(parse.(Int, collect(keys(mld_relaxed["solution"]["switch"]))))
 bus_ids = sort(parse.(Int, collect(keys(mld_relaxed["solution"]["bus"]))))
-bus_w =[]
-for id in bus_ids
+bus_w = fill(NaN, length(bus_ids), 3)
+for (i, id) in enumerate(bus_ids)
     b = math["bus"][string(id)]
-
-    #v = mld_relaxed["solution"]["bus"][string(id)]["v"]
     w = mld_relaxed["solution"]["bus"][string(id)]["w"]
-
-    push!(bus_w, w)
+    phases = b["terminals"]
+    for (j, ph) in enumerate(phases)
+        if ph <= 3
+            bus_w[i, ph] = w[j]
+        end
+    end
 end
 
 
@@ -224,7 +226,7 @@ plt = scatter(
 )
 
 for (p, lab, m) in zip(phases, phase_labels, markers)
-    scatter!(plt, bus_ids, [w[p] for w in bus_w],
+    scatter!(plt, bus_ids, bus_w[:, p],
         label = "Bus $lab",
         marker = m
     )

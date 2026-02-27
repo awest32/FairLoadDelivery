@@ -2,6 +2,8 @@
 using FairLoadDelivery
 using JuMP, Ipopt, Gurobi
 
+const TRUST_RADIUS = 0.5
+
 # Function to compute Jain's Fairness Index
 function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
@@ -12,7 +14,7 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     #     )
     @variable(model, weights_new[1:n] .>= 1.0)
     @constraint(model, weights_new[1:n] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
     # @constraint(model, [i in 1:n],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     # )
@@ -48,7 +50,7 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     #     )
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
 
     @variable(model, t >= 1)
     # @constraint(model, [i in 1:length(pshed_prev)],
@@ -76,7 +78,7 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
 
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
@@ -104,7 +106,7 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
     end
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= 0.1)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
@@ -129,6 +131,8 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
     base_name = "pshed_new"
         )    
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
+    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     #@variable(model, t >= 0)
     @constraint(model, [i in 1:length(pshed_prev)],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
@@ -153,7 +157,7 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @variable(model, t >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= 0.1)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     # )

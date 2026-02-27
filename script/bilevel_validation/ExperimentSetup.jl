@@ -15,11 +15,11 @@ using DataFrames
 using CSV
 using Dates
 
-const CASE = "motivation_a"
+const CASE =  "motivation_c" #"pmonm_13_bus_mod"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
 const ITERATIONS = 5
-const FAIR_FUNCS = "min_max"#"efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
+const FAIR_FUNCS = "efficiency"#"efficiency", "proportional", "equality_min", "min_max", "jain"]#min_max throws error for motivation_c
 const N_ROUNDS = 5
 const N_BERNOULLI_SAMPLES = 50
 

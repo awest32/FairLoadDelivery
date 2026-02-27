@@ -117,6 +117,11 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
                 switch["current_rating"][:] .= 700#264
             end
         end
+    elseif case == "ieee_13_aw_edit/pmonm_13bus_mod.dss"
+       for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
+            switch["current_rating"][:] .= 100
+       end
     end
     # Ensure the generation from the source bus is less than the max load
     for (i,gen) in math["gen"]

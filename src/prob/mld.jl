@@ -280,7 +280,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -329,7 +329,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
 
     # Regularization keeps pd interior, fixing DiffOpt sensitivity computation
     # See script/reformulation/debug/ for analysis
-    objective_fairly_weighted_max_load_served_regd(pm; regularization=0.1)
+    objective_fairly_weighted_max_load_served_regd(pm; regularization=0.05)
     #objective_fairly_weighted_max_load_served_with_penalty(pm)
     #objective_fairly_weighted_min_load_shed(pm)
 end
@@ -384,7 +384,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -493,7 +493,7 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -565,7 +565,7 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
     _PMD.variable_mc_shunt_indicator(pm; relax=false)
-    #_PMD.variable_mc_transformer_power(pm)
+    _PMD.variable_mc_transformer_power(pm)
 
     _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
@@ -612,7 +612,7 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -736,7 +736,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -849,7 +849,7 @@ function build_mc_mld_equality_min(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -933,7 +933,7 @@ function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1019,7 +1019,7 @@ function build_mc_mld_min_max(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1103,7 +1103,7 @@ function build_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1189,7 +1189,7 @@ function build_mc_mld_proportional_fairness(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1274,7 +1274,7 @@ function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1359,7 +1359,7 @@ function build_mc_mld_jain(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1443,7 +1443,7 @@ function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1528,7 +1528,7 @@ function build_mc_mld_palma(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1610,7 +1610,7 @@ function build_mc_mld_palma_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1693,7 +1693,7 @@ function build_mc_mld_gini(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1777,7 +1777,7 @@ function build_mc_mld_gini_integer(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        _PMD.constraint_mc_storage_on_off(pm, i)
+        constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)
@@ -1860,7 +1860,7 @@ function build_mc_mld_traditional(pm::_PMD.AbstractUBFModels)
         _PMD.constraint_storage_complementarity_mi(pm, i)
         _PMD.constraint_mc_storage_losses(pm, i)
         _PMD.constraint_mc_storage_thermal_limit(pm, i)
-        #_PMD.constraint_mc_storage_on_off(pm, i)
+        #constraint_mc_storage_on_off(pm, i)
     end
 
     for i in _PMD.ids(pm, :branch)

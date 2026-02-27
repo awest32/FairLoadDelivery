@@ -1,0 +1,2 @@
+Formulation,TotalServed_pct,TotalShed_kW,MaxBusShed_pct,ShedVariance_pct,JainsIndex,PalmaRatio,GiniCoeff,CV_Served
+Equality Min,32.54,2338.0,100.0,2777.78,1.0,0.5,1.0,0.0

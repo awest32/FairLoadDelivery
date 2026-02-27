@@ -35,6 +35,7 @@ math_out = Vector{Dict{String, Any}}()
 mld_results = Vector{Dict{String, Any}}()
 math_out_ac = Vector{Dict{String, Any}}()
 ac_results = Vector{Dict{String, Any}}()
+ac_tested = Int[]
 round_tested = Int[]
 stage = "random_rounding"
 

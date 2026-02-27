@@ -19,12 +19,12 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain", "palma"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 6
+const N_BERNOULLI_SAMPLES = 100
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -33,6 +33,7 @@ mkpath(save_dir)
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+gurobi = optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 
 # ============================================================
 # HELPER FUNCTIONS
@@ -108,7 +109,7 @@ end
 # ============================================================
 function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, ipopt; fair_func::String="", case::String="")
     # Solve implicit diff to get switch/block states
-    mld_implicit = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
+    mld_implicit = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 
     imp_model = instantiate_mc_model(
         math_relaxed,
@@ -121,43 +122,60 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
     switch_states, block_status = extract_switch_block_states(mld_implicit["solution"])
 
     # Storage for each round
+   math_radial = Vector{Dict{String, Any}}()
     math_out = Vector{Dict{String, Any}}()
     mld_results = Vector{Dict{String, Any}}()
+    math_out_ac = Vector{Dict{String, Any}}()
+    ac_results = Vector{Dict{String, Any}}()
+    ac_tested = Int[]
+    round_tested = Int[]
     stage = "random_rounding"
 
-    for r in 1:n_rounds
+    for r in 1:N_ROUNDS
         rng = 100 * r
-        bernoulli_samples = generate_bernoulli_samples(switch_states, n_samples, rng)
+        bernoulli_samples = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, rng);
 
         index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status =
             radiality_check(ref, switch_states, block_status, bernoulli_samples)
 
         if index === nothing
-            @warn "[$case/$fair_func] Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
-            continue
+            @warn "[$case/$fair_func]: Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology" 
         end
 
         # Apply rounded states
-        math_copy = deepcopy(math_relaxed)
-        math_rounded = update_network(
-            math_copy,
-            Dict(zip(block_ids, block_status_radial)),
-            Dict(zip(load_ids, load_status)),
-            switch_states_radial,
-            ref, r
-        )
+        math_rounded = update_network(math_relaxed, switch_states_radial, ref);
+        push!(math_radial, math_rounded)
 
         # Solve rounded MLD
-        mld_rounded = FairLoadDelivery.solve_mc_mld_shed_random_round(math_rounded, ipopt)
-
-        if mld_rounded["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
-            push!(math_out, math_rounded)
-            push!(mld_results, mld_rounded)
+        if !isempty(math_rounded)
+            mld_rounded = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_rounded, gurobi);
+            if mld_rounded["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+                push!(math_out, math_rounded)
+                push!(mld_results, mld_rounded)
+            else
+                @warn "[$case/$fair_func]: Round $r failed at: ROUNDED MLD SOLVE — termination status: $(mld_rounded["termination_status"])"
+            end
         else
-            @warn "[$case/$fair_func] Round $r failed at: ROUNDED MLD SOLVE — termination status: $(mld_rounded["termination_status"])"
+            @warn "Round $r failed: no valid radial topology found, skipping rounded MLD solve and ACPF."
+        end
+
+        # Updated network data dictionary for AC power flow
+        if !isempty(math_out)
+            math_ac = ac_network_update(math_out[r], ref)
+            # Solve AC power flow
+            pf_ac = solve_mc_pf(math_ac, IVRUPowerModel, ipopt);
+            if pf_ac["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+                @info "Round $r succeeded with AC power flow solve after random rounding."
+                push!(math_out_ac, math_ac)
+                push!(ac_results, pf_ac)
+                push!(ac_tested, r)
+            else
+                @warn "Round $r failed at: AC POWER FLOW SOLVE — termination status: $(pf_ac["termination_status"])"
+            end
+        else
+            @warn "No valid rounded MLD solution found in round $r, skipping AC power flow solve."
         end
     end
-
     return math_out, mld_results
 end
 
@@ -1141,14 +1159,14 @@ for case in CASES
     bar_width = 0.8 / n_funcs
     offsets = collect(range(-(n_funcs-1)/2 * bar_width, (n_funcs-1)/2 * bar_width, length=n_funcs))
 
-    for (i, fair_func) in enumerate(FAIR_FUNCS)
-        wts = weights_df[!, fair_func]
-        valid_mask = .!isnan.(wts)
-        if any(valid_mask)
-            bar!(p_weights, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
-                bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
-        end
-    end
+    # for (i, fair_func) in enumerate(FAIR_FUNCS)
+    #     wts = weights_df[!, fair_func]
+    #     valid_mask = .!isnan.(wts)
+    #     if any(valid_mask)
+    #         bar!(p_weights, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
+    #             bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
+    #     end
+    # end
     savefig(p_weights, joinpath(save_dir, "final_weights_$case.svg"))
     println("  Saved: final_weights_$case.csv, final_weights_$case.svg")
 end

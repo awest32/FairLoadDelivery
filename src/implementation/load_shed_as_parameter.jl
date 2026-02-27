@@ -225,7 +225,7 @@ function palma_ratio_minimization(
     pshed_prev::Vector{Float64},
     weights_prev::Vector{Float64},
     pd::Vector{Float64};
-    trust_radius::Float64 = 0.1,
+    trust_radius::Float64 = 0.5,
     w_bounds::Tuple{Float64, Float64} = (0.0, 10.0),
     solver = get_default_solver(),
     silent::Bool = true,
@@ -448,7 +448,7 @@ function lin_palma_reformulated(
 )
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
-        trust_radius = 0.1,
+        trust_radius = 0.5,
         w_bounds = (1.0, 10.0),
         relax_binary = false  # Binary required; McCormick relaxation needs testing
     )

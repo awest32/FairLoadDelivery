@@ -29,7 +29,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 # CONFIGURATION
 # ============================================================
 
-const CASES = ["motivation_c"]#, "motivation_b", "motivation_c"]
+const CASES = ["ieee123_aw_mod"]#, "motivation_b", "motivation_c"]
 const GEN_CAP = 10000.0  # Unconstrained generation — all loads served
 
 # ============================================================
