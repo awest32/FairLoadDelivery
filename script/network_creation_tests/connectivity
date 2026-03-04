@@ -1,0 +1,7 @@
+"""
+This scripts test the connectivity of the created network. It is important to check that the created network is connected, otherwise the power flow calculations will not be accurate. The script uses the PowerModelDistribution package to create a distribution network and then checks the connectivity of the network using linear algebra techniques.
+I use the admittance matrix of the network to check for connectivity. If the rank of the admittance matrix is equal to the number of nodes minus one, then the network is connected. If the rank is less than that, then the network is not connected.
+I also check the eigenvalues of the admittance matrix. If there are any zero eigenvalues, then the network is not grounded. If all eigenvalues are positive, then the network is connected. If the second smallest eigenvalue is less than 1E-3 then the network is weakly connected, which means that it may have issues with power flow calculations.
+"""
+using PowerModelDistribution
+using Linear Algebra

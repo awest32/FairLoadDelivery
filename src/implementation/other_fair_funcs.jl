@@ -183,11 +183,7 @@ end
 function gini_index(x)
     x = sort(x)
     n = length(x)
-    #mean_x = _PMD.mean(x)
-    #sum_diff = sum(abs(x[i] - x[j]) for i in 1:n for j in 1:n)
-    gini_top = 1 - 1/n + 2*sum(sum(x[j] for j in 1:i) for i in 1:n-1)/(n*sum(x))
-    gini_bottom = 2*(1-1/n)
-    return gini_top/gini_bottom
+    return (2 * sum(i * x[i] for i in 1:n) / (n * sum(x))) - (n + 1) / n
 end
 
 #Jain's index

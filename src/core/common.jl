@@ -187,9 +187,11 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 function ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     _PMD.apply_pmd!(_ref_update_weights!, ref, data; apply_to_subnetworks=true)
@@ -243,13 +245,15 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
 	ref[:load_block_switches] = load_block_switches
 
 	#Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
     ref[:block_branches] = Dict{Int,Set}(b => Set{Int}() for (b,_) in ref[:blocks])
     ref[:block_loads] = Dict{Int,Set}(i => Set{Int}() for (i,_) in ref[:blocks])
     ref[:block_weights] = Dict{Int,Real}(i => 1.0 for (i,_) in ref[:blocks])
-    
+
    load_weight = Dict{Int,Float64}()
     critical_loads = Dict{Int,String}()
     for (d, load) in data["load"]
@@ -348,9 +352,11 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 
 "create the load block structure and store in ref"
@@ -394,13 +400,15 @@ function _ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 	ref[:load_block_switches] = load_block_switches
 
 	#Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
     ref[:block_branches] = Dict{Int,Set}(b => Set{Int}() for (b,_) in ref[:blocks])
     ref[:block_loads] = Dict{Int,Set}(i => Set{Int}() for (i,_) in ref[:blocks])
     ref[:block_weights] = Dict{Int,Real}(i => 1.0 for (i,_) in ref[:blocks])
-    
+
      load_weight = Dict{Int,Int}()
     critical_loads = Dict{Int,String}()
     for (d, load) in data["load"]
@@ -484,9 +492,11 @@ function _ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 
 """

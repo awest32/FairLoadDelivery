@@ -125,13 +125,12 @@ function constraint_mc_isolate_block_ref(pm::_PMD.AbstractUnbalancedPowerModel; 
         
     #     # Total resources available to the block
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
-        JuMP.@constraint(pm.model, z_block <= total_resources)
-                #     # EXISTING: Upper bound constraint
-#         JuMP.@constraint(pm.model, z_block == _PMD.ref(pm, nw, :block, b)["state"] )
 
-         # Force substation blocks to be on
+         # Force substation blocks to be on; other blocks limited by available resources
          if b in _PMD.ref(pm, nw, :substation_blocks)
              JuMP.@constraint(pm.model, z_block == 1)
+         else
+             JuMP.@constraint(pm.model, z_block <= total_resources)
          end
     end
 end
@@ -846,16 +845,15 @@ function constraint_connect_block_shunt_jump(model::JuMP.Model,reference::Dict{S
 end
 
 
-function constraint_connect_block_voltage(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default) 
+function constraint_connect_block_voltage(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default)
     for (i, bus) in _PMD.ref(pm, nw, :bus)
         z_block = _PMD.var(pm, nw, :z_block, _PMD.ref(pm, nw, :bus_block_map, i))
         z_voltage = _PMD.var(pm, nw, :z_voltage, i)
-        for (g, gen) in _PMD.ref(pm, nw, :gen)
-            if gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source"
-                JuMP.@constraint(pm.model, z_voltage == 1)
-            else
-                JuMP.@constraint(pm.model, z_voltage <= z_block)
-            end
+        is_source_bus = any(gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source" for (_, gen) in _PMD.ref(pm, nw, :gen))
+        if is_source_bus
+            JuMP.@constraint(pm.model, z_voltage == 1)
+        else
+            JuMP.@constraint(pm.model, z_voltage <= z_block)
         end
     end
 end
@@ -864,7 +862,10 @@ function constraint_connect_block_voltage_jump(model::JuMP.Model,reference::Dict
     for (i, bus) in reference[:bus]
         z_block = model[:z_block][reference[:bus_block_map][i]]
         z_voltage = model[:z_voltage][i]
-        for t in bus["terminals"]
+        is_source_bus = any(gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source" for (_, gen) in reference[:gen])
+        if is_source_bus
+            JuMP.@constraint(model, z_voltage == 1)
+        else
             JuMP.@constraint(model, z_voltage <= z_block)
         end
     end
@@ -913,7 +914,7 @@ function constraint_radial_topology(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
     end
 
     # create an aux varible α that maps to the switch states
-    switch_lookup = Dict{Tuple{Int,Int},Vector{Int}}((_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"]), _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])) => Int[ss for (ss,ssw) in _PMD.ref(pm, nw, :switch) if (_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["f_bus"]) && _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["t_bus"])) || (_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["t_bus"]) && _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["f_bus"]))] for (s,sw) in _PMD.ref(pm, nw, :switch))
+    switch_lookup = Dict{Tuple{Int,Int},Vector{Int}}((min(_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"]), _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])), max(_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"]), _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"]))) => Int[ss for (ss,ssw) in _PMD.ref(pm, nw, :switch) if (_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["f_bus"]) && _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["t_bus"])) || (_PMD.ref(pm, nw, :bus_block_map, sw["f_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["t_bus"]) && _PMD.ref(pm, nw, :bus_block_map, sw["t_bus"])==_PMD.ref(pm, nw, :bus_block_map, ssw["f_bus"]))] for (s,sw) in _PMD.ref(pm, nw, :switch))
     for ((i,j), switches) in switch_lookup
         _PMD.var(pm, nw, :alpha)[(i,j)] = JuMP.@expression(pm.model, sum(_PMD.var(pm, nw, :switch_state, s) for s in switches))
         JuMP.@constraint(pm.model, _PMD.var(pm, nw, :alpha, (i,j)) <= 1)
@@ -928,8 +929,8 @@ function constraint_radial_topology(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
     for k in filter(kk->kk∉iᵣ,N)
         # Eq. (3)
         for _iᵣ in iᵣ
-            jiᵣ = filter(((j,i),)->i==_iᵣ&&i!=j,L)
-            iᵣj = filter(((i,j),)->i==_iᵣ&&i!=j,L)
+            jiᵣ = filter(((j,i),)->i==_iᵣ&&i!=j,L′)
+            iᵣj = filter(((i,j),)->i==_iᵣ&&i!=j,L′)
             if !(isempty(jiᵣ) && isempty(iᵣj))
                 c = JuMP.@constraint(
                     pm.model,
@@ -1273,7 +1274,7 @@ function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbo
 	for (s, sw) in reference[:switch]
 		f_bus_block = reference[:bus_block_map][sw["f_bus"]]
 		t_bus_block = reference[:bus_block_map][sw["t_bus"]]
-		key = (f_bus_block, t_bus_block)
+		key = (min(f_bus_block, t_bus_block), max(f_bus_block, t_bus_block))
 		
 		switch_ids = Int[]
 		for (ss, ssw) in reference[:switch]
@@ -1312,8 +1313,8 @@ function constraint_radial_topology_jump(model::JuMP.Model,reference::Dict{Symbo
     for k in filter(kk->kk∉iᵣ,N)
         # Eq. (3)
         for _iᵣ in iᵣ
-            jiᵣ = filter(((j,i),)->i==_iᵣ&&i!=j,L)
-            iᵣj = filter(((i,j),)->i==_iᵣ&&i!=j,L)
+            jiᵣ = filter(((j,i),)->i==_iᵣ&&i!=j,L′)
+            iᵣj = filter(((i,j),)->i==_iᵣ&&i!=j,L′)
             if !(isempty(jiᵣ) && isempty(iᵣj))
                 c = JuMP.@constraint(
                     model,

@@ -12,11 +12,13 @@ const FAIR_FUNC_COLORS = Dict(
     "efficiency"   => RGB(0.35, 0.55, 0.80),   # dark blue
     "min_max"      => RGB(0.85, 0.35, 0.35),   # dark red/coral
     "equality_min" => RGB(0.90, 0.65, 0.25),   # dark amber
-    "jain"         => RGB(0.55, 0.40, 0.75)    # dark purple
+    "jain"         => RGB(0.55, 0.40, 0.75),   # dark purple
+    "palma"        => RGB(0.80, 0.45, 0.60),   # dark pink
+    "gini"         => RGB(0.45, 0.75, 0.70)    # dark teal
 )
-const FAIR_FUNC_LABELS = Dict("proportional"=>"Proportional", "efficiency"=>"Efficiency", "min_max"=>"Min-Max", "equality_min"=>"Equality Min", "jain"=>"Jain's Index")
-const FAIR_FUNC_MARKERS = Dict("proportional"=>:square, "efficiency"=>:circle, "min_max"=>:star5, "equality_min"=>:diamond, "jain"=>:utriangle)
-const FAIR_FUNC_LINESTYLES = Dict("proportional"=>:dash, "efficiency"=>:solid, "min_max"=>:dashdot, "equality_min"=>:dot, "jain"=>:dashdotdot)
+const FAIR_FUNC_LABELS = Dict("proportional"=>"Proportional", "efficiency"=>"Efficiency", "min_max"=>"Min-Max", "equality_min"=>"Equality Min", "jain"=>"Jain's Index", "palma"=>"Palma Ratio", "gini"=>"Gini Index")
+const FAIR_FUNC_MARKERS = Dict("proportional"=>:square, "efficiency"=>:circle, "min_max"=>:star5, "equality_min"=>:diamond, "jain"=>:utriangle, "palma"=>:dtriangle, "gini"=>:hexagon)
+const FAIR_FUNC_LINESTYLES = Dict("proportional"=>:dash, "efficiency"=>:solid, "min_max"=>:dashdot, "equality_min"=>:dot, "jain"=>:dashdotdot, "palma"=>:solid, "gini"=>:dash)
 
 """
 Map the bus names to their corresponding IDs from the math and solution dictionaries.

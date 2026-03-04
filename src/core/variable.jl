@@ -10,18 +10,23 @@ function variable_mc_bus_voltage_magnitude_sqr_on_off(pm::_PMD.AbstractUnbalance
     ) for i in _PMD.ids(pm, nw, :bus))
 
     if bounded
+        z_voltage = _PMD.var(pm, nw, :z_voltage)
         for (i, bus) in _PMD.ref(pm, nw, :bus)
-            for (j, gen) in _PMD.ref(pm, nw, :gen)
-                if i == gen["gen_bus"] && gen["source_id"] == "voltage_source.source"
-                    for (idx, t) in enumerate(terminals[i])
-                        FairLoadDelivery.set_upper_bound(w[i][t], 1.03)
-                        FairLoadDelivery.set_lower_bound(w[i][t], 1.03)
-                    end
-                else
-                    for (idx, t) in enumerate(terminals[i])
-                        FairLoadDelivery.set_upper_bound(w[i][t], bus["vmax"][idx]^2)
-                        FairLoadDelivery.set_lower_bound(w[i][t], bus["vmin"][idx]^2)
-                    end                    
+            is_source_bus = any(gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source" for (_, gen) in _PMD.ref(pm, nw, :gen))
+            if is_source_bus
+                for (idx, t) in enumerate(terminals[i])
+                    FairLoadDelivery.set_upper_bound(w[i][t], 1.03)
+                    FairLoadDelivery.set_lower_bound(w[i][t], 1.03)
+                end
+            else
+                vmin_sq = bus["vmin"][1]^2
+                vmax_sq = bus["vmax"][1]^2
+                for (idx, t) in enumerate(terminals[i])
+                    FairLoadDelivery.set_upper_bound(w[i][t], vmax_sq)
+                    FairLoadDelivery.set_lower_bound(w[i][t], 0.0)
+                    # Big-M: enforce vmin^2 * z <= w <= vmax^2 * z
+                    JuMP.@constraint(pm.model, w[i][t] >= vmin_sq * z_voltage[i])
+                    JuMP.@constraint(pm.model, w[i][t] <= vmax_sq * z_voltage[i])
                 end
             end
         end

@@ -19,12 +19,12 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain", "palma"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 100
+const N_BERNOULLI_SAMPLES = 10000
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -139,7 +139,13 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
             radiality_check(ref, switch_states, block_status, bernoulli_samples)
 
         if index === nothing
-            @warn "[$case/$fair_func]: Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology" 
+            if r == N_ROUNDS && isempty(mld_results)
+                @error "[$case/$fair_func]: All $N_ROUNDS rounds failed at RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
+                return math_out, mld_results
+            else
+                @warn "[$case/$fair_func]: Round $r failed at: RADIAL FEASIBILITY — skipping to next round"
+                continue
+            end
         end
 
         # Apply rounded states
@@ -312,6 +318,8 @@ function extract_per_load_data(mld::Dict, math::Dict; original_math::Union{Dict,
     pd_served_pct = Float64[]
     qshed_pct = Float64[]
     qd_served_pct = Float64[]
+    pd_served_kw = Float64[]
+    pd_demand_kw = Float64[]
 
     sol_load = get(get(mld, "solution", Dict()), "load", Dict{String,Any}())
 
@@ -350,9 +358,11 @@ function extract_per_load_data(mld::Dict, math::Dict; original_math::Union{Dict,
         push!(pd_served_pct, pd_total > 0 ? (pd_served / pd_total) * 100 : 0.0)
         push!(qshed_pct, qd_total > 0 ? (qshed / qd_total) * 100 : 0.0)
         push!(qd_served_pct, qd_total > 0 ? (qd_served / qd_total) * 100 : 0.0)
+        push!(pd_served_kw, pd_served)
+        push!(pd_demand_kw, pd_total)
     end
 
-    return bus_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct
+    return bus_ids, pshed_pct, pd_served_pct, qshed_pct, qd_served_pct, pd_served_kw, pd_demand_kw
 end
 
 function extract_original_load(math::Dict)
@@ -787,7 +797,7 @@ function run_comparison()
             final_pshed, final_pd_served = extract_load_shed(best_mld)
             @info "    Case=$case, FairFunc=$fair_func => Final shed: $(round(final_pshed, digits=4)), Served: $(round(final_pd_served, digits=4))"
             # Extract per-bus data (one entry per bus, since all phases have same shed %)
-            bus_ids, pshed_per_bus, pd_per_bus, qshed_per_bus, qd_per_bus = extract_per_load_data(best_mld, math_out[best_idx])
+            bus_ids, pshed_per_bus, pd_per_bus, qshed_per_bus, qd_per_bus, pd_served_kw, pd_demand_kw = extract_per_load_data(best_mld, math_out[best_idx])
             bus_name_map = build_bus_name_maps(math_out[best_idx])
             bus_names = [get(bus_name_map, bid, "bus_$bid") for bid in bus_ids]
             per_load_results[case][fair_func] = Dict(
@@ -796,7 +806,9 @@ function run_comparison()
                 :pshed => pshed_per_bus,
                 :pd_served => pd_per_bus,
                 :qshed => qshed_per_bus,
-                :qd_served => qd_per_bus
+                :qd_served => qd_per_bus,
+                :pd_served_kw => pd_served_kw,
+                :pd_demand_kw => pd_demand_kw
             )
 
         
@@ -1230,13 +1242,13 @@ for case in CASES
         max_shed_pct = maximum(pshed_vals)
         shed_variance = Statistics.var(pshed_vals)
 
-        # Fairness metrics on served percentages (filter zeros)
-        served_nonzero = filter(x -> x > 0, pd_vals)
-        if length(served_nonzero) >= 2
-            jains_idx = FairLoadDelivery.jains_index(served_nonzero)
-            palma = length(served_nonzero) >= 3 ? FairLoadDelivery.palma_ratio(served_nonzero) : NaN
-            gini = FairLoadDelivery.gini_index(served_nonzero)
-            cv_served = std(served_nonzero) / mean(served_nonzero)
+        # Fairness metrics on absolute kW served (captures continuous differences across functions)
+        pd_kw = data[:pd_served_kw]
+        if length(pd_kw) >= 2
+            jains_idx = FairLoadDelivery.jains_index(pd_kw)
+            palma = length(pd_kw) >= 3 ? FairLoadDelivery.palma_ratio(pd_kw) : NaN
+            gini = FairLoadDelivery.gini_index(pd_kw)
+            cv_served = std(pd_kw) / mean(pd_kw)
         else
             jains_idx = NaN
             palma = NaN
@@ -1256,7 +1268,7 @@ for case in CASES
             round(cv_served, digits=4)
         ))
 
-        println("  $(rpad(FAIR_FUNC_LABELS[fair_func], 15)): $(round(total_served_pct, digits=1))% served, Jain=$(round(jains_idx, digits=3)), Gini=$(round(gini, digits=3))")
+        println("  $(rpad(FAIR_FUNC_LABELS[fair_func], 15)): $((total_served_pct))% served, Jain=$((jains_idx)), Gini=$((gini)), Palma=$(palma)")
     end
 
     # Save summary CSV
