@@ -268,6 +268,190 @@ function ieee13_bus_coordinates()
 end
 
 """
+    ieee123_bus_coordinates()
+
+Returns a Dict{String, Tuple{Float64, Float64}} mapping bus name (lowercase)
+to (x, y) coordinates in [0,1]×[0,1] for the IEEE 123 node test feeder.
+
+Layout based on the standard IEEE 123 bus one-line diagram:
+- Source (150) at bottom-left
+- Main trunk runs right: 150→149→1→7→8→13
+- Branches spread upward and to the right
+"""
+function ieee123_bus_coordinates()
+    coords = Dict{String,Tuple{Float64,Float64}}(
+        # === Source and main trunk: 150 → 149 → 1 → 7 → 8 → 13 ===
+        "150"        => (0.04, 0.82),
+        "sourcebus"  => (0.04, 0.82),
+        "149"        => (0.10, 0.82),
+        "1"          => (0.14, 0.82),
+        "7"          => (0.16, 0.76),
+        "8"          => (0.20, 0.76),
+        "13"         => (0.24, 0.76),
+
+        # === Short laterals from bus 1 ===
+        "2"          => (0.12, 0.72),
+        "3"          => (0.10, 0.88),
+        "4"          => (0.08, 0.92),
+        "5"          => (0.12, 0.88),
+        "6"          => (0.14, 0.92),
+
+        # === From bus 8: 12 (phase B) ===
+        "12"         => (0.18, 0.82),
+
+        # === From bus 8: 9 → RG2 → 14 → 10, 11 ===
+        "9"          => (0.20, 0.72),
+        "9r"         => (0.20, 0.72),
+        "14"         => (0.22, 0.68),
+        "10"         => (0.18, 0.68),
+        "11"         => (0.16, 0.68),
+
+        # === From bus 13: 34 → 15 → 16, 17 ===
+        "34"         => (0.24, 0.82),
+        "15"         => (0.28, 0.88),
+        "16"         => (0.28, 0.92),
+        "17"         => (0.32, 0.88),
+
+        # === From bus 13: 18 → 19 → 20 ===
+        "18"         => (0.22, 0.58),
+        "135"        => (0.24, 0.58),
+        "19"         => (0.18, 0.54),
+        "20"         => (0.14, 0.54),
+
+        # === From 18: 21 → 22, 23 → 24, 25 ===
+        "21"         => (0.20, 0.50),
+        "22"         => (0.12, 0.46),
+        "23"         => (0.18, 0.42),
+        "24"         => (0.10, 0.38),
+
+        # === From 25: 26 → 27/33, 31 → 32, 28 → 29 → 30 → 250 ===
+        "25"         => (0.16, 0.36),
+        "25r"        => (0.16, 0.36),
+        "26"         => (0.10, 0.30),
+        "27"         => (0.06, 0.34),
+        "28"         => (0.16, 0.30),
+        "29"         => (0.12, 0.22),
+        "30"         => (0.16, 0.18),
+        "250"        => (0.20, 0.14),
+        "31"         => (0.08, 0.22),
+        "32"         => (0.06, 0.18),
+        "33"         => (0.04, 0.18),
+
+        # === From 44 → 47 → 48, 49 → 50 → 51 → 151 ===
+        "47"         => (0.22, 0.34),
+        "48"         => (0.20, 0.30),
+        "49"         => (0.26, 0.26),
+        "50"         => (0.30, 0.22),
+        "51"         => (0.38, 0.18),
+        "151"        => (0.46, 0.14),
+
+        # === Via Sw3: 135 → 35 → 36 → 37/38 → 39, 35 → 40 → 41/42 → 43/44 → 45 → 46 ===
+        "35"         => (0.26, 0.54),
+        "36"         => (0.30, 0.52),
+        "37"         => (0.30, 0.56),
+        "38"         => (0.34, 0.54),
+        "39"         => (0.38, 0.54),
+        "40"         => (0.28, 0.48),
+        "41"         => (0.32, 0.48),
+        "42"         => (0.28, 0.44),
+        "43"         => (0.32, 0.40),
+        "44"         => (0.24, 0.40),
+        "45"         => (0.28, 0.36),
+        "46"         => (0.32, 0.34),
+
+        # === Via Sw2: 152 → 52 → 53 → 54 → 55 → 56, 54 → 57 → 58 → 59 ===
+        "152"        => (0.30, 0.72),
+        "52"         => (0.34, 0.68),
+        "53"         => (0.38, 0.64),
+        "54"         => (0.42, 0.62),
+        "55"         => (0.44, 0.68),
+        "56"         => (0.46, 0.72),
+        "57"         => (0.42, 0.56),
+        "58"         => (0.38, 0.52),
+        "59"         => (0.36, 0.48),
+
+        # === Bus 60, 61/61s (Sw6), 62 → 63 → 64 → 65 → 66 ===
+        "60"         => (0.48, 0.56),
+        "61"         => (0.50, 0.60),
+        "61s"        => (0.50, 0.60),
+        "610"        => (0.54, 0.60),
+        "62"         => (0.46, 0.52),
+        "63"         => (0.44, 0.44),
+        "64"         => (0.48, 0.38),
+        "65"         => (0.44, 0.34),
+        "66"         => (0.44, 0.30),
+
+        # === Via Sw4: 160 → RG4 → 67 ===
+        "160"        => (0.52, 0.54),
+        "160r"       => (0.52, 0.54),
+        "67"         => (0.58, 0.54),
+
+        # === From 67: 68 → 69 → 70 → 71 ===
+        "68"         => (0.60, 0.50),
+        "69"         => (0.62, 0.46),
+        "70"         => (0.64, 0.42),
+        "71"         => (0.66, 0.38),
+
+        # === From 67: 72 → 73 → 74 → 75 ===
+        "72"         => (0.60, 0.58),
+        "73"         => (0.62, 0.54),
+        "74"         => (0.64, 0.48),
+        "75"         => (0.66, 0.44),
+
+        # === From 72: 76 → 77 → 78 → 79, 80 → 81 → 82 → 83, 84 → 85 ===
+        "76"         => (0.60, 0.72),
+        "77"         => (0.62, 0.64),
+        "78"         => (0.64, 0.60),
+        "79"         => (0.66, 0.56),
+        "80"         => (0.66, 0.64),
+        "81"         => (0.68, 0.68),
+        "82"         => (0.68, 0.76),
+        "83"         => (0.70, 0.80),
+        "84"         => (0.70, 0.64),
+        "85"         => (0.72, 0.60),
+
+        # === From 76: 86 → 87 → 88, 89 → 90, 91 → 92, 93 → 94, 95 → 96 ===
+        "86"         => (0.64, 0.76),
+        "87"         => (0.62, 0.80),
+        "88"         => (0.58, 0.76),
+        "89"         => (0.56, 0.80),
+        "90"         => (0.54, 0.76),
+        "91"         => (0.52, 0.82),
+        "92"         => (0.54, 0.72),
+        "93"         => (0.48, 0.86),
+        "94"         => (0.40, 0.78),
+        "95"         => (0.44, 0.88),
+        "96"         => (0.42, 0.82),
+
+        # === From 67: 97 → 98 → 99 → 100 → 450 ===
+        "97"         => (0.56, 0.48),
+        "197"        => (0.56, 0.44),
+        "98"         => (0.58, 0.44),
+        "99"         => (0.60, 0.40),
+        "100"        => (0.62, 0.36),
+        "450"        => (0.66, 0.32),
+
+        # === From 197 → 101 → 102-104, 105-107, 108-114, 300 ===
+        "101"        => (0.56, 0.38),
+        "102"        => (0.58, 0.34),
+        "103"        => (0.62, 0.30),
+        "104"        => (0.66, 0.28),
+        "105"        => (0.56, 0.32),
+        "106"        => (0.58, 0.28),
+        "107"        => (0.62, 0.24),
+        "108"        => (0.58, 0.36),
+        "300"        => (0.58, 0.18),
+        "109"        => (0.60, 0.30),
+        "110"        => (0.62, 0.22),
+        "111"        => (0.60, 0.18),
+        "112"        => (0.64, 0.18),
+        "113"        => (0.66, 0.18),
+        "114"        => (0.68, 0.18),
+    )
+    return coords
+end
+
+"""
     extract_gen_utilization_per_phase(solution, math)
 
 Extract per-phase generation capacity utilization for each generator, grouped by bus.
@@ -829,7 +1013,7 @@ Plot IEEE 13 bus one-line diagram with final load shed values per bus.
 - `solution`: Solution dictionary from MLD solve (e.g., best_mld["solution"] or best_feasibility["solution"])
 - `math`: Math dictionary containing network topology and bus mapping
 - `output_file`: Path to save the SVG output
-- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram, :tree for hierarchical, :spring for force-directed
+- `layout`: Layout algorithm - :ieee13 for standard IEEE 13 bus diagram, :ieee123 for IEEE 123 bus diagram
 - `width`, `height`: Dimensions in inches
 
 # Example
@@ -871,10 +1055,16 @@ function plot_network_load_shed(
     end
 
     # Get coordinates and scale to left 70% of figure (leaving room for legend)
-    ieee13_coords_raw = ieee13_bus_coordinates()
-    ieee13_coords = Dict{String,Tuple{Float64,Float64}}()
-    for (name, (x, y)) in ieee13_coords_raw
-        ieee13_coords[name] = (0.02 + x * 0.70, y)
+    if layout == :ieee13
+        coords_raw = ieee13_bus_coordinates()
+    elseif layout == :ieee123
+        coords_raw = ieee123_bus_coordinates()
+    else
+        error("Layout :$layout is not available. Supported layouts: :ieee13, :ieee123")
+    end
+    coords = Dict{String,Tuple{Float64,Float64}}()
+    for (name, (x, y)) in coords_raw
+        coords[name] = (0.02 + x * 0.70, y)
     end
 
     # Collect drawing elements in layers (back to front)
@@ -883,14 +1073,24 @@ function plot_network_load_shed(
     node_elements = []    # Nodes drawn on top of lines
     label_elements = []   # Labels drawn last (front)
 
-    # Drawing constants
+    # Drawing constants — scaled down for denser networks
     line_color = colorant"darkcyan"
     switch_color = colorant"gray"
-    node_radius = 0.012
-    line_width = 1.425mm
-    load_node_radius = 0.018
-    phase_line_spacing = 0.020
-    annotation_font = 6pt
+    if layout == :ieee123
+        node_radius = 0.006
+        line_width = 0.8mm
+        load_node_radius = 0.009
+        phase_line_spacing = 0.012
+        annotation_font = 4pt
+        bus_label_font = 6pt
+    else
+        node_radius = 0.012
+        line_width = 1.425mm
+        load_node_radius = 0.018
+        phase_line_spacing = 0.020
+        annotation_font = 6pt
+        bus_label_font = 9pt
+    end
 
     # Draw branches as straight lines
     if haskey(math, "branch")
@@ -900,9 +1100,9 @@ function plot_network_load_shed(
             f_name = lowercase(get(bus_id_to_name, f_bus, ""))
             t_name = lowercase(get(bus_id_to_name, t_bus, ""))
 
-            if haskey(ieee13_coords, f_name) && haskey(ieee13_coords, t_name)
-                x1, y1 = ieee13_coords[f_name]
-                x2, y2 = ieee13_coords[t_name]
+            if haskey(coords, f_name) && haskey(coords, t_name)
+                x1, y1 = coords[f_name]
+                x2, y2 = coords[t_name]
 
                 # Draw line
                 push!(line_elements, compose(context(),
@@ -922,21 +1122,23 @@ function plot_network_load_shed(
             f_name = lowercase(get(bus_id_to_name, f_bus, ""))
             t_name = lowercase(get(bus_id_to_name, t_bus, ""))
 
-            # Resolve virtual bus names using switch name (e.g. "632633" -> "632", "633")
-            if !haskey(ieee13_coords, f_name) || !haskey(ieee13_coords, t_name)
+            # Resolve virtual bus names using switch name
+            # IEEE 13: switch names like "632633" split into "632" + "633"
+            # IEEE 123: bus names resolve directly via bus_id_to_name
+            if !haskey(coords, f_name) || !haskey(coords, t_name)
                 sw_name = get(sw, "name", "")
-                if length(sw_name) == 6
+                if layout == :ieee13 && length(sw_name) == 6
                     f_name = lowercase(sw_name[1:3])
                     t_name = lowercase(sw_name[4:6])
                 end
             end
 
-            if !haskey(ieee13_coords, f_name) || !haskey(ieee13_coords, t_name)
+            if !haskey(coords, f_name) || !haskey(coords, t_name)
                 continue
             end
 
-            x1, y1 = ieee13_coords[f_name]
-            x2, y2 = ieee13_coords[t_name]
+            x1, y1 = coords[f_name]
+            x2, y2 = coords[t_name]
 
             is_closed, phase_utils = get(switch_info, (f_bus, t_bus), (true, Dict{Int,Float64}()))
 
@@ -1004,27 +1206,38 @@ function plot_network_load_shed(
     end
 
     # --- Draw bus nodes with per-phase annotations ---
-    # Buses that need labels shifted left
-    left_shift_buses_3 = Set(["632", "670", "675", "680", "652", "611"])
-    left_shift_buses_2 = Set(["671"])
-    left_shift_buses_1 = Set(["646", "634"])
-    label_shift_3 = 0.04
-    label_shift_2 = 0.026
-    label_shift_1 = 0.013
+    # Buses that need labels shifted left (layout-specific)
+    if layout == :ieee13
+        left_shift_buses_3 = Set(["632", "670", "675", "680", "652", "611"])
+        left_shift_buses_2 = Set(["671"])
+        left_shift_buses_1 = Set(["646", "634"])
+        label_shift_3 = 0.04
+        label_shift_2 = 0.026
+        label_shift_1 = 0.013
+    elseif layout == :ieee123
+        left_shift_buses_3 = Set{String}()
+        left_shift_buses_2 = Set{String}()
+        left_shift_buses_1 = Set{String}()
+        label_shift_3 = 0.0
+        label_shift_2 = 0.0
+        label_shift_1 = 0.0
+    else
+        error("Layout :$layout is not available. Supported layouts: :ieee13, :ieee123")
+    end
 
     for (bus_id, bus_name) in bus_id_to_name
         name_lower = lowercase(bus_name)
 
-        # Skip virtual switch buses (names like 632645, 632633)
-        if occursin("632", bus_name) && length(bus_name) > 3
+        # Skip virtual switch buses (IEEE 13: names like 632645, 632633)
+        if layout == :ieee13 && occursin("632", bus_name) && length(bus_name) > 3
             continue
         end
 
-        if !haskey(ieee13_coords, name_lower)
+        if !haskey(coords, name_lower)
             continue
         end
 
-        x, y = ieee13_coords[name_lower]
+        x, y = coords[name_lower]
 
         # Calculate label x position
         label_x = x
@@ -1061,13 +1274,14 @@ function plot_network_load_shed(
         # Bus label above node (show load IDs if any, otherwise just bus name)
         load_ids = get(bus_name_to_load_ids, bus_name, String[])
         bus_label = isempty(load_ids) ? bus_name : "$bus_name (L$(join(sort(load_ids), ",")))"
+        label_y_offset = layout == :ieee123 ? 0.018 : 0.035
         push!(label_elements, compose(context(),
-            text(label_x, y - 0.035, bus_label, hcenter, vbottom),
-            fontsize(9pt), fill("black")
+            text(label_x, y - label_y_offset, bus_label, hcenter, vbottom),
+            fontsize(bus_label_font), fill("black")
         ))
 
         # Running y position for stacked annotations below node
-        current_y = y + 0.035
+        current_y = y + label_y_offset
 
         # --- Per-phase load shed (only for load buses) ---
         if is_load_bus
@@ -1606,6 +1820,71 @@ function plot_voltage_per_bus_comparison(
     for i in 1:(length(target_buses)-1)
         sep_x = x_positions[i*3] + 0.5
         Plots.vline!(p, [sep_x], color=:lightgray, linestyle=:dot, linewidth=0.5, label=false)
+    end
+
+    # Collect out-of-range voltage points for inset plot
+    ylim_lo, ylim_hi = 0.80, 1.10
+    oor_labels = String[]
+    oor_values = Float64[]
+    oor_colors = Symbol[]
+    oor_markers = Symbol[]
+    oor_func_labels = String[]
+
+    for (fi, fair_func) in enumerate(active_funcs)
+        bus_volt = voltage_data_per_func[fair_func]
+        for bus in target_buses
+            bus_data = bus_volt[bus]
+            for phase in phases
+                v = bus_data[phase]
+                if v < ylim_lo || v > ylim_hi
+                    push!(oor_labels, "$(bus)-$(phase_labels[phase])")
+                    push!(oor_values, v)
+                    push!(oor_colors, FAIR_FUNC_COLORS[fair_func])
+                    push!(oor_markers, FAIR_FUNC_MARKERS[fair_func])
+                    push!(oor_func_labels, FAIR_FUNC_LABELS[fair_func])
+                end
+            end
+        end
+    end
+
+    if !isempty(oor_values)
+        # Build inset plot showing out-of-range voltages
+        unique_labels = unique(oor_labels)
+        inset_x = Dict(lbl => i for (i, lbl) in enumerate(unique_labels))
+
+        p_inset = Plots.plot(
+            xlabel = "", ylabel = "V (pu)",
+            title = "Out-of-Range Voltages",
+            legend = false,
+            xticks = (1:length(unique_labels), unique_labels),
+            xrotation = 45,
+            size = (600, 400),
+            grid = :y,
+            titlefontsize = 9,
+            guidefontsize = 7,
+            tickfontsize = 6
+        )
+        Plots.hline!(p_inset, [0.95], color=:red, linestyle=:dash, linewidth=1, label=false)
+        Plots.hline!(p_inset, [1.05], color=:red, linestyle=:dash, linewidth=1, label=false)
+
+        # Group by fairness function to add legend entries
+        seen_funcs = Set{String}()
+        for i in eachindex(oor_values)
+            lbl = oor_func_labels[i] in seen_funcs ? false : oor_func_labels[i]
+            push!(seen_funcs, oor_func_labels[i])
+            Plots.scatter!(p_inset, [inset_x[oor_labels[i]]], [oor_values[i]],
+                color = oor_colors[i],
+                marker = oor_markers[i],
+                markersize = 6,
+                label = lbl
+            )
+        end
+
+        # Combine main plot and inset as a layout
+        combined = Plots.plot(p, p_inset, layout=Plots.@layout([a{0.7w} b{0.3w}]), size=(1800, 600))
+        Plots.savefig(combined, save_path)
+        println("  Saved voltage comparison (with out-of-range inset): $save_path")
+        return combined
     end
 
     Plots.savefig(p, save_path)

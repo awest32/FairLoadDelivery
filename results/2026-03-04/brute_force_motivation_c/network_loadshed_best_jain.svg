@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.2"
+     width="480mm" height="360mm" viewBox="0 0 480 360"
+     stroke="none"
+     fill="#000000"
+     stroke-width="0.3"
+     font-size="3.88"
+>
+<defs>
+  <marker id="arrow" markerWidth="15" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
+  </marker>
+</defs>
+<g stroke-width="0.3" stroke="#808080" fill="#FFFFFF" id="img-063ce157-1">
+  <g transform="translate(415.2,109.44)">
+    <path d="M-62.4,-89.64 L62.4,-89.64 62.4,89.64 -62.4,89.64  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-2">
+  <g transform="translate(374.4,190.08)">
+    <g class="primitive">
+      <text dy="0.35em">75-100% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#ADCFEB" id="img-063ce157-3">
+  <g transform="translate(363.84,190.08)">
+    <circle cx="0" cy="0" r="3.84" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-4">
+  <g transform="translate(374.4,178.56)">
+    <g class="primitive">
+      <text dy="0.35em">50-75% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#5C9FD6" id="img-063ce157-5">
+  <g transform="translate(363.84,178.56)">
+    <circle cx="0" cy="0" r="3.84" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-6">
+  <g transform="translate(374.4,167.04)">
+    <g class="primitive">
+      <text dy="0.35em">25-50% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#2E7AB8" id="img-063ce157-7">
+  <g transform="translate(363.84,167.04)">
+    <circle cx="0" cy="0" r="3.84" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-8">
+  <g transform="translate(374.4,155.52)">
+    <g class="primitive">
+      <text dy="0.35em">0-25% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#1F517A" id="img-063ce157-9">
+  <g transform="translate(363.84,155.52)">
+    <circle cx="0" cy="0" r="3.84" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-10">
+  <g transform="translate(360,144)">
+    <g class="primitive">
+      <text dy="0.6em">Load Bus (% shed):</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-11">
+  <g transform="translate(372,132.48)">
+    <g class="primitive">
+      <text dy="0.35em">Outside 0.95-1.05 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#8B008B" font-size="3.18" id="img-063ce157-12">
+  <g transform="translate(360,132.48)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-13">
+  <g transform="translate(372,120.96)">
+    <g class="primitive">
+      <text dy="0.35em">0.95-0.97 or 1.03-1.05 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#DAA520" font-size="3.18" id="img-063ce157-14">
+  <g transform="translate(360,120.96)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-15">
+  <g transform="translate(372,109.44)">
+    <g class="primitive">
+      <text dy="0.35em">0.97-1.03 pu (normal)</text>
+    </g>
+  </g>
+</g>
+<g fill="#4682B4" font-size="3.18" id="img-063ce157-16">
+  <g transform="translate(360,109.44)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-17">
+  <g transform="translate(360,97.92)">
+    <g class="primitive">
+      <text dy="0.6em">Bus Voltage:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-18">
+  <g transform="translate(384,86.4)">
+    <g class="primitive">
+      <text dy="0.35em">Open</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#808080" id="img-063ce157-19">
+  <g transform="translate(369.6,86.4)">
+    <path fill="none" d="M-9.6,0 L9.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-20">
+  <g transform="translate(384,74.88)">
+    <g class="primitive">
+      <text dy="0.35em">>100% (violation)</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#FF0000" id="img-063ce157-21">
+  <g transform="translate(369.6,74.88)">
+    <path fill="none" d="M-9.6,0 L9.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-22">
+  <g transform="translate(384,63.36)">
+    <g class="primitive">
+      <text dy="0.35em">80-100%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#800080" id="img-063ce157-23">
+  <g transform="translate(369.6,63.36)">
+    <path fill="none" d="M-9.6,0 L9.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-24">
+  <g transform="translate(384,51.84)">
+    <g class="primitive">
+      <text dy="0.35em">50-80%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#008B8B" id="img-063ce157-25">
+  <g transform="translate(369.6,51.84)">
+    <path fill="none" d="M-9.6,0 L9.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-26">
+  <g transform="translate(384,40.32)">
+    <g class="primitive">
+      <text dy="0.35em">Under 50%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#4682B4" id="img-063ce157-27">
+  <g transform="translate(369.6,40.32)">
+    <path fill="none" d="M-9.6,0 L9.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-063ce157-28">
+  <g transform="translate(360,28.8)">
+    <g class="primitive">
+      <text dy="0.6em">Switch Utilization:</text>
+    </g>
+  </g>
+</g>
+</svg>

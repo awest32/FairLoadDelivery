@@ -895,7 +895,7 @@ function constraint_radial_topology(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
 
     # create a set L of all branches, including virtual branches between iᵣ and all other nodes in L₀
     L = [L₀..., [(virtual_iᵣ, n) for n in N₀]...]
-
+ 
     # create a set L′ that inlcudes the branch reverses
     L′ = union(L, Set([(j,i) for (i,j) in L]))
 
@@ -981,8 +981,7 @@ function constraint_radial_topology(pm::_PMD.AbstractUnbalancedPowerModel; nw::I
 
     # Eq. (7)
     JuMP.@constraint(pm.model, sum((λ[(i,j)] + λ[(j,i)]) for (i,j) in L) == length(N) - 1)
-
-    # Connect λ and β, map β back to α, over only real switches (L₀)
+      # Connect λ and β, map β back to α, over only real switches (L₀)
     for (i,j) in L₀
         # Eq. (8)
         JuMP.@constraint(pm.model, λ[(i,j)] + λ[(j,i)] == β[(i,j)])

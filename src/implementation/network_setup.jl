@@ -277,7 +277,9 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
-function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any})
+function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any};
+                        block_status::Union{Nothing,AbstractVector{Float64}}=nothing,
+                        load_status::Union{Nothing,AbstractVector{Float64}}=nothing)
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
         data["switch"][string(switch_id)]["dispatchable"] = 1.0
@@ -286,6 +288,51 @@ function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref
         data["switch"][string(switch_id)]["status"] = switch_state
         #@info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
     end
+
+    # De-energize loads on disconnected blocks
+    if load_status !== nothing
+        load_ids = sort(collect(keys(ref[:load])))
+        for (idx, lid) in enumerate(load_ids)
+            if load_status[idx] <= 0.0
+                lid_str = string(lid)
+                if haskey(data["load"], lid_str)
+                    for phase in 1:length(data["load"][lid_str]["pd"])
+                        data["load"][lid_str]["pd"][phase] = 0.0
+                        data["load"][lid_str]["qd"][phase] = 0.0
+                    end
+                    data["load"][lid_str]["status"] = 0.0
+                end
+            end
+        end
+    end
+
+    # De-energize shunts on disconnected blocks
+    if block_status !== nothing
+        block_ids = sort(collect(keys(ref[:block])))
+        if !isempty(ref[:shunt])
+            for (shunt_id, shunt_data) in data["shunt"]
+                block_id = ref[:shunt_block_map][parse(Int, shunt_id)]
+                block_idx = findfirst(==(block_id), block_ids)
+                if block_idx !== nothing && block_status[block_idx] <= 0.0
+                    data["shunt"][shunt_id]["status"] = 0.0
+                end
+            end
+        end
+
+        # De-energize branches on disconnected blocks
+        for (block_id, branches) in ref[:block_branches]
+            block_idx = findfirst(==(block_id), block_ids)
+            if block_idx !== nothing && block_status[block_idx] <= 0.0
+                for branch_id in branches
+                    data["branch"][string(branch_id)]["status"] = 0.0
+                    data["branch"][string(branch_id)]["br_status"] = 0.0
+                    data["branch"][string(branch_id)]["dispatchable"] = 0.0
+                    data["branch"][string(branch_id)]["vbase"] = 0
+                end
+            end
+        end
+    end
+
     # Ensure the voltages are passed through correctly
     for (bus_id, bus_data) in data["bus"]
         bus_data["vmax"][:] .= 1.05
@@ -352,4 +399,34 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any})
      # Ensure the voltages are passed through correctly
 
     return data
+end
+
+function ensure_switches_in_solution!(solution::Dict{String,Any}, math::Dict{String,Any})
+    if !haskey(math, "switch")
+        return solution
+    end
+    if !haskey(solution, "switch")
+        solution["switch"] = Dict{String,Any}()
+    end
+    for (sid, sw) in math["switch"]
+        n_phases = length(sw["f_connections"])
+        if haskey(solution["switch"], sid)
+            if !haskey(solution["switch"][sid], "state")
+                solution["switch"][sid]["state"] = 0.0
+            end
+            if !haskey(solution["switch"][sid], "pf")
+                solution["switch"][sid]["pf"] = zeros(n_phases)
+            end
+            if !haskey(solution["switch"][sid], "qf")
+                solution["switch"][sid]["qf"] = zeros(n_phases)
+            end
+        else
+            solution["switch"][sid] = Dict{String,Any}(
+                "state" => 0.0,
+                "pf" => zeros(n_phases),
+                "qf" => zeros(n_phases)
+            )
+        end
+    end
+    return solution
 end

@@ -24,7 +24,7 @@ const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "ja
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 10000
+const N_BERNOULLI_SAMPLES = 1000
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -846,6 +846,26 @@ function run_comparison()
 
     return results, per_load_results, final_weights_results, solutions_for_plotting, failed_combinations
 end
+#  test_math = deepcopy(math)
+#   for (sw_id_str, sw_data) in test_math["switch"]
+#       sw_data["status"] = 1.0
+#   end
+#   test_blocks = PowerModelsDistribution.identify_load_blocks(test_math)
+#   @info "Number of blocks: $(length(test_blocks))"
+#   for (i, block) in enumerate(test_blocks)
+#       @info "  Block $i: $block"
+#   end
+#   imp_test = instantiate_mc_model(test_math, LinDist3FlowPowerModel,
+#       build_mc_mld_shedding_implicit_diff;
+#       ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+#   test_ref = imp_test.ref[:it][:pmd][:nw][0]
+
+#   @info "Block pairs ($(length(test_ref[:block_pairs]))): $(test_ref[:block_pairs])"
+#   for (s, sw) in test_ref[:switch]
+#       a = test_ref[:bus_block_map][sw["f_bus"]]
+#       b = test_ref[:bus_block_map][sw["t_bus"]]
+#       @info "  Switch $s ($(sw["name"])): f_bus=$(sw["f_bus"]) (block $a) → t_bus=$(sw["t_bus"]) (block $b)"
+#   end
 
 # ============================================================
 # RUN AND SAVE RESULTS
@@ -953,6 +973,7 @@ for case in CASES
 
         # Save solution data as CSV
         solution = mld_solution["solution"]
+        ensure_switches_in_solution!(solution, math_data)
 
         # Load data
         load_df = DataFrame(
