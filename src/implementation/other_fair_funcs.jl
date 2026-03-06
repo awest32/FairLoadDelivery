@@ -27,14 +27,18 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     # Guard: if all pshed values are zero, no inequality to reduce — return unchanged
     if all(pshed_prev .== 0.0)
         @warn "[jains_fairness_index] All pshed_prev values are zero — returning unchanged weights"
-        return pshed_prev, weights_prev
+        return pshed_prev, weights_prev, MOI.OPTIMAL
     end
 
     fairness_index = (sum_pshed^2) / (n * sum_pshed_squared)
     @objective(model, Max, fairness_index)
     JuMP.set_silent(model)
     optimize!(model)
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[jains_fairness_index] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Function to compute the min max of load shed 
@@ -63,7 +67,11 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     @objective(model, Min, t)
     JuMP.set_silent(model)
     optimize!(model)
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[min_max_load_shed] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Function to compute the proportional fairness of load served
@@ -86,7 +94,11 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     @objective(model, Max, sum(log(pref[i] - pshed_new[i]) for i in 1:length(pshed_new)))
     JuMP.set_silent(model)
     optimize!(model)
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[proportional_fairness_load_shed] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
@@ -120,7 +132,11 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
     # JuMP.set_silent(model)
     JuMP.set_silent(model)
     optimize!(model)
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[complete_efficiency_load_shed] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Function to compute the infinity norm fairness of load shed
@@ -144,7 +160,11 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
     #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
     # JuMP.set_silent(model)
     optimize!(model)
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[infinity_norm_fairness_load_shed] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Equality min fairness function
@@ -174,8 +194,11 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     #     end
     # JuMP.set_silent(model)
     optimize!(model)
-    
-    return value.(pshed_new), value.(weights_new)
+    status = termination_status(model)
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
+        @warn "[equality_min] Solver did not converge: $status"
+    end
+    return value.(pshed_new), value.(weights_new), status
 end
 
 # Define the fairness functions for post processing

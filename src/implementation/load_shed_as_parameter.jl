@@ -460,7 +460,7 @@ function lin_palma_reformulated(
     denom = sum(sorted_pshed[i] for i in bottom_40_idx)
     σ = denom > 0 ? 1.0 / denom : 1e-8
 
-    return result.pshed_new, result.weights_new, σ
+    return result.pshed_new, result.weights_new, σ, result.status
 end
 
 #=============================================================================

@@ -277,9 +277,7 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
     return data
 end
 #eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/motivation_b.dss", 0.5, ["675a"])
-function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any};
-                        block_status::Union{Nothing,AbstractVector{Float64}}=nothing,
-                        load_status::Union{Nothing,AbstractVector{Float64}}=nothing)
+function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any})
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
         data["switch"][string(switch_id)]["dispatchable"] = 1.0
@@ -288,51 +286,6 @@ function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref
         data["switch"][string(switch_id)]["status"] = switch_state
         #@info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
     end
-
-    # De-energize loads on disconnected blocks
-    if load_status !== nothing
-        load_ids = sort(collect(keys(ref[:load])))
-        for (idx, lid) in enumerate(load_ids)
-            if load_status[idx] <= 0.0
-                lid_str = string(lid)
-                if haskey(data["load"], lid_str)
-                    for phase in 1:length(data["load"][lid_str]["pd"])
-                        data["load"][lid_str]["pd"][phase] = 0.0
-                        data["load"][lid_str]["qd"][phase] = 0.0
-                    end
-                    data["load"][lid_str]["status"] = 0.0
-                end
-            end
-        end
-    end
-
-    # De-energize shunts on disconnected blocks
-    if block_status !== nothing
-        block_ids = sort(collect(keys(ref[:block])))
-        if !isempty(ref[:shunt])
-            for (shunt_id, shunt_data) in data["shunt"]
-                block_id = ref[:shunt_block_map][parse(Int, shunt_id)]
-                block_idx = findfirst(==(block_id), block_ids)
-                if block_idx !== nothing && block_status[block_idx] <= 0.0
-                    data["shunt"][shunt_id]["status"] = 0.0
-                end
-            end
-        end
-
-        # De-energize branches on disconnected blocks
-        for (block_id, branches) in ref[:block_branches]
-            block_idx = findfirst(==(block_id), block_ids)
-            if block_idx !== nothing && block_status[block_idx] <= 0.0
-                for branch_id in branches
-                    data["branch"][string(branch_id)]["status"] = 0.0
-                    data["branch"][string(branch_id)]["br_status"] = 0.0
-                    data["branch"][string(branch_id)]["dispatchable"] = 0.0
-                    data["branch"][string(branch_id)]["vbase"] = 0
-                end
-            end
-        end
-    end
-
     # Ensure the voltages are passed through correctly
     for (bus_id, bus_data) in data["bus"]
         bus_data["vmax"][:] .= 1.05
@@ -372,7 +325,8 @@ function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any
     return data
 end
 
-function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any})
+function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
+                           mld_solution::Union{Nothing,Dict{String,Any}}=nothing)
     data = deepcopy(data_in)
     # Get voltage scale if present (for voltage sensitivity analysis)
     vscale = get(data, "vscale", 1.0)
@@ -394,9 +348,64 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any})
     for b in ref[:substation_blocks]
         data["block"][string(b)]["state"] = 1
     end
-   
 
-     # Ensure the voltages are passed through correctly
+    # De-energize loads, shunts, and branches on disconnected blocks using MLD solution
+    if mld_solution !== nothing
+        sol = mld_solution["solution"]
+
+        # De-energize loads with status <= 0
+        if haskey(sol, "load")
+            for (lid, load_sol) in sol["load"]
+                if haskey(load_sol, "status") && load_sol["status"] <= 0.0
+                    if haskey(data["load"], lid)
+                        for phase in 1:length(data["load"][lid]["pd"])
+                            data["load"][lid]["pd"][phase] = 0.0
+                            data["load"][lid]["qd"][phase] = 0.0
+                        end
+                        data["load"][lid]["status"] = 0.0
+                    end
+                end
+            end
+        end
+
+        # De-energize shunts on disconnected blocks
+        if haskey(sol, "block") && !isempty(ref[:shunt])
+            for (shunt_id, shunt_data) in data["shunt"]
+                block_id = ref[:shunt_block_map][parse(Int, shunt_id)]
+                block_id_str = string(block_id)
+                if haskey(sol["block"], block_id_str) && sol["block"][block_id_str]["status"] <= 0.0
+                    data["shunt"][shunt_id]["status"] = 0.0
+                end
+            end
+        end
+
+        # De-energize branches on disconnected blocks
+        if haskey(sol, "block")
+            for (block_id, branches) in ref[:block_branches]
+                block_id_str = string(block_id)
+                if haskey(sol["block"], block_id_str) && sol["block"][block_id_str]["status"] <= 0.0
+                    for branch_id in branches
+                        data["branch"][string(branch_id)]["status"] = 0.0
+                        data["branch"][string(branch_id)]["br_status"] = 0.0
+                    end
+                end
+            end
+        end
+
+        # De-energize buses on disconnected blocks
+        if haskey(sol, "block")
+            for (bus_id, block_id) in ref[:bus_block_map]
+                block_id_str = string(block_id)
+                if haskey(sol["block"], block_id_str) && sol["block"][block_id_str]["status"] <= 0.0
+                    bus_id_str = string(bus_id)
+                    if haskey(data["bus"], bus_id_str)
+                        data["bus"][bus_id_str]["bus_type"] = 4
+                        data["bus"][bus_id_str]["status"] = 0
+                    end
+                end
+            end
+        end
+    end
 
     return data
 end

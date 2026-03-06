@@ -58,7 +58,8 @@ function get_bus_voltage_per_phase(solution::Dict{String,Any}, math::Dict{String
     bus_voltages = Dict{Int,Vector{Float64}}()
     for (bus_id_str, bus) in math["bus"]
         bus_id = parse(Int, bus_id_str)
-        voltages = ones(3)  # Default to 1.0 per unit for 3 phases
+        bus_status = get(bus, "status", 1)
+        voltages = bus_status > 0 ? ones(3) : zeros(3)
         if haskey(solution, "bus") && haskey(solution["bus"], bus_id_str)
             bus_sol = solution["bus"][bus_id_str]
             if haskey(bus_sol, "w")
@@ -1786,7 +1787,7 @@ function plot_voltage_per_bus_comparison(
         bottom_margin = 20Plots.mm,
         top_margin = 5Plots.mm,
         right_margin = 15Plots.mm,
-        ylims = (0.80, 1.10),
+        ylims = (0.0, 2.0),
         grid = :y
     )
 
@@ -1826,7 +1827,7 @@ function plot_voltage_per_bus_comparison(
     ylim_lo, ylim_hi = 0.80, 1.10
     oor_labels = String[]
     oor_values = Float64[]
-    oor_colors = Symbol[]
+    oor_colors = Any[]
     oor_markers = Symbol[]
     oor_func_labels = String[]
 

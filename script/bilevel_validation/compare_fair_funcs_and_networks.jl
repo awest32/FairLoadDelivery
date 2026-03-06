@@ -22,9 +22,9 @@ using Statistics
 const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain", "palma"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
+const ITERATIONS = 5 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 1000
+const N_BERNOULLI_SAMPLES = 5#000
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -115,7 +115,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         math_relaxed,
         LinDist3FlowPowerModel,
         build_mc_mld_shedding_implicit_diff;
-        ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
     )
     ref = imp_model.ref[:it][:pmd][:nw][0]
 
@@ -141,7 +141,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         if index === nothing
             if r == N_ROUNDS && isempty(mld_results)
                 @error "[$case/$fair_func]: All $N_ROUNDS rounds failed at RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
-                return math_out, mld_results
+                return math_out, mld_results, ref
             else
                 @warn "[$case/$fair_func]: Round $r failed at: RADIAL FEASIBILITY — skipping to next round"
                 continue
@@ -167,7 +167,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
 
         # Updated network data dictionary for AC power flow
         if !isempty(math_out)
-            math_ac = ac_network_update(math_out[r], ref)
+            math_ac = ac_network_update(math_out[r], ref; mld_solution=mld_rounded)
             # Solve AC power flow
             pf_ac = solve_mc_pf(math_ac, IVRUPowerModel, ipopt);
             if pf_ac["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
@@ -182,7 +182,7 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
             @warn "No valid rounded MLD solution found in round $r, skipping AC power flow solve."
         end
     end
-    return math_out, mld_results
+    return math_out, mld_results, ref
 end
 
 function find_best_mld_solution(mlds::Vector{Dict{String, Any}})
@@ -228,38 +228,13 @@ function check_binary_solution(mld::Dict)
     return isempty(violations), violations
 end
 
-function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver)
+function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dict{Symbol,Any}, mld_solution::Dict{String,Any})
     ac_checks = Dict{String, Any}()
     ac_summary = Dict{String, Any}()
 
-    # Set generation capacity high for AC feasibility (slack bus)
-    math_ac = deepcopy(math_rounded)
-    for (i, gen) in math_ac["gen"]
-        if gen["source_id"] == "voltage_source.source"
-            pd_phase1 = 0.0; pd_phase2 = 0.0; pd_phase3 = 0.0
-            qd_phase1 = 0.0; qd_phase2 = 0.0; qd_phase3 = 0.0
-            for (ind, d) in math_ac["load"]
-                for (idx, con) in enumerate(d["connections"])
-                    if con == 1
-                        pd_phase1 += d["pd"][idx]; qd_phase1 += d["qd"][idx]
-                    elseif con == 2
-                        pd_phase2 += d["pd"][idx]; qd_phase2 += d["qd"][idx]
-                    elseif con == 3
-                        pd_phase3 += d["pd"][idx]; qd_phase3 += d["qd"][idx]
-                    end
-                end
-            end
-            gen["pmax"][1] = pd_phase1 * 1000
-            gen["qmax"][1] = qd_phase1 * 1000
-            gen["pmax"][2] = pd_phase2 * 1000
-            gen["qmax"][2] = qd_phase2 * 1000
-            gen["pmax"][3] = pd_phase3 * 1000
-            gen["qmax"][3] = qd_phase3 * 1000
-            gen["pmin"][:] .= 0
-            gen["qmin"][:] .= 0
-        end
-    end
-    
+    # Use ac_network_update to de-energize disconnected loads, shunts, branches
+    math_ac = ac_network_update(math_rounded, ref; mld_solution=mld_solution)
+
     # Run AC power flow
     println("  Running AC power flow (IVRUPowerModel)...")
     ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
@@ -771,7 +746,7 @@ function run_comparison()
             )
 
             # Run random rounding
-            math_out, mld_results = run_random_rounding(
+            math_out, mld_results, rr_ref = run_random_rounding(
                 math_relaxed, N_ROUNDS, N_BERNOULLI_SAMPLES, ipopt_solver;
                 fair_func=fair_func, case=case
             )
@@ -812,7 +787,7 @@ function run_comparison()
             )
 
         
-            acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver)
+            acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
             
             # Store solution for plotting
             solutions_for_plotting[case][fair_func] = Dict(
@@ -846,26 +821,7 @@ function run_comparison()
 
     return results, per_load_results, final_weights_results, solutions_for_plotting, failed_combinations
 end
-#  test_math = deepcopy(math)
-#   for (sw_id_str, sw_data) in test_math["switch"]
-#       sw_data["status"] = 1.0
-#   end
-#   test_blocks = PowerModelsDistribution.identify_load_blocks(test_math)
-#   @info "Number of blocks: $(length(test_blocks))"
-#   for (i, block) in enumerate(test_blocks)
-#       @info "  Block $i: $block"
-#   end
-#   imp_test = instantiate_mc_model(test_math, LinDist3FlowPowerModel,
-#       build_mc_mld_shedding_implicit_diff;
-#       ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-#   test_ref = imp_test.ref[:it][:pmd][:nw][0]
 
-#   @info "Block pairs ($(length(test_ref[:block_pairs]))): $(test_ref[:block_pairs])"
-#   for (s, sw) in test_ref[:switch]
-#       a = test_ref[:bus_block_map][sw["f_bus"]]
-#       b = test_ref[:bus_block_map][sw["t_bus"]]
-#       @info "  Switch $s ($(sw["name"])): f_bus=$(sw["f_bus"]) (block $a) → t_bus=$(sw["t_bus"]) (block $b)"
-#   end
 
 # ============================================================
 # RUN AND SAVE RESULTS
@@ -1192,14 +1148,14 @@ for case in CASES
     bar_width = 0.8 / n_funcs
     offsets = collect(range(-(n_funcs-1)/2 * bar_width, (n_funcs-1)/2 * bar_width, length=n_funcs))
 
-    # for (i, fair_func) in enumerate(FAIR_FUNCS)
-    #     wts = weights_df[!, fair_func]
-    #     valid_mask = .!isnan.(wts)
-    #     if any(valid_mask)
-    #         bar!(p_weights, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
-    #             bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
-    #     end
-    # end
+    for (i, fair_func) in enumerate(FAIR_FUNCS)
+        wts = weights_df[!, fair_func]
+        valid_mask = .!isnan.(wts)
+        if any(valid_mask)
+            bar!(p_weights, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
+                bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
+        end
+    end
     savefig(p_weights, joinpath(save_dir, "final_weights_$case.svg"))
     println("  Saved: final_weights_$case.csv, final_weights_$case.svg")
 end
