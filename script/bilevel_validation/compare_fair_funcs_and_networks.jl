@@ -211,7 +211,7 @@ function check_binary_solution(mld::Dict)
     return isempty(violations), violations
 end
 
-function run_acopf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dict{Symbol,Any}, mld_solution::Dict{String,Any})
+function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dict{Symbol,Any}, mld_solution::Dict{String,Any})
     ac_checks = Dict{String, Any}()
     ac_summary = Dict{String, Any}()
 
@@ -220,14 +220,42 @@ function run_acopf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Di
 
     # Run AC power flow
     println("  Running AC power flow (IVRUPowerModel)...")
-    ac_result = PowerModelsDistribution.solve_mc_opf(math_ac, IVRUPowerModel, ipopt_solver)
+    ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
 
     ac_term = ac_result["termination_status"]
     ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ALMOST_LOCALLY_SOLVED)
 
     ac_checks["ac_convergence"] = Dict("passed" => ac_converged, "details" => ["Status: $ac_term"])
 
+    # Post-solve voltage feasibility check on energized buses
+    voltage_violations = String[]
+    if ac_converged && haskey(ac_result, "solution") && haskey(ac_result["solution"], "bus")
+        for (bid, bus_sol) in ac_result["solution"]["bus"]
+            bus_data = math_ac["bus"][bid]
+            # Skip de-energized buses
+            if get(bus_data, "status", 1) == 0 || get(bus_data, "bus_type", 1) == 4
+                continue
+            end
+            if haskey(bus_sol, "vm")
+                vmin = bus_data["vmin"]
+                vmax = bus_data["vmax"]
+                for (idx, vm) in enumerate(bus_sol["vm"])
+                    if vm < vmin[idx] - 1e-4 || vm > vmax[idx] + 1e-4
+                        push!(voltage_violations, "Bus $(bus_data["name"]) phase $idx: vm=$(round(vm, digits=4)) outside [$(vmin[idx]), $(vmax[idx])]")
+                    end
+                end
+            end
+        end
+    end
+
+    voltage_feasible = isempty(voltage_violations)
+    if !voltage_feasible
+        @warn "ACPF voltage violations ($(length(voltage_violations))): $(join(voltage_violations[1:min(5, length(voltage_violations))], "; "))"
+    end
+
+    ac_checks["voltage_feasibility"] = Dict("passed" => voltage_feasible, "details" => voltage_violations)
     ac_summary["converged"] = ac_converged
+    ac_summary["voltage_feasible"] = voltage_feasible
     ac_summary["termination_status"] = string(ac_term)
     return ac_result, math_ac, ac_checks, ac_summary
 end
@@ -770,7 +798,7 @@ function run_comparison()
             )
 
         
-            acpf, math_ac, ac_checks, ac_summary = run_acopf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
+            acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
             
             # Store solution for plotting
             solutions_for_plotting[case][fair_func] = Dict(
@@ -893,8 +921,8 @@ for case in CASES
         acpf_solution = sol_data[:acpf]
         math_ac = sol_data[:acpf_math]
 
-        # Create network plots only if ACPF converged
-        if sol_data[:summary]["converged"]
+        # Create network plots only if ACPF converged and voltages are feasible
+        if sol_data[:summary]["converged"] && get(sol_data[:summary], "voltage_feasible", true)
             plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_mld.svg")
             FairLoadDelivery.plot_network_load_shed(
                 mld_solution["solution"],
@@ -911,7 +939,8 @@ for case in CASES
             )
             println("    Saved network_$(case)_$(fair_func)_acpf.svg")
         else
-            @warn "[$case/$fair_func] Skipping network plots — AC power flow did not converge ($(sol_data[:summary]["termination_status"]))"
+            reason = !sol_data[:summary]["converged"] ? "did not converge ($(sol_data[:summary]["termination_status"]))" : "voltage violations detected"
+            @warn "[$case/$fair_func] Skipping network plots — $reason"
         end
 
         # Save solution data as CSV

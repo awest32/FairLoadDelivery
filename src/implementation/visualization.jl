@@ -1787,7 +1787,7 @@ function plot_voltage_per_bus_comparison(
         bottom_margin = 20Plots.mm,
         top_margin = 5Plots.mm,
         right_margin = 15Plots.mm,
-        ylims = (0.0, 2.0),
+        ylims = (0.8, 1.2),
         grid = :y
     )
 
@@ -1823,13 +1823,18 @@ function plot_voltage_per_bus_comparison(
         Plots.vline!(p, [sep_x], color=:lightgray, linestyle=:dot, linewidth=0.5, label=false)
     end
 
-    # Collect out-of-range voltage points for inset plot
-    ylim_lo, ylim_hi = 0.80, 1.10
-    oor_labels = String[]
-    oor_values = Float64[]
-    oor_colors = Any[]
-    oor_markers = Symbol[]
-    oor_func_labels = String[]
+    # Collect out-of-range voltage points for stacked inset plots
+    oor_lo_labels = String[]    # voltages below 0.7 (shown in bottom chart: 0.0–0.5)
+    oor_lo_values = Float64[]
+    oor_lo_colors = Any[]
+    oor_lo_markers = Symbol[]
+    oor_lo_func_labels = String[]
+
+    oor_hi_labels = String[]    # voltages above 1.3 (shown in top chart: 1.4–2.0)
+    oor_hi_values = Float64[]
+    oor_hi_colors = Any[]
+    oor_hi_markers = Symbol[]
+    oor_hi_func_labels = String[]
 
     for (fi, fair_func) in enumerate(active_funcs)
         bus_volt = voltage_data_per_func[fair_func]
@@ -1837,54 +1842,90 @@ function plot_voltage_per_bus_comparison(
             bus_data = bus_volt[bus]
             for phase in phases
                 v = bus_data[phase]
-                if v < ylim_lo || v > ylim_hi
-                    push!(oor_labels, "$(bus)-$(phase_labels[phase])")
-                    push!(oor_values, v)
-                    push!(oor_colors, FAIR_FUNC_COLORS[fair_func])
-                    push!(oor_markers, FAIR_FUNC_MARKERS[fair_func])
-                    push!(oor_func_labels, FAIR_FUNC_LABELS[fair_func])
+                if v < 0.8
+                    push!(oor_lo_labels, "$(bus)-$(phase_labels[phase])")
+                    push!(oor_lo_values, v)
+                    push!(oor_lo_colors, FAIR_FUNC_COLORS[fair_func])
+                    push!(oor_lo_markers, FAIR_FUNC_MARKERS[fair_func])
+                    push!(oor_lo_func_labels, FAIR_FUNC_LABELS[fair_func])
+                elseif v > 1.2
+                    push!(oor_hi_labels, "$(bus)-$(phase_labels[phase])")
+                    push!(oor_hi_values, v)
+                    push!(oor_hi_colors, FAIR_FUNC_COLORS[fair_func])
+                    push!(oor_hi_markers, FAIR_FUNC_MARKERS[fair_func])
+                    push!(oor_hi_func_labels, FAIR_FUNC_LABELS[fair_func])
                 end
             end
         end
     end
 
-    if !isempty(oor_values)
-        # Build inset plot showing out-of-range voltages
-        unique_labels = unique(oor_labels)
-        inset_x = Dict(lbl => i for (i, lbl) in enumerate(unique_labels))
+    has_lo = !isempty(oor_lo_values)
+    has_hi = !isempty(oor_hi_values)
 
-        p_inset = Plots.plot(
+    if has_lo || has_hi
+        # Top inset: high out-of-range voltages (1.4–2.0)
+        p_hi = Plots.plot(
             xlabel = "", ylabel = "V (pu)",
-            title = "Out-of-Range Voltages",
+            title = "High Voltage Outliers",
             legend = false,
-            xticks = (1:length(unique_labels), unique_labels),
             xrotation = 45,
-            size = (600, 400),
             grid = :y,
+            ylims = (1.2, 2.0),
             titlefontsize = 9,
             guidefontsize = 7,
             tickfontsize = 6
         )
-        Plots.hline!(p_inset, [0.95], color=:red, linestyle=:dash, linewidth=1, label=false)
-        Plots.hline!(p_inset, [1.05], color=:red, linestyle=:dash, linewidth=1, label=false)
-
-        # Group by fairness function to add legend entries
-        seen_funcs = Set{String}()
-        for i in eachindex(oor_values)
-            lbl = oor_func_labels[i] in seen_funcs ? false : oor_func_labels[i]
-            push!(seen_funcs, oor_func_labels[i])
-            Plots.scatter!(p_inset, [inset_x[oor_labels[i]]], [oor_values[i]],
-                color = oor_colors[i],
-                marker = oor_markers[i],
-                markersize = 6,
-                label = lbl
-            )
+        if has_hi
+            unique_hi = unique(oor_hi_labels)
+            hi_x = Dict(lbl => i for (i, lbl) in enumerate(unique_hi))
+            Plots.plot!(p_hi, xticks = (1:length(unique_hi), unique_hi))
+            seen_funcs = Set{String}()
+            for i in eachindex(oor_hi_values)
+                lbl = oor_hi_func_labels[i] in seen_funcs ? false : oor_hi_func_labels[i]
+                push!(seen_funcs, oor_hi_func_labels[i])
+                Plots.scatter!(p_hi, [hi_x[oor_hi_labels[i]]], [oor_hi_values[i]],
+                    color = oor_hi_colors[i], marker = oor_hi_markers[i],
+                    markersize = 6, label = lbl)
+            end
+        else
+            Plots.annotate!(p_hi, [(0.5, 1.7, Plots.text("No data", 8, :gray))])
         end
 
-        # Combine main plot and inset as a layout
-        combined = Plots.plot(p, p_inset, layout=Plots.@layout([a{0.7w} b{0.3w}]), size=(1800, 600))
+        # Bottom inset: low out-of-range voltages (0.0–0.5)
+        p_lo = Plots.plot(
+            xlabel = "", ylabel = "V (pu)",
+            title = "Low Voltage Outliers",
+            legend = false,
+            xrotation = 45,
+            grid = :y,
+            ylims = (0.0, 0.8),
+            titlefontsize = 9,
+            guidefontsize = 7,
+            tickfontsize = 6
+        )
+        if has_lo
+            unique_lo = unique(oor_lo_labels)
+            lo_x = Dict(lbl => i for (i, lbl) in enumerate(unique_lo))
+            Plots.plot!(p_lo, xticks = (1:length(unique_lo), unique_lo))
+            seen_funcs = Set{String}()
+            for i in eachindex(oor_lo_values)
+                lbl = oor_lo_func_labels[i] in seen_funcs ? false : oor_lo_func_labels[i]
+                push!(seen_funcs, oor_lo_func_labels[i])
+                Plots.scatter!(p_lo, [lo_x[oor_lo_labels[i]]], [oor_lo_values[i]],
+                    color = oor_lo_colors[i], marker = oor_lo_markers[i],
+                    markersize = 6, label = lbl)
+            end
+        else
+            Plots.annotate!(p_lo, [(0.5, 0.25, Plots.text("No data", 8, :gray))])
+        end
+
+        # Combine: main plot (left), stacked high/low insets (right)
+        combined = Plots.plot(p, p_hi, p_lo,
+            layout = Plots.@layout([a{0.65w} Plots.grid(2, 1)]),
+            size = (1900, 700)
+        )
         Plots.savefig(combined, save_path)
-        println("  Saved voltage comparison (with out-of-range inset): $save_path")
+        println("  Saved voltage comparison (with outlier insets): $save_path")
         return combined
     end
 
