@@ -13,12 +13,12 @@ function variable_mc_bus_voltage_magnitude_sqr_on_off(pm::_PMD.AbstractUnbalance
         z_voltage = _PMD.var(pm, nw, :z_voltage)
         for (i, bus) in _PMD.ref(pm, nw, :bus)
             is_source_bus = any(gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source" for (_, gen) in _PMD.ref(pm, nw, :gen))
-            if is_source_bus
-                for (idx, t) in enumerate(terminals[i])
-                    FairLoadDelivery.set_upper_bound(w[i][t], 1.03)
-                    FairLoadDelivery.set_lower_bound(w[i][t], 1.03)
-                end
-            else
+            if !is_source_bus
+            #     for (idx, t) in enumerate(terminals[i])
+            #         FairLoadDelivery.set_upper_bound(w[i][t], 1.03)
+            #         FairLoadDelivery.set_lower_bound(w[i][t], 1.03)
+            #     end
+            # else
                 vmin_sq = bus["vmin"][1]^2
                 vmax_sq = bus["vmax"][1]^2
                 for (idx, t) in enumerate(terminals[i])

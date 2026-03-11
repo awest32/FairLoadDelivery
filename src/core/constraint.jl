@@ -3,10 +3,10 @@ function constraint_source_voltage_bounds(pm::_PMD.AbstractUnbalancedPowerModel;
     v_pu = 1.03
     for (i, gen) in _PMD.ref(pm, nw, :gen)
         if gen["source_id"] == "voltage_source.source"
-            for  w in _PMD.var(pm, nw, :w, i)
+            for  w in _PMD.var(pm, nw, :w, gen["gen_bus"])
                 #  JuMP.@constraint(pm.model, w <= (1.05)^2)
                 #  JuMP.@constraint(pm.model, w >= (1)^2)
-                JuMP.fix(w, 1.0^2; force = true)
+                JuMP.fix(w, 1.03^2; force = true)
                 #JuMP.@constraint(pm.model, w == 1.03^2)
             end
         end
@@ -55,14 +55,13 @@ function constraint_mc_isolate_block(pm::_PMD.AbstractUnbalancedPowerModel; nw::
 
          total_resources = n_gen + n_strg + n_neg_loads + switch_sum
 
-    #     # EXISTING: Upper bound constraint
-        if !(b in _PMD.ref(pm, nw, :substation_blocks))
-            JuMP.@constraint(pm.model, z_block <= total_resources)
-        end
 
         # Force substation blocks to be on
         if b in _PMD.ref(pm, nw, :substation_blocks)
-            JuMP.@constraint(pm.model, z_block == 1)
+            #JuMP.@constraint(pm.model, z_block == 1)
+            continue
+        else
+            JuMP.@constraint(pm.model, z_block <= total_resources)
         end
     end
 end
@@ -701,7 +700,7 @@ function constraint_connect_block_load_jump(model::JuMP.Model,reference::Dict{Sy
     for (i, load) in reference[:load]
         z_demand =model[:z_demand][i]
         z_block = model[:z_block][reference[:load_block_map][i]]
-        JuMP.@constraint(model,  z_demand == z_block)
+        JuMP.@constraint(model,  z_demand <= z_block)
          # Find the voltage variable for the load's bus and phase
         bus = reference[:load][i]["load_bus"]
         z_voltage = model[:z_voltage][bus]
@@ -851,7 +850,8 @@ function constraint_connect_block_voltage(pm::_PMD.AbstractUnbalancedPowerModel;
         z_voltage = _PMD.var(pm, nw, :z_voltage, i)
         is_source_bus = any(gen["gen_bus"] == i && gen["source_id"] == "voltage_source.source" for (_, gen) in _PMD.ref(pm, nw, :gen))
         if is_source_bus
-            JuMP.@constraint(pm.model, z_voltage == 1)
+            #JuMP.@constraint(pm.model, z_voltage == 1)
+            continue
         else
             JuMP.@constraint(pm.model, z_voltage <= z_block)
         end

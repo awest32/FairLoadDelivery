@@ -1,0 +1,934 @@
+LPUBFDiagPowerModel(A JuMP Model
+├ solver: none
+├ objective_sense: MAX_SENSE
+│ └ objective_function_type: QuadExpr
+├ num_variables: 384
+├ num_constraints: 914
+│ ├ AffExpr in MOI.EqualTo{Float64}: 244
+│ ├ AffExpr in MOI.GreaterThan{Float64}: 209
+│ ├ AffExpr in MOI.LessThan{Float64}: 262
+│ ├ QuadExpr in MOI.EqualTo{Float64}: 8
+│ ├ QuadExpr in MOI.LessThan{Float64}: 8
+│ ├ VariableRef in MOI.EqualTo{Float64}: 3
+│ ├ VariableRef in MOI.GreaterThan{Float64}: 63
+│ ├ VariableRef in MOI.LessThan{Float64}: 63
+│ ├ VariableRef in MOI.ZeroOne: 39
+│ └ VariableRef in MOI.Parameter{Float64}: 15
+└ Names registered in the model
+  └ :fair_load_weights, :pshed, :qshed, Dict{String, Any}("is_kron_reduced" => true, "conductor_ids" => [1, 2, 3], "time_elapsed" => 1.0, "bus" => Dict{String, Any}("4" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 4, "name" => "652", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.652", "vmin" => [0.95, 0.95, 0.95], "index" => 4), "1" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 1, "name" => "671", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.671", "vmin" => [0.95, 0.95, 0.95], "index" => 1), "12" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 12, "name" => "692", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.692", "vmin" => [0.95, 0.95, 0.95], "index" => 12), "2" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 2, "name" => "680", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.680", "vmin" => [0.95, 0.95, 0.95], "index" => 2), "6" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 6, "name" => "rg60", "bus_type" => 3, "terminals" => [1, 2, 3], "vmax" => [1.03, 1.03, 1.03], "vbase" => 2.4017771198288433, "source_id" => "bus.rg60", "vmin" => [1.03, 1.03, 1.03], "index" => 6, "va" => [0.5235987755982988, -1.5707963267948966, 2.6179938779914944], "vm" => [1.03, 1.03, 1.03]), "11" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 11, "name" => "684", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.684", "vmin" => [0.95, 0.95, 0.95], "index" => 11), "13" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 13, "name" => "670", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.670", "vmin" => [0.95, 0.95, 0.95], "index" => 13), "5" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 5, "name" => "675", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.675", "vmin" => [0.95, 0.95, 0.95], "index" => 5), "15" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "source_id" => "switch.632633", "grounded" => Bool[0, 0, 0], "vmin" => [0.95, 0.95, 0.95], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 15, "index" => 15, "name" => "_virtual_bus.switch.632633", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433), "16" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "source_id" => "switch.632645", "grounded" => Bool[0, 0, 0], "vmin" => [0.95, 0.95, 0.95], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 16, "index" => 16, "name" => "_virtual_bus.switch.632645", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433), "14" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 14, "name" => "646", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.646", "vmin" => [0.95, 0.95, 0.95], "index" => 14), "7" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 7, "name" => "611", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.611", "vmin" => [0.95, 0.95, 0.95], "index" => 7), "8" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 8, "name" => "645", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.645", "vmin" => [0.95, 0.95, 0.95], "index" => 8), "10" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 10, "name" => "633", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.633", "vmin" => [0.95, 0.95, 0.95], "index" => 10), "9" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 9, "name" => "632", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.632", "vmin" => [0.95, 0.95, 0.95], "index" => 9), "3" => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 3, "name" => "634", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.634", "vmin" => [0.95, 0.95, 0.95], "index" => 3)), "name" => "ieee13nodeckt", "map" => Dict{String, Any}[Dict("unmap_function" => "_map_math2eng_root!"), Dict("to" => "bus.1", "from" => "671", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.2", "from" => "680", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.3", "from" => "634", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.4", "from" => "652", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.5", "from" => "675", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.6", "from" => "rg60", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.7", "from" => "611", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.8", "from" => "645", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.9", "from" => "632", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.10", "from" => "633", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.11", "from" => "684", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.12", "from" => "692", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.13", "from" => "670", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.14", "from" => "646", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "branch.1", "from" => "632670", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.2", "from" => "634675", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.3", "from" => "684611", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.4", "from" => "692675", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.5", "from" => "rg60632", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.6", "from" => "671684", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.7", "from" => "646611", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.8", "from" => "645646", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.9", "from" => "671680", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.10", "from" => "633634", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.11", "from" => "684652", "unmap_function" => "_map_math2eng_line!"), Dict("to" => ["switch.1", "bus.15", "branch.12"], "from" => "632633", "unmap_function" => "_map_math2eng_switch!"), Dict("to" => ["switch.2", "bus.16", "branch.13"], "from" => "632645", "unmap_function" => "_map_math2eng_switch!"), Dict("to" => "load.1", "from" => "634a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.2", "from" => "675b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.3", "from" => "671", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.4", "from" => "675a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.5", "from" => "652", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.6", "from" => "646bc", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.7", "from" => "645b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.8", "from" => "670c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.9", "from" => "634c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.10", "from" => "670b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.11", "from" => "634b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.12", "from" => "675c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.13", "from" => "692", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.14", "from" => "670a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.15", "from" => "611c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "shunt.1", "from" => "cap1", "unmap_function" => "_map_math2eng_shunt!"), Dict("to" => "shunt.2", "from" => "cap2", "unmap_function" => "_map_math2eng_shunt!"), Dict("to" => "gen.1", "from" => "source", "unmap_function" => "_map_math2eng_voltage_source!")], "settings" => Dict{String, Any}("sbase_default" => 1, "vbases_default" => Dict{String, Real}("6" => 2.4017771198288433), "voltage_scale_factor" => 1000.0, "sbase" => 1, "power_scale_factor" => 1000.0, "base_frequency" => 60.0), "gen" => Dict{String, Any}("1" => Dict{String, Any}("pg" => [0.0, 0.0, 0.0], "model" => 2, "connections" => [1, 2, 3], "shutdown" => 0.0, "startup" => 0.0, "configuration" => WYE, "name" => "_virtual_gen.voltage_source.source", "qg" => [0.0, 0.0, 0.0], "gen_bus" => 6, "pmax" => [1008.0, 739.2, 1025.6000000000001], "vbase" => 2.4017771198288433, "source_id" => "voltage_source.source", "vg" => [0.00103, 0.00103, 0.00103], "index" => 1, "cost" => [0.001, 0.0], "gen_status" => 1, "qmax" => [553.2, 479.20000000000005, 649.2], "qmin" => [0.0, 0.0, 0.0], "control_mode" => 1, "pmin" => [0.0, 0.0, 0.0], "ncost" => 2)), "branch" => Dict{String, Any}("4" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "692675", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.692675", "t_connections" => [1, 2, 3], "f_bus" => 12, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 5, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 4, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "1" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "632670", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.632670", "t_connections" => [1, 2, 3], "f_bus" => 9, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 13, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 1, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "12" => Dict{String, Any}("source_id" => "switch.632633", "t_connections" => [1, 2, 3], "f_bus" => 15, "br_r" => [1.733542899408284e-11 0.0 0.0; 0.0 1.733542899408284e-11 0.0; 0.0 0.0 1.733542899408284e-11], "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "br_status" => 1, "t_bus" => 10, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "f_connections" => [1, 2, 3], "index" => 12, "name" => "_virtual_branch.switch.632633", "angmin" => [-0.17453292519943295, -0.17453292519943295, -0.17453292519943295], "angmax" => [0.17453292519943295, 0.17453292519943295, 0.17453292519943295], "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [Inf, Inf, Inf], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]), "2" => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "634675", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.634675", "t_connections" => [1, 2, 3], "f_bus" => 3, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 5, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 2, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "6" => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "671684", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.671684", "t_connections" => [1, 2, 3], "f_bus" => 1, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 11, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 6, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "11" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "684652", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.684652", "t_connections" => [1, 2, 3], "f_bus" => 11, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 4, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 11, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "13" => Dict{String, Any}("source_id" => "switch.632645", "t_connections" => [1, 2, 3], "f_bus" => 16, "br_r" => [1.733542899408284e-11 0.0 0.0; 0.0 1.733542899408284e-11 0.0; 0.0 0.0 1.733542899408284e-11], "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "br_status" => 1, "t_bus" => 8, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "f_connections" => [1, 2, 3], "index" => 13, "name" => "_virtual_branch.switch.632645", "angmin" => [-0.17453292519943295, -0.17453292519943295, -0.17453292519943295], "angmax" => [0.17453292519943295, 0.17453292519943295, 0.17453292519943295], "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [Inf, Inf, Inf], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]), "5" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "rg60632", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.rg60632", "t_connections" => [1, 2, 3], "f_bus" => 6, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 9, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 5, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "7" => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "646611", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.646611", "t_connections" => [1, 2, 3], "f_bus" => 14, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 7, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 7, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "8" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [3, 2, 1], "rate_b" => [Inf, Inf, Inf], "name" => "645646", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.645646", "t_connections" => [3, 2, 1], "f_bus" => 8, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 14, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 8, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "10" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "633634", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.633634", "t_connections" => [1, 2, 3], "f_bus" => 10, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 3, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 10, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "9" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "671680", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.671680", "t_connections" => [1, 2, 3], "f_bus" => 1, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 2, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 9, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), "3" => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [3, 2, 1], "rate_b" => [Inf, Inf, Inf], "name" => "684611", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.684611", "t_connections" => [3, 2, 1], "f_bus" => 11, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 7, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 3, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf])), "storage" => Dict{String, Any}(), "switch" => Dict{String, Any}("1" => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632633", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 3, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632633", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 15, "index" => 1, "c_rating_c" => [Inf, Inf, Inf]), "2" => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632645", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 7, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632645", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 16, "index" => 2, "c_rating_c" => [Inf, Inf, Inf])), "source_vm_pu" => [2.473830433423709, 2.473830433423709, 2.473830433423709, 0.0], "block" => Dict{String, Any}("1" => Dict("id" => 1, "state" => 0), "2" => Dict("id" => 2, "state" => 0), "3" => Dict("id" => 3, "state" => 0)), "is_projected" => true, "per_unit" => true, "data_model" => MATHEMATICAL, "shunt" => Dict{String, Any}("1" => Dict{String, Any}("source_id" => "shunt.cap1", "name" => "cap1", "shunt_bus" => 5, "status" => 1, "connections" => [1, 2, 3], "dispatchable" => 0, "gs" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "bs" => [200.00000000000003 0.0 0.0; 0.0 200.00000000000003 0.0; 0.0 0.0 200.00000000000003], "index" => 1, "vbase" => 2.4017771198288433), "2" => Dict{String, Any}("source_id" => "shunt.cap2", "name" => "cap2", "shunt_bus" => 7, "status" => 1, "connections" => [3], "dispatchable" => 0, "gs" => [0.0;;], "bs" => [100.14814814814817;;], "index" => 2, "vbase" => 2.4017771198288433)), "transformer" => Dict{String, Any}(), "bus_lookup" => Dict{Any, Int64}("671" => 1, "680" => 2, "634" => 3, "652" => 4, "675" => 5, "rg60" => 6, "611" => 7, "645" => 8, "632" => 9, "633" => 10, "684" => 11, "692" => 12, "670" => 13, "646" => 14), "load" => Dict{String, Any}("4" => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "675a", "status" => 1, "qd" => [190.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675a", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 4, "weight" => 10, "pd" => [485.0]), "1" => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "634a", "status" => 1, "qd" => [110.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634a", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 1, "weight" => 10, "pd" => [160.0]), "12" => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "675c", "status" => 1, "qd" => [212.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675c", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 12, "weight" => 10, "pd" => [290.0]), "2" => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "675b", "status" => 1, "qd" => [60.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675b", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 2, "weight" => 10, "pd" => [68.0]), "6" => Dict{String, Any}("model" => POWER, "connections" => [2, 3], "configuration" => WYE, "name" => "646bc", "status" => 1, "qd" => [66.0, 66.0], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.646bc", "critical" => 0, "load_bus" => 14, "dispatchable" => 0, "index" => 6, "weight" => 10, "pd" => [115.0, 115.0]), "11" => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "634b", "status" => 1, "qd" => [90.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634b", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 11, "weight" => 10, "pd" => [120.0]), "13" => Dict{String, Any}("model" => POWER, "connections" => [3, 1], "configuration" => WYE, "name" => "692", "status" => 1, "qd" => [75.5, 75.5], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.692", "critical" => 0, "load_bus" => 12, "dispatchable" => 0, "index" => 13, "weight" => 10, "pd" => [85.0, 85.0]), "5" => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "652", "status" => 1, "qd" => [86.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.652", "critical" => 0, "load_bus" => 4, "dispatchable" => 0, "index" => 5, "weight" => 10, "pd" => [128.0]), "15" => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "611c", "status" => 1, "qd" => [80.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.611c", "critical" => 0, "load_bus" => 7, "dispatchable" => 0, "index" => 15, "weight" => 10, "pd" => [170.0]), "14" => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "670a", "status" => 1, "qd" => [10.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670a", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 14, "weight" => 10, "pd" => [17.0]), "7" => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "645b", "status" => 1, "qd" => [125.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.645b", "critical" => 0, "load_bus" => 8, "dispatchable" => 0, "index" => 7, "weight" => 10, "pd" => [170.0]), "8" => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "670c", "status" => 1, "qd" => [68.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670c", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 8, "weight" => 10, "pd" => [117.0]), "10" => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "670b", "status" => 1, "qd" => [38.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670b", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 10, "weight" => 10, "pd" => [66.0]), "9" => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "634c", "status" => 1, "qd" => [90.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634c", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 9, "weight" => 10, "pd" => [120.0]), "3" => Dict{String, Any}("model" => POWER, "connections" => [1, 2, 3], "configuration" => WYE, "name" => "671", "status" => 1, "qd" => [220.0, 220.0, 220.0], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.671", "critical" => 0, "load_bus" => 1, "dispatchable" => 0, "index" => 3, "weight" => 10, "pd" => [385.0, 385.0, 385.0]))), Dict{String, Any}(), Dict{String, Any}(), Dict{Symbol, Any}(:it => Dict{Symbol, Any}(:pmd => Dict{Symbol, Any}(:nw => Dict{Int64, Any}(0 => Dict{Symbol, Any}(:block_line_losses => Dict(2 => 0.00017377046941797212, 3 => 8.68551938522754e-5, 1 => 8.688524972190795e-5), :buspairs => Dict{NTuple{4, Int64}, Dict{String, Real}}((8, 14, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 8, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (3, 5, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 2, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 2, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 9, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (11, 4, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 11, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (14, 7, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 7, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (16, 8, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 13, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (9, 13, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 1, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (10, 3, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 10, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (8, 14, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 8, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (12, 5, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 4, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (6, 9, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 1.03, "angmin" => -1.0471975511965976, "branch" => 5, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.03), (11, 7, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 3, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (11, 4, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 11, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (9, 13, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 1, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (15, 10, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 12, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 11, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 6, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 2, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 9, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (14, 7, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 7, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (12, 5, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 4, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (6, 9, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 1.03, "angmin" => -1.0471975511965976, "branch" => 5, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.03), (8, 14, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 8, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (3, 5, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 2, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (10, 3, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 10, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 11, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 6, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (15, 10, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 12, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (16, 8, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 13, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (11, 4, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 11, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (9, 13, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 1, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (12, 5, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 4, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (11, 7, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 3, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (3, 5, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 2, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (10, 3, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 10, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (6, 9, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 1.03, "angmin" => -1.0471975511965976, "branch" => 5, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.03), (16, 8, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 13, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 2, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 9, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (14, 7, 3, 3) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 7, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (1, 11, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 6, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (15, 10, 2, 2) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -0.17453292519943295, "branch" => 12, "angmax" => 0.17453292519943295, "c_rating_a" => Inf, "vm_to_max" => 1.05, "vm_fr_max" => 1.05), (11, 7, 1, 1) => Dict("vm_to_min" => 1.05, "vm_fr_min" => 0.95, "angmin" => -1.0471975511965976, "branch" => 3, "angmax" => 1.0471975511965976, "rate_a" => Inf, "c_rating_a" => 1441.066271897306, "vm_to_max" => 1.05, "vm_fr_max" => 1.05)), :block_graph => SimpleGraph{Int64}(2, [[3], [3], [1, 2]]), :substation_blocks => [3], :bus_conns_gen => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [(1, [1, 2, 3])], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :shunt_block_map => Dict(2 => 2, 1 => 1), :block_loads => Dict{Int64, Set}(2 => Set([5, 6, 7, 15, 3]), 3 => Set([10, 8, 14]), 1 => Set([4, 13, 11, 2, 9, 12, 1])), :gen => Dict{Int64, Any}(1 => Dict{String, Any}("pg" => [0.0, 0.0, 0.0], "model" => 2, "connections" => [1, 2, 3], "shutdown" => 0.0, "startup" => 0.0, "configuration" => WYE, "name" => "_virtual_gen.voltage_source.source", "qg" => [0.0, 0.0, 0.0], "gen_bus" => 6, "pmax" => [1008.0, 739.2, 1025.6000000000001], "vbase" => 2.4017771198288433, "source_id" => "voltage_source.source", "vg" => [0.00103, 0.00103, 0.00103], "index" => 1, "cost" => [0.001, 0.0], "gen_status" => 1, "qmax" => [553.2, 479.20000000000005, 649.2], "qmin" => [0.0, 0.0, 0.0], "control_mode" => 1, "pmin" => [0.0, 0.0, 0.0], "ncost" => 2)), :switch_dispatchable => Dict{Int64, Any}(2 => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632645", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 7, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632645", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 16, "index" => 2, "c_rating_c" => [Inf, Inf, Inf]), 1 => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632633", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 3, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632633", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 15, "index" => 1, "c_rating_c" => [Inf, Inf, Inf])), :load => Dict{Int64, Any}(5 => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "652", "status" => 1, "qd" => [86.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.652", "critical" => 0, "load_bus" => 4, "dispatchable" => 0, "index" => 5, "weight" => 10, "pd" => [128.0]), 12 => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "675c", "status" => 1, "qd" => [212.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675c", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 12, "weight" => 10, "pd" => [290.0]), 8 => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "670c", "status" => 1, "qd" => [68.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670c", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 8, "weight" => 10, "pd" => [117.0]), 1 => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "634a", "status" => 1, "qd" => [110.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634a", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 1, "weight" => 10, "pd" => [160.0]), 6 => Dict{String, Any}("model" => POWER, "connections" => [2, 3], "configuration" => WYE, "name" => "646bc", "status" => 1, "qd" => [66.0, 66.0], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.646bc", "critical" => 0, "load_bus" => 14, "dispatchable" => 0, "index" => 6, "weight" => 10, "pd" => [115.0, 115.0]), 11 => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "634b", "status" => 1, "qd" => [90.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634b", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 11, "weight" => 10, "pd" => [120.0]), 9 => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "634c", "status" => 1, "qd" => [90.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.634c", "critical" => 0, "load_bus" => 3, "dispatchable" => 0, "index" => 9, "weight" => 10, "pd" => [120.0]), 14 => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "670a", "status" => 1, "qd" => [10.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670a", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 14, "weight" => 10, "pd" => [17.0]), 3 => Dict{String, Any}("model" => POWER, "connections" => [1, 2, 3], "configuration" => WYE, "name" => "671", "status" => 1, "qd" => [220.0, 220.0, 220.0], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.671", "critical" => 0, "load_bus" => 1, "dispatchable" => 0, "index" => 3, "weight" => 10, "pd" => [385.0, 385.0, 385.0]), 7 => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "645b", "status" => 1, "qd" => [125.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.645b", "critical" => 0, "load_bus" => 8, "dispatchable" => 0, "index" => 7, "weight" => 10, "pd" => [170.0]), 4 => Dict{String, Any}("model" => POWER, "connections" => [1], "configuration" => WYE, "name" => "675a", "status" => 1, "qd" => [190.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675a", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 4, "weight" => 10, "pd" => [485.0]), 13 => Dict{String, Any}("model" => POWER, "connections" => [3, 1], "configuration" => WYE, "name" => "692", "status" => 1, "qd" => [75.5, 75.5], "vbase" => 2.4017771198288433, "vnom_kv" => 1.0, "source_id" => "load.692", "critical" => 0, "load_bus" => 12, "dispatchable" => 0, "index" => 13, "weight" => 10, "pd" => [85.0, 85.0]), 15 => Dict{String, Any}("model" => POWER, "connections" => [3], "configuration" => WYE, "name" => "611c", "status" => 1, "qd" => [80.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.611c", "critical" => 0, "load_bus" => 7, "dispatchable" => 0, "index" => 15, "weight" => 10, "pd" => [170.0]), 2 => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "675b", "status" => 1, "qd" => [60.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.675b", "critical" => 0, "load_bus" => 5, "dispatchable" => 0, "index" => 2, "weight" => 10, "pd" => [68.0]), 10 => Dict{String, Any}("model" => POWER, "connections" => [2], "configuration" => WYE, "name" => "670b", "status" => 1, "qd" => [38.0], "vbase" => 2.4017771198288433, "vnom_kv" => 0.9992600812897368, "source_id" => "load.670b", "critical" => 0, "load_bus" => 13, "dispatchable" => 0, "index" => 10, "weight" => 10, "pd" => [66.0])), :arcs_branch_to => [(5, 9, 6), (12, 10, 15), (8, 14, 8), (1, 13, 9), (6, 11, 1), (11, 4, 11), (9, 2, 1), (3, 7, 11), (7, 7, 14), (4, 5, 12), (13, 8, 16), (2, 5, 3), (10, 3, 10)], :is_projected => true, :bus_arcs_transformer => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :load_block_switches => Dict(2 => [2], 3 => [1, 2], 1 => [1]), :block_shunts => Dict{Int64, Set{Int64}}(2 => Set([2]), 3 => Set(), 1 => Set([1])), :arcs_transformer_from => Tuple{Int64, Any, Any}[], :critical_loads => Dict{Int64, String}(), :arcs_switch_to => [(2, 16, 9), (1, 15, 9)], :bus_gens => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [1], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :arcs_branch_from => [(5, 6, 9), (12, 15, 10), (8, 8, 14), (1, 9, 13), (6, 1, 11), (11, 11, 4), (9, 1, 2), (3, 11, 7), (7, 14, 7), (4, 12, 5), (13, 16, 8), (2, 3, 5), (10, 10, 3)], :block_gens => Dict{Int64, Set{Int64}}(2 => Set(), 3 => Set([1]), 1 => Set()), :bus_conns_load => Dict(5 => [(12, [3]), (4, [1]), (2, [2])], 16 => [], 7 => [(15, [3])], 12 => [(13, [3, 1])], 8 => [(7, [2])], 1 => [(3, [1, 2, 3])], 4 => [(5, [1])], 6 => [], 13 => [(8, [3]), (14, [1]), (10, [2])], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [(6, [2, 3])], 3 => [(1, [1]), (11, [2]), (9, [3])]), :gen_block_map => Dict(1 => 3), :shunt_dispatchable => Dict{Int64, Any}(), :branch => Dict{Int64, Any}(5 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "rg60632", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.rg60632", "t_connections" => [1, 2, 3], "f_bus" => 6, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 9, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 5, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 12 => Dict{String, Any}("source_id" => "switch.632633", "t_connections" => [1, 2, 3], "f_bus" => 15, "br_r" => [1.733542899408284e-11 0.0 0.0; 0.0 1.733542899408284e-11 0.0; 0.0 0.0 1.733542899408284e-11], "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "br_status" => 1, "t_bus" => 10, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "f_connections" => [1, 2, 3], "index" => 12, "name" => "_virtual_branch.switch.632633", "angmin" => [-0.17453292519943295, -0.17453292519943295, -0.17453292519943295], "angmax" => [0.17453292519943295, 0.17453292519943295, 0.17453292519943295], "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [Inf, Inf, Inf], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]), 8 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [3, 2, 1], "rate_b" => [Inf, Inf, Inf], "name" => "645646", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.645646", "t_connections" => [3, 2, 1], "f_bus" => 8, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 14, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 8, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 1 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "632670", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.632670", "t_connections" => [1, 2, 3], "f_bus" => 9, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 13, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 1, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 6 => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "671684", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.671684", "t_connections" => [1, 2, 3], "f_bus" => 1, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 11, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 6, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 11 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "684652", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.684652", "t_connections" => [1, 2, 3], "f_bus" => 11, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 4, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 11, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 9 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "671680", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.671680", "t_connections" => [1, 2, 3], "f_bus" => 1, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 2, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 9, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 3 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [3, 2, 1], "rate_b" => [Inf, Inf, Inf], "name" => "684611", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.684611", "t_connections" => [3, 2, 1], "f_bus" => 11, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 7, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 3, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 7 => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "646611", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.646611", "t_connections" => [1, 2, 3], "f_bus" => 14, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 7, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 7, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 4 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "692675", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.692675", "t_connections" => [1, 2, 3], "f_bus" => 12, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 5, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 4, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 13 => Dict{String, Any}("source_id" => "switch.632645", "t_connections" => [1, 2, 3], "f_bus" => 16, "br_r" => [1.733542899408284e-11 0.0 0.0; 0.0 1.733542899408284e-11 0.0; 0.0 0.0 1.733542899408284e-11], "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "br_status" => 1, "t_bus" => 8, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "f_connections" => [1, 2, 3], "index" => 13, "name" => "_virtual_branch.switch.632645", "angmin" => [-0.17453292519943295, -0.17453292519943295, -0.17453292519943295], "angmax" => [0.17453292519943295, 0.17453292519943295, 0.17453292519943295], "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [Inf, Inf, Inf], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]), 2 => Dict{String, Any}("br_r" => [1.733542899408284e-8 0.0 0.0; 0.0 1.733542899408284e-8 0.0; 0.0 0.0 1.733542899408284e-8], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "634675", "br_x" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.634675", "t_connections" => [1, 2, 3], "f_bus" => 3, "b_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 5, "b_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "index" => 2, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf]), 10 => Dict{String, Any}("br_r" => [6.826011791851872e-6 3.0731827980631807e-6 3.112582577525529e-6; 3.0731827980631807e-6 6.648712784271305e-6 3.0239330737352453e-6; 3.112582577525529e-6 3.0239330737352453e-6 6.725542354222884e-6], "rate_a" => [Inf, Inf, Inf], "f_connections" => [1, 2, 3], "rate_b" => [Inf, Inf, Inf], "name" => "633634", "br_x" => [2.0052517757362256e-5 9.883434678130114e-6 8.344873290125405e-6; 9.883434678130114e-6 2.0641544460324367e-5 7.582487557528964e-6; 8.344873290125405e-6 7.582487557528964e-6 2.0385445893819096e-5], "rate_c" => [Inf, Inf, Inf], "g_to" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "c_rating_a" => [1441.066271897306, 1441.066271897306, 1441.066271897306], "vbase" => 2.4017771198288433, "g_fr" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "source_id" => "line.633634", "t_connections" => [1, 2, 3], "f_bus" => 10, "b_fr" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "c_rating_b" => [Inf, Inf, Inf], "br_status" => 1, "t_bus" => 3, "b_to" => [0.0003459822054337437 -7.413904402151651e-5 -7.413904402151651e-5; -7.413904402151651e-5 0.0003459822054337437 -7.413904402151651e-5; -7.413904402151651e-5 -7.413904402151651e-5 0.0003459822054337437], "index" => 10, "angmin" => [-1.0471975511965976, -1.0471975511965976, -1.0471975511965976], "angmax" => [1.0471975511965976, 1.0471975511965976, 1.0471975511965976], "c_rating_c" => [Inf, Inf, Inf])), :bus_block_map => Dict(5 => 1, 16 => 2, 12 => 1, 8 => 2, 1 => 2, 6 => 3, 11 => 2, 9 => 3, 14 => 2, 3 => 1, 7 => 2, 4 => 2, 13 => 3, 15 => 1, 2 => 2, 10 => 1), :is_kron_reduced => true, :per_unit => true, :bus_storages => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :time_elapsed => 1.0, :arcs_transformer => Tuple{Int64, Any, Any}[], :ref_buses => Dict{Int64, Any}(6 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 6, "name" => "rg60", "bus_type" => 3, "terminals" => [1, 2, 3], "vmax" => [1.03, 1.03, 1.03], "vbase" => 2.4017771198288433, "source_id" => "bus.rg60", "vmin" => [1.03, 1.03, 1.03], "index" => 6, "va" => [0.5235987755982988, -1.5707963267948966, 2.6179938779914944], "vm" => [1.03, 1.03, 1.03])), :block_storages => Dict{Int64, Set{Int64}}(2 => Set(), 3 => Set(), 1 => Set()), :bus_arcs_branch => Dict(5 => [(4, 5, 12), (2, 5, 3)], 16 => [(13, 16, 8)], 7 => [(3, 7, 11), (7, 7, 14)], 12 => [(4, 12, 5)], 8 => [(8, 8, 14), (13, 8, 16)], 1 => [(6, 1, 11), (9, 1, 2)], 4 => [(11, 4, 11)], 6 => [(5, 6, 9)], 13 => [(1, 13, 9)], 11 => [(11, 11, 4), (3, 11, 7), (6, 11, 1)], 15 => [(12, 15, 10)], 2 => [(9, 2, 1)], 9 => [(1, 9, 13), (5, 9, 6)], 10 => [(10, 10, 3), (12, 10, 15)], 14 => [(7, 14, 7), (8, 14, 8)], 3 => [(2, 3, 5), (10, 3, 10)]), :bus_arcs_switch => Dict(5 => [], 16 => [(2, 16, 9)], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [(1, 15, 9)], 2 => [], 9 => [(2, 9, 16), (1, 9, 15)], 10 => [], 14 => [], 3 => []), :bus_arcs_conns_transformer => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :load_dispatchable => Dict{Int64, Any}(), :arcs_transformer_to => Tuple{Int64, Any, Any}[], :root_nodes => [6], :switch => Dict{Int64, Any}(2 => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632645", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 7, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632645", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 16, "index" => 2, "c_rating_c" => [Inf, Inf, Inf]), 1 => Dict{String, Any}("f_connections" => [1, 2, 3], "state" => 1, "rate_b" => [Inf, Inf, Inf], "name" => "632633", "thermal_rating" => [Inf, Inf, Inf], "status" => 1, "rate_c" => [Inf, Inf, Inf], "branch_id" => 3, "vbase" => 2.4017771198288433, "c_rating_b" => [Inf, Inf, Inf], "source_id" => "switch.632633", "t_connections" => [1, 2, 3], "f_bus" => 9, "current_rating" => [700.0, 700.0, 700.0], "dispatchable" => 1.0, "t_bus" => 15, "index" => 1, "c_rating_c" => [Inf, Inf, Inf])), :bus => Dict{Int64, Any}(5 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 5, "name" => "675", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.675", "vmin" => [0.95, 0.95, 0.95], "index" => 5), 16 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "source_id" => "switch.632645", "grounded" => Bool[0, 0, 0], "vmin" => [0.95, 0.95, 0.95], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 16, "index" => 16, "name" => "_virtual_bus.switch.632645", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433), 12 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 12, "name" => "692", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.692", "vmin" => [0.95, 0.95, 0.95], "index" => 12), 8 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 8, "name" => "645", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.645", "vmin" => [0.95, 0.95, 0.95], "index" => 8), 1 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 1, "name" => "671", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.671", "vmin" => [0.95, 0.95, 0.95], "index" => 1), 6 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 6, "name" => "rg60", "bus_type" => 3, "terminals" => [1, 2, 3], "vmax" => [1.03, 1.03, 1.03], "vbase" => 2.4017771198288433, "source_id" => "bus.rg60", "vmin" => [1.03, 1.03, 1.03], "index" => 6, "va" => [0.5235987755982988, -1.5707963267948966, 2.6179938779914944], "vm" => [1.03, 1.03, 1.03]), 11 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 11, "name" => "684", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.684", "vmin" => [0.95, 0.95, 0.95], "index" => 11), 9 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 9, "name" => "632", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.632", "vmin" => [0.95, 0.95, 0.95], "index" => 9), 14 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 14, "name" => "646", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.646", "vmin" => [0.95, 0.95, 0.95], "index" => 14), 3 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 3, "name" => "634", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.634", "vmin" => [0.95, 0.95, 0.95], "index" => 3), 7 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 7, "name" => "611", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.611", "vmin" => [0.95, 0.95, 0.95], "index" => 7), 4 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 4, "name" => "652", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.652", "vmin" => [0.95, 0.95, 0.95], "index" => 4), 13 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 13, "name" => "670", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.670", "vmin" => [0.95, 0.95, 0.95], "index" => 13), 15 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "source_id" => "switch.632633", "grounded" => Bool[0, 0, 0], "vmin" => [0.95, 0.95, 0.95], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 15, "index" => 15, "name" => "_virtual_bus.switch.632633", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433), 2 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 2, "name" => "680", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.680", "vmin" => [0.95, 0.95, 0.95], "index" => 2), 10 => Dict{String, Any}("vm_pair_lb" => Tuple{Any, Any, Real}[], "grounded" => Bool[0, 0, 0], "vm_pair_ub" => Tuple{Any, Any, Real}[], "bus_i" => 10, "name" => "633", "bus_type" => 1, "terminals" => [1, 2, 3], "vmax" => [1.05, 1.05, 1.05], "vbase" => 2.4017771198288433, "source_id" => "bus.633", "vmin" => [0.95, 0.95, 0.95], "index" => 10)), :storage_block_map => Dict{Int64, Int64}(), :bus_conns_storage => Dict(5 => [], 16 => [], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :arcs_switch_from => [(2, 9, 16), (1, 9, 15)], :block => Dict{Int64, Any}(2 => Dict("id" => 2, "state" => 0), 3 => Dict("id" => 3, "state" => 0), 1 => Dict("id" => 1, "state" => 0)), :transformer => Dict{Int64, Any}(), :bus_loads => Dict(5 => [12, 4, 2], 16 => [], 7 => [15], 12 => [13], 8 => [7], 1 => [3], 4 => [5], 6 => [], 13 => [8, 14, 10], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [6], 3 => [1, 11, 9]), :arcs_switch => [(2, 9, 16), (1, 9, 15), (2, 16, 9), (1, 15, 9)], :block_weights => Dict{Int64, Real}(2 => 1.05, 3 => 1.03, 1 => 1.07), :bus_inverters => Dict{Int64, Set{Tuple{Symbol, Int64}}}(5 => Set(), 16 => Set(), 7 => Set(), 12 => Set(), 8 => Set(), 1 => Set(), 4 => Set(), 6 => Set([(:gen, 1)]), 13 => Set(), 11 => Set(), 15 => Set(), 2 => Set(), 9 => Set(), 10 => Set(), 14 => Set(), 3 => Set()), :block_inverters => Dict{Int64, Set{Tuple{Symbol, Int64}}}(2 => Set(), 3 => Set([(:gen, 1)]), 1 => Set()), :block_switches => Dict{Int64, Set{Int64}}(2 => Set([2]), 3 => Set([2, 1]), 1 => Set([1])), :arcs_branch => [(5, 6, 9), (12, 15, 10), (8, 8, 14), (1, 9, 13), (6, 1, 11), (11, 11, 4), (9, 1, 2), (3, 11, 7), (7, 14, 7), (4, 12, 5), (13, 16, 8), (2, 3, 5), (10, 10, 3), (5, 9, 6), (12, 10, 15), (8, 14, 8), (1, 13, 9), (6, 11, 1), (11, 4, 11), (9, 2, 1), (3, 7, 11), (7, 7, 14), (4, 5, 12), (13, 8, 16), (2, 5, 3), (10, 3, 10)], :load_weights => Dict(5 => 10.0, 12 => 10.0, 8 => 10.0, 1 => 10.0, 6 => 10.0, 11 => 10.0, 9 => 10.0, 14 => 10.0, 3 => 10.0, 7 => 10.0, 4 => 10.0, 13 => 10.0, 15 => 10.0, 2 => 10.0, 10 => 10.0), :block_status => Dict(2 => 0, 3 => 0, 1 => 0), :conductor_ids => [1, 2, 3], :blocks => Dict{Int64, Set}(2 => Set([4, 16, 7, 11, 2, 8, 14, 1]), 3 => Set([13, 6, 9]), 1 => Set([5, 15, 10, 12, 3])), :block_graph_edge_map => Dict{Graphs.SimpleGraphs.SimpleEdge, Int64}(Edge 3 => 2 => 2, Edge 3 => 1 => 1, Edge 1 => 3 => 1, Edge 2 => 3 => 2), :load_block_map => Dict(5 => 2, 12 => 1, 8 => 3, 1 => 1, 6 => 2, 11 => 1, 9 => 1, 14 => 3, 3 => 2, 7 => 2, 4 => 1, 15 => 2, 13 => 1, 2 => 1, 10 => 3), :microgrid_blocks => Dict{Int64, String}(), :storage => Dict{Int64, Any}(), :bus_arcs_conns_switch => Dict(5 => [], 16 => [((2, 16, 9), [1, 2, 3])], 7 => [], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [((1, 15, 9), [1, 2, 3])], 2 => [], 9 => [((2, 9, 16), [1, 2, 3]), ((1, 9, 15), [1, 2, 3])], 10 => [], 14 => [], 3 => []), :settings => Dict{String, Any}("sbase_default" => 1, "vbases_default" => Dict{String, Real}("6" => 2.4017771198288433), "voltage_scale_factor" => 1000.0, "sbase" => 1, "power_scale_factor" => 1000.0, "base_frequency" => 60.0), :block_pairs => Set([(1, 3), (2, 3)]), :shunt => Dict{Int64, Any}(2 => Dict{String, Any}("source_id" => "shunt.cap2", "name" => "cap2", "shunt_bus" => 7, "status" => 1, "connections" => [3], "dispatchable" => 0, "gs" => [0.0;;], "bs" => [100.14814814814817;;], "index" => 2, "vbase" => 2.4017771198288433), 1 => Dict{String, Any}("source_id" => "shunt.cap1", "name" => "cap1", "shunt_bus" => 5, "status" => 1, "connections" => [1, 2, 3], "dispatchable" => 0, "gs" => [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0], "bs" => [200.00000000000003 0.0 0.0; 0.0 200.00000000000003 0.0; 0.0 0.0 200.00000000000003], "index" => 1, "vbase" => 2.4017771198288433)), :bus_shunts => Dict(5 => [1], 16 => [], 7 => [2], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :source_vm_pu => [2.473830433423709, 2.473830433423709, 2.473830433423709, 0.0], :bus_conns_shunt => Dict(5 => [(1, [1, 2, 3])], 16 => [], 7 => [(2, [3])], 12 => [], 8 => [], 1 => [], 4 => [], 6 => [], 13 => [], 11 => [], 15 => [], 2 => [], 9 => [], 10 => [], 14 => [], 3 => []), :bus_arcs_conns_branch => Dict(5 => [((4, 5, 12), [1, 2, 3]), ((2, 5, 3), [1, 2, 3])], 16 => [((13, 16, 8), [1, 2, 3])], 7 => [((3, 7, 11), [3, 2, 1]), ((7, 7, 14), [1, 2, 3])], 12 => [((4, 12, 5), [1, 2, 3])], 8 => [((8, 8, 14), [3, 2, 1]), ((13, 8, 16), [1, 2, 3])], 1 => [((6, 1, 11), [1, 2, 3]), ((9, 1, 2), [1, 2, 3])], 4 => [((11, 4, 11), [1, 2, 3])], 6 => [((5, 6, 9), [1, 2, 3])], 13 => [((1, 13, 9), [1, 2, 3])], 11 => [((6, 11, 1), [1, 2, 3]), ((11, 11, 4), [1, 2, 3]), ((3, 11, 7), [3, 2, 1])], 15 => [((12, 15, 10), [1, 2, 3])], 2 => [((9, 2, 1), [1, 2, 3])], 9 => [((5, 9, 6), [1, 2, 3]), ((1, 9, 13), [1, 2, 3])], 10 => [((12, 10, 15), [1, 2, 3]), ((10, 10, 3), [1, 2, 3])], 14 => [((8, 14, 8), [3, 2, 1]), ((7, 14, 7), [1, 2, 3])], 3 => [((2, 3, 5), [1, 2, 3]), ((10, 3, 10), [1, 2, 3])]), :block_branches => Dict{Int64, Set}(2 => Set([13, 6, 7, 11, 9, 8, 3]), 3 => Set([5, 1]), 1 => Set([4, 2, 10, 12])))), :map => Dict{String, Any}[Dict("unmap_function" => "_map_math2eng_root!"), Dict("to" => "bus.1", "from" => "671", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.2", "from" => "680", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.3", "from" => "634", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.4", "from" => "652", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.5", "from" => "675", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.6", "from" => "rg60", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.7", "from" => "611", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.8", "from" => "645", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.9", "from" => "632", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.10", "from" => "633", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.11", "from" => "684", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.12", "from" => "692", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.13", "from" => "670", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "bus.14", "from" => "646", "unmap_function" => "_map_math2eng_bus!"), Dict("to" => "branch.1", "from" => "632670", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.2", "from" => "634675", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.3", "from" => "684611", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.4", "from" => "692675", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.5", "from" => "rg60632", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.6", "from" => "671684", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.7", "from" => "646611", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.8", "from" => "645646", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.9", "from" => "671680", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.10", "from" => "633634", "unmap_function" => "_map_math2eng_line!"), Dict("to" => "branch.11", "from" => "684652", "unmap_function" => "_map_math2eng_line!"), Dict("to" => ["switch.1", "bus.15", "branch.12"], "from" => "632633", "unmap_function" => "_map_math2eng_switch!"), Dict("to" => ["switch.2", "bus.16", "branch.13"], "from" => "632645", "unmap_function" => "_map_math2eng_switch!"), Dict("to" => "load.1", "from" => "634a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.2", "from" => "675b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.3", "from" => "671", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.4", "from" => "675a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.5", "from" => "652", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.6", "from" => "646bc", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.7", "from" => "645b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.8", "from" => "670c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.9", "from" => "634c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.10", "from" => "670b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.11", "from" => "634b", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.12", "from" => "675c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.13", "from" => "692", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.14", "from" => "670a", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "load.15", "from" => "611c", "unmap_function" => "_map_math2eng_load!"), Dict("to" => "shunt.1", "from" => "cap1", "unmap_function" => "_map_math2eng_shunt!"), Dict("to" => "shunt.2", "from" => "cap2", "unmap_function" => "_map_math2eng_shunt!"), Dict("to" => "gen.1", "from" => "source", "unmap_function" => "_map_math2eng_voltage_source!")], :name => "ieee13nodeckt", :data_model => MATHEMATICAL, :bus_lookup => Dict{Any, Int64}("671" => 1, "680" => 2, "634" => 3, "652" => 4, "675" => 5, "rg60" => 6, "611" => 7, "645" => 8, "632" => 9, "633" => 10, "684" => 11, "692" => 12, "670" => 13, "646" => 14)))), Dict{Symbol, Any}(:dep => Dict{Symbol, Any}(), :it => Dict{Symbol, Any}(:pmd => Dict{Symbol, Any}(:nw => Dict{Int64, Any}(0 => Dict{Symbol, Any}(:alpha => Dict{Tuple{Int64, Int64}, Union{Int64, VariableRef, AffExpr}}((1, 3) => 0_switch_state_1[1], (2, 3) => 0_switch_state_2[2]), :p => Dict{Tuple{Int64, Int64, Int64}, JuMP.Containers.DenseAxisArray{VariableRef, 1, Tuple{Vector{Int64}}, Tuple{JuMP.Containers._AxisLookup{Dict{Int64, Int64}}}}}((11, 4, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(11, 4, 11)[1]
+ 0_p_(11, 4, 11)[2]
+ 0_p_(11, 4, 11)[3], (9, 2, 1) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(9, 2, 1)[1]
+ 0_p_(9, 2, 1)[2]
+ 0_p_(9, 2, 1)[3], (4, 5, 12) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(4, 5, 12)[1]
+ 0_p_(4, 5, 12)[2]
+ 0_p_(4, 5, 12)[3], (2, 5, 3) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(2, 5, 3)[1]
+ 0_p_(2, 5, 3)[2]
+ 0_p_(2, 5, 3)[3], (10, 3, 10) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(10, 3, 10)[1]
+ 0_p_(10, 3, 10)[2]
+ 0_p_(10, 3, 10)[3], (9, 1, 2) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(9, 1, 2)[1]
+ 0_p_(9, 1, 2)[2]
+ 0_p_(9, 1, 2)[3], (1, 9, 13) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(1, 9, 13)[1]
+ 0_p_(1, 9, 13)[2]
+ 0_p_(1, 9, 13)[3], (1, 13, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(1, 13, 9)[1]
+ 0_p_(1, 13, 9)[2]
+ 0_p_(1, 13, 9)[3], (7, 14, 7) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(7, 14, 7)[1]
+ 0_p_(7, 14, 7)[2]
+ 0_p_(7, 14, 7)[3], (13, 16, 8) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(13, 16, 8)[1]
+ 0_p_(13, 16, 8)[2]
+ 0_p_(13, 16, 8)[3], (12, 15, 10) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(12, 15, 10)[1]
+ 0_p_(12, 15, 10)[2]
+ 0_p_(12, 15, 10)[3], (11, 11, 4) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(11, 11, 4)[1]
+ 0_p_(11, 11, 4)[2]
+ 0_p_(11, 11, 4)[3], (6, 11, 1) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(6, 11, 1)[1]
+ 0_p_(6, 11, 1)[2]
+ 0_p_(6, 11, 1)[3], (5, 6, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(5, 6, 9)[1]
+ 0_p_(5, 6, 9)[2]
+ 0_p_(5, 6, 9)[3], (4, 12, 5) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(4, 12, 5)[1]
+ 0_p_(4, 12, 5)[2]
+ 0_p_(4, 12, 5)[3], (10, 10, 3) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(10, 10, 3)[1]
+ 0_p_(10, 10, 3)[2]
+ 0_p_(10, 10, 3)[3], (6, 1, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(6, 1, 11)[1]
+ 0_p_(6, 1, 11)[2]
+ 0_p_(6, 1, 11)[3], (8, 8, 14) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(8, 8, 14)[3]
+ 0_p_(8, 8, 14)[2]
+ 0_p_(8, 8, 14)[1], (3, 11, 7) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(3, 11, 7)[3]
+ 0_p_(3, 11, 7)[2]
+ 0_p_(3, 11, 7)[1], (2, 3, 5) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(2, 3, 5)[1]
+ 0_p_(2, 3, 5)[2]
+ 0_p_(2, 3, 5)[3], (5, 9, 6) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(5, 9, 6)[1]
+ 0_p_(5, 9, 6)[2]
+ 0_p_(5, 9, 6)[3], (8, 14, 8) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(8, 14, 8)[3]
+ 0_p_(8, 14, 8)[2]
+ 0_p_(8, 14, 8)[1], (13, 8, 16) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(13, 8, 16)[1]
+ 0_p_(13, 8, 16)[2]
+ 0_p_(13, 8, 16)[3], (3, 7, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(3, 7, 11)[3]
+ 0_p_(3, 7, 11)[2]
+ 0_p_(3, 7, 11)[1], (12, 10, 15) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(12, 10, 15)[1]
+ 0_p_(12, 10, 15)[2]
+ 0_p_(12, 10, 15)[3], (7, 7, 14) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(7, 7, 14)[1]
+ 0_p_(7, 7, 14)[2]
+ 0_p_(7, 7, 14)[3]), :se => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :qsw => Dict{Any, Any}((2, 9, 16) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_aux_(2, 9, 16)[1]
+ 0_qsw_aux_(2, 9, 16)[2]
+ 0_qsw_aux_(2, 9, 16)[3], (1, 15, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_aux_(1, 15, 9)[1]
+ 0_qsw_aux_(1, 15, 9)[2]
+ 0_qsw_aux_(1, 15, 9)[3], (1, 9, 15) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_aux_(1, 9, 15)[1]
+ 0_qsw_aux_(1, 9, 15)[2]
+ 0_qsw_aux_(1, 9, 15)[3], (2, 16, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_aux_(2, 16, 9)[1]
+ 0_qsw_aux_(2, 16, 9)[2]
+ 0_qsw_aux_(2, 16, 9)[3]), :ps => Dict{Any, Any}(), :lambda => Dict{Tuple{Int64, Int64}, VariableRef}((3, 2) => lambda_(3, 2), (2, 4) => lambda_(2, 4), (3, 1) => lambda_(3, 1), (4, 2) => lambda_(4, 2), (1, 3) => lambda_(1, 3), (4, 1) => lambda_(4, 1), (4, 3) => lambda_(4, 3), (3, 4) => lambda_(3, 4), (1, 4) => lambda_(1, 4), (2, 3) => lambda_(2, 3)), :w => Dict{Int64, JuMP.Containers.DenseAxisArray{VariableRef, 1, Tuple{Vector{Int64}}, Tuple{JuMP.Containers._AxisLookup{Dict{Int64, Int64}}}}}(5 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_5[1]
+ 0_w_5[2]
+ 0_w_5[3], 16 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_16[1]
+ 0_w_16[2]
+ 0_w_16[3], 12 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_12[1]
+ 0_w_12[2]
+ 0_w_12[3], 8 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_8[1]
+ 0_w_8[2]
+ 0_w_8[3], 1 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_1[1]
+ 0_w_1[2]
+ 0_w_1[3], 6 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_6[1]
+ 0_w_6[2]
+ 0_w_6[3], 11 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_11[1]
+ 0_w_11[2]
+ 0_w_11[3], 9 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_9[1]
+ 0_w_9[2]
+ 0_w_9[3], 14 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_14[1]
+ 0_w_14[2]
+ 0_w_14[3], 3 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_3[1]
+ 0_w_3[2]
+ 0_w_3[3], 7 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_7[1]
+ 0_w_7[2]
+ 0_w_7[3], 4 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_4[1]
+ 0_w_4[2]
+ 0_w_4[3], 13 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_13[1]
+ 0_w_13[2]
+ 0_w_13[3], 15 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_15[1]
+ 0_w_15[2]
+ 0_w_15[3], 2 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_2[1]
+ 0_w_2[2]
+ 0_w_2[3], 10 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_10[1]
+ 0_w_10[2]
+ 0_w_10[3]), :qs => Dict{Any, Any}(), :qshed => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [5, 12, 8, 1, 6, 11, 9, 14, 3, 7, 4, 13, 15, 2, 10]
+And data, a 15-element Vector{VariableRef}:
+ 0_qshed[5]
+ 0_qshed[12]
+ 0_qshed[8]
+ 0_qshed[1]
+ 0_qshed[6]
+ 0_qshed[11]
+ 0_qshed[9]
+ 0_qshed[14]
+ 0_qshed[3]
+ 0_qshed[7]
+ 0_qshed[4]
+ 0_qshed[13]
+ 0_qshed[15]
+ 0_qshed[2]
+ 0_qshed[10], :qg_bus => Dict{Int64, Any}(1 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qg_1[1]
+ 0_qg_1[2]
+ 0_qg_1[3]), :sc => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :z_storage => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :sc_on => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :z_shunt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [2, 1]
+And data, a 2-element Vector{VariableRef}:
+ 0_z_shunt[2]
+ 0_z_shunt[1], :z_gen => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1]
+And data, a 1-element Vector{VariableRef}:
+ 0_z_gen[1], :qg => Dict{Int64, JuMP.Containers.DenseAxisArray{VariableRef, 1, Tuple{Vector{Int64}}, Tuple{JuMP.Containers._AxisLookup{Dict{Int64, Int64}}}}}(1 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qg_1[1]
+ 0_qg_1[2]
+ 0_qg_1[3]), :pshed => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [5, 12, 8, 1, 6, 11, 9, 14, 3, 7, 4, 13, 15, 2, 10]
+And data, a 15-element Vector{VariableRef}:
+ 0_pshed[5]
+ 0_pshed[12]
+ 0_pshed[8]
+ 0_pshed[1]
+ 0_pshed[6]
+ 0_pshed[11]
+ 0_pshed[9]
+ 0_pshed[14]
+ 0_pshed[3]
+ 0_pshed[7]
+ 0_pshed[4]
+ 0_pshed[13]
+ 0_pshed[15]
+ 0_pshed[2]
+ 0_pshed[10], :qsc => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :pt => Dict{Any, Any}(), :qd => Dict{Int64, Vector{AffExpr}}(5 => [86 0_z_demand[5]], 12 => [212 0_z_demand[12]], 8 => [68 0_z_demand[8]], 1 => [110 0_z_demand[1]], 6 => [66 0_z_demand[6], 66 0_z_demand[6]], 11 => [90 0_z_demand[11]], 9 => [90 0_z_demand[9]], 14 => [10 0_z_demand[14]], 3 => [220 0_z_demand[3], 220 0_z_demand[3], 220 0_z_demand[3]], 7 => [125 0_z_demand[7]], 4 => [190 0_z_demand[4]], 13 => [75.5 0_z_demand[13], 75.5 0_z_demand[13]], 15 => [80 0_z_demand[15]], 2 => [60 0_z_demand[2]], 10 => [38 0_z_demand[10]]), :z_demand => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [5, 12, 8, 1, 6, 11, 9, 14, 3, 7, 4, 13, 15, 2, 10]
+And data, a 15-element Vector{VariableRef}:
+ 0_z_demand[5]
+ 0_z_demand[12]
+ 0_z_demand[8]
+ 0_z_demand[1]
+ 0_z_demand[6]
+ 0_z_demand[11]
+ 0_z_demand[9]
+ 0_z_demand[14]
+ 0_z_demand[3]
+ 0_z_demand[7]
+ 0_z_demand[4]
+ 0_z_demand[13]
+ 0_z_demand[15]
+ 0_z_demand[2]
+ 0_z_demand[10], :pg_bus => Dict{Int64, Any}(1 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_pg_1[1]
+ 0_pg_1[2]
+ 0_pg_1[3]), :sd => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :q => Dict{Tuple{Int64, Int64, Int64}, JuMP.Containers.DenseAxisArray{VariableRef, 1, Tuple{Vector{Int64}}, Tuple{JuMP.Containers._AxisLookup{Dict{Int64, Int64}}}}}((11, 4, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(11, 4, 11)[1]
+ 0_q_(11, 4, 11)[2]
+ 0_q_(11, 4, 11)[3], (9, 2, 1) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(9, 2, 1)[1]
+ 0_q_(9, 2, 1)[2]
+ 0_q_(9, 2, 1)[3], (4, 5, 12) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(4, 5, 12)[1]
+ 0_q_(4, 5, 12)[2]
+ 0_q_(4, 5, 12)[3], (2, 5, 3) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(2, 5, 3)[1]
+ 0_q_(2, 5, 3)[2]
+ 0_q_(2, 5, 3)[3], (10, 3, 10) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(10, 3, 10)[1]
+ 0_q_(10, 3, 10)[2]
+ 0_q_(10, 3, 10)[3], (9, 1, 2) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(9, 1, 2)[1]
+ 0_q_(9, 1, 2)[2]
+ 0_q_(9, 1, 2)[3], (1, 9, 13) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(1, 9, 13)[1]
+ 0_q_(1, 9, 13)[2]
+ 0_q_(1, 9, 13)[3], (1, 13, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(1, 13, 9)[1]
+ 0_q_(1, 13, 9)[2]
+ 0_q_(1, 13, 9)[3], (7, 14, 7) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(7, 14, 7)[1]
+ 0_q_(7, 14, 7)[2]
+ 0_q_(7, 14, 7)[3], (13, 16, 8) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(13, 16, 8)[1]
+ 0_q_(13, 16, 8)[2]
+ 0_q_(13, 16, 8)[3], (12, 15, 10) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(12, 15, 10)[1]
+ 0_q_(12, 15, 10)[2]
+ 0_q_(12, 15, 10)[3], (11, 11, 4) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(11, 11, 4)[1]
+ 0_q_(11, 11, 4)[2]
+ 0_q_(11, 11, 4)[3], (6, 11, 1) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(6, 11, 1)[1]
+ 0_q_(6, 11, 1)[2]
+ 0_q_(6, 11, 1)[3], (5, 6, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(5, 6, 9)[1]
+ 0_q_(5, 6, 9)[2]
+ 0_q_(5, 6, 9)[3], (4, 12, 5) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(4, 12, 5)[1]
+ 0_q_(4, 12, 5)[2]
+ 0_q_(4, 12, 5)[3], (10, 10, 3) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(10, 10, 3)[1]
+ 0_q_(10, 10, 3)[2]
+ 0_q_(10, 10, 3)[3], (6, 1, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(6, 1, 11)[1]
+ 0_q_(6, 1, 11)[2]
+ 0_q_(6, 1, 11)[3], (8, 8, 14) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(8, 8, 14)[3]
+ 0_q_(8, 8, 14)[2]
+ 0_q_(8, 8, 14)[1], (3, 11, 7) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(3, 11, 7)[3]
+ 0_q_(3, 11, 7)[2]
+ 0_q_(3, 11, 7)[1], (2, 3, 5) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(2, 3, 5)[1]
+ 0_q_(2, 3, 5)[2]
+ 0_q_(2, 3, 5)[3], (5, 9, 6) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(5, 9, 6)[1]
+ 0_q_(5, 9, 6)[2]
+ 0_q_(5, 9, 6)[3], (8, 14, 8) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(8, 14, 8)[3]
+ 0_q_(8, 14, 8)[2]
+ 0_q_(8, 14, 8)[1], (13, 8, 16) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(13, 8, 16)[1]
+ 0_q_(13, 8, 16)[2]
+ 0_q_(13, 8, 16)[3], (3, 7, 11) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(3, 7, 11)[3]
+ 0_q_(3, 7, 11)[2]
+ 0_q_(3, 7, 11)[1], (12, 10, 15) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(12, 10, 15)[1]
+ 0_q_(12, 10, 15)[2]
+ 0_q_(12, 10, 15)[3], (7, 7, 14) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(7, 7, 14)[1]
+ 0_q_(7, 7, 14)[2]
+ 0_q_(7, 7, 14)[3]), :f => Dict{Tuple{Int64, Int64, Int64}, VariableRef}((1, 3, 4) => f_(1, 3, 4), (2, 3, 2) => f_(2, 3, 2), (2, 4, 2) => f_(2, 4, 2), (1, 3, 1) => f_(1, 3, 1), (1, 2, 3) => f_(1, 2, 3), (3, 1, 3) => f_(3, 1, 3), (1, 4, 1) => f_(1, 4, 1), (3, 2, 4) => f_(3, 2, 4), (3, 3, 4) => f_(3, 3, 4), (1, 4, 3) => f_(1, 4, 3), (2, 1, 4) => f_(2, 1, 4), (3, 3, 1) => f_(3, 3, 1), (3, 2, 3) => f_(3, 2, 3), (3, 4, 1) => f_(3, 4, 1), (1, 3, 2) => f_(1, 3, 2), (1, 4, 2) => f_(1, 4, 2), (3, 4, 3) => f_(3, 4, 3), (2, 1, 3) => f_(2, 1, 3), (2, 2, 4) => f_(2, 2, 4), (2, 3, 4) => f_(2, 3, 4), (3, 3, 2) => f_(3, 3, 2), (2, 3, 1) => f_(2, 3, 1), (2, 2, 3) => f_(2, 2, 3), (3, 4, 2) => f_(3, 4, 2), (2, 4, 1) => f_(2, 4, 1), (1, 1, 4) => f_(1, 1, 4), (2, 4, 3) => f_(2, 4, 3), (1, 1, 3) => f_(1, 1, 3), (1, 2, 4) => f_(1, 2, 4), (3, 1, 4) => f_(3, 1, 4)), :psw => Dict{Any, Any}((2, 9, 16) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_aux_(2, 9, 16)[1]
+ 0_psw_aux_(2, 9, 16)[2]
+ 0_psw_aux_(2, 9, 16)[3], (1, 15, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_aux_(1, 15, 9)[1]
+ 0_psw_aux_(1, 15, 9)[2]
+ 0_psw_aux_(1, 15, 9)[3], (1, 9, 15) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_aux_(1, 9, 15)[1]
+ 0_psw_aux_(1, 9, 15)[2]
+ 0_psw_aux_(1, 9, 15)[3], (2, 16, 9) => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_aux_(2, 16, 9)[1]
+ 0_psw_aux_(2, 16, 9)[2]
+ 0_psw_aux_(2, 16, 9)[3]), :qt => Dict{Any, Any}(), :fair_load_weights => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [5, 12, 8, 1, 6, 11, 9, 14, 3, 7, 4, 13, 15, 2, 10]
+And data, a 15-element Vector{VariableRef}:
+ 0_fair_load_weights[5]
+ 0_fair_load_weights[12]
+ 0_fair_load_weights[8]
+ 0_fair_load_weights[1]
+ 0_fair_load_weights[6]
+ 0_fair_load_weights[11]
+ 0_fair_load_weights[9]
+ 0_fair_load_weights[14]
+ 0_fair_load_weights[3]
+ 0_fair_load_weights[7]
+ 0_fair_load_weights[4]
+ 0_fair_load_weights[13]
+ 0_fair_load_weights[15]
+ 0_fair_load_weights[2]
+ 0_fair_load_weights[10], :sd_on => 1-dimensional DenseAxisArray{Any,1,...} with index sets:
+    Dimension 1, Int64[]
+And data, a 0-element Vector{Any}, :beta => Dict{Tuple{Int64, Int64}, VariableRef}((1, 3) => beta_(1, 3), (2, 3) => beta_(2, 3)), :pg => Dict{Int64, JuMP.Containers.DenseAxisArray{VariableRef, 1, Tuple{Vector{Int64}}, Tuple{JuMP.Containers._AxisLookup{Dict{Int64, Int64}}}}}(1 => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_pg_1[1]
+ 0_pg_1[2]
+ 0_pg_1[3]), :pd => Dict{Int64, Vector{AffExpr}}(5 => [128 0_z_demand[5]], 12 => [290 0_z_demand[12]], 8 => [117 0_z_demand[8]], 1 => [160 0_z_demand[1]], 6 => [115 0_z_demand[6], 115 0_z_demand[6]], 11 => [120 0_z_demand[11]], 9 => [120 0_z_demand[9]], 14 => [17 0_z_demand[14]], 3 => [385 0_z_demand[3], 385 0_z_demand[3], 385 0_z_demand[3]], 7 => [170 0_z_demand[7]], 4 => [485 0_z_demand[4]], 13 => [85 0_z_demand[13], 85 0_z_demand[13]], 15 => [170 0_z_demand[15]], 2 => [68 0_z_demand[2]], 10 => [66 0_z_demand[10]]), :z_block => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [2, 3, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_z_block[2]
+ 0_z_block[3]
+ 0_z_block[1], :z_voltage => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [5, 16, 12, 8, 1, 6, 11, 9, 14, 3, 7, 4, 13, 15, 2, 10]
+And data, a 16-element Vector{VariableRef}:
+ 0_z_voltage[5]
+ 0_z_voltage[16]
+ 0_z_voltage[12]
+ 0_z_voltage[8]
+ 0_z_voltage[1]
+ 0_z_voltage[6]
+ 0_z_voltage[11]
+ 0_z_voltage[9]
+ 0_z_voltage[14]
+ 0_z_voltage[3]
+ 0_z_voltage[7]
+ 0_z_voltage[4]
+ 0_z_voltage[13]
+ 0_z_voltage[15]
+ 0_z_voltage[2]
+ 0_z_voltage[10], :switch_state => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [2, 1]
+And data, a 2-element Vector{VariableRef}:
+ 0_switch_state_2[2]
+ 0_switch_state_1[1]))))), Dict{Symbol, Any}(:dep => Dict{Symbol, Any}(), :it => Dict{Symbol, Any}(:pmd => Dict{Symbol, Any}(:nw => Dict{Int64, Any}(0 => Dict{Symbol, Any}(:mu_sm_branch => Dict{Tuple{Int64, Int64, Int64}, Vector{ConstraintRef}}(), :block_energization => Dict{Int64, Vector{ConstraintRef}}(2 => [-0_switch_state_2[2]*0_z_block[3] + 0_switch_state_2[2] + 0_z_block[2] <= 1], 1 => [-0_switch_state_1[1]*0_z_block[3] + 0_switch_state_1[1] + 0_z_block[1] <= 1]), :lam_kcl_r => Dict{Int64, Array{ConstraintRef}}(5 => [0_p_(4, 5, 12)[1] + 0_p_(2, 5, 3)[1] + 485 0_z_demand[4] == 0, 0_p_(4, 5, 12)[2] + 0_p_(2, 5, 3)[2] + 68 0_z_demand[2] == 0, 0_p_(4, 5, 12)[3] + 0_p_(2, 5, 3)[3] + 290 0_z_demand[12] == 0], 16 => [0_p_(13, 16, 8)[1] + 0_psw_aux_(2, 16, 9)[1] == 0, 0_p_(13, 16, 8)[2] + 0_psw_aux_(2, 16, 9)[2] == 0, 0_p_(13, 16, 8)[3] + 0_psw_aux_(2, 16, 9)[3] == 0], 12 => [0_p_(4, 12, 5)[1] + 85 0_z_demand[13] == 0, 0_p_(4, 12, 5)[2] == 0, 0_p_(4, 12, 5)[3] + 85 0_z_demand[13] == 0], 8 => [0_p_(8, 8, 14)[1] + 0_p_(13, 8, 16)[1] == 0, 0_p_(8, 8, 14)[2] + 0_p_(13, 8, 16)[2] + 170 0_z_demand[7] == 0, 0_p_(8, 8, 14)[3] + 0_p_(13, 8, 16)[3] == 0], 1 => [0_p_(6, 1, 11)[1] + 0_p_(9, 1, 2)[1] + 385 0_z_demand[3] == 0, 0_p_(6, 1, 11)[2] + 0_p_(9, 1, 2)[2] + 385 0_z_demand[3] == 0, 0_p_(6, 1, 11)[3] + 0_p_(9, 1, 2)[3] + 385 0_z_demand[3] == 0], 6 => [0_p_(5, 6, 9)[1] - 0_pg_1[1] == 0, 0_p_(5, 6, 9)[2] - 0_pg_1[2] == 0, 0_p_(5, 6, 9)[3] - 0_pg_1[3] == 0], 11 => [0_p_(11, 11, 4)[1] + 0_p_(3, 11, 7)[1] + 0_p_(6, 11, 1)[1] == 0, 0_p_(11, 11, 4)[2] + 0_p_(3, 11, 7)[2] + 0_p_(6, 11, 1)[2] == 0, 0_p_(11, 11, 4)[3] + 0_p_(3, 11, 7)[3] + 0_p_(6, 11, 1)[3] == 0], 9 => [0_p_(1, 9, 13)[1] + 0_p_(5, 9, 6)[1] + 0_psw_aux_(2, 9, 16)[1] + 0_psw_aux_(1, 9, 15)[1] == 0, 0_p_(1, 9, 13)[2] + 0_p_(5, 9, 6)[2] + 0_psw_aux_(2, 9, 16)[2] + 0_psw_aux_(1, 9, 15)[2] == 0, 0_p_(1, 9, 13)[3] + 0_p_(5, 9, 6)[3] + 0_psw_aux_(2, 9, 16)[3] + 0_psw_aux_(1, 9, 15)[3] == 0], 14 => [0_p_(7, 14, 7)[1] + 0_p_(8, 14, 8)[1] == 0, 0_p_(7, 14, 7)[2] + 0_p_(8, 14, 8)[2] + 115 0_z_demand[6] == 0, 0_p_(7, 14, 7)[3] + 0_p_(8, 14, 8)[3] + 115 0_z_demand[6] == 0], 3 => [0_p_(2, 3, 5)[1] + 0_p_(10, 3, 10)[1] + 160 0_z_demand[1] == 0, 0_p_(2, 3, 5)[2] + 0_p_(10, 3, 10)[2] + 120 0_z_demand[11] == 0, 0_p_(2, 3, 5)[3] + 0_p_(10, 3, 10)[3] + 120 0_z_demand[9] == 0], 7 => [0_p_(3, 7, 11)[1] + 0_p_(7, 7, 14)[1] == 0, 0_p_(3, 7, 11)[2] + 0_p_(7, 7, 14)[2] == 0, 0_p_(3, 7, 11)[3] + 0_p_(7, 7, 14)[3] + 170 0_z_demand[15] == 0], 4 => [0_p_(11, 4, 11)[1] + 128 0_z_demand[5] == 0, 0_p_(11, 4, 11)[2] == 0, 0_p_(11, 4, 11)[3] == 0], 13 => [0_p_(1, 13, 9)[1] + 17 0_z_demand[14] == 0, 0_p_(1, 13, 9)[2] + 66 0_z_demand[10] == 0, 0_p_(1, 13, 9)[3] + 117 0_z_demand[8] == 0], 15 => [0_p_(12, 15, 10)[1] + 0_psw_aux_(1, 15, 9)[1] == 0, 0_p_(12, 15, 10)[2] + 0_psw_aux_(1, 15, 9)[2] == 0, 0_p_(12, 15, 10)[3] + 0_psw_aux_(1, 15, 9)[3] == 0], 2 => [0_p_(9, 2, 1)[1] == 0, 0_p_(9, 2, 1)[2] == 0, 0_p_(9, 2, 1)[3] == 0], 10 => [0_p_(10, 10, 3)[1] + 0_p_(12, 10, 15)[1] == 0, 0_p_(10, 10, 3)[2] + 0_p_(12, 10, 15)[2] == 0, 0_p_(10, 10, 3)[3] + 0_p_(12, 10, 15)[3] == 0]), :mu_sm_switch => Dict{Tuple{Int64, Int64, Int64}, Vector{ConstraintRef}}(), :lam_kcl_i => Dict{Int64, Array{ConstraintRef}}(5 => [-200.00000000000003 0_z_shunt[1]*0_w_5[1] + 0_q_(4, 5, 12)[1] + 0_q_(2, 5, 3)[1] + 190 0_z_demand[4] == 0, -200.00000000000003 0_z_shunt[1]*0_w_5[2] + 0_q_(4, 5, 12)[2] + 0_q_(2, 5, 3)[2] + 60 0_z_demand[2] == 0, -200.00000000000003 0_z_shunt[1]*0_w_5[3] + 0_q_(4, 5, 12)[3] + 0_q_(2, 5, 3)[3] + 212 0_z_demand[12] == 0], 16 => [0_q_(13, 16, 8)[1] + 0_qsw_aux_(2, 16, 9)[1] == 0, 0_q_(13, 16, 8)[2] + 0_qsw_aux_(2, 16, 9)[2] == 0, 0_q_(13, 16, 8)[3] + 0_qsw_aux_(2, 16, 9)[3] == 0], 12 => [0_q_(4, 12, 5)[1] + 75.5 0_z_demand[13] == 0, 0_q_(4, 12, 5)[2] == 0, 0_q_(4, 12, 5)[3] + 75.5 0_z_demand[13] == 0], 8 => [0_q_(8, 8, 14)[1] + 0_q_(13, 8, 16)[1] == 0, 0_q_(8, 8, 14)[2] + 0_q_(13, 8, 16)[2] + 125 0_z_demand[7] == 0, 0_q_(8, 8, 14)[3] + 0_q_(13, 8, 16)[3] == 0], 1 => [0_q_(6, 1, 11)[1] + 0_q_(9, 1, 2)[1] + 220 0_z_demand[3] == 0, 0_q_(6, 1, 11)[2] + 0_q_(9, 1, 2)[2] + 220 0_z_demand[3] == 0, 0_q_(6, 1, 11)[3] + 0_q_(9, 1, 2)[3] + 220 0_z_demand[3] == 0], 6 => [0_q_(5, 6, 9)[1] - 0_qg_1[1] == 0, 0_q_(5, 6, 9)[2] - 0_qg_1[2] == 0, 0_q_(5, 6, 9)[3] - 0_qg_1[3] == 0], 11 => [0_q_(11, 11, 4)[1] + 0_q_(3, 11, 7)[1] + 0_q_(6, 11, 1)[1] == 0, 0_q_(11, 11, 4)[2] + 0_q_(3, 11, 7)[2] + 0_q_(6, 11, 1)[2] == 0, 0_q_(11, 11, 4)[3] + 0_q_(3, 11, 7)[3] + 0_q_(6, 11, 1)[3] == 0], 9 => [0_q_(1, 9, 13)[1] + 0_q_(5, 9, 6)[1] + 0_qsw_aux_(2, 9, 16)[1] + 0_qsw_aux_(1, 9, 15)[1] == 0, 0_q_(1, 9, 13)[2] + 0_q_(5, 9, 6)[2] + 0_qsw_aux_(2, 9, 16)[2] + 0_qsw_aux_(1, 9, 15)[2] == 0, 0_q_(1, 9, 13)[3] + 0_q_(5, 9, 6)[3] + 0_qsw_aux_(2, 9, 16)[3] + 0_qsw_aux_(1, 9, 15)[3] == 0], 14 => [0_q_(7, 14, 7)[1] + 0_q_(8, 14, 8)[1] == 0, 0_q_(7, 14, 7)[2] + 0_q_(8, 14, 8)[2] + 66 0_z_demand[6] == 0, 0_q_(7, 14, 7)[3] + 0_q_(8, 14, 8)[3] + 66 0_z_demand[6] == 0], 3 => [0_q_(2, 3, 5)[1] + 0_q_(10, 3, 10)[1] + 110 0_z_demand[1] == 0, 0_q_(2, 3, 5)[2] + 0_q_(10, 3, 10)[2] + 90 0_z_demand[11] == 0, 0_q_(2, 3, 5)[3] + 0_q_(10, 3, 10)[3] + 90 0_z_demand[9] == 0], 7 => [0_q_(3, 7, 11)[1] + 0_q_(7, 7, 14)[1] == 0, 0_q_(3, 7, 11)[2] + 0_q_(7, 7, 14)[2] == 0, -100.14814814814817 0_z_shunt[2]*0_w_7[3] + 0_q_(3, 7, 11)[3] + 0_q_(7, 7, 14)[3] + 80 0_z_demand[15] == 0], 4 => [0_q_(11, 4, 11)[1] + 86 0_z_demand[5] == 0, 0_q_(11, 4, 11)[2] == 0, 0_q_(11, 4, 11)[3] == 0], 13 => [0_q_(1, 13, 9)[1] + 10 0_z_demand[14] == 0, 0_q_(1, 13, 9)[2] + 38 0_z_demand[10] == 0, 0_q_(1, 13, 9)[3] + 68 0_z_demand[8] == 0], 15 => [0_q_(12, 15, 10)[1] + 0_qsw_aux_(1, 15, 9)[1] == 0, 0_q_(12, 15, 10)[2] + 0_qsw_aux_(1, 15, 9)[2] == 0, 0_q_(12, 15, 10)[3] + 0_qsw_aux_(1, 15, 9)[3] == 0], 2 => [0_q_(9, 2, 1)[1] == 0, 0_q_(9, 2, 1)[2] == 0, 0_q_(9, 2, 1)[3] == 0], 10 => [0_q_(10, 10, 3)[1] + 0_q_(12, 10, 15)[1] == 0, 0_q_(10, 10, 3)[2] + 0_q_(12, 10, 15)[2] == 0, 0_q_(10, 10, 3)[3] + 0_q_(12, 10, 15)[3] == 0]), :mu_cm_switch => Dict{Tuple{Int64, Int64, Int64}, Vector{ConstraintRef}}((2, 9, 16) => [-490000 0_switch_state_2[2]*0_w_9[1] + 0_psw_aux_(2, 9, 16)[1]² + 0_qsw_aux_(2, 9, 16)[1]² <= 0, -490000 0_switch_state_2[2]*0_w_9[2] + 0_psw_aux_(2, 9, 16)[2]² + 0_qsw_aux_(2, 9, 16)[2]² <= 0, -490000 0_switch_state_2[2]*0_w_9[3] + 0_psw_aux_(2, 9, 16)[3]² + 0_qsw_aux_(2, 9, 16)[3]² <= 0], (1, 9, 15) => [-490000 0_switch_state_1[1]*0_w_9[1] + 0_psw_aux_(1, 9, 15)[1]² + 0_qsw_aux_(1, 9, 15)[1]² <= 0, -490000 0_switch_state_1[1]*0_w_9[2] + 0_psw_aux_(1, 9, 15)[2]² + 0_qsw_aux_(1, 9, 15)[2]² <= 0, -490000 0_switch_state_1[1]*0_w_9[3] + 0_psw_aux_(1, 9, 15)[3]² + 0_qsw_aux_(1, 9, 15)[3]² <= 0])))))), Dict{Symbol, Any}(:dep => Dict{Symbol, Any}(), :it => Dict{Symbol, Any}(:pmd => Dict{Symbol, Any}(:nw => Dict{Int64, Any}(0 => Dict{Symbol, Any}(:branch => Dict{Any, Any}(5 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(5, 9, 6)[1]
+ 0_q_(5, 9, 6)[2]
+ 0_q_(5, 9, 6)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(5, 9, 6)[1]
+ 0_p_(5, 9, 6)[2]
+ 0_p_(5, 9, 6)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(5, 6, 9)[1]
+ 0_q_(5, 6, 9)[2]
+ 0_q_(5, 6, 9)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(5, 6, 9)[1]
+ 0_p_(5, 6, 9)[2]
+ 0_p_(5, 6, 9)[3]), 12 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(12, 10, 15)[1]
+ 0_q_(12, 10, 15)[2]
+ 0_q_(12, 10, 15)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(12, 10, 15)[1]
+ 0_p_(12, 10, 15)[2]
+ 0_p_(12, 10, 15)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(12, 15, 10)[1]
+ 0_q_(12, 15, 10)[2]
+ 0_q_(12, 15, 10)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(12, 15, 10)[1]
+ 0_p_(12, 15, 10)[2]
+ 0_p_(12, 15, 10)[3]), 8 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(8, 14, 8)[3]
+ 0_q_(8, 14, 8)[2]
+ 0_q_(8, 14, 8)[1], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(8, 14, 8)[3]
+ 0_p_(8, 14, 8)[2]
+ 0_p_(8, 14, 8)[1], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(8, 8, 14)[3]
+ 0_q_(8, 8, 14)[2]
+ 0_q_(8, 8, 14)[1], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(8, 8, 14)[3]
+ 0_p_(8, 8, 14)[2]
+ 0_p_(8, 8, 14)[1]), 1 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(1, 13, 9)[1]
+ 0_q_(1, 13, 9)[2]
+ 0_q_(1, 13, 9)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(1, 13, 9)[1]
+ 0_p_(1, 13, 9)[2]
+ 0_p_(1, 13, 9)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(1, 9, 13)[1]
+ 0_q_(1, 9, 13)[2]
+ 0_q_(1, 9, 13)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(1, 9, 13)[1]
+ 0_p_(1, 9, 13)[2]
+ 0_p_(1, 9, 13)[3]), 6 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(6, 11, 1)[1]
+ 0_q_(6, 11, 1)[2]
+ 0_q_(6, 11, 1)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(6, 11, 1)[1]
+ 0_p_(6, 11, 1)[2]
+ 0_p_(6, 11, 1)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(6, 1, 11)[1]
+ 0_q_(6, 1, 11)[2]
+ 0_q_(6, 1, 11)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(6, 1, 11)[1]
+ 0_p_(6, 1, 11)[2]
+ 0_p_(6, 1, 11)[3]), 11 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(11, 4, 11)[1]
+ 0_q_(11, 4, 11)[2]
+ 0_q_(11, 4, 11)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(11, 4, 11)[1]
+ 0_p_(11, 4, 11)[2]
+ 0_p_(11, 4, 11)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(11, 11, 4)[1]
+ 0_q_(11, 11, 4)[2]
+ 0_q_(11, 11, 4)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(11, 11, 4)[1]
+ 0_p_(11, 11, 4)[2]
+ 0_p_(11, 11, 4)[3]), 9 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(9, 2, 1)[1]
+ 0_q_(9, 2, 1)[2]
+ 0_q_(9, 2, 1)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(9, 2, 1)[1]
+ 0_p_(9, 2, 1)[2]
+ 0_p_(9, 2, 1)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(9, 1, 2)[1]
+ 0_q_(9, 1, 2)[2]
+ 0_q_(9, 1, 2)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(9, 1, 2)[1]
+ 0_p_(9, 1, 2)[2]
+ 0_p_(9, 1, 2)[3]), 3 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(3, 7, 11)[3]
+ 0_q_(3, 7, 11)[2]
+ 0_q_(3, 7, 11)[1], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(3, 7, 11)[3]
+ 0_p_(3, 7, 11)[2]
+ 0_p_(3, 7, 11)[1], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(3, 11, 7)[3]
+ 0_q_(3, 11, 7)[2]
+ 0_q_(3, 11, 7)[1], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [3, 2, 1]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(3, 11, 7)[3]
+ 0_p_(3, 11, 7)[2]
+ 0_p_(3, 11, 7)[1]), 7 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(7, 7, 14)[1]
+ 0_q_(7, 7, 14)[2]
+ 0_q_(7, 7, 14)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(7, 7, 14)[1]
+ 0_p_(7, 7, 14)[2]
+ 0_p_(7, 7, 14)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(7, 14, 7)[1]
+ 0_q_(7, 14, 7)[2]
+ 0_q_(7, 14, 7)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(7, 14, 7)[1]
+ 0_p_(7, 14, 7)[2]
+ 0_p_(7, 14, 7)[3]), 4 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(4, 5, 12)[1]
+ 0_q_(4, 5, 12)[2]
+ 0_q_(4, 5, 12)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(4, 5, 12)[1]
+ 0_p_(4, 5, 12)[2]
+ 0_p_(4, 5, 12)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(4, 12, 5)[1]
+ 0_q_(4, 12, 5)[2]
+ 0_q_(4, 12, 5)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(4, 12, 5)[1]
+ 0_p_(4, 12, 5)[2]
+ 0_p_(4, 12, 5)[3]), 13 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(13, 8, 16)[1]
+ 0_q_(13, 8, 16)[2]
+ 0_q_(13, 8, 16)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(13, 8, 16)[1]
+ 0_p_(13, 8, 16)[2]
+ 0_p_(13, 8, 16)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(13, 16, 8)[1]
+ 0_q_(13, 16, 8)[2]
+ 0_q_(13, 16, 8)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(13, 16, 8)[1]
+ 0_p_(13, 16, 8)[2]
+ 0_p_(13, 16, 8)[3]), 2 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(2, 5, 3)[1]
+ 0_q_(2, 5, 3)[2]
+ 0_q_(2, 5, 3)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(2, 5, 3)[1]
+ 0_p_(2, 5, 3)[2]
+ 0_p_(2, 5, 3)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(2, 3, 5)[1]
+ 0_q_(2, 3, 5)[2]
+ 0_q_(2, 3, 5)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(2, 3, 5)[1]
+ 0_p_(2, 3, 5)[2]
+ 0_p_(2, 3, 5)[3]), 10 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(10, 3, 10)[1]
+ 0_q_(10, 3, 10)[2]
+ 0_q_(10, 3, 10)[3], :pt => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(10, 3, 10)[1]
+ 0_p_(10, 3, 10)[2]
+ 0_p_(10, 3, 10)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_q_(10, 10, 3)[1]
+ 0_q_(10, 10, 3)[2]
+ 0_q_(10, 10, 3)[3], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_p_(10, 10, 3)[1]
+ 0_p_(10, 10, 3)[2]
+ 0_p_(10, 10, 3)[3])), :switch => Dict{Any, Any}(2 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{AffExpr,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{AffExpr}:
+ -0_qsw_(2, 9, 16)[1]
+ -0_qsw_(2, 9, 16)[2]
+ -0_qsw_(2, 9, 16)[3], :pt => 1-dimensional DenseAxisArray{AffExpr,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{AffExpr}:
+ -0_psw_(2, 9, 16)[1]
+ -0_psw_(2, 9, 16)[2]
+ -0_psw_(2, 9, 16)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_(2, 9, 16)[1]
+ 0_qsw_(2, 9, 16)[2]
+ 0_qsw_(2, 9, 16)[3], :state => 0_switch_state_2[2], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_(2, 9, 16)[1]
+ 0_psw_(2, 9, 16)[2]
+ 0_psw_(2, 9, 16)[3]), 1 => Dict{Any, Any}(:qt => 1-dimensional DenseAxisArray{AffExpr,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{AffExpr}:
+ -0_qsw_(1, 9, 15)[1]
+ -0_qsw_(1, 9, 15)[2]
+ -0_qsw_(1, 9, 15)[3], :pt => 1-dimensional DenseAxisArray{AffExpr,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{AffExpr}:
+ -0_psw_(1, 9, 15)[1]
+ -0_psw_(1, 9, 15)[2]
+ -0_psw_(1, 9, 15)[3], :qf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qsw_(1, 9, 15)[1]
+ 0_qsw_(1, 9, 15)[2]
+ 0_qsw_(1, 9, 15)[3], :state => 0_switch_state_1[1], :pf => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_psw_(1, 9, 15)[1]
+ 0_psw_(1, 9, 15)[2]
+ 0_psw_(1, 9, 15)[3])), :block => Dict{Any, Any}(2 => Dict{Any, Any}(:status => 0_z_block[2]), 3 => Dict{Any, Any}(:status => 0_z_block[3]), 1 => Dict{Any, Any}(:status => 0_z_block[1])), :gen => Dict{Any, Any}(1 => Dict{Any, Any}(:qg => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qg_1[1]
+ 0_qg_1[2]
+ 0_qg_1[3], :block => 3, :qg_bus => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_qg_1[1]
+ 0_qg_1[2]
+ 0_qg_1[3], :gen_status => 0_z_gen[1], :pg => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_pg_1[1]
+ 0_pg_1[2]
+ 0_pg_1[3], :pg_bus => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_pg_1[1]
+ 0_pg_1[2]
+ 0_pg_1[3])), :bus => Dict{Any, Any}(5 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_5[1]
+ 0_w_5[2]
+ 0_w_5[3], :status => 0_z_voltage[5], :block => 1), 16 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_16[1]
+ 0_w_16[2]
+ 0_w_16[3], :status => 0_z_voltage[16], :block => 2), 12 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_12[1]
+ 0_w_12[2]
+ 0_w_12[3], :status => 0_z_voltage[12], :block => 1), 8 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_8[1]
+ 0_w_8[2]
+ 0_w_8[3], :status => 0_z_voltage[8], :block => 2), 1 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_1[1]
+ 0_w_1[2]
+ 0_w_1[3], :status => 0_z_voltage[1], :block => 2), 6 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_6[1]
+ 0_w_6[2]
+ 0_w_6[3], :status => 0_z_voltage[6], :block => 3), 11 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_11[1]
+ 0_w_11[2]
+ 0_w_11[3], :status => 0_z_voltage[11], :block => 2), 9 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_9[1]
+ 0_w_9[2]
+ 0_w_9[3], :status => 0_z_voltage[9], :block => 3), 14 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_14[1]
+ 0_w_14[2]
+ 0_w_14[3], :status => 0_z_voltage[14], :block => 2), 3 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_3[1]
+ 0_w_3[2]
+ 0_w_3[3], :status => 0_z_voltage[3], :block => 1), 7 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_7[1]
+ 0_w_7[2]
+ 0_w_7[3], :status => 0_z_voltage[7], :block => 2), 4 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_4[1]
+ 0_w_4[2]
+ 0_w_4[3], :status => 0_z_voltage[4], :block => 2), 13 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_13[1]
+ 0_w_13[2]
+ 0_w_13[3], :status => 0_z_voltage[13], :block => 3), 15 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_15[1]
+ 0_w_15[2]
+ 0_w_15[3], :status => 0_z_voltage[15], :block => 1), 2 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_2[1]
+ 0_w_2[2]
+ 0_w_2[3], :status => 0_z_voltage[2], :block => 2), 10 => Dict{Any, Any}(:w => 1-dimensional DenseAxisArray{VariableRef,1,...} with index sets:
+    Dimension 1, [1, 2, 3]
+And data, a 3-element Vector{VariableRef}:
+ 0_w_10[1]
+ 0_w_10[2]
+ 0_w_10[3], :status => 0_z_voltage[10], :block => 1)), :shunt => Dict{Any, Any}(2 => Dict{Any, Any}(:status => 0_z_shunt[2]), 1 => Dict{Any, Any}(:status => 0_z_shunt[1])), :load => Dict{Any, Any}(5 => Dict{Any, Any}(:pshed => 0_pshed[5], :status => 0_z_demand[5], :qshed => 0_qshed[5], :qd => AffExpr[86 0_z_demand[5]], :block => 2, :pd => AffExpr[128 0_z_demand[5]]), 12 => Dict{Any, Any}(:pshed => 0_pshed[12], :status => 0_z_demand[12], :qshed => 0_qshed[12], :qd => AffExpr[212 0_z_demand[12]], :block => 1, :pd => AffExpr[290 0_z_demand[12]]), 8 => Dict{Any, Any}(:pshed => 0_pshed[8], :status => 0_z_demand[8], :qshed => 0_qshed[8], :qd => AffExpr[68 0_z_demand[8]], :block => 3, :pd => AffExpr[117 0_z_demand[8]]), 1 => Dict{Any, Any}(:pshed => 0_pshed[1], :status => 0_z_demand[1], :qshed => 0_qshed[1], :qd => AffExpr[110 0_z_demand[1]], :block => 1, :pd => AffExpr[160 0_z_demand[1]]), 6 => Dict{Any, Any}(:pshed => 0_pshed[6], :status => 0_z_demand[6], :qshed => 0_qshed[6], :qd => AffExpr[66 0_z_demand[6], 66 0_z_demand[6]], :block => 2, :pd => AffExpr[115 0_z_demand[6], 115 0_z_demand[6]]), 11 => Dict{Any, Any}(:pshed => 0_pshed[11], :status => 0_z_demand[11], :qshed => 0_qshed[11], :qd => AffExpr[90 0_z_demand[11]], :block => 1, :pd => AffExpr[120 0_z_demand[11]]), 9 => Dict{Any, Any}(:pshed => 0_pshed[9], :status => 0_z_demand[9], :qshed => 0_qshed[9], :qd => AffExpr[90 0_z_demand[9]], :block => 1, :pd => AffExpr[120 0_z_demand[9]]), 14 => Dict{Any, Any}(:pshed => 0_pshed[14], :status => 0_z_demand[14], :qshed => 0_qshed[14], :qd => AffExpr[10 0_z_demand[14]], :block => 3, :pd => AffExpr[17 0_z_demand[14]]), 3 => Dict{Any, Any}(:pshed => 0_pshed[3], :status => 0_z_demand[3], :qshed => 0_qshed[3], :qd => AffExpr[220 0_z_demand[3], 220 0_z_demand[3], 220 0_z_demand[3]], :block => 2, :pd => AffExpr[385 0_z_demand[3], 385 0_z_demand[3], 385 0_z_demand[3]]), 7 => Dict{Any, Any}(:pshed => 0_pshed[7], :status => 0_z_demand[7], :qshed => 0_qshed[7], :qd => AffExpr[125 0_z_demand[7]], :block => 2, :pd => AffExpr[170 0_z_demand[7]]), 4 => Dict{Any, Any}(:pshed => 0_pshed[4], :status => 0_z_demand[4], :qshed => 0_qshed[4], :qd => AffExpr[190 0_z_demand[4]], :block => 1, :pd => AffExpr[485 0_z_demand[4]]), 13 => Dict{Any, Any}(:pshed => 0_pshed[13], :status => 0_z_demand[13], :qshed => 0_qshed[13], :qd => AffExpr[75.5 0_z_demand[13], 75.5 0_z_demand[13]], :block => 1, :pd => AffExpr[85 0_z_demand[13], 85 0_z_demand[13]]), 15 => Dict{Any, Any}(:pshed => 0_pshed[15], :status => 0_z_demand[15], :qshed => 0_qshed[15], :qd => AffExpr[80 0_z_demand[15]], :block => 2, :pd => AffExpr[170 0_z_demand[15]]), 2 => Dict{Any, Any}(:pshed => 0_pshed[2], :status => 0_z_demand[2], :qshed => 0_qshed[2], :qd => AffExpr[60 0_z_demand[2]], :block => 1, :pd => AffExpr[68 0_z_demand[2]]), 10 => Dict{Any, Any}(:pshed => 0_pshed[10], :status => 0_z_demand[10], :qshed => 0_qshed[10], :qd => AffExpr[38 0_z_demand[10]], :block => 3, :pd => AffExpr[66 0_z_demand[10]]))))))), Dict{Symbol, Any}(:dep => Dict{Symbol, Any}(), :it => Dict{Symbol, Any}(:pmd => Dict{Symbol, Any}(:nw => Dict{Int64, Any}(0 => Dict{Symbol, Any}())))), Dict{Symbol, Any}())

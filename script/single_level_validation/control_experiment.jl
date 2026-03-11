@@ -43,7 +43,7 @@ gurobi = Gurobi.Optimizer
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "ieee123_aw_mod"# "motivation_c"
+case = "motivation_a"
 gen_cap = 0.8
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])

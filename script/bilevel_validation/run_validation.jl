@@ -423,11 +423,8 @@ for r in 1:N_ROUNDS
 
     math_out[r] = update_network(
         math_random_test[r],
-        bernoulli_block_selection_exp[r],
-        bernoulli_load_selection_exp[r],
         bernoulli_switch_selection_exp[r],
-        ref, r
-    )
+        ref)
 end
 if math_out == [nothing for _ in 1:N_ROUNDS]
     @error "[$CASE/$FAIR_FUNC] FAILED — no feasible radial topology found across all $N_ROUNDS rounds. Check warnings above for failure stage RADIAL FEASIBILITY."
@@ -510,7 +507,7 @@ if isempty(mld_rounded_results)
     @error "[$CASE/$FAIR_FUNC] FAILED — no feasible rounded MLD solution found across all $N_ROUNDS rounds. Check warnings above for failure stage ROUNDED MLD SOLVE."
     error("No feasible solution — cannot proceed to AC feasibility test")
 end
-best_set, best_mld = find_best_mld_solution(mld_rounded_results, ipopt)
+best_set, best_mld = find_best_mld_solution(mld_rounded_results, ipopt_solver)
 math_rounded = math_rounded_results[best_set]
 mld_rounded = mld_rounded_results[best_set]
 

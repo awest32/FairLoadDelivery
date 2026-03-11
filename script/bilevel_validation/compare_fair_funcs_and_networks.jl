@@ -164,23 +164,6 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
         else
             @warn "Round $r failed: no valid radial topology found, skipping rounded MLD solve and ACPF."
         end
-
-        # Updated network data dictionary for AC power flow
-        if !isempty(math_out)
-            math_ac = ac_network_update(math_out[r], ref; mld_solution=mld_rounded)
-            # Solve AC power flow
-            pf_ac = solve_mc_pf(math_ac, IVRUPowerModel, ipopt);
-            if pf_ac["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
-                @info "Round $r succeeded with AC power flow solve after random rounding."
-                push!(math_out_ac, math_ac)
-                push!(ac_results, pf_ac)
-                push!(ac_tested, r)
-            else
-                @warn "Round $r failed at: AC POWER FLOW SOLVE — termination status: $(pf_ac["termination_status"])"
-            end
-        else
-            @warn "No valid rounded MLD solution found in round $r, skipping AC power flow solve."
-        end
     end
     return math_out, mld_results, ref
 end
@@ -240,7 +223,7 @@ function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dic
     ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
 
     ac_term = ac_result["termination_status"]
-    ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED)
+    ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ALMOST_LOCALLY_SOLVED)
 
     ac_checks["ac_convergence"] = Dict("passed" => ac_converged, "details" => ["Status: $ac_term"])
 
@@ -804,7 +787,7 @@ function run_comparison()
             pct_served = (final_pd_served / total_demand) * 100
 
             println("shed=$(round(pct_shed, digits=2))%, served=$(round(pct_served, digits=2))%")
-
+            
             push!(results, (
                 case,
                 fair_func,
@@ -910,22 +893,26 @@ for case in CASES
         acpf_solution = sol_data[:acpf]
         math_ac = sol_data[:acpf_math]
 
-        # Create network plot
-        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_mld.svg")
-        FairLoadDelivery.plot_network_load_shed(
-            mld_solution["solution"],
-            math_data;
-            output_file=plot_filename
-        )
-        println("    Saved network_$(case)_$(fair_func)_mld.svg")
+        # Create network plots only if ACPF converged
+        if sol_data[:summary]["converged"]
+            plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_mld.svg")
+            FairLoadDelivery.plot_network_load_shed(
+                mld_solution["solution"],
+                math_data;
+                output_file=plot_filename
+            )
+            println("    Saved network_$(case)_$(fair_func)_mld.svg")
 
-        plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_acpf.svg")
-        FairLoadDelivery.plot_network_load_shed(
-            acpf_solution["solution"],
-            math_ac;
-            output_file=plot_filename, ac_flag=true
-        )
-        println("    Saved network_$(case)_$(fair_func)_acpf.svg")
+            plot_filename = joinpath(save_dir, "network_$(case)_$(fair_func)_acpf.svg")
+            FairLoadDelivery.plot_network_load_shed(
+                acpf_solution["solution"],
+                math_ac;
+                output_file=plot_filename, ac_flag=true
+            )
+            println("    Saved network_$(case)_$(fair_func)_acpf.svg")
+        else
+            @warn "[$case/$fair_func] Skipping network plots — AC power flow did not converge ($(sol_data[:summary]["termination_status"]))"
+        end
 
         # Save solution data as CSV
         solution = mld_solution["solution"]

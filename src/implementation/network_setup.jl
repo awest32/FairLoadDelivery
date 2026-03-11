@@ -51,9 +51,15 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     get(eng, "time_series", Dict())
 
     # Update the voltage limits
+        
     for (i,bus) in math["bus"]
-            bus["vmax"][:] .= 1.05
-            bus["vmin"][:] .= 0.95
+            if bus["name"] == "rg60"
+                    bus["vmax"][:] .= 1.03
+                    bus["vmin"][:] .= 1.03
+            else
+                bus["vmax"][:] .= 1.05
+                bus["vmin"][:] .= 0.95
+            end
     end
 
     # Update the current limits on the switches based upon the case
@@ -349,27 +355,66 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
         data["block"][string(b)]["state"] = 1
     end
 
-    # De-energize loads, shunts, and branches on disconnected blocks using MLD solution
+    # Copy topology from the integer MLD solution
     if mld_solution !== nothing
         sol = mld_solution["solution"]
 
-        # De-energize loads with status <= 0
+        # 1. Apply switch states from MLD solution
+        if haskey(sol, "switch")
+            for (sid, sw_sol) in sol["switch"]
+                if haskey(data["switch"], sid) && haskey(sw_sol, "state")
+                    data["switch"][sid]["state"] = sw_sol["state"]
+                    data["switch"][sid]["status"] = sw_sol["state"]
+                    data["switch"][sid]["dispatchable"] = 1.0
+                end
+            end
+        end
+
+        # 2. Apply block states from MLD solution
+        if haskey(sol, "block")
+            for (bid, block_sol) in sol["block"]
+                if haskey(data["block"], bid) && haskey(block_sol, "status")
+                    data["block"][bid]["state"] = block_sol["status"]
+                end
+            end
+        end
+
+        # 3. Apply load setpoints: copy served pd/qd, de-energize shed loads
         if haskey(sol, "load")
             for (lid, load_sol) in sol["load"]
-                if haskey(load_sol, "status") && load_sol["status"] <= 0.0
-                    if haskey(data["load"], lid)
+                if haskey(data["load"], lid)
+                    if haskey(load_sol, "status") && load_sol["status"] <= 0.0
                         for phase in 1:length(data["load"][lid]["pd"])
                             data["load"][lid]["pd"][phase] = 0.0
                             data["load"][lid]["qd"][phase] = 0.0
                         end
                         data["load"][lid]["status"] = 0.0
+                    elseif haskey(load_sol, "pd") && haskey(load_sol, "qd")
+                        for phase in 1:length(data["load"][lid]["pd"])
+                            data["load"][lid]["pd"][phase] = load_sol["pd"][phase]
+                            data["load"][lid]["qd"][phase] = load_sol["qd"][phase]
+                        end
+                    end
+                end
+            end
+        end
+
+        # 4. De-energize buses on disconnected blocks
+        if haskey(sol, "block")
+            for (bus_id, block_id) in ref[:bus_block_map]
+                block_id_str = string(block_id)
+                if haskey(sol["block"], block_id_str) && sol["block"][block_id_str]["status"] <= 0.0
+                    bus_id_str = string(bus_id)
+                    if haskey(data["bus"], bus_id_str)
+                        data["bus"][bus_id_str]["bus_type"] = 4
+                        data["bus"][bus_id_str]["status"] = 0
                     end
                 end
             end
         end
 
         # De-energize shunts on disconnected blocks
-        if haskey(sol, "block") && !isempty(ref[:shunt])
+        if haskey(sol, "block") && haskey(ref, :shunt_block_map) && !isempty(ref[:shunt])
             for (shunt_id, shunt_data) in data["shunt"]
                 block_id = ref[:shunt_block_map][parse(Int, shunt_id)]
                 block_id_str = string(block_id)
@@ -392,15 +437,24 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
             end
         end
 
-        # De-energize buses on disconnected blocks
-        if haskey(sol, "block")
-            for (bus_id, block_id) in ref[:bus_block_map]
-                block_id_str = string(block_id)
-                if haskey(sol["block"], block_id_str) && sol["block"][block_id_str]["status"] <= 0.0
-                    bus_id_str = string(bus_id)
-                    if haskey(data["bus"], bus_id_str)
-                        data["bus"][bus_id_str]["bus_type"] = 4
-                        data["bus"][bus_id_str]["status"] = 0
+        # 5. De-energize storage on disconnected blocks
+        if haskey(sol, "storage") && haskey(data, "storage")
+            for (stid, st_sol) in sol["storage"]
+                if haskey(data["storage"], stid) && haskey(st_sol, "status") && st_sol["status"] <= 0.0
+                    data["storage"][stid]["status"] = 0.0
+                end
+            end
+        end
+
+        # 6. Copy generator status from MLD solution (skip source bus generator)
+        if haskey(sol, "gen")
+            for (gid, gen_sol) in sol["gen"]
+                if haskey(data["gen"], gid)
+                    if data["gen"][gid]["source_id"] == "voltage_source.source"
+                        continue
+                    end
+                    if haskey(gen_sol, "gen_status")
+                        data["gen"][gid]["gen_status"] = gen_sol["gen_status"]
                     end
                 end
             end

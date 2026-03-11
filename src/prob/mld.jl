@@ -307,7 +307,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -411,7 +411,7 @@ function build_mc_mld_shedding_random_rounding(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     #constraint_mc_radiality(pm)
@@ -520,7 +520,7 @@ function build_mc_mld_shedding_random_rounding_integer(pm::_PMD.AbstractUBFModel
        _PMD.constraint_mc_transformer_power(pm, i)
     end
     
-    ##constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block_ref(pm)
     constraint_radial_topology(pm)
     # #constraint_mc_radiality(pm)
@@ -584,7 +584,7 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
 
 
 
-   	 _PMD.constraint_mc_model_current(pm)
+   	_PMD.constraint_mc_model_current(pm)
 
      for i in _PMD.ids(pm, :ref_buses)
          _PMD.constraint_mc_theta_ref(pm, i)
@@ -617,8 +617,8 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
 
     for i in _PMD.ids(pm, :branch)
         _PMD.constraint_mc_power_losses(pm, i)
-        #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
-        FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
+         #_PMD.constraint_mc_model_voltage_magnitude_difference(pm,i)
+         FairLoadDelivery.constraint_model_voltage_magnitude_difference_fld(pm,i)
         #constraint_mc_model_voltage_magnitude_difference_block(pm,i)
         _PMD.constraint_mc_voltage_angle_difference(pm, i)
 
@@ -639,11 +639,11 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
-    constraint_mc_isolate_block(pm)
+    constraint_source_voltage_bounds(pm)
+    #constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # #constraint_mc_radiality(pm)
-    #constraint_mc_block_energization_consistency_bigm(pm)
+    constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)
@@ -671,9 +671,12 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     # #objective_fair_max_load_served(pm,"jain")
     # #objective_fairly_weighted_max_load_served_with_penalty(pm)
     # #objective_fairly_weighted_min_load_shed(pm)
-
-    # JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    # print(pm.model)
+    JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    open("integer_mld_mdel.txt", "w") do io
+        redirect_stdout(io) do
+            print(pm)
+        end
+    end
 
 end
 
@@ -765,7 +768,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     for i in _PMD.ids(pm, :transformer)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # constraint_mc_radiality(pm)
@@ -867,7 +870,7 @@ function build_mc_mld_equality_min(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -951,7 +954,7 @@ function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1037,7 +1040,7 @@ function build_mc_mld_min_max(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1121,7 +1124,7 @@ function build_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1207,7 +1210,7 @@ function build_mc_mld_proportional_fairness(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1292,7 +1295,7 @@ function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1377,7 +1380,7 @@ function build_mc_mld_jain(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1461,7 +1464,7 @@ function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1711,7 +1714,7 @@ function build_mc_mld_gini(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
@@ -1795,7 +1798,7 @@ function build_mc_mld_gini_integer(pm::_PMD.AbstractUBFModels)
        _PMD.constraint_mc_transformer_power(pm, i)
     end
 
-    #constraint_source_voltage_bounds(pm)
+    constraint_source_voltage_bounds(pm)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
 
