@@ -211,7 +211,7 @@ function check_binary_solution(mld::Dict)
     return isempty(violations), violations
 end
 
-function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dict{Symbol,Any}, mld_solution::Dict{String,Any})
+function run_acopf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dict{Symbol,Any}, mld_solution::Dict{String,Any})
     ac_checks = Dict{String, Any}()
     ac_summary = Dict{String, Any}()
 
@@ -220,7 +220,7 @@ function run_acpf_on_rounded_solution(math_rounded::Dict, ipopt_solver, ref::Dic
 
     # Run AC power flow
     println("  Running AC power flow (IVRUPowerModel)...")
-    ac_result = PowerModelsDistribution.solve_mc_pf(math_ac, IVRUPowerModel, ipopt_solver)
+    ac_result = PowerModelsDistribution.solve_mc_opf(math_ac, IVRUPowerModel, ipopt_solver)
 
     ac_term = ac_result["termination_status"]
     ac_converged = (ac_term == MOI.OPTIMAL || ac_term == MOI.LOCALLY_SOLVED || ac_term == MOI.ALMOST_LOCALLY_SOLVED)
@@ -770,7 +770,7 @@ function run_comparison()
             )
 
         
-            acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
+            acpf, math_ac, ac_checks, ac_summary = run_acopf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
             
             # Store solution for plotting
             solutions_for_plotting[case][fair_func] = Dict(
