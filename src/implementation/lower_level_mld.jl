@@ -41,26 +41,27 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
     n_pshed = length(pshed_keys)
     #n_pserved = length(pserved_keys)
 
+    # Solve once — perturbations only affect differentiation direction, not the optimal solution
+    optimize!(model)
+
     # Build Jacobian column by column
-    
     jacobian = zeros(n_pshed, n_weights)
-    #dpshed = Dict{Any,Any}()
     for j in 1:n_weights
+        # Clear previous perturbation before setting next direction
+        DiffOpt.empty_input_sensitivities!(model)
+
         # Perturb ONLY weight j (standard basis vector e_j)
         for (k, wkey) in enumerate(weight_keys)
             perturbation = (k == j) ? fair_load_weights[j] : 0.0
             DiffOpt.set_forward_parameter(model, weight_params[wkey], perturbation)
         end
 
-        optimize!(model);
-
         # Compute derivatives
-        DiffOpt.forward_differentiate!(model);
-        
+        DiffOpt.forward_differentiate!(model)
+
         # Extract column j: [∂pshed[1]/∂weight[j], ∂pshed[2]/∂weight[j], ...]
         for (i, pkey) in enumerate(pshed_keys)
             jacobian[i, j] = DiffOpt.get_forward_variable(model, pshed_vars[pkey])
-            #dpshed[i,pkey] = jacobian[i, j]
         end
     end
     

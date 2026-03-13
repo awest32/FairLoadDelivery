@@ -28,10 +28,12 @@ using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
 using Dates
+using Logging, LoggingExtras
 
 # Load validation utilities
 include("validation_utils.jl")
 include("../../src/implementation/other_fair_funcs.jl")
+include("../../src/implementation/load_shed_as_parameter.jl")
 
 # ============================================================
 # CONFIGURATION
@@ -39,8 +41,8 @@ include("../../src/implementation/other_fair_funcs.jl")
 const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
-const ITERATIONS = 5
-const FAIR_FUNC = "efficiency"  # simplest fairness function for testing
+const ITERATIONS = 1
+const FAIR_FUNC = "proportional"  # simplest fairness function for testing
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 6
 
@@ -58,6 +60,14 @@ validation_results = Dict{String, Any}(
 
 save_dir = "results/$(Dates.today())/bilevel_validation/$CASE/$FAIR_FUNC"
 mkpath(save_dir)
+
+# Set up persistent file logging (console + file)
+log_file = joinpath(save_dir, "run_validation.log")
+global_logger(TeeLogger(
+    global_logger(),
+    FileLogger(log_file)
+))
+@info "Logging to $log_file"
 
 # ============================================================
 # STEP 1: NETWORK SETUP
@@ -196,7 +206,7 @@ for k in 1:ITERATIONS
     println("\n  --- Iteration $k ---")
 
     # Solve lower-level
-    dpshed_k, pshed_val_k, pshed_ids_k, weight_vals_k, weight_ids_k, model_k = lower_level_soln(math_new, fair_weights, k)
+    dpshed_k, pshed_val_k, pshed_ids_k, weight_vals_k, weight_ids_k, model_k = lower_level_soln(math_new, fair_weights, k);
 
     # Check label consistency at each iteration
     passed_k, issues_k = check_label_consistency(math_new, pshed_ids_k, weight_ids_k, "iteration_$k")
@@ -207,22 +217,25 @@ for k in 1:ITERATIONS
 
     # Apply upper-level fairness function
     if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "proportional"
-        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
+        pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
     elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
+        pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
     elseif FAIR_FUNC == "jain"
-        pshed_new, fair_weight_vals = jains_fairness_index(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "equality_min"
-        pshed_new, fair_weight_vals = equality_min(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = equality_min(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "palma"
         pd = Float64[]
         for i in pshed_ids_k
             push!(pd, sum(math_new["load"][string(i)]["pd"]))
         end
-        pshed_new, fair_weight_vals = lin_palma_w_grad_input(dpshed_k, pshed_val_k, weight_vals_k, pd)
+        pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed_k, pshed_val_k, weight_vals_k, pd)
     end
+    
+    @info "[$FAIR_FUNC] Iteration $k: upper-level status = $status (type: $(typeof(status)))"
+
 
     # Update weights in math dict
     math_before_update = deepcopy(math_new)
@@ -233,7 +246,12 @@ for k in 1:ITERATIONS
     # Check weight update consistency
     passed_w, issues_w = check_weight_update_consistency(math_before_update, math_new, weight_ids_k, fair_weight_vals)
     if !passed_w
-        @error "    [X] Weight update inconsistency: $(join(issues_w, "; "))"
+        error("    [X] Weight update inconsistency: $(join(issues_w, "; "))")
+    else 
+        if (status == "MOI.INFEASIBLE" || status == "MOI.UNBOUNDED" ) && k == 1
+            error("    [!] Fairness optimization reported infeasibility at iteration $k. Check the fairness function implementation and input data.")
+        end
+            println("    Fairness optimization status: $status")
     end
 
     push!(all_pshed_lower, sum(pshed_val_k))
@@ -244,13 +262,13 @@ for k in 1:ITERATIONS
     println("    Lower-level shed: $(sum(pshed_val_k)), Upper-level shed: $(sum(pshed_new))")
     println("    Weights: $fair_weight_vals")
 end
-
+error("    [!] Ending iterations early for testing purposes. Remove this break statement to run full iterations.")
 relaxed_checks["iteration_label_consistency"] = Dict("passed" => iteration_label_consistent)
 print_check_result("Label consistency across all iterations", iteration_label_consistent)
 
 # Now solve the relaxed MLD with the final weights and check limits
-println("\n  Solving relaxed MLD with final weights...")
-mld_relaxed_final = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math_new, ipopt_solver; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
+print_validation_header("Step 3: Solving relaxed MLD with final weights...")
+mld_relaxed_final = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math_new, ipopt_solver; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]);
 
 # Check voltage limits on relaxed solution
 v_passed, v_violations, v_summary = check_voltage_limits_relaxed(mld_relaxed_final, math_new)

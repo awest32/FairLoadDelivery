@@ -104,8 +104,8 @@ function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64}, n_sa
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states_bern
             p_clamped = clamp(p, 0.0, 1.0)
-            @info " The Bernoulli switch state for round $i is $p"
-            @info " The clamped Bernoulli switch state for round $i is $p_clamped"
+            # @info " The Bernoulli switch state for round $i is $p"
+            # @info " The clamped Bernoulli switch state for round $i is $p_clamped"
             sample[switch_id] = rand(local_rng, Bernoulli(p_clamped))
         end
         samples[i] = sample

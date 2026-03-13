@@ -230,7 +230,7 @@ function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
     pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(Ipopt.Optimizer))
     # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
     # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
-    @info pm.model typeof(pm.model)
+    #@info pm.model typeof(pm.model)
     
     _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)

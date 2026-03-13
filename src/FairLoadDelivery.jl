@@ -45,6 +45,8 @@ const pmd_it_sym = Symbol(pmd_it_name)
 
 #const M = 1e20
 const zero_tol = 1e-9
+const TRUST_RADIUS = 0.5
+
 # Explicit imports for later export
 import InfrastructureModels: optimize_model!, @im_fields, nw_id_default, ismultinetwork, update_data!
 import PowerModelsDistribution.PolyhedralRelaxations: FormulationInfo, _build_univariate_lp_relaxation!
@@ -81,6 +83,7 @@ export build_mc_mld_jain, build_mc_mld_jain_integer, objective_jain_mld, objecti
 export build_mc_mld_palma, build_mc_mld_palma_integer, objective_palma_mld, objective_palma_mld_maxmin
 export solve_mc_mld_gini, solve_mc_mld_gini_integer
 export build_mc_mld_gini, build_mc_mld_gini_integer, objective_gini_mld
+export TRUST_RADIUS
 export setup_network, lower_level_soln,generate_bernoulli_samples, radiality_check, update_network, ac_feasibility_test, ac_network_update, ensure_switches_in_solution!
 export lin_palma_reformulated, lin_palma_w_grad_input, proportional_fairness_load_shed, complete_efficiency_load_shed, min_max_load_shed, jains_fairness_index
 export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder, visualize_network_svg, plot_network_load_shed, build_load_name_map, build_bus_name_maps

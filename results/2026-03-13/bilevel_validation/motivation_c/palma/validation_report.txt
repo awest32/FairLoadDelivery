@@ -1,0 +1,56 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_c
+  Fairness Function: palma
+  Iterations: 1
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [+] voltage_limits: PASS
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] block_label_consistency: PASS
+    [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [X] current_limits_ac: FAIL
+        - (switch_id = "4", phase = 1, s_squared = 357993.30238405446, limit = 40000.0, utilization_pct = 299.16270756231233, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "4", phase = 2, s_squared = 196623.50723965012, limit = 40000.0, utilization_pct = 221.71124646691368, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "4", phase = 3, s_squared = 351550.8287059625, limit = 40000.0, utilization_pct = 296.4586095502889, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "5", phase = 2, s_squared = 117857.76911953613, limit = 40000.0, utilization_pct = 171.65209663701762, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "2", phase = 1, s_squared = 576785.1758945211, limit = 40000.0, utilization_pct = 379.7318711586246, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "2", phase = 3, s_squared = 289151.2147104893, limit = 40000.0, utilization_pct = 268.8639129329601, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "6", phase = 1, s_squared = 330168.6603767776, limit = 40000.0, utilization_pct = 287.30152295836234, z_switch = 1.0, w = 1.0, rating = 200.0)
+        - (switch_id = "6", phase = 3, s_squared = 151119.32442019926, limit = 40000.0, utilization_pct = 194.37034523056704, z_switch = 1.0, w = 1.0, rating = 200.0)
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 8
+    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+
+  TOTALS: 23 checks, 21 passed, 2 failed
+======================================================================

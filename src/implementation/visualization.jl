@@ -1787,7 +1787,7 @@ function plot_voltage_per_bus_comparison(
         bottom_margin = 20Plots.mm,
         top_margin = 5Plots.mm,
         right_margin = 15Plots.mm,
-        ylims = (0.8, 1.2),
+        ylims = (0.9, 1.1),
         grid = :y
     )
 
@@ -1842,13 +1842,13 @@ function plot_voltage_per_bus_comparison(
             bus_data = bus_volt[bus]
             for phase in phases
                 v = bus_data[phase]
-                if v < 0.8
+                if v < 0.9
                     push!(oor_lo_labels, "$(bus)-$(phase_labels[phase])")
                     push!(oor_lo_values, v)
                     push!(oor_lo_colors, FAIR_FUNC_COLORS[fair_func])
                     push!(oor_lo_markers, FAIR_FUNC_MARKERS[fair_func])
                     push!(oor_lo_func_labels, FAIR_FUNC_LABELS[fair_func])
-                elseif v > 1.2
+                elseif v > 1.1
                     push!(oor_hi_labels, "$(bus)-$(phase_labels[phase])")
                     push!(oor_hi_values, v)
                     push!(oor_hi_colors, FAIR_FUNC_COLORS[fair_func])
@@ -1870,7 +1870,7 @@ function plot_voltage_per_bus_comparison(
             legend = false,
             xrotation = 45,
             grid = :y,
-            ylims = (1.2, 2.0),
+            ylims = (1.1, 2.0),
             titlefontsize = 9,
             guidefontsize = 7,
             tickfontsize = 6
@@ -1888,7 +1888,7 @@ function plot_voltage_per_bus_comparison(
                     markersize = 6, label = lbl)
             end
         else
-            Plots.annotate!(p_hi, [(0.5, 1.7, Plots.text("No data", 8, :gray))])
+            Plots.annotate!(p_hi, [(0.5, 1.55, Plots.text("No data", 8, :gray))])
         end
 
         # Bottom inset: low out-of-range voltages (0.0–0.5)
@@ -1898,7 +1898,7 @@ function plot_voltage_per_bus_comparison(
             legend = false,
             xrotation = 45,
             grid = :y,
-            ylims = (0.0, 0.8),
+            ylims = (0.0, 0.9),
             titlefontsize = 9,
             guidefontsize = 7,
             tickfontsize = 6

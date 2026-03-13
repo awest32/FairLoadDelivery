@@ -4,6 +4,8 @@ using FairLoadDelivery
 using PowerModelsDistribution, PowerModels
 using Ipopt, Gurobi, HiGHS
 using JuMP
+import MathOptInterface
+const MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
@@ -11,6 +13,11 @@ using Dates
 using Plots
 using StatsPlots
 using Statistics
+
+include("validation_utils.jl")
+include("../../src/implementation/other_fair_funcs.jl")
+include("../../src/implementation/load_shed_as_parameter.jl")
+
 
 """
     Efficient script to compare load shed results from the bilevel formulation
@@ -20,11 +27,11 @@ using Statistics
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
-const FAIR_FUNCS = ["efficiency", "proportional", "equality_min", "min_max", "jain", "palma"]#min_max throws error for motivation_c
+const FAIR_FUNCS = ["efficiency", "palma"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 5 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
+const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 5#000
+const N_BERNOULLI_SAMPLES = 100#000
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -61,6 +68,12 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
     pshed_upper_level = Float64[]
     final_weight_ids = Int[]
     final_weights = Float64[]
+    completed_iterations = 0
+    last_status = MOI.OPTIMIZE_NOT_CALLED
+    prev_weights = copy(fair_weights)
+    prev_pshed = Float64[]
+    max_delta_weights = NaN
+    max_delta_pshed = NaN
 
     for k in 1:iterations
         # Solve lower-level problem and get sensitivities
@@ -68,24 +81,41 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
 
         # Apply fairness function
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, math_new)
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "efficiency"
-            pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
+            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals = min_max_load_shed(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals)
         elseif fair_func == "jain"
-            pshed_new, fair_weight_vals = jains_fairness_index(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals)
         elseif fair_func == "palma"
             pd = Float64[]
-            for (load_id, load_dict) in math_new["load"]
-                push!(pd, sum(load_dict["pd"]))
+            for i in pshed_ids
+                push!(pd, sum(math_new["load"][string(i)]["pd"]))
             end
-            pshed_new, fair_weight_vals = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd)
         else
             error("Unknown fairness function: $fair_func")
         end
+
+        # If upper-level fairness problem is infeasible, stop bilevel iteration and keep last feasible weights
+        last_status = status
+        @info "[$fair_func] Iteration $k: upper-level status = $status (type: $(typeof(status)))"
+        if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.TIME_LIMIT]
+            @warn "[$fair_func] Iteration $k/$iterations: upper-level infeasible (status=$status) — stopping bilevel with last feasible weights"
+            break
+        end
+        completed_iterations = k
+
+        # Track convergence: max absolute change in weights and pshed
+        max_delta_weights = maximum(abs.(fair_weight_vals .- prev_weights))
+        if !isempty(prev_pshed)
+            max_delta_pshed = maximum(abs.(pshed_new .- prev_pshed))
+        end
+        prev_weights = copy(fair_weight_vals)
+        prev_pshed = copy(pshed_new)
 
         # Update weights in math dictionary
         for (i, w) in zip(weight_ids, fair_weight_vals)
@@ -101,13 +131,24 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
         push!(pshed_upper_level, sum(pshed_new))
     end
 
-    return math_new, pshed_lower_level, pshed_upper_level, final_weight_ids, final_weights
+    weights_converged = !isnan(max_delta_weights) && max_delta_weights <= TRUST_RADIUS
+    bilevel_summary = Dict(
+        "completed_iterations" => completed_iterations,
+        "total_iterations" => iterations,
+        "last_status" => string(last_status),
+        "early_stop" => completed_iterations < iterations,
+        "max_delta_weights" => max_delta_weights,
+        "max_delta_pshed" => max_delta_pshed,
+        "weights_converged" => weights_converged
+    )
+    @info "[$fair_func] Bilevel finished: $completed_iterations/$iterations iterations, last status=$last_status, Δw_max=$(round(max_delta_weights, digits=6)), weights_converged=$weights_converged"
+    return math_new, pshed_lower_level, pshed_upper_level, final_weight_ids, final_weights, bilevel_summary
 end
 
 # ============================================================
 # RANDOM ROUNDING AND FINAL SOLUTION
 # ============================================================
-function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, ipopt; fair_func::String="", case::String="")
+function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, ipopt; fair_func::String="", case::String="", mld_relaxed::Union{Dict,Nothing}=nothing)
     # Solve implicit diff to get switch/block states
     mld_implicit = solve_mc_mld_shed_implicit_diff(math_relaxed, ipopt; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 
@@ -148,8 +189,8 @@ function run_random_rounding(math_relaxed::Dict, n_rounds::Int, n_samples::Int, 
             end
         end
 
-        # Apply rounded states
-        math_rounded = update_network(math_relaxed, switch_states_radial, ref);
+        # Apply rounded states (deepcopy so successive rounds don't corrupt each other)
+        math_rounded = update_network(deepcopy(math_relaxed), switch_states_radial, ref);
         push!(math_radial, math_rounded)
 
         # Solve rounded MLD
@@ -703,14 +744,21 @@ function run_comparison()
         pct_shed = Float64[],
         pct_served = Float64[],
         relaxed_pshed_final = Float64[],
-        objective = Float64[]
+        objective = Float64[],
+        bilevel_iters_completed = Int[],
+        bilevel_iters_total = Int[],
+        bilevel_last_status = String[],
+        bilevel_early_stop = Bool[],
+        max_delta_weights = Float64[],
+        max_delta_pshed = Float64[],
+        weights_converged = Bool[]
     )
 
     # Per-load data storage: case => fair_func => {load_ids, pshed, pd_served}
     per_load_results = Dict{String, Dict{String, Dict{Symbol, Vector}}}()
 
-    # Final weights storage: case => fair_func => {weight_ids, weights}
-    final_weights_results = Dict{String, Dict{String, Dict{Symbol, Vector}}}()
+    # Final weights storage: case => fair_func => {weight_ids, weights, bilevel_summary}
+    final_weights_results = Dict{String, Dict{String, Dict{Symbol, Any}}}()
 
     # Solutions storage for plotting: case => fair_func => {mld, math}
     solutions_for_plotting = Dict{String, Dict{String, Dict{Symbol, Any}}}()
@@ -739,21 +787,29 @@ function run_comparison()
 
         # Initialize per-load storage for this case
         per_load_results[case] = Dict{String, Dict{Symbol, Vector}}()
-        final_weights_results[case] = Dict{String, Dict{Symbol, Vector}}()
+        final_weights_results[case] = Dict{String, Dict{Symbol, Any}}()
         solutions_for_plotting[case] = Dict{String, Dict{Symbol, Any}}()
 
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
 
             # Run bilevel relaxation
-            math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts = run_bilevel_relaxed(
+            math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts, bilevel_summary = run_bilevel_relaxed(
                 math, ITERATIONS, fair_weights, fair_func
             )
 
-            # Store final weights
+            # Skip this fairness function if bilevel failed on the first iteration
+            if bilevel_summary["completed_iterations"] == 0
+                @warn "[$case/$fair_func] FAILED — bilevel infeasible on first iteration (status=$(bilevel_summary["last_status"])). Skipping."
+                push!(failed_combinations, (case, fair_func, "Bilevel infeasible on first iteration"))
+                continue
+            end
+
+            # Store final weights and bilevel summary
             final_weights_results[case][fair_func] = Dict(
                 :weight_ids => weight_ids,
-                :weights => final_wts
+                :weights => final_wts,
+                :bilevel_summary => bilevel_summary
             )
 
             # Run random rounding
@@ -825,7 +881,14 @@ function run_comparison()
                 pct_shed,
                 pct_served,
                 pshed_upper[end],
-                best_mld["objective"]
+                best_mld["objective"],
+                bilevel_summary["completed_iterations"],
+                bilevel_summary["total_iterations"],
+                bilevel_summary["last_status"],
+                bilevel_summary["early_stop"],
+                bilevel_summary["max_delta_weights"],
+                bilevel_summary["max_delta_pshed"],
+                bilevel_summary["weights_converged"]
             ))
         end
     end
@@ -1203,11 +1266,14 @@ for case in CASES
         TotalServed_pct = Float64[],
         TotalShed_kW = Float64[],
         MaxBusShed_pct = Float64[],
-        ShedVariance_pct = Float64[],
+        MaxBusServed_pct = Float64[],
+        MinBusServed_pct = Float64[],
+        ShedStdDev_pct = Float64[],
         JainsIndex = Float64[],
         PalmaRatio = Float64[],
+        ProportionalFairness = Float64[],
         GiniCoeff = Float64[],
-        CV_Served = Float64[]
+        CV_PctServed = Float64[]
     )
 
     for fair_func in FAIR_FUNCS
@@ -1233,35 +1299,43 @@ for case in CASES
 
         # Per-bus statistics (on percentages)
         max_shed_pct = maximum(pshed_vals)
-        shed_variance = Statistics.var(pshed_vals)
+        max_served_pct = maximum(pd_vals)
+        min_served_pct = minimum(pd_vals)
+        shed_stddev = Statistics.std(pshed_vals)
 
-        # Fairness metrics on absolute kW served (captures continuous differences across functions)
-        pd_kw = data[:pd_served_kw]
-        if length(pd_kw) >= 2
-            jains_idx = FairLoadDelivery.jains_index(pd_kw)
-            palma = length(pd_kw) >= 3 ? FairLoadDelivery.palma_ratio(pd_kw) : NaN
-            gini = FairLoadDelivery.gini_index(pd_kw)
-            cv_served = std(pd_kw) / mean(pd_kw)
+        # Fairness metrics on percent served (normalizes across different bus demand levels)
+        if length(pd_vals) >= 2
+            jains_idx = FairLoadDelivery.jains_index(pd_vals)
+            palma = length(pd_vals) >= 3 ? FairLoadDelivery.palma_ratio(pd_vals) : NaN
+            # Proportional fairness: Σ log(served_pct) — only for buses with positive served
+            pos_served = filter(x -> x > 0, pd_vals)
+            prop_fair = !isempty(pos_served) ? FairLoadDelivery.alpha_fairness(pos_served, 1) : NaN
+            gini = FairLoadDelivery.gini_index(pd_vals)
+            cv_served = std(pd_vals) / mean(pd_vals)
         else
             jains_idx = NaN
             palma = NaN
+            prop_fair = NaN
             gini = NaN
             cv_served = NaN
         end
 
         push!(summary_df, (
-            FAIR_FUNC_LABELS[fair_func],
+            get(FAIR_FUNC_LABELS, fair_func, fair_func),
             round(total_served_pct, digits=2),
             round(total_shed_kw, digits=2),
             round(max_shed_pct, digits=2),
-            round(shed_variance, digits=2),
+            round(max_served_pct, digits=2),
+            round(min_served_pct, digits=2),
+            round(shed_stddev, digits=2),
             round(jains_idx, digits=4),
             round(palma, digits=4),
+            round(prop_fair, digits=4),
             round(gini, digits=4),
             round(cv_served, digits=4)
         ))
 
-        println("  $(rpad(FAIR_FUNC_LABELS[fair_func], 15)): $((total_served_pct))% served, Jain=$((jains_idx)), Gini=$((gini)), Palma=$(palma)")
+        println("  $(rpad(get(FAIR_FUNC_LABELS, fair_func, fair_func), 15)): $(total_served_pct)% served, Jain=$(round(jains_idx, digits=4)), Gini=$(round(gini, digits=4)), Palma=$(round(palma, digits=4)), PropFair=$(round(prop_fair, digits=4))")
     end
 
     # Save summary CSV

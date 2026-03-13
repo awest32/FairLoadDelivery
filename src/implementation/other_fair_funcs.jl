@@ -1,8 +1,4 @@
-# Create the other fairness functions 
-using FairLoadDelivery
-using JuMP, Ipopt, Gurobi
-
-const TRUST_RADIUS = 0.5
+# Create the other fairness functions
 
 # Function to compute Jain's Fairness Index
 function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
@@ -87,11 +83,16 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
-    @expression(model, pshed_new[i = 1:length(pshed_prev)],
+    n = length(pshed_prev)
+    @expression(model, pshed_new[i = 1:n],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    # Maximize sum of log(load served) = sum of log(pref - pshed)
-    @objective(model, Max, sum(log(pref[i] - pshed_new[i]) for i in 1:length(pshed_new)))
+    # Auxiliary variable for load served, with strictly positive lower bound
+    ε = 1e-6
+    @variable(model, s[1:n] >= ε)
+    @constraint(model, [i=1:n], s[i] == pref[i] - pshed_new[i])
+    # Maximize sum of log(load served)
+    @objective(model, Max, sum(log(s[i]) for i in 1:n))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
