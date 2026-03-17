@@ -61,7 +61,8 @@ function relaxed_fldp(data::Dict{String, Any}, iterations::Int, fair_weights::Ve
         # Update weights using Lin-PALMA-W with gradient input
         # pshed_new, fair_weight_vals, sigma = lin_palma_w_grad_input(dpshed, pshed_val, weight_vals, pd)
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals)
+            pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
+            pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd)
         elseif fair_func == "efficiency"
             pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "min_max"

@@ -10,7 +10,8 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     #     )
     @variable(model, weights_new[1:n] .>= 1.0)
     @constraint(model, weights_new[1:n] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # @constraint(model, [i in 1:n],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     # )
@@ -50,7 +51,8 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     #     )
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    #@constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
 
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
@@ -73,26 +75,26 @@ end
 # Function to compute the proportional fairness of load served
 # Maximizes Σ log(pd_served_i) = Σ log(pref_i - pshed_i)  (α-fairness with α=1)
 # Reports load shed values
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, math::Dict{String,Any})
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64})
     model = JuMP.Model(Ipopt.Optimizer)
+    set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
-    # Build reference demand vector aligned with pshed indexing (sorted load IDs)
-    load_ids = sort(parse.(Int, collect(keys(math["load"]))))
-    pref = Float64[sum(math["load"][string(lid)]["pd"]) for lid in load_ids]
-
-    @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
-    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
     n = length(pshed_prev)
-    @expression(model, pshed_new[i = 1:n],
-        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+    pref = pd  # reference demand aligned with pshed indexing (built by caller from pshed_ids)
+    # Start weights at weights_prev so Ipopt evaluates log at a valid initial point
+    @variable(model, weights_new[i=1:n] >= 1.0, start = weights_prev[i])
+    @constraint(model, weights_new[1:n] .<= 10.0)
+    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    # Use variables (not expressions) for pshed_new so log doesn't nest expressions
+    @variable(model, pshed_new[i=1:n], start = pshed_prev[i])
+    @constraint(model, [i=1:n],
+        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     )
-    # Maximize sum of log(load served), shifted by ε to remain feasible when load is fully shed
-    ε = 1e-6
-    @expression(model, served[i=1:n], pref[i] - pshed_new[i])
-    # Ensure pshed doesn't exceed reference demand (feasible at weights_prev since pshed_prev <= pref)
-    @constraint(model, [i=1:n], pshed_new[i] <= pref[i])
-    @objective(model, Max, sum(log(served[i] + ε) for i in 1:n))
+    # Shifted log: uniform constant c added to all loads' served values
+    # At start point (Δw=0): pshed_new = pshed_prev, so log(pref - pshed_prev + c) is valid
+    c = 1e-6
+    @NLobjective(model, Max, sum(log(pref[i] - pshed_new[i] + c) for i in 1:n))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -119,7 +121,8 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
     end
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
@@ -150,6 +153,7 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
     @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     #@variable(model, t >= 0)
     @constraint(model, [i in 1:length(pshed_prev)],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
@@ -179,6 +183,7 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     @variable(model, t >= 0)
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     # )

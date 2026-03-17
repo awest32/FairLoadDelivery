@@ -278,8 +278,10 @@ function palma_ratio_minimization(
     # McCormick auxiliary variables for bilinear products
     @variable(model, u[1:n, 1:n] >= 0)
 
-    # Charnes-Cooper scaling variable
-    @variable(model, σ >= ε)
+    # NOTE: Charnes-Cooper scaling variable is needed if minimizing the Palma
+    # ratio directly instead of targeting ratio = 1. Uncomment if restoring
+    # the Charnes-Cooper objective below.
+    # @variable(model, σ >= ε)
 
     #=========================================================================
     # P_shed as EXPRESSION (Core Simplification)
@@ -356,22 +358,30 @@ function palma_ratio_minimization(
     @constraint(model, ascending[k=1:n-1], sorted[k] <= sorted[k+1])
 
     #=========================================================================
-    # Charnes-Cooper Transformation for Palma Ratio
+    # Palma Ratio Target: ratio = 1  (top 10% sum == bottom 40% sum)
     =========================================================================#
 
     # Get indices in sorted space
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    # Note: We rely on the caller to check is_palma_well_defined() BEFORE calling
-    # this function. If the denominator is too small, the problem becomes infeasible.
+    # Objective: minimize squared deviation from Palma ratio = 1
+    # i.e., minimize (Σ top_10% - Σ bottom_40%)²
+    @expression(model, top_sum, sum(sorted[i] for i in top_10_idx))
+    @expression(model, bot_sum, sum(sorted[i] for i in bottom_40_idx))
+    @objective(model, Min, (top_sum - bot_sum)^2)
 
-    # Denominator normalization: Σ_{i∈Bottom40%} sorted[i] * σ = 1
-    # This is the Charnes-Cooper transformation: scale by σ = 1/denominator
-    @constraint(model, denom_norm,
-        sum(sorted[i] * σ for i in bottom_40_idx) == 1)
-
-    # Objective: minimize Σ_{i∈Top10%} sorted[i] * σ (scaled numerator)
-    @objective(model, Min, sum(sorted[i] * σ for i in top_10_idx))
+#     #=========================================================================
+#     # NOTE: The Charnes-Cooper transformation below is necessary if we want
+#     # to minimize the Palma ratio directly (min top_10% / bottom_40%) rather
+#     # than targeting ratio = 1. Keep this code for that use case.
+#     #=========================================================================
+#     # # Denominator normalization: Σ_{i∈Bottom40%} sorted[i] * σ = 1
+#     # # This is the Charnes-Cooper transformation: scale by σ = 1/denominator
+#     # @constraint(model, denom_norm,
+#     #     sum(sorted[i] * σ for i in bottom_40_idx) == 1)
+#     #
+#     # # Objective: minimize Σ_{i∈Top10%} sorted[i] * σ (scaled numerator)
+#     # @objective(model, Min, sum(sorted[i] * σ for i in top_10_idx))
 
     #=========================================================================
     # Solve

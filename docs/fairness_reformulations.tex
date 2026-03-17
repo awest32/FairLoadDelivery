@@ -25,11 +25,16 @@ The upper level then updates the weight vector $\mathbf{w}$ to improve a chosen 
 All upper-level formulations share the following weight constraints:
 \begin{align}
     1 &\le w_j \le 10, & j &= 1,\dots,n, \label{eq:wbounds}\\
-    w_j - w_j^{\mathrm{(prev)}} &\le \Delta, & j &= 1,\dots,n, \label{eq:trust}
+    |w_j - w_j^{\mathrm{(prev)}}| &\le \Delta, & j &= 1,\dots,n, \label{eq:trust}
 \end{align}
 where $\Delta = 0.5$ is the trust-region radius.
-Note that constraint~\eqref{eq:trust} is one-sided: it limits weight \emph{increases} by $\Delta$, while weight \emph{decreases} are bounded only by the lower bound in~\eqref{eq:wbounds}.
-On the first iteration, $\mathbf{w}^{\mathrm{(prev)}} = 10 \cdot \mathbf{1}$, so each weight can decrease to~$1.0$ but cannot increase beyond~$10.0$ (the upper bound is already active).
+The trust region is two-sided, limiting both increases and decreases to~$\Delta$ per iteration.
+This ensures the first-order Taylor approximation~\eqref{eq:taylor} remains accurate, since the Jacobian is only valid locally.
+
+\paragraph{Correction from one-sided trust region.}
+The original implementation used a one-sided constraint ($w_j - w_j^{\mathrm{(prev)}} \le \Delta$), which only limited weight \emph{increases}.
+On the first iteration with $\mathbf{w}^{\mathrm{(prev)}} = 10 \cdot \mathbf{1}$, weights could decrease by up to~$9$ units (to the lower bound of~$1$), far exceeding the region where the Taylor approximation is valid.
+This caused fairness objectives (Palma, equality-min, min-max) to produce degenerate solutions by uniformly decreasing all weights, inflating predicted load shed to~$100\%$ across all loads.
 
 \section{Proportional Fairness}\label{sec:proportional}
 
@@ -46,24 +51,34 @@ The original formulation introduced auxiliary variables $s_i$ for load served:
 \end{align}
 where $p_i^{\mathrm{ref}}$ is the reference (pre-shedding) demand for load~$i$ and $\varepsilon = 10^{-6}$.
 
-\subsection{Infeasibility on Iteration~1}
+\subsection{Issues}
 
-Constraint~\eqref{eq:prop-eq} forces $s_i = p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}}$.
-If any load is fully shed on the first iteration ($p_i^{\mathrm{shed,(prev)}} \approx p_i^{\mathrm{ref}}$), the Taylor approximation~\eqref{eq:taylor} may not be able to reduce $\hat{p}_i^{\mathrm{shed}}$ enough within the trust region to satisfy $s_i \ge \varepsilon$.
-This makes the problem infeasible before the solver begins.
+\begin{enumerate}
+    \item \textbf{Infeasibility from equality + lower bound.}
+    Constraint~\eqref{eq:prop-eq} forces $s_i = p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}}$.
+    If any load is fully shed on the first iteration ($p_i^{\mathrm{shed,(prev)}} \approx p_i^{\mathrm{ref}}$), the Taylor approximation~\eqref{eq:taylor} may not be able to reduce $\hat{p}_i^{\mathrm{shed}}$ enough within the trust region to satisfy $s_i \ge \varepsilon$.
 
-\subsection{Reformulation: Shifted Logarithm with Demand Bound}
+    \item \textbf{Index mismatch between $\mathbf{p}^{\mathrm{ref}}$ and $\mathbf{p}^{\mathrm{shed}}$.}
+    The original implementation built $\mathbf{p}^{\mathrm{ref}}$ from all loads in the network data dictionary (sorted by ID), while $\mathbf{p}^{\mathrm{shed}}$ from the lower level may exclude certain loads (e.g., source bus loads).
+    This caused $p_i^{\mathrm{ref}}$ to correspond to a different load than $p_i^{\mathrm{shed}}$, leading to $p_i^{\mathrm{ref}} - p_i^{\mathrm{shed}} < 0$ and \texttt{log(negative)} evaluations, which Ipopt reports as \texttt{INVALID\_MODEL}.
+\end{enumerate}
 
-We eliminate the auxiliary variable~$s_i$ and apply the logarithm directly to a shifted load-served expression, adding a physical bound that load shed cannot exceed reference demand:
+\subsection{Reformulation: Shifted Logarithm with Aligned Indexing}
+
+We make two changes:
+\begin{enumerate}
+    \item \textbf{Signature change:} The function now receives a pre-aligned demand vector $\mathbf{p}^{\mathrm{ref}}$ (built by the caller from \texttt{pshed\_ids}), rather than constructing it internally from the math dictionary. This matches the pattern used by the Palma ratio function.
+    \item \textbf{Shifted log with variable-based formulation:} We use $\hat{p}_i^{\mathrm{shed}}$ as a JuMP variable (linked to the Taylor expression by equality constraints) and apply the shifted logarithm:
+\end{enumerate}
 \begin{align}
-    \max_{\mathbf{w}} \quad & \sum_{i=1}^{n} \log\!\bigl(p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}}(\mathbf{w}) + \varepsilon\bigr) \\
+    \max_{\mathbf{w},\,\hat{\mathbf{p}}^{\mathrm{shed}}} \quad & \sum_{i=1}^{n} \log\!\bigl(p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}} + c\bigr) \\
     \text{s.t.} \quad
-    & \hat{p}_i^{\mathrm{shed}}(\mathbf{w}) \le p_i^{\mathrm{ref}}, & i &= 1,\dots,n, \label{eq:prop-bound}\\
-    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+    & \hat{p}_i^{\mathrm{shed}} = p_i^{\mathrm{shed,(prev)}} + \sum_{j=1}^{n} J_{ij} \Delta w_j, & i &= 1,\dots,n, \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}, \notag
 \end{align}
-The shift by $\varepsilon$ ensures the argument of $\log(\cdot)$ remains strictly positive even when a load is fully shed ($\hat{p}_i^{\mathrm{shed}} = p_i^{\mathrm{ref}}$).
-Constraint~\eqref{eq:prop-bound} keeps Ipopt in a region where the log argument is non-negative; it is always feasible at $\mathbf{w} = \mathbf{w}^{\mathrm{(prev)}}$ since $p_i^{\mathrm{shed,(prev)}} \le p_i^{\mathrm{ref}}$ by construction from the lower level.
-For loads with meaningful service ($p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}} \gg \varepsilon$), the shift has negligible effect on the optimal weights.
+where $c = 10^{-6}$ is a uniform shift applied to all loads' served values.
+The shift ensures $\log(\cdot)$ remains defined even when a load is fully shed ($\hat{p}_i^{\mathrm{shed}} = p_i^{\mathrm{ref}}$ gives $\log(c)$, which is finite).
+Ipopt's \texttt{warm\_start\_init\_point} option is enabled with starting values $\mathbf{w} = \mathbf{w}^{\mathrm{(prev)}}$ and $\hat{\mathbf{p}}^{\mathrm{shed}} = \mathbf{p}^{\mathrm{shed,(prev)}}$, ensuring the initial log evaluation is valid.
 
 \section{Min-Max Load Shed}\label{sec:minmax}
 
@@ -86,15 +101,49 @@ Two problems made this formulation unreliable:
     \item The lower bound $t \ge 1$ is unnecessarily restrictive; when all load-shed values are small, the problem may be infeasible.
 \end{enumerate}
 
-\subsection{Reformulation: Infinity Norm}
+\subsection{Reformulation: Epigraph}
 
-We replace the auxiliary variable formulation with a direct infinity norm on the load-shed expression vector:
+We replace the non-smooth \texttt{maximum()} with individual constraints (the standard epigraph reformulation of the infinity norm) and relax $t \ge 1$ to $t \ge 0$:
 \begin{align}
-    \min_{\mathbf{w}} \quad & \|\hat{\mathbf{p}}^{\mathrm{shed}}(\mathbf{w})\|_\infty \\
-    \text{s.t.} \quad & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+    \min_{\mathbf{w},\,t} \quad & t \\
+    \text{s.t.} \quad
+    & t \ge \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), & i &= 1,\dots,n, \\
+    & t \ge 0, \notag \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
 \end{align}
-This is mathematically equivalent to $\min_t \{t : t \ge \hat{p}_i^{\mathrm{shed}}\ \forall\, i\}$ but delegates the epigraph reformulation to JuMP/Ipopt, which handles it correctly.
-The lower bound $t \ge 1$ is removed, and no auxiliary variable is needed.
+This is mathematically equivalent to $\min \|\hat{\mathbf{p}}^{\mathrm{shed}}\|_\infty$ but uses smooth, solver-compatible constraints.
+Note: JuMP does not support \texttt{norm(x, Inf)} as a nonlinear operator for any solver, so the epigraph form is required.
+
+\section{Palma Ratio}\label{sec:palma}
+
+\subsection{Original Formulation}
+
+The original Palma ratio formulation minimized the ratio of the top~10\% to bottom~40\% of sorted load-shed values using the Charnes-Cooper transformation:
+\begin{align}
+    \min_{\mathbf{w},\,\sigma} \quad & \sum_{i \in \mathrm{Top10}} \mathrm{sorted}_i \cdot \sigma \\
+    \text{s.t.} \quad
+    & \sum_{i \in \mathrm{Bot40}} \mathrm{sorted}_i \cdot \sigma = 1, \\
+    & \sigma \ge \varepsilon, \notag \\
+    & \text{permutation, McCormick, trust region constraints.} \notag
+\end{align}
+
+\subsection{Issues}
+
+\begin{enumerate}
+    \item \textbf{Wrong objective target.} Minimizing the Palma ratio pushes it below~$1$, meaning the top~10\% sheds \emph{less} than the bottom~40\%---reverse inequality, not fairness. The desired target is Palma ratio $= 1$ (proportional balance).
+    \item \textbf{No efficiency incentive.} The ratio objective has no penalty for increasing total load shed. The optimizer can equalize shedding by inflating all values toward~$100\%$, which achieves ratio $\approx 1$ but is a degenerate solution.
+\end{enumerate}
+
+\subsection{Reformulation: Target Ratio = 1}
+
+We replace the Charnes-Cooper transformation with a squared-deviation objective targeting Palma ratio $= 1$:
+\begin{align}
+    \min_{\mathbf{w}} \quad & \Bigl(\sum_{i \in \mathrm{Top10}} \mathrm{sorted}_i - \sum_{i \in \mathrm{Bot40}} \mathrm{sorted}_i\Bigr)^2 \\
+    \text{s.t.} \quad & \text{permutation, McCormick, trust region constraints.} \notag
+\end{align}
+This eliminates the Charnes-Cooper variable $\sigma$ and its quadratic constraint, simplifying the formulation.
+When the top~10\% and bottom~40\% sums are equal, the objective is zero and the Palma ratio is exactly~$1$.
+The Charnes-Cooper code is retained (commented out) for cases where direct ratio minimization is desired.
 
 \section{Equality-Min Fairness}\label{sec:equality}
 
@@ -139,12 +188,15 @@ When exact equality is achievable, the penalty vanishes and the solution coincid
 
 \begin{table}[h]
 \centering
+\small
 \begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Function} & \textbf{Issue} & \textbf{Fix} \\
 \midrule
-\texttt{proportional\_fairness\_load\_shed} & Equality + lower bound $\Rightarrow$ infeasible & Shifted $\log(\cdot + \varepsilon)$ + demand bound \\
-\texttt{min\_max\_load\_shed} & Non-smooth \texttt{maximum()} + tight $t\ge1$ & $\|\cdot\|_\infty$ norm, no aux variable \\
+All functions & One-sided trust region $\Rightarrow$ degenerate solutions & Two-sided: $|w_j - w_j^{\mathrm{prev}}| \le \Delta$ \\
+\texttt{proportional\_fairness} & Equality + bound infeasible; index mismatch & Shifted $\log(\cdot + c)$; aligned \texttt{pd} from caller \\
+\texttt{min\_max\_load\_shed} & Non-smooth \texttt{maximum()} + tight $t\ge1$ & Epigraph: $t \ge \hat{p}_i^{\mathrm{shed}}\ \forall i$, $t \ge 0$ \\
+\texttt{palma\_ratio} & Minimized ratio (wrong target); no efficiency & Target ratio $= 1$: $\min(\Sigma\mathrm{top} - \Sigma\mathrm{bot})^2$ \\
 \texttt{equality\_min} & Hard equality structurally infeasible & Inequality + quadratic penalty \\
 \bottomrule
 \end{tabular}

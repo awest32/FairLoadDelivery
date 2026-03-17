@@ -18,7 +18,8 @@ for k in 1:ITERATIONS
     dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, _ = lower_level_soln(math_new, fair_weights, 1);
     # Apply fairness function
     if fair_func == "proportional"
-        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, math_new);
+        pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
+        pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd);
     elseif fair_func == "efficiency"
         pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new);
     elseif fair_func == "min_max"

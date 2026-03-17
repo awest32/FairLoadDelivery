@@ -27,7 +27,7 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
-const FAIR_FUNCS = ["efficiency", "palma", "proportional", "min_max", "equality_min"]#min_max throws error for motivation_c
+const FAIR_FUNCS = ["efficiency", "palma", "min_max", "equality_min", "proportional"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 20 
 const N_ROUNDS = 2
@@ -81,7 +81,8 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
 
         # Apply fairness function
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, math_new)
+            pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd)
         elseif fair_func == "efficiency"
             pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
         elseif fair_func == "min_max"

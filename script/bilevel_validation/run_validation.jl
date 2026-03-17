@@ -41,10 +41,10 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 const CASE = "motivation_c"
 const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
 const LS_PERCENT = 0.8
-const ITERATIONS = 1
-const FAIR_FUNC = "proportional"  # simplest fairness function for testing
+const ITERATIONS = 20
+const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 6
+const N_BERNOULLI_SAMPLES = 1000
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -219,7 +219,8 @@ for k in 1:ITERATIONS
     if FAIR_FUNC == "min_max"
         pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "proportional"
-        pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
+        pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids_k]
+        pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, pd)
     elseif FAIR_FUNC == "efficiency"
         pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
     elseif FAIR_FUNC == "jain"
@@ -262,7 +263,7 @@ for k in 1:ITERATIONS
     println("    Lower-level shed: $(sum(pshed_val_k)), Upper-level shed: $(sum(pshed_new))")
     println("    Weights: $fair_weight_vals")
 end
-error("    [!] Ending iterations early for testing purposes. Remove this break statement to run full iterations.")
+#error("    [!] Ending iterations early for testing purposes. Remove this break statement to run full iterations.")
 relaxed_checks["iteration_label_consistency"] = Dict("passed" => iteration_label_consistent)
 print_check_result("Label consistency across all iterations", iteration_label_consistent)
 
