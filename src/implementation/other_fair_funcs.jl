@@ -52,14 +52,14 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i]<= TRUST_RADIUS)
 
-    @variable(model, t >= 1)
     # @constraint(model, [i in 1:length(pshed_prev)],
     #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     # )
+    @variable(model, t >= 0)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
          pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    @constraint(model, t >= maximum(pshed_new))
+    @constraint(model, [i=1:length(pshed_prev)], t >= pshed_new[i])
     @objective(model, Min, t)
     JuMP.set_silent(model)
     optimize!(model)
@@ -87,12 +87,12 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     @expression(model, pshed_new[i = 1:n],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    # Auxiliary variable for load served, with strictly positive lower bound
+    # Maximize sum of log(load served), shifted by ε to remain feasible when load is fully shed
     ε = 1e-6
-    @variable(model, s[1:n] >= ε)
-    @constraint(model, [i=1:n], s[i] == pref[i] - pshed_new[i])
-    # Maximize sum of log(load served)
-    @objective(model, Max, sum(log(s[i]) for i in 1:n))
+    @expression(model, served[i=1:n], pref[i] - pshed_new[i])
+    # Ensure pshed doesn't exceed reference demand (feasible at weights_prev since pshed_prev <= pref)
+    @constraint(model, [i=1:n], pshed_new[i] <= pref[i])
+    @objective(model, Max, sum(log(served[i] + ε) for i in 1:n))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -185,8 +185,9 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
     )
-    @constraint(model, [i = 1:length(pshed_new)],t == pshed_new[i])
-    @objective(model, Min, t)
+    # Relax hard equality to inequality + quadratic penalty encouraging equal shedding
+    @constraint(model, [i = 1:length(pshed_new)], t >= pshed_new[i])
+    @objective(model, Min, t + sum((pshed_new[i] - t)^2 for i in 1:length(pshed_new)))
     #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
     # open("equality_min_model_out.txt", "w") do io
     #         redirect_stdout(io) do

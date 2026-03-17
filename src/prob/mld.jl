@@ -206,6 +206,7 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
         end
 
         # FairLoadDelivery-specific constraints
+        FairLoadDelivery.constraint_source_voltage_bounds(pm; nw=n)
         FairLoadDelivery.constraint_mc_isolate_block(pm; nw=n)
         FairLoadDelivery.constraint_radial_topology(pm; nw=n)
 
@@ -640,7 +641,7 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     end
 
     constraint_source_voltage_bounds(pm)
-    #constraint_mc_isolate_block(pm)
+    constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # #constraint_mc_radiality(pm)
     constraint_mc_block_energization_consistency_bigm(pm)
@@ -671,12 +672,12 @@ function build_mc_mld_switchable_integer(pm::_PMD.AbstractUBFModels)
     # #objective_fair_max_load_served(pm,"jain")
     # #objective_fairly_weighted_max_load_served_with_penalty(pm)
     # #objective_fairly_weighted_min_load_shed(pm)
-    JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    open("integer_mld_mdel.txt", "w") do io
-        redirect_stdout(io) do
-            print(pm)
-        end
-    end
+    # JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+    # open("integer_mld_mdel.txt", "w") do io
+    #     redirect_stdout(io) do
+    #         print(pm)
+    #     end
+    # end
 
 end
 
@@ -772,7 +773,7 @@ function build_mc_mld_switchable_relaxed(pm::_PMD.AbstractUBFModels)
     constraint_mc_isolate_block(pm)
     constraint_radial_topology(pm)
     # constraint_mc_radiality(pm)
-    #constraint_mc_block_energization_consistency_bigm(pm)
+    constraint_mc_block_energization_consistency_bigm(pm)
 
     # Must be disabled if there is no generation in the network
     constraint_block_budget(pm)

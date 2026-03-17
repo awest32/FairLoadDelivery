@@ -180,7 +180,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
             #println("Load $(load["name"]) at math load node $(i) is critical.")
         else
             load["critical"] = 0
-            load["weight"] = 10
+            load["weight"] = 5
             #println("Load $(load["name"]) at math load node $(i) is not critical.")
 
         end

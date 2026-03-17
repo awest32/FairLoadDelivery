@@ -13,6 +13,21 @@ function constraint_source_voltage_bounds(pm::_PMD.AbstractUnbalancedPowerModel;
     end
 end
 
+function constraint_source_voltage_bounds_jump(model::JuMP.Model, ref::Dict{Symbol,Any})
+    v_pu = 1.03
+    for (i, gen) in ref[:gen]
+        if gen["source_id"] == "voltage_source.source"
+            for  w in model[:w][gen["gen_bus"]]
+                #  JuMP.@constraint(pm.model, w <= (1.05)^2)
+                #  JuMP.@constraint(pm.model, w >= (1)^2)
+                JuMP.fix(w, 1.03^2; force = true)
+                #JuMP.@constraint(pm.model, w == 1.03^2)
+            end
+        end
+    end
+end
+
+
 function constraint_fix_bus_terminal_mismatch(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=nw_id_default)
     println("Fixing bus 646 mismatch")
     JuMP.@constraint(pm.model, _PMD.var(pm, nw, :w)[i][3] ==_PMD.var(pm, nw, :w)[i][1])

@@ -27,11 +27,11 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
-const FAIR_FUNCS = ["efficiency", "palma"]#min_max throws error for motivation_c
+const FAIR_FUNCS = ["efficiency", "palma", "proportional", "min_max", "equality_min"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 10 # number of iterations for bilevel optimization (weight updates), more than two breaks the proportional fairness case for motivation_c and min_max case for motivation_d, likely due to numerical issues in the weight updates
+const ITERATIONS = 20 
 const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 100#000
+const N_BERNOULLI_SAMPLES = 1000#000
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
