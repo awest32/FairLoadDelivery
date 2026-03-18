@@ -1,6 +1,6 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64, critical_load)
+function setup_network(case::String, ls_percent::Float64, source_pu::Float64, critical_load)
     dir = @__DIR__
     casepath = "data/$case"
     file = joinpath(dir, "../../", casepath)
@@ -23,7 +23,7 @@ function setup_network(case::String, ls_percent::Float64, critical_load)
     math = PowerModelsDistribution.transform_data_model(eng)
 
     # Store source voltage in per-unit for use in constraints
-    math["source_vm_pu"] = eng["voltage_source"]["source"]["vm"]
+    math["source_vm_pu"] = source_pu#eng["voltage_source"]["source"]["vm"]
 
     # for (idx, switch) in math["switch"]
     #     switch["state"] = 1
@@ -335,12 +335,12 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
                            mld_solution::Union{Nothing,Dict{String,Any}}=nothing)
     data = deepcopy(data_in)
     # Get voltage scale if present (for voltage sensitivity analysis)
-    vscale = get(data, "vscale", 1.0)
+    #vscale = get(data, "vscale", 1.0)
 
     for (i,gen) in data["gen"]
         id = parse(Int,i)
         if gen["source_id"] == "voltage_source.source"
-            gen["vg"][:] .= ref[:gen][id]["vg"] .* vscale
+            gen["vg"][:] .= ref[:gen][id]["vg"]
             gen["vbase"] = ref[:gen][id]["vbase"]
             # Ensure the generation from the source bus is infinitely large to avoid infeasibility in the AC power flow
             gen["pmax"][:] .= Inf

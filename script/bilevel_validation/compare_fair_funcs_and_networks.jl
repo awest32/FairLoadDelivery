@@ -32,6 +32,7 @@ const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 20 
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 1000#000
+const SOURCE_PU = 1.03
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
@@ -775,7 +776,7 @@ function run_comparison()
         println("\n>>> Processing case: $case")
 
         # Setup network
-        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, [])
+        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, [])
         fair_weights = Float64[load["weight"] for (_, load) in math["load"]]
         total_demand = get_total_demand(math)
 
@@ -827,7 +828,7 @@ function run_comparison()
 
             # Find best solution
             best_idx, best_mld = find_best_mld_solution(mld_results)
-
+            
             # Check binary values in final solution
             binary_ok, binary_violations = check_binary_solution(best_mld)
             if !binary_ok
@@ -856,7 +857,109 @@ function run_comparison()
 
         
             acpf, math_ac, ac_checks, ac_summary = run_acpf_on_rounded_solution(math_out[best_idx], ipopt_solver, rr_ref, best_mld)
-            
+
+            # ── Voltage troubleshooting ──────────────────────────────
+            let diag_file = joinpath(save_dir, "voltage_debug_$(case)_$(fair_func).txt")
+                open(diag_file, "w") do io
+                    println(io, "Voltage Diagnostic: $case / $fair_func")
+                    println(io, "="^60)
+
+                    mld_sol = best_mld["solution"]
+                    acpf_sol = acpf["solution"]
+                    math_mld = math_out[best_idx]
+
+                    # Source bus identification
+                    source_gen_id = nothing
+                    for (gid, gen) in math_mld["gen"]
+                        if gen["source_id"] == "voltage_source.source"
+                            source_gen_id = gid
+                            source_bus = gen["gen_bus"]
+                            println(io, "\nSource generator: gen $gid, bus $source_bus")
+                            println(io, "  vg (math_mld): $(gen["vg"])")
+                            if haskey(math_ac, "gen") && haskey(math_ac["gen"], gid)
+                                println(io, "  vg (math_ac):  $(math_ac["gen"][gid]["vg"])")
+                            end
+                            break
+                        end
+                    end
+
+                    # Per-bus voltage comparison
+                    println(io, "\n\nPer-Bus Voltage Comparison (MLD w→√w vs ACPF vm)")
+                    println(io, "-"^80)
+                    println(io, lpad("Bus", 6), "  ", rpad("Name", 12),
+                            "  ", lpad("MLD_V1", 8), lpad("MLD_V2", 8), lpad("MLD_V3", 8),
+                            "  ", lpad("AC_V1", 8), lpad("AC_V2", 8), lpad("AC_V3", 8),
+                            "  ", lpad("ΔV1", 8), lpad("ΔV2", 8), lpad("ΔV3", 8))
+
+                    bus_ids = sort(parse.(Int, collect(keys(math_mld["bus"]))))
+                    for bid in bus_ids
+                        bid_str = string(bid)
+                        bus = math_mld["bus"][bid_str]
+                        bus_name = get(bus, "name", "?")
+
+                        # MLD voltages: w → sqrt(w)
+                        mld_v = [0.0, 0.0, 0.0]
+                        if haskey(mld_sol, "bus") && haskey(mld_sol["bus"], bid_str)
+                            bs = mld_sol["bus"][bid_str]
+                            if haskey(bs, "w")
+                                for (idx, c) in enumerate(bus["terminals"])
+                                    w = bs["w"][idx]
+                                    mld_v[c] = w >= 0 ? sqrt(w) : 0.0
+                                end
+                            elseif haskey(bs, "vm")
+                                for (idx, c) in enumerate(bus["terminals"])
+                                    mld_v[c] = bs["vm"][idx]
+                                end
+                            end
+                        end
+
+                        # ACPF voltages: IVR gives vr/vi, compute vm = sqrt(vr²+vi²)
+                        ac_v = [0.0, 0.0, 0.0]
+                        if haskey(acpf_sol, "bus") && haskey(acpf_sol["bus"], bid_str)
+                            bs = acpf_sol["bus"][bid_str]
+                            if haskey(bs, "vr") && haskey(bs, "vi")
+                                for (idx, c) in enumerate(bus["terminals"])
+                                    ac_v[c] = sqrt(bs["vr"][idx]^2 + bs["vi"][idx]^2)
+                                end
+                            elseif haskey(bs, "vm")
+                                for (idx, c) in enumerate(bus["terminals"])
+                                    ac_v[c] = bs["vm"][idx]
+                                end
+                            elseif haskey(bs, "w")
+                                for (idx, c) in enumerate(bus["terminals"])
+                                    w = bs["w"][idx]
+                                    ac_v[c] = w >= 0 ? sqrt(w) : 0.0
+                                end
+                            end
+                        end
+
+                        delta = ac_v .- mld_v
+                        println(io, lpad(bid_str, 6), "  ", rpad(bus_name, 12),
+                                "  ", join([lpad(round(v, digits=4), 8) for v in mld_v]),
+                                "  ", join([lpad(round(v, digits=4), 8) for v in ac_v]),
+                                "  ", join([lpad(round(d, digits=4), 8) for d in delta]))
+                    end
+
+                    # Load setpoint comparison
+                    println(io, "\n\nLoad Setpoint Comparison (MLD pd vs math_ac pd)")
+                    println(io, "-"^60)
+                    if haskey(math_mld, "load")
+                        load_ids = sort(parse.(Int, collect(keys(math_mld["load"]))))
+                        for lid in load_ids
+                            lid_str = string(lid)
+                            mld_pd = haskey(mld_sol, "load") && haskey(mld_sol["load"], lid_str) ? get(mld_sol["load"][lid_str], "pd", []) : []
+                            ac_pd = haskey(math_ac, "load") && haskey(math_ac["load"], lid_str) ? math_ac["load"][lid_str]["pd"] : []
+                            println(io, "  Load $lid_str: MLD pd=$(round.(mld_pd, digits=6))  AC pd=$(round.(ac_pd, digits=6))")
+                        end
+                    end
+
+                    println(io, "\n\nMLD termination: $(best_mld["termination_status"])")
+                    println(io, "ACPF termination: $(acpf["termination_status"])")
+                end
+                println("    Saved voltage diagnostics to $diag_file")
+            end
+            # ─────────────────────────────────────────────────────────
+
             # Store solution for plotting
             solutions_for_plotting[case][fair_func] = Dict(
                 :mld => best_mld,
