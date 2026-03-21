@@ -170,12 +170,12 @@ function setup_network(case::String, ls_percent::Float64, source_pu::Float64, cr
 
     # Create the critical load set
     #critical_load = ["675a"]
-    critical_id = []
+    critical_id = Int[]
     #critical_load = ["l4"]
     for (i,load) in math["load"]
         if load["name"] in critical_load
             load["critical"] = 1
-            load["weight"] = 100000
+            load["weight"] = 100
             push!(critical_id,parse(Int,i))
             #println("Load $(load["name"]) at math load node $(i) is critical.")
         else

@@ -229,11 +229,22 @@ function palma_ratio_minimization(
     w_bounds::Tuple{Float64, Float64} = (0.0, 10.0),
     solver = get_default_solver(),
     silent::Bool = true,
-    relax_binary::Bool = false  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
+    relax_binary::Bool = false,  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
+    critical_ids::Vector{Int} = Int[],
+    weight_ids::Vector{Int} = Int[]
 )
     n = length(pshed_prev)
     w_min, w_max = w_bounds
     ε = 1e-8  # Small positive for σ lower bound
+
+    # Clamp critical loads' pshed to zero (lower level can return slightly negative
+    # values due to numerical noise, which would make the problem infeasible)
+    for j in 1:n
+        load_id = isempty(weight_ids) ? j : weight_ids[j]
+        if load_id in critical_ids
+            pshed_prev[j] = max(pshed_prev[j], 0.0)
+        end
+    end
 
     # Validate inputs
     @assert size(dpshed_dw) == (n, n) "Jacobian must be n×n"
@@ -299,8 +310,15 @@ function palma_ratio_minimization(
 
     @constraint(model, trust_lb[j=1:n], Δw[j] >= -trust_radius)
     @constraint(model, trust_ub[j=1:n], Δw[j] <= trust_radius)
-    @constraint(model, weight_lb[j=1:n], weights_prev[j] + Δw[j] >= w_min)
-    @constraint(model, weight_ub[j=1:n], weights_prev[j] + Δw[j] <= w_max)
+    for j in 1:n
+        load_id = isempty(weight_ids) ? j : weight_ids[j]
+        if load_id in critical_ids
+            @constraint(model, weights_prev[j] + Δw[j] <= 100.0)
+        else
+            @constraint(model, weights_prev[j] + Δw[j] >= w_min)
+            @constraint(model, weights_prev[j] + Δw[j] <= w_max)
+        end
+    end
 
     #=========================================================================
     # P_shed Bounds (Critical for Charnes-Cooper feasibility)
@@ -454,13 +472,18 @@ function lin_palma_reformulated(
     dpshed_dw::Matrix{Float64},
     pshed_prev::Vector{Float64},
     weights_prev::Vector{Float64},
-    pd::Vector{Float64}
+    pd::Vector{Float64},
+    critical_ids::Vector{Int} = Int[],
+    weight_ids::Vector{Int} = Int[]
 )
+    # Clamp slightly negative pshed values (numerical noise from lower level) to zero
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
         trust_radius = 0.5,
         w_bounds = (1.0, 10.0),
-        relax_binary = false  # Binary required; McCormick relaxation needs testing
+        relax_binary = false,  # Binary required; McCormick relaxation needs testing
+        critical_ids = critical_ids,
+        weight_ids = weight_ids
     )
 
     # Compute σ from result (for compatibility)

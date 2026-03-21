@@ -1,15 +1,18 @@
 # Create the other fairness functions
 
 # Function to compute Jain's Fairness Index
-function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
     n = length(pshed_prev)
-    # pshed_new = JuMP.@variable(
-    # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
-    # base_name = "pshed_new"
-    #     )
     @variable(model, weights_new[1:n] .>= 1.0)
-    @constraint(model, weights_new[1:n] .<= 10.0)
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # @constraint(model, [i in 1:n],
@@ -43,23 +46,35 @@ end
 # updating pshed with the gradietn dpshed_dw
 # with respect the the change in weights w, w_prev
 # optimizing pshed_new and weights_new
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
-    # pshed_new = JuMP.@variable(
-    # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
-    # base_name = "pshed_new"
-    #     )
-    @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
-    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    #@constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    n = length(weights_prev)
+    @variable(model, weights_new[1:n])
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] >= 50.0)
+        else
+            @constraint(model, weights_new[id] >= 1.0)
+        end
+    end
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
+    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    #@constraint(model, [i=1:n], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
 
     # @constraint(model, [i in 1:length(pshed_prev)],
-    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     # )
     @variable(model, t >= 0)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
-         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
     )
     @constraint(model, [i=1:length(pshed_prev)], t >= pshed_new[i])
     @objective(model, Min, t)
@@ -75,7 +90,7 @@ end
 # Function to compute the proportional fairness of load served
 # Maximizes Σ log(pd_served_i) = Σ log(pref_i - pshed_i)  (α-fairness with α=1)
 # Reports load shed values
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64})
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
@@ -83,7 +98,14 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     pref = pd  # reference demand aligned with pshed indexing (built by caller from pshed_ids)
     # Start weights at weights_prev so Ipopt evaluates log at a valid initial point
     @variable(model, weights_new[i=1:n] >= 1.0, start = weights_prev[i])
-    @constraint(model, weights_new[1:n] .<= 10.0)
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
     @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # Use variables (not expressions) for pshed_new so log doesn't nest expressions
@@ -105,7 +127,7 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
 end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
-function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any})
+function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
     # pshed_new = JuMP.@variable(
     # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
@@ -119,8 +141,17 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
             total_load_ref += load["pd"][idx]
         end
     end
-    @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
-    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
+    n = length(weights_prev)
+    @variable(model, weights_new[1:n] .>= 1.0)
+    for id in 1:n
+        # Map position to load ID; if weight_ids available use it, otherwise assume position == load ID
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:length(pshed_prev)],
@@ -144,14 +175,22 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
 end
 
 # Function to compute the infinity norm fairness of load shed
-function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
+    n = length(weights_prev)
     pshed_new = JuMP.@variable(
     model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
     base_name = "pshed_new"
-        )    
-    @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
-    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
+        )
+    @variable(model, weights_new[1:n] .>= 1.0)
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     #@variable(model, t >= 0)
@@ -173,15 +212,19 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
 end
 
 # Equality min fairness function
-function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64})
+function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
-    # pshed_new = JuMP.@variable(
-    # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
-    # base_name = "pshed_new"
-    #     )
-    @variable(model, weights_new[1:length(weights_prev)] .>= 1.0)
+    n = length(weights_prev)
+    @variable(model, weights_new[1:n] .>= 1.0)
     @variable(model, t >= 0)
-    @constraint(model, weights_new[1:length(weights_prev)] .<= 10.0)
+    for id in 1:n
+        load_id = isempty(weight_ids) ? id : weight_ids[id]
+        if load_id in critical_ids
+            @constraint(model, weights_new[id] <= 100.0)
+        else
+            @constraint(model, weights_new[id] <= 10.0)
+        end
+    end
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # @constraint(model, [i in 1:length(pshed_prev)],

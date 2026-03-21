@@ -26,14 +26,14 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]#ieee123_aw_mod"]#"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
+const CASES = ["ieee123_aw_mod"]#["motivation_c"]##"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
 const FAIR_FUNCS = ["efficiency", "palma", "min_max", "equality_min", "proportional"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 20 
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 1000#000
 const SOURCE_PU = 1.03
-
+const critical_buses = []# ["611c"]
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
 mkpath(save_dir)
@@ -62,7 +62,7 @@ end
 # ============================================================
 # STREAMLINED BILEVEL OPTIMIZATION (no plotting)
 # ============================================================
-function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weights_init::Vector{Float64}, fair_func::String)
+function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weights_init::Vector{Float64}, fair_func::String, critical_id::Vector{Int}=Int[])
     math_new = deepcopy(data)
     fair_weights = copy(fair_weights_init)  # Mutable copy for updates
     pshed_lower_level = Float64[]
@@ -83,21 +83,21 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
         # Apply fairness function
         if fair_func == "proportional"
             pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
-            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd)
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd, critical_id, weight_ids)
         elseif fair_func == "efficiency"
-            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new)
+            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new, critical_id, weight_ids)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
         elseif fair_func == "jain"
-            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals)
+            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
         elseif fair_func == "palma"
             pd = Float64[]
             for i in pshed_ids
                 push!(pd, sum(math_new["load"][string(i)]["pd"]))
             end
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd, critical_id, weight_ids)
         else
             error("Unknown fairness function: $fair_func")
         end
@@ -776,8 +776,9 @@ function run_comparison()
         println("\n>>> Processing case: $case")
 
         # Setup network
-        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, [])
-        fair_weights = Float64[load["weight"] for (_, load) in math["load"]]
+        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, critical_buses)
+        sorted_load_ids = sort(parse.(Int, collect(keys(math["load"]))))
+        fair_weights = Float64[math["load"][string(i)]["weight"] for i in sorted_load_ids]
         total_demand = get_total_demand(math)
 
         println("    Total demand: $(round(total_demand, digits=4))")
@@ -797,7 +798,7 @@ function run_comparison()
 
             # Run bilevel relaxation
             math_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts, bilevel_summary = run_bilevel_relaxed(
-                math, ITERATIONS, fair_weights, fair_func
+                math, ITERATIONS, fair_weights, fair_func, critical_id
             )
 
             # Skip this fairness function if bilevel failed on the first iteration
@@ -1324,7 +1325,22 @@ for case in CASES
     # Save CSV
     CSV.write(joinpath(save_dir, "final_weights_$case.csv"), weights_df)
 
-    # Create bar chart
+    # Identify critical load IDs from the math dict in solutions_for_plotting
+    critical_ids_case = Int[]
+    if haskey(solutions_for_plotting, case)
+        for (ff, sol) in solutions_for_plotting[case]
+            math_case = sol[:mld_math]
+            for (lid_str, load) in math_case["load"]
+                if get(load, "critical", 0) == 1
+                    push!(critical_ids_case, parse(Int, lid_str))
+                end
+            end
+            break  # only need one fair_func to get the load data
+        end
+    end
+    unique!(critical_ids_case)
+
+    # Create bar chart of all weights
     p_weights = plot(xlabel="Load ID", ylabel="Final Weight", title="Final Weights: $case",
                      legend=:outertopright, xticks=load_ids_sorted, size=(1100, 500))
     n_funcs = length(FAIR_FUNCS)
@@ -1341,6 +1357,44 @@ for case in CASES
     end
     savefig(p_weights, joinpath(save_dir, "final_weights_$case.svg"))
     println("  Saved: final_weights_$case.csv, final_weights_$case.svg")
+
+    # Create critical load weight plot (side-by-side: all weights + critical-only zoom)
+    if !isempty(critical_ids_case)
+        crit_mask = [lid in critical_ids_case for lid in load_ids_sorted]
+        crit_ids = load_ids_sorted[crit_mask]
+
+        # Left: all weights with critical loads highlighted
+        p_all = plot(xlabel="Load ID", ylabel="Final Weight", title="All Weights: $case",
+                     legend=:outertopright, xticks=load_ids_sorted, ylims=(0, 10), size=(600, 400))
+        for (i, fair_func) in enumerate(FAIR_FUNCS)
+            wts = weights_df[!, fair_func]
+            valid_mask = .!isnan.(wts)
+            if any(valid_mask)
+                bar!(p_all, load_ids_sorted[valid_mask] .+ offsets[i], wts[valid_mask],
+                    bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
+            end
+        end
+        # Mark critical loads on x-axis
+        vline!(p_all, crit_ids, color=:red, linestyle=:dash, linewidth=1, label="Critical")
+
+        # Right: zoom on critical loads only
+        p_crit = plot(xlabel="Load ID", ylabel="Final Weight", title="Critical Load Weights: $case",
+                      legend=:outertopright, xticks=crit_ids, size=(600, 400))
+        for (i, fair_func) in enumerate(FAIR_FUNCS)
+            wts = weights_df[!, fair_func]
+            crit_wts = wts[crit_mask]
+            crit_valid = .!isnan.(crit_wts)
+            if any(crit_valid)
+                bar!(p_crit, crit_ids[crit_valid] .+ offsets[i], crit_wts[crit_valid],
+                    bar_width=bar_width*0.9, label=FAIR_FUNC_LABELS[fair_func], color=FAIR_FUNC_COLORS[fair_func])
+            end
+        end
+
+        p_combined = plot(p_all, p_crit, layout=(1, 2), size=(1400, 500),
+                          left_margin=10Plots.mm, bottom_margin=10Plots.mm)
+        savefig(p_combined, joinpath(save_dir, "critical_weights_$case.svg"))
+        println("  Saved: critical_weights_$case.svg")
+    end
 end
 
 # ============================================================

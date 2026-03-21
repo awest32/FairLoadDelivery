@@ -81,9 +81,11 @@ function lower_level_soln(math, weights_new, k)
     ref = mld_paramed.ref[:it][:pmd][:nw][0]
 
 
-    # Initial weights (iteration 0)
+    # On the first iteration, use the weights from the math dictionary.
+    # On subsequent iterations, use the weights from the upper-level fairness function.
     if k == 1
-        weights_prev = ones(length(ref[:load])) * 10.0
+        load_ids_sorted = sort(parse.(Int, collect(keys(math["load"]))))
+        weights_prev = Float64[math["load"][string(i)]["weight"] for i in load_ids_sorted]
     else
         weights_prev = weights_new
     end
