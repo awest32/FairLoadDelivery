@@ -198,7 +198,7 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
         for i in _PMD.ids(pm, n, :switch)
             FairLoadDelivery.constraint_switch_state_on_off(pm, i; nw=n, relax=true)
             FairLoadDelivery.constraint_mc_switch_ampacity(pm, i; nw=n)
-            constraint_model_switch_voltage_magnitude_difference_fld(pm, i)
+            constraint_model_switch_voltage_magnitude_difference_fld(pm, i; nw=n)
         end
 
         for i in _PMD.ids(pm, n, :transformer)
@@ -225,6 +225,141 @@ function build_mn_mc_mld_switch_relaxed(pm::_PMD.AbstractUnbalancedPowerModel)
 
     # Objective: maximize weighted load served across all periods
     objective_mn_max_load_served(pm)
+end
+
+"""
+Solve the multiperiod MLD problem with implicit differentiation (DiffOpt).
+One global set of fair_load_weights shared across all time periods.
+"""
+function solve_mn_mc_mld_shed_implicit_diff(data::Dict{String,Any}, solver; kwargs...)
+    return _PMD.solve_mc_model(
+        data,
+        _PMD.LinDist3FlowPowerModel,
+        solver,
+        build_mn_mc_mld_shedding_implicit_diff;
+        multinetwork=true,
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!],
+        kwargs...
+    )
+end
+
+"""
+Build multiperiod MLD with implicit differentiation (DiffOpt).
+Creates ONE global set of fair_load_weights shared across all T periods.
+Per-period: all other variables (pshed, pd, switches, blocks, etc.)
+Registers per-period pshed in model dictionary for Jacobian computation.
+"""
+function build_mn_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
+    # Replace model with DiffOpt-wrapped optimizer for implicit differentiation
+    pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(Ipopt.Optimizer))
+
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    first_nw = nw_ids[1]
+
+    println("Building multiperiod implicit diff FLDP with $(length(nw_ids)) periods...")
+
+    for (idx, n) in enumerate(nw_ids)
+        println("  Building period $n...")
+
+        # Variables (same as single-period build_mc_mld_shedding_implicit_diff)
+        _PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=true)
+        variable_mc_bus_voltage_magnitude_sqr_on_off(pm; nw=n)
+
+        _PMD.variable_mc_branch_power(pm; nw=n)
+        _PMD.variable_mc_switch_power(pm; nw=n)
+        _PMD.variable_mc_switch_state(pm; nw=n, relax=true)
+        _PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_transformer_power(pm; nw=n)
+
+        _PMD.variable_mc_gen_indicator(pm; nw=n, relax=true)
+        _PMD.variable_mc_generator_power_on_off(pm; nw=n)
+
+        _PMD.variable_mc_storage_power_mi_on_off(pm; nw=n, relax=true, report=true)
+
+        _PMD.variable_mc_load_indicator(pm; nw=n, relax=true)
+        variable_mc_load_shed(pm; nw=n)
+
+        variable_block_indicator(pm; nw=n, relax=true)
+
+        # GLOBAL fair_load_weights: create only for the first period
+        # All periods share the same weight parameters
+        if idx == 1
+            variable_mc_fair_load_weights(pm; nw=n)
+        end
+
+        # Constraints
+        _PMD.constraint_mc_model_current(pm; nw=n)
+
+        for i in _PMD.ids(pm, n, :ref_buses)
+            _PMD.constraint_mc_theta_ref(pm, i; nw=n)
+        end
+
+        _PMD.constraint_mc_bus_voltage_on_off(pm; nw=n)
+
+        for i in _PMD.ids(pm, n, :gen)
+            _PMD.constraint_mc_generator_power(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :bus)
+            constraint_mc_power_balance_shed(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :storage)
+            _PMD.constraint_storage_state(pm, i; nw=n)
+            _PMD.constraint_storage_complementarity_mi(pm, i; nw=n)
+            _PMD.constraint_mc_storage_losses(pm, i; nw=n)
+            _PMD.constraint_mc_storage_thermal_limit(pm, i; nw=n)
+            constraint_mc_storage_on_off(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :branch)
+            _PMD.constraint_mc_power_losses(pm, i; nw=n)
+            constraint_model_voltage_magnitude_difference_fld(pm, i; nw=n)
+            _PMD.constraint_mc_voltage_angle_difference(pm, i; nw=n)
+            _PMD.constraint_mc_thermal_limit_from(pm, i; nw=n)
+            _PMD.constraint_mc_thermal_limit_to(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :switch)
+            constraint_switch_state_on_off(pm, i; nw=n, relax=true)
+            _PMD.constraint_mc_switch_thermal_limit(pm, i; nw=n)
+            constraint_mc_switch_ampacity(pm, i; nw=n)
+            constraint_model_switch_voltage_magnitude_difference_fld(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :transformer)
+            _PMD.constraint_mc_transformer_power(pm, i; nw=n)
+        end
+
+        # FairLoadDelivery-specific constraints
+        constraint_source_voltage_bounds(pm; nw=n)
+        constraint_mc_isolate_block(pm; nw=n)
+        constraint_radial_topology(pm; nw=n)
+        constraint_mc_block_energization_consistency_bigm(pm, n)
+
+        constraint_block_budget(pm; nw=n)
+        constraint_switch_budget(pm; nw=n)
+
+        constraint_load_shed_definition(pm; nw=n)
+
+        constraint_connect_block_load(pm; nw=n)
+        constraint_connect_load_bus(pm; nw=n)
+        constraint_connect_block_gen(pm; nw=n)
+        constraint_connect_block_voltage(pm; nw=n)
+        constraint_connect_block_shunt(pm; nw=n)
+        constraint_connect_block_storage(pm; nw=n)
+    end
+
+    # Register per-period pshed in model dictionary for Jacobian computation
+    for n in nw_ids
+        pm.model[Symbol("pshed_nw_$(n)")] = _PMD.var(pm, n)[:pshed]
+    end
+    # Store nw_ids list in model for retrieval during Jacobian computation
+    pm.model[:nw_ids] = nw_ids
+
+    # Objective: maximize weighted load served across all periods with global weights
+    # Regularization keeps pd interior for DiffOpt sensitivity computation
+    objective_mn_fairly_weighted_max_load_served_regd(pm; regularization=0.05)
 end
 
 function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)

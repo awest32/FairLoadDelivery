@@ -565,3 +565,41 @@ function objective_mn_max_load_served(pm::_PMD.AbstractUnbalancedPowerModel)
 
     JuMP.@objective(pm.model, Min, obj_expr)
 end
+
+"""
+Multiperiod objective: maximize weighted load served across all time periods
+using ONE set of global fair_load_weights (shared across periods) with regularization.
+The global weights are stored in pm.model[:fair_load_weights] (created for the first nw only).
+"""
+function objective_mn_fairly_weighted_max_load_served_regd(pm::_PMD.AbstractUnbalancedPowerModel; regularization::Float64=0.05)
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    first_nw = nw_ids[1]
+
+    # Global fair_load_weights (created only for first nw, shared across all periods)
+    fair_load_weights = _PMD.var(pm, first_nw, :fair_load_weights)
+
+    weighted_load_served = []
+    regularization_terms = []
+
+    for n in nw_ids
+        for d in _PMD.ids(pm, n, :load)
+            pd_var = _PMD.var(pm, n, :pd)[d]
+            push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
+            if regularization > 0.0
+                push!(regularization_terms, sum(pd_var .^ 2))
+            end
+        end
+    end
+
+    if isempty(weighted_load_served)
+        return JuMP.@objective(pm.model, Max, 0.0)
+    else
+        if regularization > 0.0
+            return JuMP.@objective(pm.model, Max,
+                sum(weighted_load_served) - regularization * sum(regularization_terms))
+        else
+            return JuMP.@objective(pm.model, Max,
+                sum(weighted_load_served))
+        end
+    end
+end

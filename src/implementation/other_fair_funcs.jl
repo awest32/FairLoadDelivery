@@ -3,9 +3,10 @@
 # Function to compute Jain's Fairness Index
 function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
     model = JuMP.Model(Ipopt.Optimizer)
-    n = length(pshed_prev)
-    @variable(model, weights_new[1:n] .>= 1.0)
-    for id in 1:n
+    m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod)
+    n_w = length(weights_prev)   # Number of weights (N)
+    @variable(model, weights_new[1:n_w] .>= 1.0)
+    for id in 1:n_w
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
@@ -13,16 +14,13 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
-    # @constraint(model, [i in 1:n],
-    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
-    # )
-    @expression(model, pshed_new[i = 1:n],
-       pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @expression(model, pshed_new[i = 1:m],
+       pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
     sum_pshed = sum(pshed_new)
-    sum_pshed_squared = sum(pshed_new[i]^2 for i in 1:n)
+    sum_pshed_squared = sum(pshed_new[i]^2 for i in 1:m)
 
     # Guard: if all pshed values are zero, no inequality to reduce — return unchanged
     if all(pshed_prev .== 0.0)
@@ -30,7 +28,7 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
         return pshed_prev, weights_prev, MOI.OPTIMAL
     end
 
-    fairness_index = (sum_pshed^2) / (n * sum_pshed_squared)
+    fairness_index = (sum_pshed^2) / (m * sum_pshed_squared)
     @objective(model, Max, fairness_index)
     JuMP.set_silent(model)
     optimize!(model)
@@ -94,11 +92,12 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
-    n = length(pshed_prev)
+    m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod)
+    n_w = length(weights_prev)   # Number of weights (N)
     pref = pd  # reference demand aligned with pshed indexing (built by caller from pshed_ids)
     # Start weights at weights_prev so Ipopt evaluates log at a valid initial point
-    @variable(model, weights_new[i=1:n] >= 1.0, start = weights_prev[i])
-    for id in 1:n
+    @variable(model, weights_new[i=1:n_w] >= 1.0, start = weights_prev[i])
+    for id in 1:n_w
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
@@ -106,17 +105,17 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # Use variables (not expressions) for pshed_new so log doesn't nest expressions
-    @variable(model, pshed_new[i=1:n], start = pshed_prev[i])
-    @constraint(model, [i=1:n],
-        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
+    @variable(model, pshed_new[i=1:m], start = pshed_prev[i])
+    @constraint(model, [i=1:m],
+        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
     # Shifted log: uniform constant c added to all loads' served values
     # At start point (Δw=0): pshed_new = pshed_prev, so log(pref - pshed_prev + c) is valid
     c = 1e-6
-    @NLobjective(model, Max, sum(log(pref[i] - pshed_new[i] + c) for i in 1:n))
+    @NLobjective(model, Max, sum(log(pref[i] - pshed_new[i] + c) for i in 1:m))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)

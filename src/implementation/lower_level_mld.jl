@@ -51,8 +51,10 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
         DiffOpt.empty_input_sensitivities!(model)
 
         # Perturb ONLY weight j (standard basis vector e_j)
+        # Use 1.0 (not fair_load_weights[j]) so that get_forward_variable
+        # returns the true partial derivative ∂pshed/∂w_j
         for (k, wkey) in enumerate(weight_keys)
-            perturbation = (k == j) ? fair_load_weights[j] : 0.0
+            perturbation = (k == j) ? 1.0 : 0.0
             DiffOpt.set_forward_parameter(model, weight_params[wkey], perturbation)
         end
 
@@ -98,6 +100,103 @@ end
 # dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, 10*ones(length(math["load"])), 1)
 # mld_relaxed = FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi)
 # mld_relaxed["solution"]["switch"]
+"""
+Multiperiod Jacobian computation via DiffOpt forward differentiation.
+Returns Jacobian of shape (T*N) x N where:
+  - Rows: pshed for each load in each period (flattened: period 0 loads, period 1 loads, ...)
+  - Columns: global fair_load_weights (N weights)
+Also returns flattened pshed values, pshed IDs (tuples of (nw, load_id)),
+weight values, weight IDs, and the model.
+"""
+function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vector{Float64})
+    weight_params = model[:fair_load_weights]
+    nw_ids = model[:nw_ids]
+
+    weight_keys = collect(eachindex(weight_params))
+    weight_ids = collect(axes(weight_params, 1))
+    n_weights = length(weight_keys)
+
+    # Collect all pshed variables across periods (flattened)
+    all_pshed_vars = []      # JuMP variable references
+    all_pshed_keys = []      # keys for indexing
+    all_pshed_nw_ids = []    # (nw, load_id) tuples for identification
+
+    for n in nw_ids
+        pshed_nw = model[Symbol("pshed_nw_$(n)")]
+        pshed_keys_nw = collect(eachindex(pshed_nw))
+        pshed_ids_nw = collect(axes(pshed_nw, 1))
+        for (key, lid) in zip(pshed_keys_nw, pshed_ids_nw)
+            push!(all_pshed_vars, pshed_nw[key])
+            push!(all_pshed_keys, (n, key))
+            push!(all_pshed_nw_ids, (n, lid))
+        end
+    end
+
+    n_pshed_total = length(all_pshed_vars)
+
+    # Solve once — perturbations only affect differentiation direction, not the optimal solution
+    optimize!(model)
+
+    # Build Jacobian column by column: (T*N) x N
+    jacobian = zeros(n_pshed_total, n_weights)
+    for j in 1:n_weights
+        DiffOpt.empty_input_sensitivities!(model)
+
+        # Perturb ONLY weight j (standard basis vector e_j)
+        # Use 1.0 (not fair_load_weights[j]) so that get_forward_variable
+        # returns the true partial derivative ∂pshed/∂w_j
+        for (k, wkey) in enumerate(weight_keys)
+            perturbation = (k == j) ? 1.0 : 0.0
+            DiffOpt.set_forward_parameter(model, weight_params[wkey], perturbation)
+        end
+
+        DiffOpt.forward_differentiate!(model)
+
+        # Extract column j: [∂pshed_t0_l1/∂w_j, ∂pshed_t0_l2/∂w_j, ..., ∂pshed_t1_l1/∂w_j, ...]
+        for (i, var) in enumerate(all_pshed_vars)
+            jacobian[i, j] = DiffOpt.get_forward_variable(model, var)
+        end
+    end
+
+    # Collect pshed values (flattened across periods)
+    pshed_vals = Float64[JuMP.value(var) for var in all_pshed_vars]
+
+    return jacobian, pshed_vals, all_pshed_nw_ids, Array(JuMP.value.(weight_params)), weight_ids, model
+end
+
+"""
+Multiperiod lower-level solution: instantiates the multiperiod implicit diff model,
+sets weights, computes Jacobian via DiffOpt.
+Returns: dpshed_mat (T*N x N), pshed_val (T*N), pshed_nw_ids, weight_vals, weight_ids, refs
+"""
+function lower_level_soln_mn(mn_data::Dict{String,Any}, weights_new, k)
+    mld_paramed = instantiate_mc_model(
+        mn_data,
+        LinDist3FlowPowerModel,
+        build_mn_mc_mld_shedding_implicit_diff;
+        multinetwork=true,
+        ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
+    )
+
+    nw_ids = sort(collect(_PMD.nw_ids(mld_paramed)))
+    first_nw = nw_ids[1]
+    refs = Dict(n => mld_paramed.ref[:it][:pmd][:nw][n] for n in nw_ids)
+
+    # On first iteration, use weights from the data; subsequently use updated weights
+    if k == 1
+        first_nw_data = mn_data["nw"][string(first_nw)]
+        load_ids_sorted = sort(parse.(Int, collect(keys(first_nw_data["load"]))))
+        weights_prev = Float64[first_nw_data["load"][string(i)]["weight"] for i in load_ids_sorted]
+    else
+        weights_prev = weights_new
+    end
+
+    @info "Iteration $k: Solving multiperiod lower-level MLD with weights: $weights_prev"
+
+    dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, _ = diff_forward_full_jacobian_mn(mld_paramed.model, weights_prev)
+    return dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
+end
+
 function plot_dpshed_heatmap(dpshed, pshed_ids, weight_ids, k, save_path)
     # Labels for rows/columns (use pshed keys)
     # original ordering
