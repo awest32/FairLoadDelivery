@@ -72,11 +72,72 @@ for case in CASES
     _, math_viz, _, _ = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, critical_buses)
 
     bus_name_map = build_bus_name_maps(math_viz)
-    sorted_load_ids = sort(parse.(Int, collect(keys(math_viz["load"]))))
-    load_names = [get(math_viz["load"][string(lid)], "name", "load_$lid") for lid in sorted_load_ids]
     nw_ids_sorted = [string(i) for i in 0:(N_PERIODS-1)]
     n_periods = N_PERIODS
     period_labels = ["T$(i+1)\n(×$(LOAD_SCALE_FACTORS[i+1]))" for i in 0:(N_PERIODS-1)]
+
+    # ── Compute bus distances from source via BFS ──
+    # Identify virtual switch buses
+    virtual_buses = Set{Int}()
+    for (bid_str, bus) in math_viz["bus"]
+        if contains(get(bus, "name", ""), "_virtual")
+            push!(virtual_buses, parse(Int, bid_str))
+        end
+    end
+    # Build adjacency from branches + switches
+    adj = Dict{Int, Vector{Int}}()
+    for (_, br) in math_viz["branch"]
+        f, t = br["f_bus"], br["t_bus"]
+        if !haskey(adj, f); adj[f] = Int[]; end
+        if !haskey(adj, t); adj[t] = Int[]; end
+        push!(adj[f], t)
+        push!(adj[t], f)
+    end
+    if haskey(math_viz, "switch")
+        for (_, sw) in math_viz["switch"]
+            f, t = sw["f_bus"], sw["t_bus"]
+            if !haskey(adj, f); adj[f] = Int[]; end
+            if !haskey(adj, t); adj[t] = Int[]; end
+            push!(adj[f], t)
+            push!(adj[t], f)
+        end
+    end
+    # Find source bus
+    source_bus = nothing
+    for (_, gen) in math_viz["gen"]
+        if gen["source_id"] == "voltage_source.source"
+            source_bus = gen["gen_bus"]
+            break
+        end
+    end
+    if source_bus === nothing
+        source_bus = first(keys(adj))  # fallback
+    end
+    # BFS — virtual buses cost 0 distance
+    bus_dist = Dict{Int, Int}()
+    queue = [(source_bus, 0)]
+    bus_dist[source_bus] = 0
+    while !isempty(queue)
+        bus, d = popfirst!(queue)
+        for nb in get(adj, bus, Int[])
+            if !haskey(bus_dist, nb)
+                nd = nb in virtual_buses ? d : d + 1
+                bus_dist[nb] = nd
+                push!(queue, (nb, nd))
+            end
+        end
+    end
+
+    # ── Order loads by (bus distance from source, load name) ──
+    all_load_ids = sort(parse.(Int, collect(keys(math_viz["load"]))))
+    load_order = sort(all_load_ids, by=lid -> begin
+        load = math_viz["load"][string(lid)]
+        d = get(bus_dist, load["load_bus"], 999)
+        name = get(load, "name", "zzz_$lid")
+        (d, name)
+    end)
+    sorted_load_ids = load_order
+    load_names = [get(math_viz["load"][string(lid)], "name", "load_$lid") for lid in sorted_load_ids]
 
     # Build multinetwork for original demand reference
     mn_data_viz = Dict{String,Any}("nw" => Dict{String,Any}())
@@ -90,7 +151,7 @@ for case in CASES
         mn_data_viz["nw"][string(t-1)] = nw_data
     end
 
-    # Build bus-level grouping
+    # ── Order buses by distance from source (for load shed / voltage plots) ──
     bus_loads = Dict{Int, Vector{Int}}()
     for lid in sorted_load_ids
         bus_id = math_viz["load"][string(lid)]["load_bus"]
@@ -99,9 +160,12 @@ for case in CASES
         end
         push!(bus_loads[bus_id], lid)
     end
-    bus_ids_sorted = sort(collect(keys(bus_loads)))
+    bus_ids_sorted = sort(collect(keys(bus_loads)), by=bid -> get(bus_dist, bid, 999))
     bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in bus_ids_sorted]
-    all_bus_ids = sort(parse.(Int, collect(keys(math_viz["bus"]))))
+    # Filter out virtual switch buses
+    real_bus_ids = filter(bid -> !contains(get(math_viz["bus"][string(bid)], "name", ""), "_virtual"),
+        parse.(Int, collect(keys(math_viz["bus"]))))
+    all_bus_ids = sort(real_bus_ids, by=bid -> get(bus_dist, bid, 999))
     all_bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in all_bus_ids]
 
     # ── 1. WEIGHTS: multi-pane heatmap ──
@@ -155,6 +219,10 @@ for case in CASES
                     markerstrokecolor=:white, markerstrokewidth=1.5,
                     label=false)
             end
+            # Light grid lines at cell boundaries
+            n_loads = length(sorted_load_ids)
+            vline!(p, (0:n_loads) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
+            hline!(p, (0:n_periods) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
             push!(weight_panes, p)
         end
         n_panes = length(weight_panes)
@@ -223,6 +291,10 @@ for case in CASES
                 ytickfontcolor=is_first ? :black : RGBA(0,0,0,0),
                 titlefontsize=10, tickfontsize=7,
 )
+            # Light grid lines at cell boundaries
+            n_buses_shed = length(bus_ids_sorted)
+            vline!(p, (0:n_buses_shed) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
+            hline!(p, (0:n_periods) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
             push!(shed_panes, p)
         end
         n_panes = length(shed_panes)
@@ -291,6 +363,16 @@ for case in CASES
                 end
             end
 
+            # Track de-energized cells (NaN or near-zero voltage)
+            # Place markers at grid intersections (bottom-left corner of de-energized cell)
+            deenerg_x = Float64[]
+            deenerg_y = Float64[]
+            for i in 1:n_periods, j in 1:length(all_bus_ids)
+                if isnan(voltage_matrix[i, j]) || voltage_matrix[i, j] < 0.01
+                    push!(deenerg_x, Float64(j) - 0.5)
+                    push!(deenerg_y, Float64(i) - 0.5)
+                end
+            end
             replace!(voltage_matrix, NaN => 0.0)
             p = heatmap(all_bus_labels, period_labels, voltage_matrix,
                 title=FAIR_FUNC_LABELS[fair_func],
@@ -298,8 +380,18 @@ for case in CASES
                 clims=(0.9, 1.1), colorbar=false,
                 ylabel=is_first ? "Period" : "",
                 ytickfontcolor=is_first ? :black : RGBA(0,0,0,0),
-                titlefontsize=10, tickfontsize=7,
-)
+                titlefontsize=10, tickfontsize=7)
+            # Overlay × on de-energized buses
+            if !isempty(deenerg_x)
+                scatter!(p, deenerg_x, deenerg_y,
+                    marker=:xcross, markersize=5, markercolor=:white,
+                    markerstrokecolor=:black, markerstrokewidth=1.5,
+                    label=false)
+            end
+            # Light grid lines at cell boundaries
+            n_buses_volt = length(all_bus_ids)
+            vline!(p, (0:n_buses_volt) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
+            hline!(p, (0:n_periods) .+ 0.5, color=:gray70, linewidth=0.5, label=false)
             push!(volt_panes, p)
         end
         n_panes = length(volt_panes)
@@ -307,7 +399,7 @@ for case in CASES
         cb_data = reshape(range(0.9, 1.1, length=256), 1, :)
         p_cb = heatmap(range(0.9, 1.1, length=256), [""], cb_data,
             color=:RdYlBu, clims=(0.9, 1.1), colorbar=false,
-            yticks=false, xlabel="Voltage (p.u.)", tickfontsize=8,
+            yticks=false, xlabel="Voltage (p.u.)  (× = de-energized)", tickfontsize=8,
             framestyle=:box, top_margin=-5Plots.mm)
         lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
         p_combined = plot(volt_panes..., p_cb,
