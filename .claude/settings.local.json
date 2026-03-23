@@ -3,7 +3,8 @@
     "allow": [
       "Bash(wc:*)",
       "Bash(julia --project=. script/multiperiod/test_palma_only.jl)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(julia:*)"
     ]
   }
 }

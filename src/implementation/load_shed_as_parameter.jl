@@ -288,7 +288,7 @@ function palma_ratio_minimization(
         set_optimizer_attribute(model, "DualReductions", 0)
         set_optimizer_attribute(model, "MIPGap", 1e-4)   # Relaxed gap (was 1e-6)
         set_optimizer_attribute(model, "NonConvex", 2)   # Allow non-convex QP
-        set_optimizer_attribute(model, "TimeLimit", 60*5)  # 5-minute time limit
+        set_optimizer_attribute(model, "TimeLimit", 60 * 5)  # 5 minutes per iteration
         set_optimizer_attribute(model, "MIPFocus", 1)    # Focus on finding feasible solutions
         set_optimizer_attribute(model, "NumericFocus", 2) # High numerical care (3 was needed only when bounds were wrong)
         if !silent

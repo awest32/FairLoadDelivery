@@ -1,0 +1,3 @@
+case,fair_func,total_demand,final_pshed,final_pd_served,pct_shed,pct_served,relaxed_pshed_final,objective,bilevel_iters_completed,bilevel_iters_total,bilevel_last_status,bilevel_early_stop,max_delta_weights,max_delta_pshed,weights_converged
+motivation_c,efficiency,3466.0,1970.8366686401307,1495.1633313598695,56.86199274783989,43.138007252160115,1781.762979072931,14751.63497149479,20,20,LOCALLY_SOLVED,false,0.5000000794227049,4.2494718416389405,false
+motivation_c,min_max,3466.0,2027.3655026309548,1438.6344973690454,58.492945834707285,41.507054165292715,1879.2408677304813,13607.918098828646,20,20,LOCALLY_SOLVED,false,0.4999981083750633,9.99995429379505,true

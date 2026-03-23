@@ -26,8 +26,8 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["ieee123_aw_mod"]#["motivation_c"]##"motivation_c"]#, "motivation_b", "motivation_c", "motivation_d"] #, "motivation_e"] #e throws error for min_max
-const FAIR_FUNCS = ["efficiency", "palma", "min_max", "equality_min", "proportional"]#min_max throws error for motivation_c
+const CASES = ["motivation_c"]#["ieee123_aw_mod"]
+const FAIR_FUNCS = ["efficiency",  "min_max"]#"palma", "jain", "equality_min", "proportional"]#min_max throws error for motivation_c
 const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
 const ITERATIONS = 20 
 const N_ROUNDS = 2

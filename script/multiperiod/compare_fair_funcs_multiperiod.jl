@@ -25,6 +25,7 @@ using Dates
 using Plots
 using Statistics
 using DiffOpt
+using JLD2
 
 const PMD = PowerModelsDistribution
 
@@ -36,15 +37,29 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]
-const FAIR_FUNCS = ["efficiency", "palma", "min_max", "equality_min", "proportional"]
+const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain"]
 const LS_PERCENT = 0.8
 const ITERATIONS = 20
 const N_ROUNDS = 2
 const N_BERNOULLI_SAMPLES = 1000
 const SOURCE_PU = 1.03
 const critical_buses = []
-const N_PERIODS = 3
-const LOAD_SCALE_FACTORS = [0.8, 1.0, 0.9]
+const N_PERIODS = 12
+# Summer daily profile: 6am-5pm (12 hourly periods)
+const LOAD_SCALE_FACTORS = [
+    0.6,   # 6am  - early morning
+    0.75,  # 7am  - morning ramp
+    0.9,   # 8am  - morning ramp
+    1.0,   # 9am  - approaching peak
+    1.1,   # 10am - midday peak (AC)
+    1.2,   # 11am - peak
+    1.2,   # 12pm - peak
+    1.15,  # 1pm  - peak
+    1.05,  # 2pm  - afternoon decline
+    0.95,  # 3pm  - afternoon
+    1.0,   # 4pm  - evening ramp
+    1.1,   # 5pm  - evening peak start
+]
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_multiperiod"
@@ -309,6 +324,7 @@ function run_comparison_mn()
 
     per_period_results = Dict{String, Dict{String, Dict{Int, Vector{Float64}}}}()
     final_weights_results = Dict{String, Dict{String, Dict{Symbol, Any}}}()
+    rounding_results = Dict{String, Dict{String, Dict{String, Any}}}()
     failed_combinations = Vector{Tuple{String, String, String}}()
 
     println("=" ^ 70)
@@ -337,6 +353,7 @@ function run_comparison_mn()
 
         per_period_results[case] = Dict{String, Dict{Int, Vector{Float64}}}()
         final_weights_results[case] = Dict{String, Dict{Symbol, Any}}()
+        rounding_results[case] = Dict{String, Dict{String, Any}}()
 
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
@@ -378,10 +395,30 @@ function run_comparison_mn()
                 bilevel_summary["max_delta_pshed"],
                 bilevel_summary["weights_converged"]
             ))
+
+            # Per-period rounding and topology selection
+            println("    Running per-period rounding & topology selection...")
+            per_period_topology = round_and_select_topology_mn(
+                mn_relaxed;
+                n_samples=N_BERNOULLI_SAMPLES,
+                n_rounds=N_ROUNDS,
+                seed_base=100,
+                solver=ipopt_solver
+            )
+            rounding_results[case][fair_func] = per_period_topology
+
+            # Print per-period rounding summary
+            for (nw_id, period_res) in sort(collect(per_period_topology), by=x -> parse(Int, x[1]))
+                n_feas = period_res["n_feasible_samples"]
+                load_shed = period_res["total_load_shed"]
+                ac_statuses = [f["feas_status"] for f in period_res["ac_feas"]]
+                best_mld_obj = period_res["best_mld"] !== nothing && !isempty(period_res["best_mld"]) ? get(period_res["best_mld"], "objective", NaN) : NaN
+                println("      Period $nw_id: n_feasible=$n_feas, load_shed=$(round(load_shed, digits=4)), AC_feas=$ac_statuses, MLD_obj=$(round(best_mld_obj, digits=4))")
+            end
         end
     end
 
-    return results, per_period_results, final_weights_results, failed_combinations
+    return results, per_period_results, final_weights_results, rounding_results, failed_combinations
 end
 
 # ============================================================
@@ -389,7 +426,7 @@ end
 # ============================================================
 println("\nStarting multiperiod comparison at $(now())...\n")
 
-results, per_period_results, final_weights_results, failed_combinations = run_comparison_mn()
+results, per_period_results, final_weights_results, rounding_results, failed_combinations = run_comparison_mn()
 
 # Print failed combinations
 if !isempty(failed_combinations)
@@ -431,3 +468,67 @@ for case in CASES
         println("  $fair_func: $(round.(wvals, digits=3))")
     end
 end
+
+# Print per-period rounding results
+println("\n" * "=" ^ 70)
+println("PER-PERIOD ROUNDING & TOPOLOGY SELECTION RESULTS")
+println("=" ^ 70)
+for case in CASES
+    if !haskey(rounding_results, case)
+        continue
+    end
+    println("\n$case:")
+    for fair_func in FAIR_FUNCS
+        if !haskey(rounding_results[case], fair_func)
+            continue
+        end
+        println("  $fair_func:")
+        per_period = rounding_results[case][fair_func]
+        for (nw_id, period_res) in sort(collect(per_period), by=x -> parse(Int, x[1]))
+            n_feas = period_res["n_feasible_samples"]
+            load_shed = round(period_res["total_load_shed"], digits=4)
+            ac_statuses = [f["feas_status"] for f in period_res["ac_feas"]]
+            best_mld_obj = period_res["best_mld"] !== nothing && !isempty(period_res["best_mld"]) ? round(get(period_res["best_mld"], "objective", NaN), digits=4) : NaN
+            # Relaxed switch states
+            sw_str = ""
+            if haskey(period_res, "relaxed_switch_states")
+                sw = period_res["relaxed_switch_states"]
+                sw_str = join(["s$k=$(round(v, digits=3))" for (k,v) in sort(collect(sw))], ", ")
+            end
+            println("    Period $nw_id: feasible=$n_feas, shed=$load_shed, AC=$ac_statuses, MLD=$best_mld_obj")
+            if !isempty(sw_str)
+                println("             switches: $sw_str")
+            end
+        end
+    end
+end
+
+# Save rounding results to CSV
+rounding_df = DataFrame(
+    case=String[], fair_func=String[], period=String[],
+    n_feasible_samples=Int[], total_load_shed=Float64[],
+    best_mld_obj=Float64[], any_ac_feasible=Bool[]
+)
+for case in CASES
+    if !haskey(rounding_results, case); continue; end
+    for fair_func in FAIR_FUNCS
+        if !haskey(rounding_results[case], fair_func); continue; end
+        for (nw_id, period_res) in rounding_results[case][fair_func]
+            any_ac = isempty(period_res["ac_feas"]) ? false : any(f["feas_status"] for f in period_res["ac_feas"])
+            mld_obj = period_res["best_mld"] !== nothing && !isempty(period_res["best_mld"]) ? get(period_res["best_mld"], "objective", NaN) : NaN
+            push!(rounding_df, (case, fair_func, nw_id,
+                period_res["n_feasible_samples"],
+                period_res["total_load_shed"],
+                mld_obj, any_ac))
+        end
+    end
+end
+rounding_csv_path = joinpath(save_dir, "multiperiod_rounding_results.csv")
+CSV.write(rounding_csv_path, rounding_df)
+println("\nRounding results saved to: $rounding_csv_path")
+
+# Save full results to JLD2 for visualization script
+jld2_path = joinpath(save_dir, "multiperiod_results.jld2")
+@save jld2_path results final_weights_results rounding_results failed_combinations CASES FAIR_FUNCS N_PERIODS LOAD_SCALE_FACTORS LS_PERCENT SOURCE_PU
+println("Full results saved to: $jld2_path")
+println("\nRun script/multiperiod/visualize_multiperiod.jl to generate heatmaps.")
