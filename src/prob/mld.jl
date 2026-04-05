@@ -1030,22 +1030,22 @@ MLD problem with equality_min (min-max fairness) objective (INTEGER version).
 Minimizes the maximum load shed across all loads with binary switch/block variables.
 """
 function build_mc_mld_equality_min_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=false)
@@ -1200,22 +1200,22 @@ MLD problem with equality_min (min-max fairness) objective (INTEGER version).
 Minimizes the maximum load shed across all loads with binary switch/block variables.
 """
 function build_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=false)
@@ -1371,22 +1371,22 @@ MLD problem with proportional fairness (Nash bargaining) objective (INTEGER).
 Maximizes sum of log(load_served) with binary switch/block variables.
 """
 function build_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=false)
@@ -1540,22 +1540,22 @@ end
 MLD problem with Jain's index promoting objective (INTEGER).
 """
 function build_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=false)
@@ -1707,22 +1707,22 @@ end
 MLD problem with Palma ratio promoting objective (INTEGER).
 """
 function build_mc_mld_palma_integer(pm::_PMD.AbstractUBFModels)
-    _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
+    _PMD.variable_mc_bus_voltage_indicator(pm; relax=false)
  	variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
     _PMD.variable_mc_branch_power(pm)
 	_PMD.variable_mc_branch_current(pm)
     _PMD.variable_mc_switch_power(pm)
     _PMD.variable_mc_switch_state(pm; relax=false)
-    _PMD.variable_mc_shunt_indicator(pm; relax=true)
+    _PMD.variable_mc_shunt_indicator(pm; relax=false)
     _PMD.variable_mc_transformer_power(pm)
 
-    _PMD.variable_mc_gen_indicator(pm; relax=true)
+    _PMD.variable_mc_gen_indicator(pm; relax=false)
     _PMD.variable_mc_generator_power_on_off(pm)
 
-   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
+   	_PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=true)
 
-    _PMD.variable_mc_load_indicator(pm; relax=true)
+    _PMD.variable_mc_load_indicator(pm; relax=false)
     variable_mc_load_shed(pm)
 
     variable_block_indicator(pm; relax=false)

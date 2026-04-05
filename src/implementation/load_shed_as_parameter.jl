@@ -231,7 +231,8 @@ function palma_ratio_minimization(
     silent::Bool = true,
     relax_binary::Bool = false,  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
     critical_ids::Vector{Int} = Int[],
-    weight_ids::Vector{Int} = Int[]
+    weight_ids::Vector{Int} = Int[],
+    period_weights::Vector{Float64} = Float64[]  # On-peak/off-peak weighting per period (empty = uniform)
 )
     m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod, N for single)
     n_w = length(weights_prev)   # Number of weights (N)
@@ -270,7 +271,9 @@ function palma_ratio_minimization(
         @warn "[Palma] Starting point infeasible: $n_above_pd values > pd, $n_below_eps values < ε"
         for j in 1:m
             if pshed_prev[j] > pd[j]
-                @warn "  pshed_prev[$j]=$(round(pshed_prev[j], sigdigits=6)) > pd[$j]=$(round(pd[j], sigdigits=6)), excess=$(round(pshed_prev[j]-pd[j], sigdigits=4))"
+                error("  pshed_prev[$j]=$(round(pshed_prev[j], sigdigits=6)) > pd[$j]=$(round(pd[j], sigdigits=6)), excess=$(round(pshed_prev[j]-pd[j], sigdigits=4))")
+            elseif pshed_prev[j] < ε
+                error("  pshed_prev[$j]=$(round(pshed_prev[j], sigdigits=6)) < ε=$(round(ε, sigdigits=6)), deficit=$(round(ε - pshed_prev[j], sigdigits=4))")
             end
         end
     else
@@ -422,11 +425,32 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Objective: sum of per-period Palma deviations
-    # min Σ_t (top_10%_t - bot_40%_t)²
+    # Objective: sum of per-period Palma deviations, weighted by period_weights (peak charges)
+    # Charnes-Cooper Transformation for Palma Ratio                                                                                                                                                                                
+    # Palma ratio per period: top_10%_t / bot_40%_t                                                                                                                                         
+    # Charnes-Cooper: introduce σ_t = 1 / bot_40%_t                                                                                                                                         
+    #   Constraint: σ_t * bot_40%_t = 1, σ_t > 0                                                                                                                                            
+    #   Objective:  min Σ_t λ[t] * σ_t * top_10%_t                                                                                                                                          
+    #                                                                                                                                                                                       
+    # Since top/bot are linear in pshed_new (via sorted expressions),                                                                                                                       
+    # σ_t * top_t and σ_t * bot_t are bilinear — handled by Gurobi NonConvex=2.                                                                                                             
     =========================================================================#
 
-    @objective(model, Min, sum((period_top_sums[t] - period_bot_sums[t])^2 for t in 1:n_periods))
+    # Default to uniform weights if not provided
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    # Charnes-Cooper variables: σ_t = 1 / bot_40%_t
+    @variable(model, σ[1:n_periods] >= 1e-8)
+
+    
+   # Normalization constraints: σ_t * bot_40%_t = 1                                                                                                                                        
+    for t in 1:n_periods                                                                                                                                                                    
+        @constraint(model, σ[t] * period_bot_sums[t] == 1.0)                                                                                                                                
+    end                                                                                                                                                                                     
+    # Objective: minimize weighted sum of per-period Palma ratios                                                                                                                           
+    # Palma_t = top_t / bot_t = σ_t * top_t  (since σ_t = 1/bot_t)                                                                                                                          
+    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))        
 
     #=========================================================================
     # Solve
@@ -509,7 +533,8 @@ function lin_palma_reformulated(
     weights_prev::Vector{Float64},
     pd::Vector{Float64},
     critical_ids::Vector{Int} = Int[],
-    weight_ids::Vector{Int} = Int[]
+    weight_ids::Vector{Int} = Int[];
+    period_weights::Vector{Float64} = Float64[]
 )
     # Clamp slightly negative pshed values (numerical noise from lower level) to zero
     result = palma_ratio_minimization(
@@ -518,7 +543,8 @@ function lin_palma_reformulated(
         w_bounds = (1.0, 10.0),
         relax_binary = false,  # Binary required; McCormick relaxation needs testing
         critical_ids = critical_ids,
-        weight_ids = weight_ids
+        weight_ids = weight_ids,
+        period_weights = period_weights
     )
 
     # Compute σ from result (for compatibility)

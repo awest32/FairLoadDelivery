@@ -37,14 +37,18 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]
-const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain"]
+const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain","palma"]
 const LS_PERCENT = 0.8
 const ITERATIONS = 20
-const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 1000
+const N_ROUNDS = 1
+const N_BERNOULLI_SAMPLES = 2000
 const SOURCE_PU = 1.03
 const critical_buses = []
 const N_PERIODS = 12
+# On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
+# Higher weight = prioritize fairness during that period (on-peak mid-day)
+# Empty vector = uniform weighting (backward compatible)
+const PERIOD_WEIGHTS = Float64[]  # Set e.g. [0.5, 0.7, 0.9, 1.0, 1.3, 1.5, 1.5, 1.3, 1.0, 0.9, 1.0, 1.2] for peak pricing
 # Summer daily profile: 6am-5pm (12 hourly periods)
 const LOAD_SCALE_FACTORS = [
     0.6,   # 6am  - early morning
@@ -121,7 +125,7 @@ Upper-level fairness functions operate on the full (T*N) pshed vector.
 """
 function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair_weights_init::Vector{Float64},
                                 fair_func::String, critical_id::Vector{Int}=Int[];
-                                n_periods::Int=N_PERIODS)
+                                n_periods::Int=N_PERIODS, period_weights::Vector{Float64}=Float64[])
     mn_new = deepcopy(mn_data)
     fair_weights = copy(fair_weights_init)
     n_weights = length(fair_weights)
@@ -156,18 +160,18 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         # Apply fairness function on the full per-period (T*N) pshed vector
         # dpshed is (T*N) x N, pshed_val is (T*N), weight_vals is (N)
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights)
         elseif fair_func == "efficiency"
             math_dummy = _create_math_dummy_mn(mn_new)
-            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_dummy, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_dummy, critical_id, weight_ids; period_weights=period_weights)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
         elseif fair_func == "jain"
-            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
         elseif fair_func == "palma"
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights)
         else
             error("Unknown fairness function: $fair_func")
         end
@@ -359,7 +363,7 @@ function run_comparison_mn()
             print("  $fair_func: ")
 
             mn_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts, bilevel_summary =
-                run_bilevel_relaxed_mn(mn_data, ITERATIONS, fair_weights, fair_func, critical_id)
+                run_bilevel_relaxed_mn(mn_data, ITERATIONS, fair_weights, fair_func, critical_id; period_weights=PERIOD_WEIGHTS)
 
             if bilevel_summary["completed_iterations"] == 0
                 @warn "[$case/$fair_func] FAILED — bilevel infeasible on first iteration"

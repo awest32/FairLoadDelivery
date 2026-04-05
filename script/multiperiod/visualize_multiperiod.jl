@@ -47,12 +47,12 @@ results = saved["results"]
 final_weights_results = saved["final_weights_results"]
 rounding_results = saved["rounding_results"]
 failed_combinations = saved["failed_combinations"]
-CASES = saved["CASES"]
-FAIR_FUNCS = saved["FAIR_FUNCS"]
-N_PERIODS = saved["N_PERIODS"]
-LOAD_SCALE_FACTORS = saved["LOAD_SCALE_FACTORS"]
-LS_PERCENT = saved["LS_PERCENT"]
-SOURCE_PU = saved["SOURCE_PU"]
+# CASES = saved["CASES"]
+# FAIR_FUNCS = saved["FAIR_FUNCS"]
+# N_PERIODS = saved["N_PERIODS"]
+# LOAD_SCALE_FACTORS = saved["LOAD_SCALE_FACTORS"]
+# LS_PERCENT = saved["LS_PERCENT"]
+# SOURCE_PU = saved["SOURCE_PU"]
 
 println("  Cases: $CASES")
 println("  Fair funcs: $FAIR_FUNCS")
@@ -65,7 +65,7 @@ println("\n" * "=" ^ 70)
 println("GENERATING MULTIPERIOD HEATMAP VISUALIZATIONS")
 println("=" ^ 70)
 
-critical_buses = []  # Match computation script
+#critical_buses = []  # Match computation script
 
 for case in CASES
     # Reconstruct network for bus/load name mapping

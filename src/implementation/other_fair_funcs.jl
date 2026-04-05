@@ -1,7 +1,8 @@
 # Create the other fairness functions
 
 # Function to compute Jain's Fairness Index
-function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
+# With period_weights (peak charges): max Σ_t λ[t] * Jain_t
+function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod)
     n_w = length(weights_prev)   # Number of weights (N)
@@ -19,8 +20,6 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     @expression(model, pshed_new[i = 1:m],
        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
-    sum_pshed = sum(pshed_new)
-    sum_pshed_squared = sum(pshed_new[i]^2 for i in 1:m)
 
     # Guard: if all pshed values are zero, no inequality to reduce — return unchanged
     if all(pshed_prev .== 0.0)
@@ -28,8 +27,22 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
         return pshed_prev, weights_prev, MOI.OPTIMAL
     end
 
-    fairness_index = (sum_pshed^2) / (m * sum_pshed_squared)
-    @objective(model, Max, fairness_index)
+    # Per-period decomposition with peak charge weighting
+    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
+    n_periods = m ÷ n_w
+    n = n_w  # loads per period
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    # Weighted sum of per-period Jain indices
+    period_jain_terms = []
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        sum_pshed_t = sum(pshed_new[offset + i] for i in 1:n)
+        sum_pshed_sq_t = sum(pshed_new[offset + i]^2 for i in 1:n)
+        push!(period_jain_terms, λ[t] * (sum_pshed_t^2) / (n * sum_pshed_sq_t))
+    end
+    @objective(model, Max, sum(period_jain_terms))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -39,16 +52,14 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     return value.(pshed_new), value.(weights_new), status
 end
 
-# Function to compute the min max of load shed 
-# pshed is a vector of load shed values
-# updating pshed with the gradietn dpshed_dw
-# with respect the the change in weights w, w_prev
-# optimizing pshed_new and weights_new
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
+# Function to compute the min max of load shed
+# With period_weights (peak charges): min Σ_t λ[t] * max_i(pshed_t[i])
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
-    n = length(weights_prev)
-    @variable(model, weights_new[1:n])
-    for id in 1:n
+    m = length(pshed_prev)
+    n_w = length(weights_prev)
+    @variable(model, weights_new[1:n_w])
+    for id in 1:n_w
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
             @constraint(model, weights_new[id] >= 50.0)
@@ -56,7 +67,7 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
             @constraint(model, weights_new[id] >= 1.0)
         end
     end
-    for id in 1:n
+    for id in 1:n_w
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
@@ -64,18 +75,27 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    #@constraint(model, [i=1:n], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    #@constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
 
-    # @constraint(model, [i in 1:length(pshed_prev)],
-    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
-    # )
-    @variable(model, t >= 0)
-    @expression(model, pshed_new[i = 1:length(pshed_prev)],
-         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n)
+    @expression(model, pshed_new[i = 1:m],
+         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
-    @constraint(model, [i=1:length(pshed_prev)], t >= pshed_new[i])
-    @objective(model, Min, t)
+
+    # Per-period decomposition with peak charge weighting
+    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
+    n_periods = m ÷ n_w
+    n = n_w  # loads per period
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    # Per-period max variables
+    @variable(model, t_period[1:n_periods] >= 0)
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        @constraint(model, [i=1:n], t_period[t] >= pshed_new[offset + i])
+    end
+    @objective(model, Min, sum(λ[t] * t_period[t] for t in 1:n_periods))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -86,9 +106,8 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
 end
 
 # Function to compute the proportional fairness of load served
-# Maximizes Σ log(pd_served_i) = Σ log(pref_i - pshed_i)  (α-fairness with α=1)
-# Reports load shed values
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
+# With period_weights (peak charges): max Σ_t λ[t] * Σ_i log(pref_t[i] - pshed_t[i])
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
@@ -112,10 +131,17 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     @constraint(model, [i=1:m],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
+
+    # Per-period decomposition with peak charge weighting
+    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
+    n_periods = m ÷ n_w
+    n = n_w  # loads per period
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
     # Shifted log: uniform constant c added to all loads' served values
-    # At start point (Δw=0): pshed_new = pshed_prev, so log(pref - pshed_prev + c) is valid
     c = 1e-6
-    @NLobjective(model, Max, sum(log(pref[i] - pshed_new[i] + c) for i in 1:m))
+    @NLobjective(model, Max, sum(λ[t] * sum(log(pref[(t-1)*n + i] - pshed_new[(t-1)*n + i] + c) for i in 1:n) for t in 1:n_periods))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -126,12 +152,11 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
 end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
-function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[])
+# With period_weights (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
+function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
-    # pshed_new = JuMP.@variable(
-    # model,pshed_new[j in keys(pshed_val)] in JuMP.Parameter(pshed_val[j]),
-    # base_name = "pshed_new"
-    #     )    
+    m = length(pshed_prev)
+    n_w = length(weights_prev)
     # Determine the total load in the reference case
     total_load_ref = 0.0
     for (i, load) in math["load"]
@@ -140,9 +165,8 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
             total_load_ref += load["pd"][idx]
         end
     end
-    n = length(weights_prev)
-    @variable(model, weights_new[1:n] .>= 1.0)
-    for id in 1:n
+    @variable(model, weights_new[1:n_w] .>= 1.0)
+    for id in 1:n_w
         # Map position to load ID; if weight_ids available use it, otherwise assume position == load ID
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
@@ -151,19 +175,20 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
-    @expression(model, pshed_new[i = 1:length(pshed_prev)],
-        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @expression(model, pshed_new[i = 1:m],
+        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
-    @objective(model, Min, sum(pshed_new))
-    #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    # open("efficiency_model_out.txt", "w") do io
-    #         redirect_stdout(io) do
-    #             print(model)
-    #         end
-    #     end
-    # JuMP.set_silent(model)
+
+    # Per-period decomposition with peak charge weighting
+    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
+    n_periods = m ÷ n_w
+    n = n_w  # loads per period
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    @objective(model, Min, sum(λ[t] * sum(pshed_new[(t-1)*n + i] for i in 1:n) for t in 1:n_periods))
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)
@@ -211,12 +236,13 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
 end
 
 # Equality min fairness function
-function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[])
+# With period_weights (peak charges): min Σ_t λ[t] * (t_period[t] + Σ_i (pshed_t[i] - t_period[t])²)
+function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
-    n = length(weights_prev)
-    @variable(model, weights_new[1:n] .>= 1.0)
-    @variable(model, t >= 0)
-    for id in 1:n
+    m = length(pshed_prev)
+    n_w = length(weights_prev)
+    @variable(model, weights_new[1:n_w] .>= 1.0)
+    for id in 1:n_w
         load_id = isempty(weight_ids) ? id : weight_ids[id]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
@@ -224,24 +250,26 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:length(weights_prev)], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
-    # @constraint(model, [i in 1:length(pshed_prev)],
-    #     pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
-    # )
-    @expression(model, pshed_new[i = 1:length(pshed_prev)],
-        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:length(weights_prev))
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @expression(model, pshed_new[i = 1:m],
+        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
     )
-    # Relax hard equality to inequality + quadratic penalty encouraging equal shedding
-    @constraint(model, [i = 1:length(pshed_new)], t >= pshed_new[i])
-    @objective(model, Min, t + sum((pshed_new[i] - t)^2 for i in 1:length(pshed_new)))
-    #  JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-    # open("equality_min_model_out.txt", "w") do io
-    #         redirect_stdout(io) do
-    #             print(model)
-    #         end
-    #     end
-    # JuMP.set_silent(model)
+
+    # Per-period decomposition with peak charge weighting
+    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
+    n_periods = m ÷ n_w
+    n = n_w  # loads per period
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    # Per-period max variables with quadratic penalty encouraging equal shedding
+    @variable(model, t_period[1:n_periods] >= 0)
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        @constraint(model, [i=1:n], t_period[t] >= pshed_new[offset + i])
+    end
+    @objective(model, Min, sum(λ[t] * (t_period[t] + sum((pshed_new[(t-1)*n + i] - t_period[t])^2 for i in 1:n)) for t in 1:n_periods))
     optimize!(model)
     status = termination_status(model)
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]

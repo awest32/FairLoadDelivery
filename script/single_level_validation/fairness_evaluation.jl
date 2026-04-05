@@ -16,13 +16,13 @@ using DataFrames
 using CSV
 using Dates
 
-include("../src/implementation/network_setup.jl")
-include("../src/implementation/lower_level_mld.jl")
-include("../src/implementation/palma_relaxation.jl")
-include("../src/implementation/other_fair_funcs.jl")
-include("../src/implementation/random_rounding.jl")
-include("../src/implementation/export_results.jl")
-include("../src/implementation/visualization.jl")
+include("../../src/implementation/network_setup.jl")
+include("../../src/implementation/lower_level_mld.jl")
+include("../../src/implementation/load_shed_as_parameter.jl")
+include("../../src/implementation/other_fair_funcs.jl")
+include("../../src/implementation/random_rounding.jl")
+include("../../src/implementation/export_results.jl")
+include("../../src/implementation/visualization.jl")
 
 """
 Flexible fairness evaluation script.
@@ -54,20 +54,16 @@ Usage:
 
 # Select which formulations to run
 formulations_to_run = [
-    :efficient_relaxed,
     :efficient_integer,
-    :equality_min_relaxed,
-    :equality_min_integer,
-    :prop_fair_relaxed,
+    #:equality_min_integer,
+    :min_max_integer,
     :prop_fair_integer,
-    :jain_relaxed,
     :jain_integer,
-    # :palma_relaxed,
-    # :palma_integer,
+    #:palma_integer,
 ]
 
-case = "motivation_a"
-gen_cap = 0.5  # Limited generation to force load shedding
+case = "motivation_c"
+gen_cap = 0.6  # Limited generation to force load shedding
 
 # ============================================================
 # SETUP
@@ -80,7 +76,7 @@ ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
 # Inputs: case file path, generation capacity, list of critical load IDs
-eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", gen_cap, [])
+eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", gen_cap, 1.03, [])
 
 # Create the folder structure for results
 today = Dates.today()
@@ -93,10 +89,11 @@ end
 eval_folder = "results/$(today)/$case/fairness_eval"
 
 # Get the reference data for the blocks
-mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_equality_min;
+mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max_integer;
                                   ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]
 
+#mld_soln = FairLoadDelivery.solve_mc_mld_min_max_integer(math, gurobi)
 # Build bus ID to name mapping
 bus_id_to_name = Dict{Int,String}()
 for (bus_id_str, bus) in math["bus"]
@@ -226,26 +223,19 @@ end
 # ============================================================
 
 formulation_solvers = Dict(
-    :efficient_relaxed => () -> FairLoadDelivery.solve_mc_mld_switch_relaxed(math, ipopt),
     :efficient_integer => () -> FairLoadDelivery.solve_mc_mld_switch_integer(math, gurobi),
-    :equality_min_relaxed => () -> FairLoadDelivery.solve_mc_mld_equality_min(math, ipopt),
     :equality_min_integer => () -> FairLoadDelivery.solve_mc_mld_equality_min_integer(math, gurobi),
-    :prop_fair_relaxed => () -> FairLoadDelivery.solve_mc_mld_proportional_fairness(math, ipopt),
+    :min_max_integer => () -> FairLoadDelivery.solve_mc_mld_min_max_integer(math, gurobi),
     :prop_fair_integer => () -> FairLoadDelivery.solve_mc_mld_proportional_fairness_integer(math, gurobi),
-    :jain_relaxed => () -> FairLoadDelivery.solve_mc_mld_jain(math, ipopt),
     :jain_integer => () -> FairLoadDelivery.solve_mc_mld_jain_integer(math, gurobi),
-    :palma_relaxed => () -> FairLoadDelivery.solve_mc_mld_palma(math, ipopt),
-    :palma_integer => () -> FairLoadDelivery.solve_mc_mld_palma_integer(math, gurobi),
+    #:palma_integer => () -> FairLoadDelivery.solve_mc_mld_palma_integer(math, gurobi),
 )
 
 formulation_names = Dict(
-    :efficient_relaxed => "Efficient (Relaxed)",
     :efficient_integer => "Efficient (Integer)",
-    :equality_min_relaxed => "Equality Min (Relaxed)",
     :equality_min_integer => "Equality Min (Integer)",
-    :prop_fair_relaxed => "Prop Fair (Relaxed)",
+    :min_max_integer => "Min Max (Integer)",
     :prop_fair_integer => "Prop Fair (Integer)",
-    :jain_relaxed => "Jain Max (Relaxed)",
     :jain_integer => "Jain Max (Integer)",
     # :palma_relaxed => "Palma Min (Relaxed)",
     # :palma_integer => "Palma Min (Integer)",
