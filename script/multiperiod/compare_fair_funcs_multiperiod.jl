@@ -48,7 +48,12 @@ const N_PERIODS = 12
 # On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
 # Higher weight = prioritize fairness during that period (on-peak mid-day)
 # Empty vector = uniform weighting (backward compatible)
-const PERIOD_WEIGHTS = Float64[]  # Set e.g. [0.5, 0.7, 0.9, 1.0, 1.3, 1.5, 1.5, 1.3, 1.0, 0.9, 1.0, 1.2] for peak pricing
+# On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
+# Higher weight = prioritize fairness during that period
+# On-peak (2pm-7pm, periods 9-12 i.e. hours 14-17), off-peak (all others)
+# Prices in cents/kWh
+const ON_PEAK_WEIGHT = 29.8
+const OFF_PEAK_WEIGHT = 7.6
 # Summer daily profile: 6am-5pm (12 hourly periods)
 const LOAD_SCALE_FACTORS = [
     0.6,   # 6am  - early morning
@@ -63,6 +68,10 @@ const LOAD_SCALE_FACTORS = [
     0.95,  # 3pm  - afternoon
     1.0,   # 4pm  - evening ramp
     1.1,   # 5pm  - evening peak start
+]
+# On-peak = periods 9-12 (2pm-5pm), off-peak = rest
+const PERIOD_WEIGHTS = [
+    (i in 9:12 ? ON_PEAK_WEIGHT : OFF_PEAK_WEIGHT) for i in 1:length(LOAD_SCALE_FACTORS)
 ]
 
 # Save results
