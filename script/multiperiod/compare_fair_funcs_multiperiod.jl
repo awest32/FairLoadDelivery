@@ -44,7 +44,7 @@ const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 const SOURCE_PU = 1.03
 const critical_buses = []
-const N_PERIODS = 12
+const N_PERIODS = 3
 # On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
 # Higher weight = prioritize fairness during that period (on-peak mid-day)
 # Empty vector = uniform weighting (backward compatible)
@@ -56,17 +56,17 @@ const ON_PEAK_WEIGHT = 29.8
 const OFF_PEAK_WEIGHT = 7.6
 # Summer daily profile: 6am-5pm (12 hourly periods)
 const LOAD_SCALE_FACTORS = [
-    0.6,   # 6am  - early morning
-    0.75,  # 7am  - morning ramp
-    0.9,   # 8am  - morning ramp
-    1.0,   # 9am  - approaching peak
-    1.1,   # 10am - midday peak (AC)
+    1.0,   # 6am  - early morning
+    #1.0,  # 7am  - morning ramp
+    #1.0,   # 8am  - morning ramp
+    #1.1,   # 9am  - approaching peak
+    #1.1,   # 10am - midday peak (AC)
     1.2,   # 11am - peak
-    1.2,   # 12pm - peak
-    1.15,  # 1pm  - peak
-    1.05,  # 2pm  - afternoon decline
-    0.95,  # 3pm  - afternoon
-    1.0,   # 4pm  - evening ramp
+    #1.2,   # 12pm - peak
+    #1.15,  # 1pm  - peak
+    #1.05,  # 2pm  - afternoon decline
+    #0.95,  # 3pm  - afternoon
+    #1.0,   # 4pm  - evening ramp
     1.1,   # 5pm  - evening peak start
 ]
 # On-peak = periods 9-12 (2pm-5pm), off-peak = rest
@@ -136,9 +136,10 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
                                 fair_func::String, critical_id::Vector{Int}=Int[];
                                 n_periods::Int=N_PERIODS, period_weights::Vector{Float64}=Float64[])
     mn_new = deepcopy(mn_data)
-    fair_weights = copy(fair_weights_init)
+    fair_weights = copy(fair_weights_init)  # N-length global weights for lower level
     n_weights = length(fair_weights)
     nw_ids = sort(collect(keys(mn_new["nw"])), by=x->parse(Int, x))
+    T = length(nw_ids)
 
     pshed_lower_level = Float64[]
     pshed_upper_level = Float64[]
@@ -146,41 +147,38 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
     final_weights = Float64[]
     completed_iterations = 0
     last_status = MOI.OPTIMIZE_NOT_CALLED
-    prev_weights = copy(fair_weights)
+    prev_weights = repeat(fair_weights, T)  # T*N for per-period tracking
     prev_pshed = Float64[]
     max_delta_weights = NaN
     max_delta_pshed = NaN
 
     for k in 1:iterations
-        # Solve multiperiod lower-level and get (T*N) x N Jacobian
+        # Solve multiperiod lower-level and get (T*N) x (T*N) Jacobian
         dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs = lower_level_soln_mn(mn_new, fair_weights, k)
 
-        n_total = length(pshed_val)  # T*N
+        n_loads = length(weight_ids) # N (loads per period)
 
         # Collect per-period pd reference values matching pshed ordering from Jacobian
-        # Use refs dict (from instantiate_mc_model) to match the lower-level constraint:
-        #   pshed[d] == (1 - z_demand[d]) * sum(ref[:load][d]["pd"])
-        # The math dict pd may differ from ref pd due to PMD processing/per-unit conversion.
         pd_all = Float64[]
         for (nw, lid) in pshed_nw_ids
             push!(pd_all, sum(refs[nw][:load][lid]["pd"]))
         end
 
         # Apply fairness function on the full per-period (T*N) pshed vector
-        # dpshed is (T*N) x N, pshed_val is (T*N), weight_vals is (N)
+        # dpshed is (T*N) x (T*N), pshed_val is (T*N), weight_vals is (T*N)
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         elseif fair_func == "efficiency"
             math_dummy = _create_math_dummy_mn(mn_new)
-            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_dummy, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_dummy, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         elseif fair_func == "jain"
-            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         elseif fair_func == "palma"
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
         else
             error("Unknown fairness function: $fair_func")
         end
@@ -193,7 +191,7 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         end
         completed_iterations = k
 
-        # Track convergence
+        # Track convergence (compare per-period weights)
         max_delta_weights = maximum(abs.(fair_weight_vals .- prev_weights))
         if !isempty(prev_pshed)
             max_delta_pshed = maximum(abs.(pshed_new .- prev_pshed))
@@ -201,15 +199,17 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         prev_weights = copy(fair_weight_vals)
         prev_pshed = copy(pshed_new)
 
-        # Update weights in ALL periods of mn_data (global weights)
-        for nw_id in nw_ids
+        # Update weights per-period in mn_data
+        for (t, nw_id) in enumerate(nw_ids)
             nw_data = mn_new["nw"][nw_id]
-            for (i, w) in zip(weight_ids, fair_weight_vals)
-                nw_data["load"][string(i)]["weight"] = w
+            offset = (t - 1) * n_loads
+            for (j, lid) in enumerate(weight_ids)
+                nw_data["load"][string(lid)]["weight"] = fair_weight_vals[offset + j]
             end
         end
 
-        fair_weights = fair_weight_vals
+        # Pass T*N per-period weights to next lower-level iteration
+        fair_weights = copy(fair_weight_vals)
         final_weight_ids = weight_ids
         final_weights = fair_weight_vals
 

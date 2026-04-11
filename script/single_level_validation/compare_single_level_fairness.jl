@@ -2,8 +2,9 @@
     compare_single_level_fairness.jl
 
     Compare single-level MLD results across fairness function formulations
-    for all motivation cases. Solves both relaxed (Ipopt) and integer (Gurobi)
-    formulations. Produces voltage and loadshed comparison plots.
+    for all motivation cases. Solves integer (Gurobi) formulations only.
+    Exports total network load shed and post-hoc fairness metrics
+    (Jain, Palma, Gini) for each formulation.
 """
 
 using Revise
@@ -25,17 +26,9 @@ include("../../src/implementation/network_setup.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]#["motivation_a", "motivation_b",
+const CASES = ["motivation_c"]
 const GEN_CAP = 0.8
-
-# Relaxed formulations (continuous, Ipopt)
-const FAIR_SOLVE_RELAXED = [
-    "efficiency"    => FairLoadDelivery.solve_mc_mld_switch_relaxed,
-    "equality_min"  => FairLoadDelivery.solve_mc_mld_equality_min,
-    "proportional"  => FairLoadDelivery.solve_mc_mld_proportional_fairness,
-     "min_max"       => FairLoadDelivery.solve_mc_mld_min_max,
-    #"jain"          => FairLoadDelivery.solve_mc_mld_jain,
-]
+const SOURCE_PU = 1.03
 
 # Integer formulations (MIP, Gurobi)
 const FAIR_SOLVE_INTEGER = [
@@ -43,29 +36,49 @@ const FAIR_SOLVE_INTEGER = [
     "equality_min"  => FairLoadDelivery.solve_mc_mld_equality_min_integer,
     "proportional"  => FairLoadDelivery.solve_mc_mld_proportional_fairness_integer,
     "min_max"       => FairLoadDelivery.solve_mc_mld_min_max_integer,
-   # "jain"          => FairLoadDelivery.solve_mc_mld_jain_integer,
+    "jain"          => FairLoadDelivery.solve_mc_mld_jain_integer,
+    "palma"         => FairLoadDelivery.solve_mc_mld_palma_integer,
 ]
 
-# Solvers
-ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+# Solver
 gurobi_solver = Gurobi.Optimizer
 
 # Save results
 save_dir = "results/$(Dates.today())/single_level_fairness"
-relaxed_dir = joinpath(save_dir, "relaxed")
 integer_dir = joinpath(save_dir, "integer")
-mkpath(relaxed_dir)
 mkpath(integer_dir)
 
 # Target buses for voltage plots (load buses of interest)
 const TARGET_BUSES = ["670","632","645","671","634","646","611","675","652","692"]
 
 # ============================================================
-# SOLVE + EXTRACT + PLOT FOR ONE FORMULATION TYPE
+# POST-HOC FAIRNESS METRICS
 # ============================================================
-function run_formulation(
-    cases, fair_solve_funcs, solver, formulation_label::String, out_dir::String
-)
+function gini_index(x)
+    x = sort(x)
+    n = length(x)
+    return (2 * sum(i * x[i] for i in 1:n) / (n * sum(x))) - (n + 1) / n
+end
+
+function jains_index(x)
+    n = length(x)
+    sum_x = sum(x)
+    sum_x2 = sum(xi^2 for xi in x)
+    return (sum_x^2) / (n * sum_x2)
+end
+
+function palma_ratio_posthoc(x)
+    sorted_x = sort(x)
+    n = length(x)
+    top_10 = sum(sorted_x[ceil(Int, 0.9n):end])
+    bot_40 = sum(sorted_x[1:floor(Int, 0.4n)])
+    return bot_40 > 0 ? top_10 / bot_40 : Inf
+end
+
+# ============================================================
+# SOLVE + EXTRACT + COMPUTE METRICS
+# ============================================================
+function run_integer_comparison(cases, fair_solve_funcs, solver, out_dir::String)
     results_df = DataFrame(
         case = String[],
         fair_func = String[],
@@ -74,13 +87,16 @@ function run_formulation(
         total_pd_served = Float64[],
         pct_shed = Float64[],
         pct_served = Float64[],
-        objective = Float64[]
+        objective = Float64[],
+        jain = Float64[],
+        palma = Float64[],
+        gini = Float64[]
     )
 
     for case in cases
-        println("\n>>> Processing case: $case ($formulation_label)")
+        println("\n>>> Processing case: $case")
 
-        eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", GEN_CAP, [])
+        eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", GEN_CAP, SOURCE_PU, [])
 
         total_demand = sum(sum(load["pd"]) for (_, load) in math["load"])
         println("    Total demand: $(round(total_demand, digits=4))")
@@ -94,7 +110,7 @@ function run_formulation(
             mld_result = solve_func(math, solver)
 
             if !(mld_result["termination_status"] in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED])
-                @warn "Non-optimal termination for $case/$fair_func ($formulation_label): $(mld_result["termination_status"])"
+                @warn "Non-optimal termination for $case/$fair_func: $(mld_result["termination_status"])"
                 continue
             end
 
@@ -107,7 +123,8 @@ function run_formulation(
             bus_names, pshed_pct, qshed_pct = extract_per_bus_loadshed(solution, math)
             loadshed_data_per_func[fair_func] = (bus_names, pshed_pct, qshed_pct)
 
-            # Compute totals for summary
+            # Compute per-load pshed fractions for fairness metrics
+            pshed_fractions = Float64[]
             total_pshed = 0.0
             total_pd_served = 0.0
             for (lid, load_sol) in solution["load"]
@@ -115,16 +132,25 @@ function run_formulation(
                 pd_s = load_sol["pd"]
                 pd_served = isa(pd_s, AbstractArray) ? sum(pd_s) : pd_s
                 total_pd_served += pd_served
-                total_pshed += (pd_orig - pd_served)
+                pshed_load = pd_orig - pd_served
+                total_pshed += pshed_load
+                push!(pshed_fractions, pd_orig > 0 ? pshed_load / pd_orig : 0.0)
             end
 
             pct_shed = (total_pshed / total_demand) * 100
             pct_served = (total_pd_served / total_demand) * 100
-            println("shed=$(round(pct_shed, digits=2))%, served=$(round(pct_served, digits=2))%")
+
+            # Post-hoc fairness metrics on per-load shed fractions
+            jain_val = jains_index(pshed_fractions)
+            palma_val = palma_ratio_posthoc(pshed_fractions)
+            gini_val = gini_index(pshed_fractions)
+
+            println("shed=$(round(pct_shed, digits=2))%, jain=$(round(jain_val, digits=4)), palma=$(round(palma_val, digits=4)), gini=$(round(gini_val, digits=4))")
 
             push!(results_df, (
                 case, fair_func, total_demand, total_pshed, total_pd_served,
-                pct_shed, pct_served, mld_result["objective"]
+                pct_shed, pct_served, mld_result["objective"],
+                jain_val, palma_val, gini_val
             ))
 
             # Save solution CSV
@@ -149,7 +175,7 @@ function run_formulation(
         plot_voltage_per_bus_comparison(
             voltage_data_per_func,
             joinpath(out_dir, "voltage_per_phase_$case.svg");
-            title = "Bus Voltage Per Phase ($formulation_label): $case",
+            title = "Bus Voltage Per Phase (Integer): $case",
             target_buses = TARGET_BUSES
         )
 
@@ -157,7 +183,7 @@ function run_formulation(
         plot_loadshed_per_bus_comparison(
             loadshed_data_per_func,
             joinpath(out_dir, "loadshed_per_bus_$case.svg");
-            title = "Load Shed Per Bus ($formulation_label): $case"
+            title = "Load Shed Per Bus (Integer): $case"
         )
     end
 
@@ -170,37 +196,23 @@ function run_formulation(
 end
 
 # ============================================================
-# RUN BOTH FORMULATIONS
+# RUN
 # ============================================================
 println("=" ^ 60)
-println("SINGLE-LEVEL FAIRNESS COMPARISON")
+println("SINGLE-LEVEL FAIRNESS COMPARISON (Integer only)")
 println("=" ^ 60)
 
-println("\n" * "=" ^ 60)
-println("RELAXED FORMULATIONS (Ipopt)")
-println("=" ^ 60)
-results_relaxed = run_formulation(CASES, FAIR_SOLVE_RELAXED, ipopt_solver, "Relaxed", relaxed_dir)
-
-println("\n" * "=" ^ 60)
-println("INTEGER FORMULATIONS (Gurobi)")
-println("=" ^ 60)
-results_integer = run_formulation(CASES, FAIR_SOLVE_INTEGER, gurobi_solver, "Integer", integer_dir)
+results_integer = run_integer_comparison(CASES, FAIR_SOLVE_INTEGER, gurobi_solver, integer_dir)
 
 # ============================================================
-# COMBINED SUMMARY
+# SUMMARY
 # ============================================================
 println("\n" * "=" ^ 60)
-println("RELAXED SUMMARY")
-println("=" ^ 60)
-println(results_relaxed)
-
-println("\n" * "=" ^ 60)
-println("INTEGER SUMMARY")
+println("RESULTS SUMMARY")
 println("=" ^ 60)
 println(results_integer)
 
 println("\n" * "=" ^ 60)
 println("COMPARISON COMPLETE")
-println("Relaxed results in: $relaxed_dir")
-println("Integer results in: $integer_dir")
+println("Results in: $integer_dir")
 println("=" ^ 60)

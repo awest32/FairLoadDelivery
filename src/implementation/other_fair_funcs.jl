@@ -2,23 +2,24 @@
 
 # Function to compute Jain's Fairness Index
 # With period_weights (peak charges): max Σ_t λ[t] * Jain_t
-function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
+function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
-    m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod)
-    n_w = length(weights_prev)   # Number of weights (N)
-    @variable(model, weights_new[1:n_w] .>= 1.0)
-    for id in 1:n_w
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
+    m = length(pshed_prev)
+    n_per_period = n_loads > 0 ? n_loads : m
+    @variable(model, weights_new[1:m] .>= 1.0)
+    for id in 1:m
+        lid_idx = ((id - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
         else
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:m],
-       pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
+       pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
 
     # Guard: if all pshed values are zero, no inequality to reduce — return unchanged
@@ -28,9 +29,9 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     end
 
     # Per-period decomposition with peak charge weighting
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
 
@@ -54,38 +55,33 @@ end
 
 # Function to compute the min max of load shed
 # With period_weights (peak charges): min Σ_t λ[t] * max_i(pshed_t[i])
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
-    n_w = length(weights_prev)
-    @variable(model, weights_new[1:n_w])
-    for id in 1:n_w
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
+    n_per_period = n_loads > 0 ? n_loads : m
+    @variable(model, weights_new[1:m])
+    for id in 1:m
+        lid_idx = ((id - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_new[id] >= 50.0)
-        else
-            @constraint(model, weights_new[id] >= 1.0)
-        end
-    end
-    for id in 1:n_w
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
-        if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
         else
+            @constraint(model, weights_new[id] >= 1.0)
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    #@constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
 
     @expression(model, pshed_new[i = 1:m],
-         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
+         pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
 
     # Per-period decomposition with peak charge weighting
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
 
@@ -107,35 +103,36 @@ end
 
 # Function to compute the proportional fairness of load served
 # With period_weights (peak charges): max Σ_t λ[t] * Σ_i log(pref_t[i] - pshed_t[i])
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
-    m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod)
-    n_w = length(weights_prev)   # Number of weights (N)
+    m = length(pshed_prev)
+    n_per_period = n_loads > 0 ? n_loads : m
     pref = pd  # reference demand aligned with pshed indexing (built by caller from pshed_ids)
     # Start weights at weights_prev so Ipopt evaluates log at a valid initial point
-    @variable(model, weights_new[i=1:n_w] >= 1.0, start = weights_prev[i])
-    for id in 1:n_w
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
+    @variable(model, weights_new[i=1:m] >= 1.0, start = weights_prev[i])
+    for id in 1:m
+        lid_idx = ((id - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
         else
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     # Use variables (not expressions) for pshed_new so log doesn't nest expressions
     @variable(model, pshed_new[i=1:m], start = pshed_prev[i])
     @constraint(model, [i=1:m],
-        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
+        pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
 
     # Per-period decomposition with peak charge weighting
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
 
@@ -153,10 +150,10 @@ end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
 # With period_weights (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
-function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
+function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
-    n_w = length(weights_prev)
+    n_per_period = n_loads > 0 ? n_loads : m
     # Determine the total load in the reference case
     total_load_ref = 0.0
     for (i, load) in math["load"]
@@ -165,26 +162,26 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
             total_load_ref += load["pd"][idx]
         end
     end
-    @variable(model, weights_new[1:n_w] .>= 1.0)
-    for id in 1:n_w
-        # Map position to load ID; if weight_ids available use it, otherwise assume position == load ID
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
+    @variable(model, weights_new[1:m] .>= 1.0)
+    for id in 1:m
+        lid_idx = ((id - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
         else
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:m],
-        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
+        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
 
     # Per-period decomposition with peak charge weighting
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
 
@@ -237,29 +234,30 @@ end
 
 # Equality min fairness function
 # With period_weights (peak charges): min Σ_t λ[t] * (t_period[t] + Σ_i (pshed_t[i] - t_period[t])²)
-function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[])
+function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
-    n_w = length(weights_prev)
-    @variable(model, weights_new[1:n_w] .>= 1.0)
-    for id in 1:n_w
-        load_id = isempty(weight_ids) ? id : weight_ids[id]
+    n_per_period = n_loads > 0 ? n_loads : m
+    @variable(model, weights_new[1:m] .>= 1.0)
+    for id in 1:m
+        lid_idx = ((id - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_new[id] <= 100.0)
         else
             @constraint(model, weights_new[id] <= 10.0)
         end
     end
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
-    @constraint(model, [i=1:n_w], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
+    @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
     @expression(model, pshed_new[i = 1:m],
-        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:n_w)
+        pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
 
     # Per-period decomposition with peak charge weighting
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
 

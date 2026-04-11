@@ -232,26 +232,29 @@ function palma_ratio_minimization(
     relax_binary::Bool = false,  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[],
-    period_weights::Vector{Float64} = Float64[]  # On-peak/off-peak weighting per period (empty = uniform)
+    period_weights::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
+    n_loads::Int = 0  # Number of loads per period (0 = infer from weights_prev length)
 )
-    m = length(pshed_prev)       # Number of pshed values (T*N for multiperiod, N for single)
-    n_w = length(weights_prev)   # Number of weights (N)
+    m = length(pshed_prev)       # T*N: total pshed values (= total weights)
     w_min, w_max = w_bounds
     ε = 1e-8  # Small positive for σ lower bound
 
+    # Determine loads per period
+    n_per_period = n_loads > 0 ? n_loads : m
+
     # Clamp critical loads' pshed to zero (lower level can return slightly negative
     # values due to numerical noise, which would make the problem infeasible)
-    # In multiperiod case, map pshed index to load ID cyclically
     for j in 1:m
-        w_idx = ((j - 1) % n_w) + 1
-        load_id = isempty(weight_ids) ? w_idx : weight_ids[w_idx]
+        lid_idx = ((j - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             pshed_prev[j] = max(pshed_prev[j], 0.0)
         end
     end
 
     # Validate inputs
-    @assert size(dpshed_dw) == (m, n_w) "Jacobian must be (m×n_w), got $(size(dpshed_dw)) expected ($m, $n_w)"
+    @assert length(weights_prev) == m "weights_prev must have length m=$m, got $(length(weights_prev))"
+    @assert size(dpshed_dw) == (m, m) "Jacobian must be (m×m), got $(size(dpshed_dw)) expected ($m, $m)"
     @assert length(pd) == m "pd must have length m=$m"
     @assert all(pd .>= 0) "Load demands must be non-negative"
 
@@ -302,67 +305,69 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Per-Period Sort Decomposition
+    # Global Sort with Per-Period Weighting
     #
-    # For multiperiod (m = T*N), sorting all m values globally requires an
-    # m×m binary permutation matrix (e.g., 45×45 = 2025 binaries for T=3, N=15),
-    # which is computationally intractable.
+    # All T*N pshed values are sorted globally using a single m×m
+    # permutation matrix. Each pshed value is scaled by its period's
+    # weight λ[t] so that peak periods contribute more to the Palma ratio.
     #
-    # Instead, we decompose into T separate N×N sorts (one per period).
-    # Each period's pshed values are sorted independently, and the Palma
-    # ratio is computed per-period. The objective sums per-period deviations:
-    #   min Σ_t (top_10%_t - bot_40%_t)²
+    # scaled_pshed[j] = λ[t(j)] * pshed_new[j]  where t(j) = ⌈j/N⌉
     #
-    # The Jacobian is still (T*N) × N, so each Δw[k] affects all periods.
-    # This ensures weights are optimized considering ALL pshed values.
-    # Binary count: T*N² instead of (T*N)² (e.g., 675 vs 2025 for T=3, N=15).
-    #
-    # For single-period (m == n_w), this reduces to the original formulation.
+    # weights_prev and Δw are both T*N (per-period weights).
+    # Jacobian is (T*N) × (T*N).
     =========================================================================#
 
     # Determine number of periods
-    @assert m % n_w == 0 "m=$m must be divisible by n_w=$n_w"
-    n_periods = m ÷ n_w
-    n = n_w  # loads per period
-    @info "[Palma] Per-period sort: $n_periods period(s), $n loads/period, $(n_periods * n^2) binaries (was $(m^2))"
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    @info "[Palma] Global sort: $n_periods period(s), $n_per_period loads/period, $m weights, $(m^2) binaries"
+
+    # Period weights: λ[t] for each period (default uniform)
+    λ = isempty(period_weights) ? ones(n_periods) : period_weights
+    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+
+    # Map each pshed index j to its period weight λ[t(j)]
+    λ_j = [λ[((j - 1) ÷ n_per_period) + 1] for j in 1:m]
 
     #=========================================================================
     # Decision Variables
     =========================================================================#
 
-    # Weight changes (n_w decision variables — global weights)
-    @variable(model, Δw[1:n_w])
+    # Weight changes (m = T*N per-period weight decision variables)
+    @variable(model, Δw[1:m])
 
-    # Per-period permutation matrices: a[t][i,j] for t=1..T, i,j=1..n
-    a = []
-    u = []
-    for t in 1:n_periods
-        if relax_binary
-            push!(a, @variable(model, [1:n, 1:n], lower_bound=0, upper_bound=1, base_name="a_$t"))
-        else
-            push!(a, @variable(model, [1:n, 1:n], Bin, base_name="a_$t"))
-        end
-        push!(u, @variable(model, [1:n, 1:n], lower_bound=0, base_name="u_$t"))
+    # Global m×m permutation matrix
+    if relax_binary
+        @variable(model, 0 <= a[1:m, 1:m] <= 1)
+    else
+        @variable(model, a[1:m, 1:m], Bin)
     end
+    @variable(model, u[1:m, 1:m] >= 0)
 
     #=========================================================================
     # P_shed as EXPRESSION (Core Simplification)
     =========================================================================#
 
-    # pshed_new is an expression defined by the first-order Taylor expansion
-    # Jacobian is m×n_w: each pshed depends on all n_w weights
+    # pshed_new via first-order Taylor expansion; Jacobian is m×m
     @expression(model, pshed_new[j=1:m],
-        pshed_prev[j] + sum(dpshed_dw[j, k] * Δw[k] for k in 1:n_w)
+        pshed_prev[j] + sum(dpshed_dw[j, k] * Δw[k] for k in 1:m)
     )
+
+    # Scaled pshed: each value weighted by its period's λ[t]
+    @expression(model, scaled_pshed[j=1:m], λ_j[j] * pshed_new[j])
+
+    # Upper bounds for scaled pshed (needed for McCormick)
+    scaled_pd = [λ_j[j] * pd[j] for j in 1:m]
 
     #=========================================================================
     # Trust Region and Weight Bounds
     =========================================================================#
 
-    @constraint(model, trust_lb[j=1:n_w], Δw[j] >= -trust_radius)
-    @constraint(model, trust_ub[j=1:n_w], Δw[j] <= trust_radius)
-    for j in 1:n_w
-        load_id = isempty(weight_ids) ? j : weight_ids[j]
+    @constraint(model, trust_lb[j=1:m], Δw[j] >= -trust_radius)
+    @constraint(model, trust_ub[j=1:m], Δw[j] <= trust_radius)
+    for j in 1:m
+        lid_idx = ((j - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
             @constraint(model, weights_prev[j] + Δw[j] <= 100.0)
         else
@@ -375,82 +380,53 @@ function palma_ratio_minimization(
     # P_shed Bounds (Critical for McCormick feasibility)
     =========================================================================#
 
-    # Ensure pshed_new stays non-negative and bounded by demand
     @constraint(model, pshed_lb[j=1:m], pshed_new[j] >= ε)
     @constraint(model, pshed_ub[j=1:m], pshed_new[j] <= pd[j])
 
     #=========================================================================
-    # Per-Period Sorting: Permutation + McCormick + Ascending Order
+    # Global Sorting: Permutation + McCormick + Ascending Order
     =========================================================================#
 
-    # Palma indices (same for each period since all have n loads)
-    top_10_idx, bottom_40_idx = compute_palma_indices(n)
+    # Doubly stochastic constraints
+    for i in 1:m
+        @constraint(model, sum(a[i, j] for j in 1:m) == 1)  # row sum
+    end
+    for j in 1:m
+        @constraint(model, sum(a[i, j] for i in 1:m) == 1)  # col sum
+    end
 
-    # Build per-period sorted expressions
-    period_top_sums = []
-    period_bot_sums = []
+    # McCormick envelopes: u[i,j] = a[i,j] * scaled_pshed[j]
+    for i in 1:m, j in 1:m
+        S_j = scaled_pd[j]  # upper bound on scaled_pshed[j]
 
-    for t in 1:n_periods
-        offset = (t - 1) * n  # index offset into flattened pshed_new
+        @constraint(model, u[i, j] >= scaled_pshed[j] + a[i, j] * S_j - S_j)
+        @constraint(model, u[i, j] <= a[i, j] * S_j)
+        @constraint(model, u[i, j] <= scaled_pshed[j])
+    end
 
-        # Doubly stochastic constraints for this period's permutation
-        for i in 1:n
-            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)  # row sum
-        end
-        for j in 1:n
-            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)  # col sum
-        end
-
-        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pshed_new[offset+j]
-        for i in 1:n, j in 1:n
-            gj = offset + j  # global pshed index
-            P_j = pd[gj]
-
-            @constraint(model, u[t][i, j] >= pshed_new[gj] + a[t][i, j] * P_j - P_j)
-            @constraint(model, u[t][i, j] <= a[t][i, j] * P_j)
-            @constraint(model, u[t][i, j] <= pshed_new[gj])
-        end
-
-        # Sorted values for this period
-        sorted_t = @expression(model, [i=1:n], sum(u[t][i, j] for j in 1:n))
-
-        # Ascending order within this period
-        for k in 1:n-1
-            @constraint(model, sorted_t[k] <= sorted_t[k+1])
-        end
-
-        # Palma sums for this period
-        push!(period_top_sums, @expression(model, sum(sorted_t[i] for i in top_10_idx)))
-        push!(period_bot_sums, @expression(model, sum(sorted_t[i] for i in bottom_40_idx)))
+    # Sorted values (ascending order)
+    @expression(model, sorted_vals[i=1:m], sum(u[i, j] for j in 1:m))
+    for k in 1:m-1
+        @constraint(model, sorted_vals[k] <= sorted_vals[k+1])
     end
 
     #=========================================================================
-    # Objective: sum of per-period Palma deviations, weighted by period_weights (peak charges)
-    # Charnes-Cooper Transformation for Palma Ratio                                                                                                                                                                                
-    # Palma ratio per period: top_10%_t / bot_40%_t                                                                                                                                         
-    # Charnes-Cooper: introduce σ_t = 1 / bot_40%_t                                                                                                                                         
-    #   Constraint: σ_t * bot_40%_t = 1, σ_t > 0                                                                                                                                            
-    #   Objective:  min Σ_t λ[t] * σ_t * top_10%_t                                                                                                                                          
-    #                                                                                                                                                                                       
-    # Since top/bot are linear in pshed_new (via sorted expressions),                                                                                                                       
-    # σ_t * top_t and σ_t * bot_t are bilinear — handled by Gurobi NonConvex=2.                                                                                                             
+    # Objective: Charnes-Cooper for Global Palma Ratio
+    #
+    # Palma ratio of period-weighted pshed:
+    #   top_10% / bot_40% of sorted(λ[t(j)] * pshed[j])
+    #
+    # Charnes-Cooper: σ = 1 / bot_40%, minimize σ * top_10%
     =========================================================================#
 
-    # Default to uniform weights if not provided
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    top_10_idx, bottom_40_idx = compute_palma_indices(m)
 
-    # Charnes-Cooper variables: σ_t = 1 / bot_40%_t
-    @variable(model, σ[1:n_periods] >= 1e-8)
+    top_sum = @expression(model, sum(sorted_vals[i] for i in top_10_idx))
+    bot_sum = @expression(model, sum(sorted_vals[i] for i in bottom_40_idx))
 
-    
-   # Normalization constraints: σ_t * bot_40%_t = 1                                                                                                                                        
-    for t in 1:n_periods                                                                                                                                                                    
-        @constraint(model, σ[t] * period_bot_sums[t] == 1.0)                                                                                                                                
-    end                                                                                                                                                                                     
-    # Objective: minimize weighted sum of per-period Palma ratios                                                                                                                           
-    # Palma_t = top_t / bot_t = σ_t * top_t  (since σ_t = 1/bot_t)                                                                                                                          
-    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))        
+    @variable(model, σ >= 1e-8)
+    @constraint(model, σ * bot_sum == 1.0)
+    @objective(model, Min, σ * top_sum)
 
     #=========================================================================
     # Solve
@@ -472,17 +448,10 @@ function palma_ratio_minimization(
         # Compute pshed_new from the expression
         pshed_new_val = pshed_prev .+ dpshed_dw * Δw_val
 
-        # Collect per-period permutation matrices into a list
-        a_vals = [value.(a[t]) for t in 1:n_periods]
-
-        # Compute per-period sorted values
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            pshed_t = pshed_new_val[offset+1:offset+n]
-            sorted_t = a_vals[t] * pshed_t
-            append!(sorted_val, sorted_t)
-        end
+        # Extract permutation matrix and sorted values
+        a_val = value.(a)
+        scaled_pshed_val = λ_j .* pshed_new_val
+        sorted_val = a_val * scaled_pshed_val
 
         # Compute actual Palma ratio (from unsorted pshed_new)
         actual_palma = palma_ratio(pshed_new_val)
@@ -494,7 +463,7 @@ function palma_ratio_minimization(
             palma_ratio = actual_palma,
             status = status,
             solve_time = solve_time,
-            permutation = a_vals,
+            permutation = a_val,
             sorted_values = sorted_val
         )
     else
@@ -502,12 +471,12 @@ function palma_ratio_minimization(
         return (
             weights_new = weights_prev,
             pshed_new = pshed_prev,
-            delta_w = zeros(n_w),
+            delta_w = zeros(m),
             palma_ratio = palma_ratio(pshed_prev),
             status = status,
             solve_time = solve_time,
-            permutation = [Matrix{Float64}(I, n, n) for _ in 1:n_periods],
-            sorted_values = sort(pshed_prev)
+            permutation = Matrix{Float64}(I, m, m),
+            sorted_values = sort(λ_j .* pshed_prev)
         )
     end
 end
@@ -534,9 +503,9 @@ function lin_palma_reformulated(
     pd::Vector{Float64},
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[];
-    period_weights::Vector{Float64} = Float64[]
+    period_weights::Vector{Float64} = Float64[],
+    n_loads::Int = 0
 )
-    # Clamp slightly negative pshed values (numerical noise from lower level) to zero
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
         trust_radius = 0.5,
@@ -544,7 +513,8 @@ function lin_palma_reformulated(
         relax_binary = false,  # Binary required; McCormick relaxation needs testing
         critical_ids = critical_ids,
         weight_ids = weight_ids,
-        period_weights = period_weights
+        period_weights = period_weights,
+        n_loads = n_loads
     )
 
     # Compute σ from result (for compatibility)

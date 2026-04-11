@@ -195,11 +195,11 @@ function variable_mc_bus_voltage_magnitude_sqr(pm::_PMD.AbstractUBFModels; nw::I
 end
 
 function variable_mc_fair_load_weights(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
-    fbw_val = _PMD.ref(pm, nw, :load_weights)
+    fw_val = _PMD.ref(pm, nw, :load_weights)
     # Create parameter variables for each block weight (anonymous syntax for multinetwork support)
     fair_load_weights = JuMP.@variable(
         pm.model,
-        [j in keys(fbw_val)] in JuMP.Parameter(fbw_val[j]),
+        [j in keys(fw_val)] in JuMP.Parameter(fw_val[j]),
         base_name = "$(nw)_fair_load_weights"
     )
     _PMD.var(pm, nw)[:fair_load_weights] = fair_load_weights

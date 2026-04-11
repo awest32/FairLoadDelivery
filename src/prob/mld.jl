@@ -281,11 +281,8 @@ function build_mn_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
 
         variable_block_indicator(pm; nw=n, relax=true)
 
-        # GLOBAL fair_load_weights: create only for the first period
-        # All periods share the same weight parameters
-        if idx == 1
-            variable_mc_fair_load_weights(pm; nw=n)
-        end
+        # Per-period fair_load_weights: each period gets its own weight parameters
+        variable_mc_fair_load_weights(pm; nw=n)
 
         # Constraints
         _PMD.constraint_mc_model_current(pm; nw=n)
@@ -350,9 +347,10 @@ function build_mn_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
         constraint_connect_block_storage(pm; nw=n)
     end
 
-    # Register per-period pshed in model dictionary for Jacobian computation
+    # Register per-period pshed and weights in model dictionary for Jacobian computation
     for n in nw_ids
         pm.model[Symbol("pshed_nw_$(n)")] = _PMD.var(pm, n)[:pshed]
+        pm.model[Symbol("weights_nw_$(n)")] = _PMD.var(pm, n)[:fair_load_weights]
     end
     # Store nw_ids list in model for retrieval during Jacobian computation
     pm.model[:nw_ids] = nw_ids
