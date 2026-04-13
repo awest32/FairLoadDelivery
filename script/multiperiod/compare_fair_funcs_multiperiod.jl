@@ -37,42 +37,22 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]
-const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain","palma"]
+const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain", "palma"]
 const LS_PERCENT = 0.8
-const ITERATIONS = 20
+const ITERATIONS = 5
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+const N_BERNOULLI_SAMPLES = 100
 const SOURCE_PU = 1.03
 const critical_buses = []
-const N_PERIODS = 3
-# On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
-# Higher weight = prioritize fairness during that period (on-peak mid-day)
-# Empty vector = uniform weighting (backward compatible)
-# On-peak / off-peak period weights (peak charges) for upper-level fairness objectives
-# Higher weight = prioritize fairness during that period
-# On-peak (2pm-7pm, periods 9-12 i.e. hours 14-17), off-peak (all others)
-# Prices in cents/kWh
-const ON_PEAK_WEIGHT = 29.8
-const OFF_PEAK_WEIGHT = 7.6
-# Summer daily profile: 6am-5pm (12 hourly periods)
-const LOAD_SCALE_FACTORS = [
-    1.0,   # 6am  - early morning
-    #1.0,  # 7am  - morning ramp
-    #1.0,   # 8am  - morning ramp
-    #1.1,   # 9am  - approaching peak
-    #1.1,   # 10am - midday peak (AC)
-    1.2,   # 11am - peak
-    #1.2,   # 12pm - peak
-    #1.15,  # 1pm  - peak
-    #1.05,  # 2pm  - afternoon decline
-    #0.95,  # 3pm  - afternoon
-    #1.0,   # 4pm  - evening ramp
-    1.1,   # 5pm  - evening peak start
-]
-# On-peak = periods 9-12 (2pm-5pm), off-peak = rest
-const PERIOD_WEIGHTS = [
-    (i in 9:12 ? ON_PEAK_WEIGHT : OFF_PEAK_WEIGHT) for i in 1:length(LOAD_SCALE_FACTORS)
-]
+const N_PERIODS = 12
+
+# Gaussian load profile: peak at hour 14 (1pm), σ=4 hours
+# Base load 1.0, peak load 2.0
+const LOAD_SCALE_FACTORS = [round(0.8 + 1.0 * exp(-((t - N_PERIODS/2)^2) / (2 * 4^2)), digits=3) for t in 0:N_PERIODS-1]
+
+# Gaussian cost profile: peak at hour 14 (2pm), σ=3 hours
+# Base cost 8 ¢/kWh, peak cost 30 ¢/kWh
+const PERIOD_COSTS = [round(8 + 22 * exp(-((t - N_PERIODS/2)^2) / (2 * 3^2)), digits=2) for t in 0:N_PERIODS-1]
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_multiperiod"
@@ -151,6 +131,7 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
     prev_pshed = Float64[]
     max_delta_weights = NaN
     max_delta_pshed = NaN
+    iteration_log = []  # Per-iteration diagnostics
 
     for k in 1:iterations
         # Solve multiperiod lower-level and get (T*N) x (T*N) Jacobian
@@ -215,6 +196,23 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
 
         push!(pshed_lower_level, sum(pshed_val))
         push!(pshed_upper_level, sum(pshed_new))
+
+        # Log iteration diagnostics
+        dw = fair_weight_vals .- prev_weights
+        push!(iteration_log, (
+            iteration = k,
+            status = string(status),
+            pshed_lower = sum(pshed_val),
+            pshed_upper = sum(pshed_new),
+            max_delta_w = maximum(abs.(dw)),
+            mean_delta_w = mean(abs.(dw)),
+            w_min = minimum(fair_weight_vals),
+            w_max = maximum(fair_weight_vals),
+            jac_max = maximum(abs.(dpshed)),
+            jac_nnz = count(!=(0.0), dpshed),
+            n_pshed_zero = count(x -> x < 1e-6, pshed_val),
+            n_pshed_total = length(pshed_val)
+        ))
     end
 
     weights_converged = !isnan(max_delta_weights) && max_delta_weights <= TRUST_RADIUS
@@ -229,6 +227,7 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         "n_periods" => length(nw_ids)
     )
     @info "[$fair_func] Bilevel finished: $completed_iterations/$iterations iterations, Δw_max=$(round(max_delta_weights, digits=6))"
+    bilevel_summary["iteration_log"] = iteration_log
     return mn_new, pshed_lower_level, pshed_upper_level, final_weight_ids, final_weights, bilevel_summary
 end
 
@@ -332,7 +331,9 @@ function run_comparison_mn()
         bilevel_early_stop = Bool[],
         max_delta_weights = Float64[],
         max_delta_pshed = Float64[],
-        weights_converged = Bool[]
+        weights_converged = Bool[],
+        bilevel_time_s = Float64[],
+        rounding_time_s = Float64[]
     )
 
     per_period_results = Dict{String, Dict{String, Dict{Int, Vector{Float64}}}}()
@@ -371,8 +372,10 @@ function run_comparison_mn()
         for fair_func in FAIR_FUNCS
             print("  $fair_func: ")
 
+            t_start = time()
             mn_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts, bilevel_summary =
-                run_bilevel_relaxed_mn(mn_data, ITERATIONS, fair_weights, fair_func, critical_id; period_weights=PERIOD_WEIGHTS)
+                run_bilevel_relaxed_mn(mn_data, ITERATIONS, fair_weights, fair_func, critical_id; period_weights=PERIOD_COSTS)
+            bilevel_time = time() - t_start
 
             if bilevel_summary["completed_iterations"] == 0
                 @warn "[$case/$fair_func] FAILED — bilevel infeasible on first iteration"
@@ -390,7 +393,57 @@ function run_comparison_mn()
             total_pshed_upper = isempty(pshed_upper) ? NaN : pshed_upper[end]
             pct_shed = (total_pshed_lower / total_demand) * 100
 
-            println("shed=$(round(pct_shed, digits=2))%, iters=$(bilevel_summary["completed_iterations"])")
+            println("shed=$(round(pct_shed, digits=2))%, iters=$(bilevel_summary["completed_iterations"]), status=$(bilevel_summary["last_status"]), bilevel_time=$(round(bilevel_time, digits=1))s")
+
+            # Save per-period weight diagnostics to CSV
+            nw_ids_diag = sort(collect(keys(mn_relaxed["nw"])), by=x->parse(Int, x))
+            diag_rows = []
+            for nw_id in nw_ids_diag
+                nw_data = mn_relaxed["nw"][nw_id]
+                for lid in weight_ids
+                    w_val = nw_data["load"][string(lid)]["weight"]
+                    push!(diag_rows, (case=case, fair_func=fair_func, period=nw_id, load_id=lid, weight=w_val))
+                end
+            end
+            diag_df = DataFrame(diag_rows)
+            diag_path = joinpath(save_dir, "weight_diagnostics_$(case)_$(fair_func).csv")
+            CSV.write(diag_path, diag_df)
+
+            # Save per-iteration log
+            if haskey(bilevel_summary, "iteration_log") && !isempty(bilevel_summary["iteration_log"])
+                iter_df = DataFrame(bilevel_summary["iteration_log"])
+                iter_path = joinpath(save_dir, "iteration_log_$(case)_$(fair_func).csv")
+                CSV.write(iter_path, iter_df)
+            end
+
+            # Per-period rounding and topology selection
+            println("    Running per-period rounding & topology selection...")
+            rounding_time = NaN
+            try
+                t_round_start = time()
+                per_period_topology = round_and_select_topology_mn(
+                    mn_relaxed;
+                    n_samples=N_BERNOULLI_SAMPLES,
+                    n_rounds=N_ROUNDS,
+                    seed_base=100,
+                    solver=ipopt_solver
+                )
+                rounding_time = time() - t_round_start
+                rounding_results[case][fair_func] = per_period_topology
+
+                # Print per-period rounding summary
+                for (nw_id, period_res) in sort(collect(per_period_topology), by=x -> parse(Int, x[1]))
+                    n_feas = period_res["n_feasible_samples"]
+                    load_shed = period_res["total_load_shed"]
+                    ac_statuses = [f["feas_status"] for f in period_res["ac_feas"]]
+                    best_mld_obj = period_res["best_mld"] !== nothing && !isempty(period_res["best_mld"]) ? get(period_res["best_mld"], "objective", NaN) : NaN
+                    println("      Period $nw_id: n_feasible=$n_feas, load_shed=$(round(load_shed, digits=4)), AC_feas=$ac_statuses, MLD_obj=$(round(best_mld_obj, digits=4))")
+                end
+            catch e
+                @warn "[$case/$fair_func] Rounding/AC failed: $e"
+                push!(failed_combinations, (case, fair_func, string(e)))
+            end
+            println("    Timing: bilevel=$(round(bilevel_time, digits=1))s, rounding=$(isnan(rounding_time) ? "FAILED" : "$(round(rounding_time, digits=1))s"), total=$(round(bilevel_time + (isnan(rounding_time) ? 0.0 : rounding_time), digits=1))s")
 
             push!(results, (
                 case,
@@ -406,28 +459,10 @@ function run_comparison_mn()
                 bilevel_summary["early_stop"],
                 bilevel_summary["max_delta_weights"],
                 bilevel_summary["max_delta_pshed"],
-                bilevel_summary["weights_converged"]
+                bilevel_summary["weights_converged"],
+                bilevel_time,
+                rounding_time
             ))
-
-            # Per-period rounding and topology selection
-            println("    Running per-period rounding & topology selection...")
-            per_period_topology = round_and_select_topology_mn(
-                mn_relaxed;
-                n_samples=N_BERNOULLI_SAMPLES,
-                n_rounds=N_ROUNDS,
-                seed_base=100,
-                solver=ipopt_solver
-            )
-            rounding_results[case][fair_func] = per_period_topology
-
-            # Print per-period rounding summary
-            for (nw_id, period_res) in sort(collect(per_period_topology), by=x -> parse(Int, x[1]))
-                n_feas = period_res["n_feasible_samples"]
-                load_shed = period_res["total_load_shed"]
-                ac_statuses = [f["feas_status"] for f in period_res["ac_feas"]]
-                best_mld_obj = period_res["best_mld"] !== nothing && !isempty(period_res["best_mld"]) ? get(period_res["best_mld"], "objective", NaN) : NaN
-                println("      Period $nw_id: n_feasible=$n_feas, load_shed=$(round(load_shed, digits=4)), AC_feas=$ac_statuses, MLD_obj=$(round(best_mld_obj, digits=4))")
-            end
         end
     end
 

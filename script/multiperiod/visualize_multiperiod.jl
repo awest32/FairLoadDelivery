@@ -182,14 +182,27 @@ for case in CASES
                 continue
             end
             wdata = final_weights_results[case][fair_func]
-            wid_to_val = Dict(zip(wdata[:weight_ids], wdata[:weights]))
+            wids = wdata[:weight_ids]    # N load IDs
+            wvals = wdata[:weights]      # T*N per-period weights
+            n_loads_w = length(wids)
+
+            # Build load ID → position mapping
+            wid_to_pos = Dict(lid => pos for (pos, lid) in enumerate(wids))
 
             n_loads = length(sorted_load_ids)
             weight_matrix = zeros(n_periods, n_loads)
             for (j, lid) in enumerate(sorted_load_ids)
-                w = get(wid_to_val, lid, NaN)
+                pos = get(wid_to_pos, lid, 0)
                 for i in 1:n_periods
-                    weight_matrix[i, j] = w
+                    if pos > 0 && length(wvals) >= n_loads_w * n_periods
+                        # Per-period weights: index into T*N vector
+                        weight_matrix[i, j] = wvals[(i - 1) * n_loads_w + pos]
+                    elseif pos > 0
+                        # Fallback: global weights (N-length)
+                        weight_matrix[i, j] = wvals[pos]
+                    else
+                        weight_matrix[i, j] = NaN
+                    end
                 end
             end
 
@@ -247,7 +260,12 @@ for case in CASES
 
     # ── 2. LOAD SHED: multi-pane heatmap ──
     if haskey(rounding_results, case)
+        valid_funcs = [ff for ff in FAIR_FUNCS if haskey(rounding_results[case], ff)]
+        if isempty(valid_funcs)
+            println("\n  Skipping load shed & voltage heatmaps for $case — no rounding results")
+        else
         println("\n  Creating load shed heatmaps for $case...")
+        end
         shed_panes = Plots.Plot[]
         for fair_func in FAIR_FUNCS
             is_first = !isempty(valid_funcs) && fair_func == first(valid_funcs)

@@ -294,7 +294,7 @@ function palma_ratio_minimization(
         set_optimizer_attribute(model, "DualReductions", 0)
         set_optimizer_attribute(model, "MIPGap", 1e-4)   # Relaxed gap (was 1e-6)
         set_optimizer_attribute(model, "NonConvex", 2)   # Allow non-convex QP
-        set_optimizer_attribute(model, "TimeLimit", 60 * 5)  # 5 minutes per iteration
+        set_optimizer_attribute(model, "TimeLimit", 60 * 20)  # 20 minutes per iteration
         set_optimizer_attribute(model, "MIPFocus", 1)    # Focus on finding feasible solutions
         set_optimizer_attribute(model, "NumericFocus", 2) # High numerical care (3 was needed only when bounds were wrong)
         if !silent
@@ -305,29 +305,25 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Global Sort with Per-Period Weighting
+    # Per-Period Sort Decomposition
     #
-    # All T*N pshed values are sorted globally using a single m×m
-    # permutation matrix. Each pshed value is scaled by its period's
-    # weight λ[t] so that peak periods contribute more to the Palma ratio.
+    # Each period's N pshed values are sorted independently using N×N
+    # binary permutation matrices. The objective is the cost-weighted sum
+    # of per-period Palma ratios: min Σ_t λ[t] * Palma_t
     #
-    # scaled_pshed[j] = λ[t(j)] * pshed_new[j]  where t(j) = ⌈j/N⌉
-    #
-    # weights_prev and Δw are both T*N (per-period weights).
-    # Jacobian is (T*N) × (T*N).
+    # Binary count: T*N² (e.g., 9*225 = 2025 for T=9, N=15)
+    # vs global sort: (T*N)² (e.g., 135² = 18225)
     =========================================================================#
 
     # Determine number of periods
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
-    @info "[Palma] Global sort: $n_periods period(s), $n_per_period loads/period, $m weights, $(m^2) binaries"
+    n = n_per_period
+    @info "[Palma] Per-period sort: $n_periods period(s), $n loads/period, $m weights, $(n_periods * n^2) binaries"
 
-    # Period weights: λ[t] for each period (default uniform)
+    # Period costs: λ[t] for each period (default uniform)
     λ = isempty(period_weights) ? ones(n_periods) : period_weights
     @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
-
-    # Map each pshed index j to its period weight λ[t(j)]
-    λ_j = [λ[((j - 1) ÷ n_per_period) + 1] for j in 1:m]
 
     #=========================================================================
     # Decision Variables
@@ -336,13 +332,17 @@ function palma_ratio_minimization(
     # Weight changes (m = T*N per-period weight decision variables)
     @variable(model, Δw[1:m])
 
-    # Global m×m permutation matrix
-    if relax_binary
-        @variable(model, 0 <= a[1:m, 1:m] <= 1)
-    else
-        @variable(model, a[1:m, 1:m], Bin)
+    # Per-period permutation matrices: a[t][i,j] for t=1..T, i,j=1..n
+    a = []
+    u = []
+    for t in 1:n_periods
+        if relax_binary
+            push!(a, @variable(model, [1:n, 1:n], lower_bound=0, upper_bound=1, base_name="a_$t"))
+        else
+            push!(a, @variable(model, [1:n, 1:n], Bin, base_name="a_$t"))
+        end
+        push!(u, @variable(model, [1:n, 1:n], lower_bound=0, base_name="u_$t"))
     end
-    @variable(model, u[1:m, 1:m] >= 0)
 
     #=========================================================================
     # P_shed as EXPRESSION (Core Simplification)
@@ -352,12 +352,6 @@ function palma_ratio_minimization(
     @expression(model, pshed_new[j=1:m],
         pshed_prev[j] + sum(dpshed_dw[j, k] * Δw[k] for k in 1:m)
     )
-
-    # Scaled pshed: each value weighted by its period's λ[t]
-    @expression(model, scaled_pshed[j=1:m], λ_j[j] * pshed_new[j])
-
-    # Upper bounds for scaled pshed (needed for McCormick)
-    scaled_pd = [λ_j[j] * pd[j] for j in 1:m]
 
     #=========================================================================
     # Trust Region and Weight Bounds
@@ -384,49 +378,61 @@ function palma_ratio_minimization(
     @constraint(model, pshed_ub[j=1:m], pshed_new[j] <= pd[j])
 
     #=========================================================================
-    # Global Sorting: Permutation + McCormick + Ascending Order
+    # Per-Period Sorting: Permutation + McCormick + Ascending Order
     =========================================================================#
 
-    # Doubly stochastic constraints
-    for i in 1:m
-        @constraint(model, sum(a[i, j] for j in 1:m) == 1)  # row sum
-    end
-    for j in 1:m
-        @constraint(model, sum(a[i, j] for i in 1:m) == 1)  # col sum
-    end
+    # Palma indices (same for each period since all have n loads)
+    top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    # McCormick envelopes: u[i,j] = a[i,j] * scaled_pshed[j]
-    for i in 1:m, j in 1:m
-        S_j = scaled_pd[j]  # upper bound on scaled_pshed[j]
+    # Build per-period Palma ratios via Charnes-Cooper
+    # σ[t] = 1 / bot_sum_t, objective = min Σ_t λ[t] * σ[t] * top_sum_t
+    @variable(model, σ[1:n_periods] >= 1e-8)
 
-        @constraint(model, u[i, j] >= scaled_pshed[j] + a[i, j] * S_j - S_j)
-        @constraint(model, u[i, j] <= a[i, j] * S_j)
-        @constraint(model, u[i, j] <= scaled_pshed[j])
-    end
+    period_top_sums = []
+    period_bot_sums = []
 
-    # Sorted values (ascending order)
-    @expression(model, sorted_vals[i=1:m], sum(u[i, j] for j in 1:m))
-    for k in 1:m-1
-        @constraint(model, sorted_vals[k] <= sorted_vals[k+1])
+    for t in 1:n_periods
+        offset = (t - 1) * n
+
+        # Doubly stochastic constraints
+        for i in 1:n
+            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)
+        end
+        for j in 1:n
+            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
+        end
+
+        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pshed_new[offset+j]
+        for i in 1:n, j in 1:n
+            gj = offset + j
+            P_j = pd[gj]
+
+            @constraint(model, u[t][i, j] >= pshed_new[gj] + a[t][i, j] * P_j - P_j)
+            @constraint(model, u[t][i, j] <= a[t][i, j] * P_j)
+            @constraint(model, u[t][i, j] <= pshed_new[gj])
+        end
+
+        # Sorted values for this period (ascending)
+        sorted_t = @expression(model, [i=1:n], sum(u[t][i, j] for j in 1:n))
+        for k in 1:n-1
+            @constraint(model, sorted_t[k] <= sorted_t[k+1])
+        end
+
+        # Palma sums for this period
+        push!(period_top_sums, @expression(model, sum(sorted_t[i] for i in top_10_idx)))
+        push!(period_bot_sums, @expression(model, sum(sorted_t[i] for i in bottom_40_idx)))
+
+        # Charnes-Cooper normalization: σ[t] * bot_sum_t = 1
+        @constraint(model, σ[t] * period_bot_sums[t] == 1.0)
     end
 
     #=========================================================================
-    # Objective: Charnes-Cooper for Global Palma Ratio
-    #
-    # Palma ratio of period-weighted pshed:
-    #   top_10% / bot_40% of sorted(λ[t(j)] * pshed[j])
-    #
-    # Charnes-Cooper: σ = 1 / bot_40%, minimize σ * top_10%
+    # Objective: Cost-weighted sum of per-period Palma ratios
+    #   min Σ_t λ[t] * σ[t] * top_sum_t
+    #   where σ[t] = 1 / bot_sum_t  (Charnes-Cooper)
     =========================================================================#
 
-    top_10_idx, bottom_40_idx = compute_palma_indices(m)
-
-    top_sum = @expression(model, sum(sorted_vals[i] for i in top_10_idx))
-    bot_sum = @expression(model, sum(sorted_vals[i] for i in bottom_40_idx))
-
-    @variable(model, σ >= 1e-8)
-    @constraint(model, σ * bot_sum == 1.0)
-    @objective(model, Min, σ * top_sum)
+    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))
 
     #=========================================================================
     # Solve
@@ -448,10 +454,14 @@ function palma_ratio_minimization(
         # Compute pshed_new from the expression
         pshed_new_val = pshed_prev .+ dpshed_dw * Δw_val
 
-        # Extract permutation matrix and sorted values
-        a_val = value.(a)
-        scaled_pshed_val = λ_j .* pshed_new_val
-        sorted_val = a_val * scaled_pshed_val
+        # Collect per-period permutation matrices and sorted values
+        a_vals = [value.(a[t]) for t in 1:n_periods]
+        sorted_val = Float64[]
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            pshed_t = pshed_new_val[offset+1:offset+n]
+            append!(sorted_val, a_vals[t] * pshed_t)
+        end
 
         # Compute actual Palma ratio (from unsorted pshed_new)
         actual_palma = palma_ratio(pshed_new_val)
@@ -463,21 +473,11 @@ function palma_ratio_minimization(
             palma_ratio = actual_palma,
             status = status,
             solve_time = solve_time,
-            permutation = a_val,
+            permutation = a_vals,
             sorted_values = sorted_val
         )
     else
-        @warn "Solver failed with status: $status"
-        return (
-            weights_new = weights_prev,
-            pshed_new = pshed_prev,
-            delta_w = zeros(m),
-            palma_ratio = palma_ratio(pshed_prev),
-            status = status,
-            solve_time = solve_time,
-            permutation = Matrix{Float64}(I, m, m),
-            sorted_values = sort(λ_j .* pshed_prev)
-        )
+        error("[Palma] Solver failed with status: $status (solve_time=$(round(solve_time, digits=2))s)")
     end
 end
 
