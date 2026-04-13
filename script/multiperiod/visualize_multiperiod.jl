@@ -249,7 +249,6 @@ for case in CASES
     if haskey(rounding_results, case)
         println("\n  Creating load shed heatmaps for $case...")
         shed_panes = Plots.Plot[]
-        valid_funcs = [ff for ff in FAIR_FUNCS if haskey(rounding_results[case], ff)]
         for fair_func in FAIR_FUNCS
             is_first = !isempty(valid_funcs) && fair_func == first(valid_funcs)
             is_last = !isempty(valid_funcs) && fair_func == last(valid_funcs)
