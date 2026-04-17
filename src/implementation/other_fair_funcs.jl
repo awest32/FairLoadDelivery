@@ -1,8 +1,8 @@
 # Create the other fairness functions
 
 # Function to compute Jain's Fairness Index
-# With period_weights (peak charges): max Σ_t λ[t] * Jain_t
-function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
+# With peak_time_costs (peak charges): max Σ_t λ[t] * Jain_t
+function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -32,8 +32,8 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     # Weighted sum of per-period Jain indices
     period_jain_terms = []
@@ -54,8 +54,8 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
 end
 
 # Function to compute the min max of load shed
-# With period_weights (peak charges): min Σ_t λ[t] * max_i(pshed_t[i])
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
+# With peak_time_costs (peak charges): min Σ_t λ[t] * max_i(pshed_t[i])
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -82,8 +82,8 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     # Per-period max variables
     @variable(model, t_period[1:n_periods] >= 0)
@@ -102,8 +102,8 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
 end
 
 # Function to compute the proportional fairness of load served
-# With period_weights (peak charges): max Σ_t λ[t] * Σ_i log(pref_t[i] - pshed_t[i])
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
+# With peak_time_costs (peak charges): max Σ_t λ[t] * Σ_i log(pref_t[i] - pshed_t[i])
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
@@ -133,8 +133,8 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     # Shifted log: uniform constant c added to all loads' served values
     c = 1e-6
@@ -149,19 +149,11 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
 end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
-# With period_weights (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
-function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},math::Dict{String,Any},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
+# With peak_time_costs (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
+function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
-    # Determine the total load in the reference case
-    total_load_ref = 0.0
-    for (i, load) in math["load"]
-        cons = load["connections"]
-        for idx in 1:length(cons)
-            total_load_ref += load["pd"][idx]
-        end
-    end
     @variable(model, weights_new[1:m] .>= 1.0)
     for id in 1:m
         lid_idx = ((id - 1) % n_per_period) + 1
@@ -182,8 +174,8 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     @objective(model, Min, sum(λ[t] * sum(pshed_new[(t-1)*n + i] for i in 1:n) for t in 1:n_periods))
     JuMP.set_silent(model)
@@ -233,8 +225,8 @@ function infinity_norm_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev
 end
 
 # Equality min fairness function
-# With period_weights (peak charges): min Σ_t λ[t] * (t_period[t] + Σ_i (pshed_t[i] - t_period[t])²)
-function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; period_weights::Vector{Float64}=Float64[], n_loads::Int=0)
+# With peak_time_costs (peak charges): min Σ_t λ[t] * (t_period[t] + Σ_i (pshed_t[i] - t_period[t])²)
+function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -258,8 +250,8 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     # Per-period max variables with quadratic penalty encouraging equal shedding
     @variable(model, t_period[1:n_periods] >= 0)

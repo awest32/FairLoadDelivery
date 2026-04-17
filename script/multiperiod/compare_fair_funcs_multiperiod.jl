@@ -39,12 +39,13 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 const CASES = ["motivation_c"]
 const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain", "palma"]
 const LS_PERCENT = 0.8
-const ITERATIONS = 5
+const WARMSTART_ITERATIONS = 2  # Fixed warm-up phase; set to 0 to disable
+const ITERATIONS = 20           # Main iterations after warm-start
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 100
 const SOURCE_PU = 1.03
 const critical_buses = []
-const N_PERIODS = 12
+const N_PERIODS = 3
 
 # Gaussian load profile: peak at hour 14 (1pm), σ=4 hours
 # Base load 1.0, peak load 2.0
@@ -52,7 +53,7 @@ const LOAD_SCALE_FACTORS = [round(0.8 + 1.0 * exp(-((t - N_PERIODS/2)^2) / (2 * 
 
 # Gaussian cost profile: peak at hour 14 (2pm), σ=3 hours
 # Base cost 8 ¢/kWh, peak cost 30 ¢/kWh
-const PERIOD_COSTS = [round(8 + 22 * exp(-((t - N_PERIODS/2)^2) / (2 * 3^2)), digits=2) for t in 0:N_PERIODS-1]
+const PEAK_TIME_COSTS = [round(8 + 22 * exp(-((t - N_PERIODS/2)^2) / (2 * 3^2)), digits=2) for t in 0:N_PERIODS-1]
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_multiperiod"
@@ -69,6 +70,7 @@ gurobi = optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0)
 Create multinetwork data from a single-period math dict.
 Replicates network N times with different load scaling factors.
 """
+# use PMD.replicate or PMD.make_multinetwork if it supports load scaling, otherwise do manually
 function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
     @assert length(load_scales) == n_periods
 
@@ -114,7 +116,7 @@ Upper-level fairness functions operate on the full (T*N) pshed vector.
 """
 function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair_weights_init::Vector{Float64},
                                 fair_func::String, critical_id::Vector{Int}=Int[];
-                                n_periods::Int=N_PERIODS, period_weights::Vector{Float64}=Float64[])
+                                n_periods::Int=N_PERIODS, peak_time_costs::Vector{Float64}=Float64[])
     mn_new = deepcopy(mn_data)
     fair_weights = copy(fair_weights_init)  # N-length global weights for lower level
     n_weights = length(fair_weights)
@@ -148,18 +150,17 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         # Apply fairness function on the full per-period (T*N) pshed vector
         # dpshed is (T*N) x (T*N), pshed_val is (T*N), weight_vals is (T*N)
         if fair_func == "proportional"
-            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "efficiency"
-            math_dummy = _create_math_dummy_mn(mn_new)
-            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_dummy, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "equality_min"
-            pshed_new, fair_weight_vals, status = FairLoadDelivery.equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "jain"
-            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "palma"
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; period_weights=period_weights, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         else
             error("Unknown fairness function: $fair_func")
         end
@@ -173,7 +174,10 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         completed_iterations = k
 
         # Track convergence (compare per-period weights)
-        max_delta_weights = maximum(abs.(fair_weight_vals .- prev_weights))
+        if k!=1
+            max_delta_weights = maximum(abs.(fair_weight_vals .- prev_weights))
+        end
+
         if !isempty(prev_pshed)
             max_delta_pshed = maximum(abs.(pshed_new .- prev_pshed))
         end
@@ -255,26 +259,6 @@ function _aggregate_by_load(dpshed::Matrix{Float64}, pshed_val::Vector{Float64},
     end
 
     return dpshed_agg, pshed_agg, pd_agg
-end
-
-"""Helper to create a dummy math dict with total load info for efficiency function."""
-function _create_math_dummy_mn(mn_data::Dict{String,Any})
-    # Aggregate loads across all periods for the efficiency function's total_load_ref calculation
-    math_dummy = Dict{String,Any}("load" => Dict{String,Any}())
-    nw_ids = sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
-    # Use first period's load structure, but sum demands across periods
-    first_nw = mn_data["nw"][nw_ids[1]]
-    for (lid, load) in first_nw["load"]
-        total_pd = zeros(length(load["pd"]))
-        for nw_id in nw_ids
-            total_pd .+= mn_data["nw"][nw_id]["load"][lid]["pd"]
-        end
-        math_dummy["load"][lid] = Dict(
-            "pd" => total_pd,
-            "connections" => load["connections"]
-        )
-    end
-    return math_dummy
 end
 
 # ============================================================
@@ -373,13 +357,40 @@ function run_comparison_mn()
             print("  $fair_func: ")
 
             t_start = time()
+
+            # --- Warm-start phase (fixed count, always cold-start mn_data) ---
+            mn_input = mn_data
+            wts_input = fair_weights
+            warm_iter_log = []
+            warm_completed = 0
+            if WARMSTART_ITERATIONS > 0
+                println("[warm-start $WARMSTART_ITERATIONS iters] ")
+                mn_warm, _, _, _, warm_wts, warm_summary =
+                    run_bilevel_relaxed_mn(mn_data, WARMSTART_ITERATIONS, fair_weights, fair_func, critical_id; peak_time_costs=PEAK_TIME_COSTS)
+                warm_completed = warm_summary["completed_iterations"]
+                warm_iter_log = [merge(row, (phase="warmstart",)) for row in get(warm_summary, "iteration_log", [])]
+                if warm_completed < WARMSTART_ITERATIONS
+                    @warn "[$case/$fair_func] Warm-start stopped early ($warm_completed/$WARMSTART_ITERATIONS) — falling back to cold start for main phase"
+                else
+                    mn_input = mn_warm
+                    wts_input = warm_wts
+                end
+            end
+
+            # --- Main phase ---
             mn_relaxed, pshed_lower, pshed_upper, weight_ids, final_wts, bilevel_summary =
-                run_bilevel_relaxed_mn(mn_data, ITERATIONS, fair_weights, fair_func, critical_id; period_weights=PERIOD_COSTS)
+                run_bilevel_relaxed_mn(mn_input, ITERATIONS, wts_input, fair_func, critical_id; peak_time_costs=PEAK_TIME_COSTS)
             bilevel_time = time() - t_start
 
+            # Merge warm-start log into bilevel_summary for full visibility
+            main_iter_log = [merge(row, (phase="main",)) for row in get(bilevel_summary, "iteration_log", [])]
+            bilevel_summary["iteration_log"] = vcat(warm_iter_log, main_iter_log)
+            bilevel_summary["warmstart_iterations"] = warm_completed
+            bilevel_summary["warmstart_iterations_target"] = WARMSTART_ITERATIONS
+
             if bilevel_summary["completed_iterations"] == 0
-                @warn "[$case/$fair_func] FAILED — bilevel infeasible on first iteration"
-                push!(failed_combinations, (case, fair_func, "Bilevel infeasible on first iteration"))
+                @warn "[$case/$fair_func] FAILED — bilevel infeasible on first iteration of main phase"
+                push!(failed_combinations, (case, fair_func, "Bilevel infeasible on first main-phase iteration"))
                 continue
             end
 
@@ -393,7 +404,7 @@ function run_comparison_mn()
             total_pshed_upper = isempty(pshed_upper) ? NaN : pshed_upper[end]
             pct_shed = (total_pshed_lower / total_demand) * 100
 
-            println("shed=$(round(pct_shed, digits=2))%, iters=$(bilevel_summary["completed_iterations"]), status=$(bilevel_summary["last_status"]), bilevel_time=$(round(bilevel_time, digits=1))s")
+            println("shed=$(round(pct_shed, digits=2))%, warm=$(warm_completed)/$WARMSTART_ITERATIONS, main=$(bilevel_summary["completed_iterations"])/$ITERATIONS, status=$(bilevel_summary["last_status"]), bilevel_time=$(round(bilevel_time, digits=1))s")
 
             # Save per-period weight diagnostics to CSV
             nw_ids_diag = sort(collect(keys(mn_relaxed["nw"])), by=x->parse(Int, x))

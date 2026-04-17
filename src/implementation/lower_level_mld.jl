@@ -131,10 +131,16 @@ function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vec
     n_loads = length(weight_ids)  # N
     n_weights_total = length(all_weight_params)  # T*N
 
-    # Set per-period weight parameter values from the T*N input
-    @assert length(fair_load_weights) == n_weights_total "Expected $(n_weights_total) weights (T*N), got $(length(fair_load_weights))"
-    for (idx, (n, key, param)) in enumerate(all_weight_params)
-        JuMP.set_parameter_value(param, fair_load_weights[idx])
+    # Set per-period weight parameter values from the T*N input.
+    # If fair_load_weights is empty, retain the model's initial parameter values
+    # (populated from ref[:load_weights] at model construction). This makes the
+    # JuMP container's axes the single source of truth for load ordering —
+    # callers should not construct weights_prev externally on the first iteration.
+    if !isempty(fair_load_weights)
+        @assert length(fair_load_weights) == n_weights_total "Expected $(n_weights_total) weights (T*N), got $(length(fair_load_weights))"
+        for (idx, (n, key, param)) in enumerate(all_weight_params)
+            JuMP.set_parameter_value(param, fair_load_weights[idx])
+        end
     end
 
     # Collect all pshed variables across periods (flattened)
@@ -204,21 +210,21 @@ function lower_level_soln_mn(mn_data::Dict{String,Any}, weights_new, k)
     refs = Dict(n => mld_paramed.ref[:it][:pmd][:nw][n] for n in nw_ids)
     T = length(nw_ids)
 
-    # On first iteration, build T*N weights from mn_data; subsequently use updated weights
+    # On first iteration, let the callee read the model's initial parameter values
+    # (populated from ref[:load_weights] at construction). The JuMP container's
+    # axes define the canonical load ordering, returned as weight_ids — eliminating
+    # any mismatch between sorted vs. dict-iteration order.
     if k == 1
         weights_prev = Float64[]
-        for n in nw_ids
-            nw_data = mn_data["nw"][string(n)]
-            load_ids_sorted = sort(parse.(Int, collect(keys(nw_data["load"]))))
-            for lid in load_ids_sorted
-                push!(weights_prev, nw_data["load"][string(lid)]["weight"])
-            end
-        end
     else
         weights_prev = weights_new
     end
 
-    @info "Iteration $k: Solving multiperiod lower-level MLD with $(length(weights_prev)) per-period weights"
+    if k == 1
+        @info "Iteration $k: Solving multiperiod lower-level MLD with initial parameter values from ref"
+    else
+        @info "Iteration $k: Solving multiperiod lower-level MLD with $(length(weights_prev)) per-period weights"
+    end
 
     dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, _ = diff_forward_full_jacobian_mn(mld_paramed.model, weights_prev)
     return dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs

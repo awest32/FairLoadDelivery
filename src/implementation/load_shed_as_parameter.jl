@@ -232,7 +232,7 @@ function palma_ratio_minimization(
     relax_binary::Bool = false,  # Binary required; McCormick relaxation (true) produces degenerate solutions - needs further testing
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[],
-    period_weights::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
+    peak_time_costs::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
     n_loads::Int = 0  # Number of loads per period (0 = infer from weights_prev length)
 )
     m = length(pshed_prev)       # T*N: total pshed values (= total weights)
@@ -322,8 +322,8 @@ function palma_ratio_minimization(
     @info "[Palma] Per-period sort: $n_periods period(s), $n loads/period, $m weights, $(n_periods * n^2) binaries"
 
     # Period costs: λ[t] for each period (default uniform)
-    λ = isempty(period_weights) ? ones(n_periods) : period_weights
-    @assert length(λ) == n_periods "period_weights must have length $n_periods, got $(length(λ))"
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
     #=========================================================================
     # Decision Variables
@@ -503,7 +503,7 @@ function lin_palma_reformulated(
     pd::Vector{Float64},
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[];
-    period_weights::Vector{Float64} = Float64[],
+    peak_time_costs::Vector{Float64} = Float64[],
     n_loads::Int = 0
 )
     result = palma_ratio_minimization(
@@ -513,7 +513,7 @@ function lin_palma_reformulated(
         relax_binary = false,  # Binary required; McCormick relaxation needs testing
         critical_ids = critical_ids,
         weight_ids = weight_ids,
-        period_weights = period_weights,
+        peak_time_costs = peak_time_costs,
         n_loads = n_loads
     )
 
