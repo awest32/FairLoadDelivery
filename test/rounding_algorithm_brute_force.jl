@@ -20,12 +20,13 @@ using Statistics
 case = "ieee_13_aw_edit/motivation_c.dss"
 dir = @__DIR__
 casepath = joinpath(dir, "../data/", case)
-const SWITCH_RATING = 700.0
-const GEN_CAP = 5000.0
-const SOURCE_PU = 1.03
+SWITCH_RATING = 600.0
+LS_FRAC = 0.8
+SOURCE_PU = 1.03
 
-eng, math = setup_network(casepath, GEN_CAP, SOURCE_PU, SWITCH_RATING,[])
+eng, math = setup_network(casepath, LS_FRAC, SOURCE_PU, SWITCH_RATING,[])
 
+total_demand = sum(sum(load["pd"]) for (_, load) in math["load"])   
 switch_2_eng_map = Dict{String, String}()
 for (switch_id, switch_data) in math["switch"]
     switch_2_eng_map[switch_id] = switch_data["name"]
@@ -107,6 +108,7 @@ function radiality_check(ref_round, math, optimizer)
     optimize!(model);
     return termination_status(model)
 end
+
 empty!(radiality_results);
 for config in 0:(2^n_switches - 1)
     states = Dict(sid => Float64((config >> (i - 1)) & 1)
@@ -147,6 +149,7 @@ for row in eachrow(radiality_feasible_networks)
         trial["switch"][sid]["dispatchable"] = 1.0  # fix switch at this state
     end
 
+
     mld_res = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(trial, Gurobi.Optimizer)
     tstat = mld_res["termination_status"]
     feasible = tstat in (MOI.LOCALLY_SOLVED, MOI.OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
@@ -158,7 +161,15 @@ end
  
 mld_feasible_networks = filter(row -> row.feasible, mld_results)
 
-
+math_pf = deepcopy(math)
+for (gid, gen) in math_pf["gen"]
+    gen["pg"] .= 1000000.0
+    gen["qg"] .= 1000000.0
+    gen["pmax"] .= 1000000.0
+    gen["qmax"] .= 1000000.0
+    gen["pmin"] .= 0.0
+    gen["qmin"] .= 0.0
+end
 empty!(ac_results)
 # For each MLD-feasible config, apply the MLD shed decisions and run AC OPF
 # to check whether the post-shed network is AC-power-flow feasible.
@@ -166,7 +177,7 @@ for row in eachrow(mld_feasible_networks)
     states = Dict(sid => Float64(parse(Int, row.config_bits[i]))
                   for (i, sid) in enumerate(sorted_switch_ids))
 
-    trial = deepcopy(math)
+    trial = deepcopy(math_pf)
     for (sid, s) in states
         trial["switch"][sid]["state"]        = s
         trial["switch"][sid]["status"]       = s
@@ -209,3 +220,8 @@ end
 
 ac_feasible_networks = filter(row -> row.feasible, ac_results)
 
+# only two network ac feasible. 
+# 1. switch 632645 and 634675 open, the rest closed
+# 2. switch 632645 and 670671 open, the rest closed
+# both netwoks have 2696 load served out of the 3466 total demand, which is 77.8% load served.
+# 
