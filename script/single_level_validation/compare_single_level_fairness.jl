@@ -27,8 +27,9 @@ include("../../src/implementation/network_setup.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]
-const GEN_CAP = 0.8
+const GEN_CAP = 5000.0
 const SOURCE_PU = 1.03
+const SWITCH_RATING = 700.0
 
 # Integer formulations (MIP, Gurobi)
 const FAIR_SOLVE_INTEGER = [
@@ -50,7 +51,7 @@ mkpath(integer_dir)
 
 # Target buses for voltage plots (load buses of interest)
 const TARGET_BUSES = ["670","632","645","671","634","646","611","675","652","692"]
-
+#["primary", "sourcebus", "loadbus"]# 
 # ============================================================
 # POST-HOC FAIRNESS METRICS
 # ============================================================
@@ -96,7 +97,7 @@ function run_integer_comparison(cases, fair_solve_funcs, solver, out_dir::String
     for case in cases
         println("\n>>> Processing case: $case")
 
-        eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", GEN_CAP, SOURCE_PU, [])
+        eng, math, lbs, critical_id = setup_network("ieee_13_aw_edit/$case.dss", GEN_CAP, SOURCE_PU, SWITCH_RATING, [])
 
         total_demand = sum(sum(load["pd"]) for (_, load) in math["load"])
         println("    Total demand: $(round(total_demand, digits=4))")

@@ -43,10 +43,10 @@ gurobi = Gurobi.Optimizer
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "motivation_a"
-gen_cap = 0.8
+case = "case3_balanced"
+gen_cap = 1000.0
 # Inputs: case file path, percentage of load shed, list of critical load IDs
-eng, math, lbs, critical_id = setup_network( "ieee_13_aw_edit/$case.dss", gen_cap, [])
+eng, math, lbs, critical_id = setup_network( "pmd_opendss/$case.dss", gen_cap, 1.03,[])
 # Create the folder to store the results
     today = Dates.today()
     # Create a results folder

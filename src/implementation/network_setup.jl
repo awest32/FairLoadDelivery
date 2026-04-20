@@ -1,15 +1,12 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64, source_pu::Float64, critical_load)
-    dir = @__DIR__
-    casepath = "data/$case"
-    file = joinpath(dir, "../../", casepath)
+function setup_network(case::String, ls_percent::Float64, source_pu::Float64, switch_rating::Float64, critical_load::Vector{Any})
 
     data = case 
     vscale = 1
     loadscale = 1   
 
-    eng = PowerModelsDistribution.parse_file(file)#, transformations=[PowerModelsDistribution.transform_loops!,PowerModelsDistribution.remove_all_bounds!])
+    eng = PowerModelsDistribution.parse_file(case)#, transformations=[PowerModelsDistribution.transform_loops!,PowerModelsDistribution.remove_all_bounds!])
 
     eng["settings"]["sbase_default"] = 1
     eng["voltage_source"]["source"]["rs"] *=0
@@ -54,8 +51,8 @@ function setup_network(case::String, ls_percent::Float64, source_pu::Float64, cr
         
     for (i,bus) in math["bus"]
             if bus["name"] == "rg60"
-                    bus["vmax"][:] .= 1.03
-                    bus["vmin"][:] .= 1.03
+                    bus["vmax"][:] .= source_pu
+                    bus["vmin"][:] .= source_pu
             else
                 bus["vmax"][:] .= 1.05
                 bus["vmin"][:] .= 0.95
@@ -67,35 +64,35 @@ function setup_network(case::String, ls_percent::Float64, source_pu::Float64, cr
         for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#308
+                switch["current_rating"][:] .= switch_rating#308
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#322
+                switch["current_rating"][:] .= switch_rating#322
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
         for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#308
+                switch["current_rating"][:] .= switch_rating#308
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#322
+                switch["current_rating"][:] .= switch_rating#322
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_b.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#304
+                switch["current_rating"][:] .= switch_rating#304
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#305
+                switch["current_rating"][:] .= switch_rating#305
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 700#80
+                switch["current_rating"][:] .= switch_rating#80
             end
         end
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
-            switch["current_rating"][:] .= 200
+            switch["current_rating"][:] .= switch_rating
             # if switch["name"] == "632633"
             #     switch["current_rating"][:] .= 700#310
             # elseif switch["name"] == "632645"
@@ -114,19 +111,19 @@ function setup_network(case::String, ls_percent::Float64, source_pu::Float64, cr
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "632633"
-                switch["current_rating"][:] .= 700#310
+                switch["current_rating"][:] .= switch_rating#310
             elseif switch["name"] == "632645"
-                switch["current_rating"][:] .= 700#264
+                switch["current_rating"][:] .= switch_rating#264
             elseif switch["name"] == "671692"
-                switch["current_rating"][:] .= 700#70
+                switch["current_rating"][:] .= switch_rating#70
             elseif switch["name"] == "646611"
-                switch["current_rating"][:] .= 700#264
+                switch["current_rating"][:] .= switch_rating#264
             end
         end
     elseif case == "ieee_13_aw_edit/pmonm_13bus_mod.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
-            switch["current_rating"][:] .= 100
+            switch["current_rating"][:] .= switch_rating
        end
     end
     # Ensure the generation from the source bus is less than the max load
