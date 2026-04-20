@@ -329,7 +329,7 @@ function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any
 end
 
 function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
-                           mld_solution::Union{Nothing,Dict{String,Any}}=nothing)
+                           mld_solution::Union{Nothing,Dict{String,Any}})
     data = deepcopy(data_in)
     # Get voltage scale if present (for voltage sensitivity analysis)
     #vscale = get(data, "vscale", 1.0)

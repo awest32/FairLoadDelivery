@@ -161,15 +161,7 @@ end
  
 mld_feasible_networks = filter(row -> row.feasible, mld_results)
 
-math_pf = deepcopy(math)
-for (gid, gen) in math_pf["gen"]
-    gen["pg"] .= 1000000.0
-    gen["qg"] .= 1000000.0
-    gen["pmax"] .= 1000000.0
-    gen["qmax"] .= 1000000.0
-    gen["pmin"] .= 0.0
-    gen["qmin"] .= 0.0
-end
+
 empty!(ac_results)
 # For each MLD-feasible config, apply the MLD shed decisions and run AC OPF
 # to check whether the post-shed network is AC-power-flow feasible.
@@ -177,7 +169,7 @@ for row in eachrow(mld_feasible_networks)
     states = Dict(sid => Float64(parse(Int, row.config_bits[i]))
                   for (i, sid) in enumerate(sorted_switch_ids))
 
-    trial = deepcopy(math_pf)
+    trial = deepcopy(math)
     for (sid, s) in states
         trial["switch"][sid]["state"]        = s
         trial["switch"][sid]["status"]       = s
@@ -186,30 +178,13 @@ for row in eachrow(mld_feasible_networks)
 
     # Re-solve MLD to retrieve the per-load shed decisions for this config
     mld_res = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(trial, Gurobi.Optimizer)
-    load_sol = mld_res["solution"]["load"]
+    #load_sol = mld_res["solution"]["load"]
+    mld_model = instantiate_mc_model(trial, LinDist3FlowPowerModel, build_mc_mld_switchable_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
+    ref_round = mld_model.ref[:it][:pmd][:nw][0]
 
-    # Apply MLD load-shed decisions: reduce pd/qd by the solution's pshed/qshed
-    for (lid, load) in trial["load"]
-        if haskey(load_sol, lid)
-            pshed = get(load_sol[lid], "pshed", zeros(length(load["pd"])))
-            qshed = get(load_sol[lid], "qshed", zeros(length(load["qd"])))
-            load["pd"] = max.(load["pd"] .- pshed, 0.0)
-            load["qd"] = max.(load["qd"] .- qshed, 0.0)
-        end
-    end
-
-    # Open the branch associated with any switch that is open (state == 0)
-    # so the AC model sees an actually disconnected topology.
-    for (sid, s) in states
-        if s == 0.0
-            bid = trial["switch"][sid]["branch_id"]
-            if bid != 0
-                trial["branch"][string(bid)]["br_status"] = 0
-            end
-        end
-    end
-
-    ac_res = PowerModelsDistribution.solve_mc_opf(trial, IVRUPowerModel, Ipopt.Optimizer)
+    math_ac = ac_network_update(trial, ref_round; mld_solution=mld_res)
+    ac_res = PowerModelsDistribution.solve_mc_opf(math_ac, IVRUPowerModel, Ipopt.Optimizer)
+    
     tstat = ac_res["termination_status"]
     feasible = tstat in (MOI.LOCALLY_SOLVED, MOI.OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
 
@@ -219,9 +194,3 @@ for row in eachrow(mld_feasible_networks)
 end
 
 ac_feasible_networks = filter(row -> row.feasible, ac_results)
-
-# only two network ac feasible. 
-# 1. switch 632645 and 634675 open, the rest closed
-# 2. switch 632645 and 670671 open, the rest closed
-# both netwoks have 2696 load served out of the 3466 total demand, which is 77.8% load served.
-# 
