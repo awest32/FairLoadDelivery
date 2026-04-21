@@ -1,4 +1,4 @@
-Min -49.49826853500561 weights_new[1] - 49.998814251354005 weights_new[2] - 50.01140067871608 weights_new[3] - 50.092707921298896 weights_new[4] - 100.77383577024256 weights_new[5] - 49.9621058257887 weights_new[6] - 49.99762744137704 weights_new[7] + 0.00044483822884176777 weights_new[8] - 150.30130544611254 weights_new[9] - 50.868139297783216 weights_new[10] - 50.09039194438012 weights_new[11] - 100.09214385514156 weights_new[12] - 49.96726409143429 weights_new[13] - 49.96382282253577 weights_new[14] - 50.011181696211736 weights_new[15] + 11565.285661775331
+Min 1.3030351875789981e-5 weights_new[1] - 0.0008312570964713018 weights_new[2] + 0.00025793881240539077 weights_new[3] + 3.87610285133081e-5 weights_new[4] + 0.96080101304212 weights_new[5] + 0.0001190582851733688 weights_new[6] + 0.00012624887219727466 weights_new[7] + 7.426240494926539e-6 weights_new[8] - 6.844685595297934 weights_new[9] + 1.6783643226526155e-5 weights_new[10] + 0.3789775677817765 weights_new[11] - 4.25392445955867 weights_new[12] + 0.016149293490465275 weights_new[13] + 4.1538103221210084e-5 weights_new[14] + 8.590581271656791e-5 weights_new[15] + 1697.1046246135509
 Subject to
  weights_new[1] <= 10
  weights_new[2] <= 10
@@ -30,18 +30,18 @@ Subject to
  weights_new[13] <= 10.1
  weights_new[14] <= 10.1
  weights_new[15] <= 10.1
- weights_new[1] >= 0
- weights_new[2] >= 0
- weights_new[3] >= 0
- weights_new[4] >= 0
- weights_new[5] >= 0
- weights_new[6] >= 0
- weights_new[7] >= 0
- weights_new[8] >= 0
- weights_new[9] >= 0
- weights_new[10] >= 0
- weights_new[11] >= 0
- weights_new[12] >= 0
- weights_new[13] >= 0
- weights_new[14] >= 0
- weights_new[15] >= 0
+ weights_new[1] >= 1
+ weights_new[2] >= 1
+ weights_new[3] >= 1
+ weights_new[4] >= 1
+ weights_new[5] >= 1
+ weights_new[6] >= 1
+ weights_new[7] >= 1
+ weights_new[8] >= 1
+ weights_new[9] >= 1
+ weights_new[10] >= 1
+ weights_new[11] >= 1
+ weights_new[12] >= 1
+ weights_new[13] >= 1
+ weights_new[14] >= 1
+ weights_new[15] >= 1

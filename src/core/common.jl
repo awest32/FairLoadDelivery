@@ -75,11 +75,6 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
 	ref[:substation_blocks] = Vector{Int}()
 	ref[:root_nodes] = Vector{Int}()
 
-	for (g,gen) in ref[:gen]
-        startswith(gen["source_id"], "voltage_source") && push!(ref[:substation_blocks], ref[:bus_block_map][gen["gen_bus"]])
-        startswith(gen["source_id"], "voltage_source") && push!(ref[:root_nodes], gen["gen_bus"])
-    end	
-
 	load_block_map = Dict{Int,Int}()
     block_load_map = Dict{Int,Int}()
 	for (l,load) in get(data, "load", Dict())
@@ -102,11 +97,6 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
 		end
 	end
 	ref[:load_block_switches] = load_block_switches
-
-	#Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
     ref[:block_branches] = Dict{Int,Set}(b => Set{Int}() for (b,_) in ref[:blocks])
     ref[:block_loads] = Dict{Int,Set}(i => Set{Int}() for (i,_) in ref[:blocks])
     ref[:block_weights] = Dict{Int,Real}(i => 1.0 for (i,_) in ref[:blocks])
@@ -162,6 +152,7 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
         startswith(gen["source_id"], "voltage_source") && push!(ref[:substation_blocks], ref[:bus_block_map][gen["gen_bus"]])
         push!(ref[:bus_inverters][gen["gen_bus"]], (:gen, g))
         push!(ref[:block_inverters][ref[:bus_block_map][gen["gen_bus"]]], (:gen, g))
+        startswith(gen["source_id"], "voltage_source") && push!(ref[:root_nodes], gen["gen_bus"])
     end
     ref[:gen_block_map] = Dict{Int,Int}(gen => b for (b,block_gens) in ref[:block_gens] for gen in block_gens)
 
@@ -196,9 +187,11 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 function ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     _PMD.apply_pmd!(_ref_update_weights!, ref, data; apply_to_subnetworks=true)
@@ -252,13 +245,15 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
 	ref[:load_block_switches] = load_block_switches
 
 	#Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
     ref[:block_branches] = Dict{Int,Set}(b => Set{Int}() for (b,_) in ref[:blocks])
     ref[:block_loads] = Dict{Int,Set}(i => Set{Int}() for (i,_) in ref[:blocks])
     ref[:block_weights] = Dict{Int,Real}(i => 1.0 for (i,_) in ref[:blocks])
-    
+
    load_weight = Dict{Int,Float64}()
     critical_loads = Dict{Int,String}()
     for (d, load) in data["load"]
@@ -283,7 +278,7 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
 
     for (b,bus) in ref[:bus]
         if !isempty(get(bus, "microgrid_id", ""))
-            ref[:block_weights][ref[:bus_block_map][b]] = 10.0
+            ref[:block_weights][ref[:bus_block_map][b]] = maximum(ref[:load_weights][l] for l in ref[:block_loads][ref[:bus_block_map][b]])
             ref[:microgrid_blocks][ref[:bus_block_map][b]] = bus["microgrid_id"]
         end
     end
@@ -357,9 +352,11 @@ function _ref_add_rounded_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 
 "create the load block structure and store in ref"
@@ -403,13 +400,15 @@ function _ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 	ref[:load_block_switches] = load_block_switches
 
 	#Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
     ref[:block_branches] = Dict{Int,Set}(b => Set{Int}() for (b,_) in ref[:blocks])
     ref[:block_loads] = Dict{Int,Set}(i => Set{Int}() for (i,_) in ref[:blocks])
     ref[:block_weights] = Dict{Int,Real}(i => 1.0 for (i,_) in ref[:blocks])
-    
+
      load_weight = Dict{Int,Int}()
     critical_loads = Dict{Int,String}()
     for (d, load) in data["load"]
@@ -493,9 +492,11 @@ function _ref_update_weights!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     end
 
     # Build block pairs for radiality constraints
-    ref[:block_pairs] = filter(((x,y),)->x!=y, Set{Tuple{Int,Int}}(
-            Set([(ref[:bus_block_map][sw["f_bus"]],ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch]]),
-    ))
+    ref[:block_pairs] = Set{Tuple{Int,Int}}(
+        (min(a,b), max(a,b)) for (a,b) in
+        ((ref[:bus_block_map][sw["f_bus"]], ref[:bus_block_map][sw["t_bus"]]) for (_,sw) in ref[:switch])
+        if a != b
+    )
 end
 
 """

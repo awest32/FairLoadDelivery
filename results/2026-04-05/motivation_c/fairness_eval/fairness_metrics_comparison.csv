@@ -1,0 +1,5 @@
+Formulation,TotalServed_pct,TotalShed_kW,MaxShed_kW,ShedVariance,JainsIndex,PalmaRatio,GiniCoeff,CV_Served
+Efficient (Integer),32.54,2338.0,1155.0,96525.55,0.6,Inf,0.4,0.8452
+Min Max (Integer),5.77,3266.0,1155.0,82660.07,0.2,Inf,0.8,2.0702
+Prop Fair (Integer),32.54,2338.0,1155.0,96525.55,0.6,Inf,0.4,0.8452
+Jain Max (Integer),11.54,3066.0,1155.0,84157.26,0.1333,Inf,0.8667,2.639

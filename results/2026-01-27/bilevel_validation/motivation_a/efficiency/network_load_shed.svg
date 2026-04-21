@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.2"
+     width="180mm" height="120mm" viewBox="0 0 180 120"
+     stroke="none"
+     fill="#000000"
+     stroke-width="0.3"
+     font-size="3.88"
+>
+<defs>
+  <marker id="arrow" markerWidth="15" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
+  </marker>
+</defs>
+<g stroke-width="0.3" stroke="#808080" fill="#FFFFFF" id="img-553967fb-1">
+  <g transform="translate(155.7,34.56)">
+    <path d="M-23.4,-27.96 L23.4,-27.96 23.4,27.96 -23.4,27.96  z" class="primitive"/>
+  </g>
+</g>
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#800080" id="img-553967fb-2">
+  <g transform="translate(52.74,26.4)">
+    <path fill="none" d="M13.86,0 L-13.86,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-dasharray="3,2" stroke-width="1.42" stroke="#800080" id="img-553967fb-3">
+  <g transform="translate(80.46,26.4)">
+    <path fill="none" d="M-13.86,0 L13.86,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-4">
+  <g transform="translate(21.24,64.8)">
+    <path fill="none" d="M7.56,0 L-7.56,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-5">
+  <g transform="translate(74.16,75.6)">
+    <path fill="none" d="M-7.56,-10.8 L7.56,10.8 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-6">
+  <g transform="translate(106.92,26.4)">
+    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-7">
+  <g transform="translate(26.28,26.4)">
+    <path fill="none" d="M12.6,0 L-12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-8">
+  <g transform="translate(13.68,45.6)">
+    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-9">
+  <g transform="translate(66.6,16.8)">
+    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-10">
+  <g transform="translate(28.8,75.6)">
+    <path fill="none" d="M0,-10.8 L0,10.8 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-11">
+  <g transform="translate(47.7,64.8)">
+    <path fill="none" d="M18.9,0 L-18.9,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-12">
+  <g transform="translate(119.52,45.6)">
+    <path fill="none" d="M0,-19.2 L0,19.2 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-13">
+  <g transform="translate(66.6,36)">
+    <path fill="none" d="M0,-9.6 L0,9.6 " class="primitive"/>
+  </g>
+</g>
+<g stroke-width="1.42" stroke="#008B8B" id="img-553967fb-14">
+  <g transform="translate(106.92,64.8)">
+    <path fill="none" d="M-12.6,0 L12.6,0 " class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-15">
+  <g transform="translate(94.32,26.4)">
+    <circle cx="0" cy="0" r="2.16" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-16">
+  <g transform="translate(81.72,86.4)">
+    <circle cx="0" cy="0" r="2.16" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-17">
+  <g transform="translate(66.6,45.6)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-18">
+  <g transform="translate(28.8,86.4)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#6BA8DA" id="img-553967fb-19">
+  <g transform="translate(13.68,64.8)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#266497" id="img-553967fb-20">
+  <g transform="translate(119.52,26.4)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-21">
+  <g transform="translate(13.68,26.4)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-22">
+  <g transform="translate(66.6,26.4)">
+    <circle cx="0" cy="0" r="2.16" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-23">
+  <g transform="translate(28.8,64.8)">
+    <circle cx="0" cy="0" r="2.16" class="primitive"/>
+  </g>
+</g>
+<g stroke="#A9A9A9" fill="#808080" id="img-553967fb-24">
+  <g transform="translate(66.6,7.2)">
+    <circle cx="0" cy="0" r="2.16" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#5FA1D7" id="img-553967fb-25">
+  <g transform="translate(66.6,64.8)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#ADCFEB" id="img-553967fb-26">
+  <g transform="translate(38.88,26.4)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#1F517A" id="img-553967fb-27">
+  <g transform="translate(94.32,64.8)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g stroke-width="0.3" stroke="#000000" fill="#87B8E1" id="img-553967fb-28">
+  <g transform="translate(119.52,64.8)">
+    <circle cx="0" cy="0" r="3.24" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-29">
+  <g transform="translate(140.4,59.52)">
+    <g class="primitive">
+      <text dy="0.35em">75-100% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#ADCFEB" id="img-553967fb-30">
+  <g transform="translate(136.44,59.52)">
+    <circle cx="0" cy="0" r="1.44" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-31">
+  <g transform="translate(140.4,55.68)">
+    <g class="primitive">
+      <text dy="0.35em">50-75% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#5C9FD6" id="img-553967fb-32">
+  <g transform="translate(136.44,55.68)">
+    <circle cx="0" cy="0" r="1.44" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-33">
+  <g transform="translate(140.4,51.84)">
+    <g class="primitive">
+      <text dy="0.35em">25-50% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#2E7AB8" id="img-553967fb-34">
+  <g transform="translate(136.44,51.84)">
+    <circle cx="0" cy="0" r="1.44" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-35">
+  <g transform="translate(140.4,48)">
+    <g class="primitive">
+      <text dy="0.35em">0-25% shed</text>
+    </g>
+  </g>
+</g>
+<g stroke-width="0.2" stroke="#000000" fill="#1F517A" id="img-553967fb-36">
+  <g transform="translate(136.44,48)">
+    <circle cx="0" cy="0" r="1.44" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-37">
+  <g transform="translate(135,44.16)">
+    <g class="primitive">
+      <text dy="0.6em">Load Bus (% shed):</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-38">
+  <g transform="translate(139.5,40.32)">
+    <g class="primitive">
+      <text dy="0.35em">Outside 0.95-1.05 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-39">
+  <g transform="translate(135,40.32)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-40">
+  <g transform="translate(139.5,36.48)">
+    <g class="primitive">
+      <text dy="0.35em">0.95-0.97 or 1.03-1.05 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#DAA520" font-size="2.47" id="img-553967fb-41">
+  <g transform="translate(135,36.48)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-42">
+  <g transform="translate(139.5,32.64)">
+    <g class="primitive">
+      <text dy="0.35em">0.97-1.03 pu (normal)</text>
+    </g>
+  </g>
+</g>
+<g fill="#4682B4" font-size="2.47" id="img-553967fb-43">
+  <g transform="translate(135,32.64)">
+    <g class="primitive">
+      <text dy="0.35em">V:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-44">
+  <g transform="translate(135,28.8)">
+    <g class="primitive">
+      <text dy="0.6em">Bus Voltage:</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-45">
+  <g transform="translate(144,24.96)">
+    <g class="primitive">
+      <text dy="0.35em">Open</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#808080" id="img-553967fb-46">
+  <g transform="translate(138.6,24.96)">
+    <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-47">
+  <g transform="translate(144,21.12)">
+    <g class="primitive">
+      <text dy="0.35em">80-100%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#800080" id="img-553967fb-48">
+  <g transform="translate(138.6,21.12)">
+    <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-49">
+  <g transform="translate(144,17.28)">
+    <g class="primitive">
+      <text dy="0.35em">50-80%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#008B8B" id="img-553967fb-50">
+  <g transform="translate(138.6,17.28)">
+    <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-51">
+  <g transform="translate(144,13.44)">
+    <g class="primitive">
+      <text dy="0.35em">Under 50%</text>
+    </g>
+  </g>
+</g>
+<g stroke-dasharray="2,1" stroke-width="1.2" stroke="#4682B4" id="img-553967fb-52">
+  <g transform="translate(138.6,13.44)">
+    <path fill="none" d="M-3.6,0 L3.6,0 " class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.82" id="img-553967fb-53">
+  <g transform="translate(135,9.6)">
+    <g class="primitive">
+      <text dy="0.6em">Switch Utilization:</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-54">
+  <g transform="translate(94.32,29.7)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-55">
+  <g transform="translate(94.32,29.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-56">
+  <g transform="translate(94.32,23.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">633 (10)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-57">
+  <g transform="translate(74.52,89.7)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-58">
+  <g transform="translate(74.52,89.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.089 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-59">
+  <g transform="translate(74.52,83.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">680 (2)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-60">
+  <g transform="translate(59.4,54.3)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-61">
+  <g transform="translate(59.4,54)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-62">
+  <g transform="translate(59.4,50.7)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-63">
+  <g transform="translate(59.4,50.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 0.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-64">
+  <g transform="translate(59.4,41.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">670 (13)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-65">
+  <g transform="translate(21.6,95.1)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-66">
+  <g transform="translate(21.6,94.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.089 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-67">
+  <g transform="translate(21.6,91.5)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-68">
+  <g transform="translate(21.6,91.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 0.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-69">
+  <g transform="translate(21.6,82.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">652 (4)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-70">
+  <g transform="translate(6.48,73.5)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-71">
+  <g transform="translate(6.48,73.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.091 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-72">
+  <g transform="translate(6.48,69.9)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-73">
+  <g transform="translate(6.48,69.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 67.5%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-74">
+  <g transform="translate(6.48,60.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">611 (7)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-75">
+  <g transform="translate(117.18,35.1)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-76">
+  <g transform="translate(117.18,34.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-77">
+  <g transform="translate(117.18,31.5)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-78">
+  <g transform="translate(117.18,31.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 13.9%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-79">
+  <g transform="translate(117.18,22.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">634 (3)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-80">
+  <g transform="translate(11.34,35.1)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-81">
+  <g transform="translate(11.34,34.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.091 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-82">
+  <g transform="translate(11.34,31.5)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-83">
+  <g transform="translate(11.34,31.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 0.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-84">
+  <g transform="translate(11.34,22.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">646 (14)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-85">
+  <g transform="translate(59.4,29.7)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-86">
+  <g transform="translate(59.4,29.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-87">
+  <g transform="translate(59.4,23.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">632 (9)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-88">
+  <g transform="translate(28.8,68.1)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-89">
+  <g transform="translate(28.8,67.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.089 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-90">
+  <g transform="translate(28.8,61.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">684 (11)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-91">
+  <g transform="translate(66.6,10.5)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-92">
+  <g transform="translate(66.6,10.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.096 pu</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-93">
+  <g transform="translate(66.6,4.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">rg60 (6)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-94">
+  <g transform="translate(61.92,73.5)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-95">
+  <g transform="translate(61.92,73.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.089 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-96">
+  <g transform="translate(61.92,69.9)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-97">
+  <g transform="translate(61.92,69.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 61.4%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-98">
+  <g transform="translate(61.92,60.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">671 (1)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-99">
+  <g transform="translate(38.88,35.1)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-100">
+  <g transform="translate(38.88,34.8)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-101">
+  <g transform="translate(38.88,31.5)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-102">
+  <g transform="translate(38.88,31.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 100.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-103">
+  <g transform="translate(38.88,22.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">645 (8)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-104">
+  <g transform="translate(94.32,73.5)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-105">
+  <g transform="translate(94.32,73.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-106">
+  <g transform="translate(94.32,69.9)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-107">
+  <g transform="translate(94.32,69.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 0.0%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-108">
+  <g transform="translate(94.32,60.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">692 (12)</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-109">
+  <g transform="translate(112.32,73.5)">
+    <path d="M-9,-1.5 L9,-1.5 9,1.5 -9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#8B008B" font-size="2.47" id="img-553967fb-110">
+  <g transform="translate(112.32,73.2)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">V: 1.093 pu</text>
+    </g>
+  </g>
+</g>
+<g stroke="#000000" stroke-opacity="0.000" fill="#FFFFFF" id="img-553967fb-111">
+  <g transform="translate(112.32,69.9)">
+    <path d="M-9.9,-1.5 L9.9,-1.5 9.9,1.5 -9.9,1.5  z" class="primitive"/>
+  </g>
+</g>
+<g fill="#000000" font-size="2.47" id="img-553967fb-112">
+  <g transform="translate(112.32,69.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.6em">Shed: 81.1%</text>
+    </g>
+  </g>
+</g>
+<g fill="#000000" font-size="3.18" id="img-553967fb-113">
+  <g transform="translate(112.32,60.6)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="-0em">675 (5)</text>
+    </g>
+  </g>
+</g>
+<g font-family="sans-serif" fill="#800080" font-size="2.47" id="img-553967fb-114">
+  <g transform="translate(52.74,23.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">93.0%</text>
+    </g>
+  </g>
+</g>
+<g font-family="sans-serif" fill="#800080" font-size="2.47" id="img-553967fb-115">
+  <g transform="translate(80.46,29.4)">
+    <g class="primitive">
+      <text text-anchor="middle" dy="0.35em">100.0%</text>
+    </g>
+  </g>
+</g>
+</svg>

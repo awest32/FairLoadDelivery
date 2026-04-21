@@ -1,0 +1,10 @@
+case,fair_func,period,n_feasible_samples,total_load_shed,best_mld_obj,any_ac_feasible
+motivation_c,palma,8,1,4840.211997023186,741.0000396587029,true
+motivation_c,palma,4,1,5852.671997604514,896.0000390915283,true
+motivation_c,palma,1,1,4840.211997023272,741.0000405352171,true
+motivation_c,palma,5,1,5852.671997534163,896.0000061488968,true
+motivation_c,palma,0,1,4347.045997340786,665.5000358711015,true
+motivation_c,palma,2,1,5300.717996501626,811.500026689089,true
+motivation_c,palma,6,1,5656.71199688683,866.0000077682618,true
+motivation_c,palma,7,1,5300.717996501626,811.5000266890594,true
+motivation_c,palma,3,1,5656.711996643253,866.000008406312,true

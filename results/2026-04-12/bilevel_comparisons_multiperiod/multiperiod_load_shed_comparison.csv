@@ -1,0 +1,2 @@
+case,fair_func,n_periods,total_demand_all_periods,total_pshed_lower,total_pshed_upper,pct_shed,bilevel_iters_completed,bilevel_iters_total,bilevel_last_status,bilevel_early_stop,max_delta_weights,max_delta_pshed,weights_converged
+motivation_c,palma,9,50565.47400000003,44006.333064918595,44267.108339771425,87.02841995492531,5,5,OPTIMAL,false,0.5,15.00121806458992,true

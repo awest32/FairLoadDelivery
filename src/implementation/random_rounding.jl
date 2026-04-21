@@ -96,14 +96,17 @@ Generate sets of Bernoulli variables based on relaxed switch probabilities.
 Each switch i with relaxed value p_i is sampled as Bernoulli(p_i).
 Returns an array of sample dictionaries.
 """
-function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64},n_samples::Int, rng::Int)
+function generate_bernoulli_samples(switch_states_bern::Dict{Int, Float64}, n_samples::Int, rng_seed::Int)
+    local_rng = Random.MersenneTwister(rng_seed)
     samples = Vector{Dict{Int, Float64}}(undef, n_samples)
 
     for i in 1:n_samples
         sample = Dict{Int, Float64}()
         for (switch_id, p) in switch_states_bern
             p_clamped = clamp(p, 0.0, 1.0)
-            sample[switch_id] = rand(Bernoulli(p_clamped))
+            # @info " The Bernoulli switch state for round $i is $p"
+            # @info " The clamped Bernoulli switch state for round $i is $p_clamped"
+            sample[switch_id] = rand(local_rng, Bernoulli(p_clamped))
         end
         samples[i] = sample
     end
@@ -119,45 +122,50 @@ end
 Test radiality of the network for each set of switch configurations provided in bernoulli_selection_exp.
 Returns a vector of feasible switch configurations that maintain radiality.
 """
-function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Float64}, zb_relaxed::Dict{Int, Float64}, bernoulli_samples::Vector{Dict{Int, Float64}}; optimizer=Gurobi.Optimizer)
-    
+function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Float64}, zb_relaxed::Dict{Int, Float64}, bernoulli_samples::Vector{Dict{Int, Float64}}; optimizer=Gurobi.Optimizer, top_k::Int=5)
+
     n_samples = length(bernoulli_samples)
     n_switches = length(zs_relaxed)
     switch_ids = sort(collect(keys(zs_relaxed)))
     n_blocks = length(zb_relaxed)
-    block_ids = sort(collect(keys(zb_relaxed)))
-    
-    println("\n[Optimization] Finding best single Bernoulli sample...")
+    block_ids_init = sort(collect(keys(zb_relaxed)))
+
+    println("\n[Optimization] Finding top-$top_k radial Bernoulli samples...")
     println("  Number of samples: $n_samples")
     println("  Number of switches: $n_switches")
     println("  Number of blocks: $n_blocks")
 
-
-    best_i = nothing
-    best_dist = Inf
-    best_block_status = nothing
-    best_load_status = nothing
+    # Collect all feasible samples with their distance to relaxed solution
+    feasible_candidates = []  # (distance, index, block_status, load_status)
 
     for i in 1:n_samples
         model = JuMP.Model()
         set_optimizer(model, optimizer)
-        set_attribute(model, "DualReductions", 0)
-        @variable(model, z_block[1:length(block_ids)],Bin)
-        @variable(model, z_switch[1:length(ref_round[:switch])])
-        @variable(model, z_demand[1:length(ref_round[:load])])
-        @variable(model, z_gen[1:length(ref_round[:gen])])
-        @variable(model, z_storage[1:length(ref_round[:storage])])
-        @variable(model, z_voltage[1:length(ref_round[:bus])])
-        @variable(model, z_shunt[1:length(ref_round[:shunt])])
+        @variable(model, z_switch[1:length(ref_round[:switch])].>= 0)
+        @variable(model, z_block[1:length(block_ids_init)] .>= 0)
+        @variable(model, z_demand[1:length(ref_round[:load])].>= 0)
+        @variable(model, z_gen[1:length(ref_round[:gen])].>= 0)
+        @variable(model, z_storage[1:length(ref_round[:storage])].>= 0)
+        @variable(model, z_voltage[1:length(ref_round[:bus])].>= 0)
+        @variable(model, z_shunt[1:length(ref_round[:shunt])].>= 0)
+
         for s in switch_ids
             @constraint(model, z_switch[s] == bernoulli_samples[i][s])
         end
+        @constraint(model, z_block[1:length(block_ids_init)] .<= 1)
+        @constraint(model, z_demand[1:length(ref_round[:load])] .<= 1)
+        @constraint(model, z_gen[1:length(ref_round[:gen])] .<= 1)
+        @constraint(model, z_storage[1:length(ref_round[:storage])] .<= 1)
+        @constraint(model, z_voltage[1:length(ref_round[:bus])] .<= 1)
+        @constraint(model, z_shunt[1:length(ref_round[:shunt])] .<= 1)
+
         # radiality
         FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, z_switch)
         FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
-        #FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
+        for b in ref_round[:substation_blocks]
+            @constraint(model, z_block[b] == 1)
+        end
 
-        # Must be disabled if there is no generation in the network
         FairLoadDelivery.constraint_block_budget_jump(model, ref_round)
         FairLoadDelivery.constraint_switch_budget_jump(model, ref_round)
 
@@ -167,33 +175,28 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
         FairLoadDelivery.constraint_connect_block_shunt_jump(model, ref_round)
         FairLoadDelivery.constraint_connect_block_storage_jump(model, ref_round)
 
-        # Constraint to ensure generation matches the load served
-        # @constraint(model, sum(ref_round[g]["pg"][t]*z_gen[g] for (g, conns) in ref_round[:bus_conns_gen] for t in conns)
-        #     >= sum(ref_round[s]["ps"][t]*z_storage[s] for (s, conns) in ref_round[:bus_conns_storage] for t in conns)
-        #     - sum(ref_round[l]["pd"][t]*z_demand[l] for (l, conns) in ref_round[:bus_conns_load] for t in conns)
-        #     ) 
-        print(model)
-        optimize!(model)
-        @info "Sample $i: Radiality check status: $(termination_status(model))"
-        if termination_status(model) == MOI.OPTIMAL
+        optimize!(model);
+        if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.LOCALLY_SOLVED || termination_status(model) == MOI.ALMOST_LOCALLY_SOLVED
             d = sum((bernoulli_samples[i][s] - zs_relaxed[s])^2 for s in switch_ids)
-            if d < best_dist
-                best_dist = d
-                best_i = i
-                best_block_status = value.(z_block)
-                best_load_status = value.(z_demand)
-            end
+            push!(feasible_candidates, (dist=d, index=i, block_status=value.(z_block), load_status=value.(z_demand)))
         end
-        #   JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-        #   open("radiality_model.txt", "w") do io
-        #     redirect_stdout(io) do
-        #         print(model)
-        #     end
-        # end
     end
+
     block_ids = sort(collect(keys(ref_round[:block])))
     load_ids = sort(collect(keys(ref_round[:load])))
-    return best_i, bernoulli_samples[best_i], block_ids, best_block_status, load_ids, best_load_status
+
+    if isempty(feasible_candidates)
+        @warn "[radiality_check] No feasible radial topology found in any of $n_samples Bernoulli samples"
+        return nothing, Dict{Int,Float64}(), block_ids, zeros(length(block_ids)), load_ids, zeros(length(load_ids))
+    end
+
+    # Sort by distance and return top-k (or best if top_k=1 for backward compat)
+    sort!(feasible_candidates, by=c -> c.dist)
+    n_return = min(top_k, length(feasible_candidates))
+    println("  Found $(length(feasible_candidates)) feasible samples, returning top $n_return")
+
+    best = feasible_candidates[1]
+    return best.index, bernoulli_samples[best.index], block_ids, best.block_status, load_ids, best.load_status, feasible_candidates[1:n_return]
 end
 
 """
@@ -208,7 +211,7 @@ function ac_feasibility_test(math::Dict{String, Any}, set_id)
     term_status = pf_ivrup["termination_status"]
     feas_dict = Dict{String, Any}()
     feas_dict["set_id"] = set_id
-    if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED || term_status == MOI.ITERATION_LIMIT
+    if term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED || term_status == MOI.ALMOST_LOCALLY_SOLVED || term_status == MOI.ALMOST_OPTIMAL || term_status == MOI.ITERATION_LIMIT
         println("AC Optimization converged to optimality for sample $set_id.")
         feas_dict["feas_status"] = true
         feas_dict["feas_obj"] = pf_ivrup["objective"]
@@ -223,32 +226,241 @@ function ac_feasibility_test(math::Dict{String, Any}, set_id)
 
     return feas_dict
 end
-# # Find the set of switches with best mld objective value among feasible ac solutions
-# function find_best_switch_set(math::Dict{String, Any}, 
-#                           ac_bernoulli::Vector{Any},
-#                           switch_ids::Vector{Int};
-#                           optimizer=Ipopt.Optimizer)
-#     best_obj = -Inf
-#     best_sample_idx = 0
-#     best_switch_config = Dict{Int, Float64}()
-#     math_round = deepcopy(math)
-#     for (set_id, bernoulli_set) in enumerate(ac_bernoulli)
-#         for s in switch_ids
-#             math_round["switch"][string(s)]["state"] = value(bernoulli_set[s])
-#         end
-#         mld_rounded_soln = solve_mc_mld_shed_random_round(math_round, optimizer)
-#         obj_val = mld_rounded_soln["objective"]
-#         term_status = mld_rounded_soln["termination_status"]
-#         @info "Sample $set_id: Objective = $obj_val, Status = $term_status"
-#         if (term_status == MOI.OPTIMAL || term_status == MOI.LOCALLY_SOLVED) && obj_val > best_obj
-#             best_obj = obj_val
-#             best_sample_idx = set_id
-#             for s in switch_ids
-#                 best_switch_config[s] = value(bernoulli_set[s])
-#             end
-#         end
-#     end
+"""
+    extract_switch_block_states(solution::Dict{String,Any})
 
-#     return best_sample_idx, best_switch_config
-# end
+Extract switch states and block statuses from an MLD solution dictionary.
+Returns `(switch_states, block_status)` as `Dict{Int64,Float64}` each.
+"""
+function extract_switch_block_states(solution::Dict{String,Any})
+    switch_states = Dict{Int64,Float64}()
+    for (s_id, s_data) in solution["switch"]
+        switch_states[parse(Int, s_id)] = s_data["state"]
+    end
+
+    block_status = Dict{Int64,Float64}()
+    for (b_id, b_data) in solution["block"]
+        block_status[parse(Int, b_id)] = b_data["status"]
+    end
+    return switch_states, block_status
+end
+
+"""
+    find_best_mld_solution(math_out::Vector{Dict{String, Any}}, solver)
+
+Solve the rounded MLD problem for each candidate network in `math_out` and
+return `(best_set, best_mld)` — the index and solution dictionary of the
+topology with the highest objective value.
+"""
+function find_best_mld_solution(math_out::Vector{Dict{String, Any}}, solver)
+    best_obj = -Inf
+    best_set = 0
+    best_mld = Dict{String, Any}()
+    for (id, data) in enumerate(math_out)
+        mld = solve_mc_mld_shed_random_round(data, solver)
+        @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
+        if best_obj <= mld["objective"]
+            best_obj = mld["objective"]
+            best_set = id
+            best_mld = mld
+        end
+    end
+    return best_set, best_mld
+end
+
+"""
+    set_source_gen_capacity!(math::Dict{String,Any}; ls_percent::Real=1000)
+
+Set the source bus generation capacity to `ls_percent` times the total per-phase
+demand. This simulates an effectively infinite slack bus for AC feasibility testing.
+"""
+function set_source_gen_capacity!(math::Dict{String,Any}; ls_percent::Real=1000)
+    for (i, gen) in math["gen"]
+        if gen["source_id"] == "voltage_source.source"
+            pd_phase = zeros(3)
+            qd_phase = zeros(3)
+            for (_, d) in math["load"]
+                for (idx, con) in enumerate(d["connections"])
+                    if con in 1:3
+                        pd_phase[con] += d["pd"][idx]
+                        qd_phase[con] += d["qd"][idx]
+                    end
+                end
+            end
+            for phase in 1:3
+                gen["pmax"][phase] = pd_phase[phase] * ls_percent
+                gen["qmax"][phase] = qd_phase[phase] * ls_percent
+            end
+            gen["pmin"][:] .= 0
+            gen["qmin"][:] .= 0
+        end
+    end
+end
+
+"""
+    round_and_select_topology_mn(mn_data::Dict{String,Any};
+        n_samples::Int=1000, n_rounds::Int=1, seed_base::Int=100,
+        solver=ipopt) -> Dict{String, Any}
+
+Per-period rounding and topology selection for multiperiod FALD.
+
+For each period in `mn_data["nw"]`:
+1. Solve relaxed MLD with the period's final weights
+2. Generate Bernoulli samples of switch states
+3. Find the best radial topology via radiality check
+4. Apply the rounded switch configuration to the network
+5. Set source generation capacity and run AC feasibility test
+6. Select the best topology via rounded MLD objective
+
+Returns a `Dict` keyed by `nw_id` with per-period results.
+"""
+function round_and_select_topology_mn(mn_data::Dict{String,Any};
+        n_samples::Int=1000, n_rounds::Int=1, n_top_k::Int=5, seed_base::Int=100,
+        solver=ipopt)
+
+    nw_ids = sort(collect(keys(mn_data["nw"])), by=x -> parse(Int, x))
+    results = Dict{String, Any}()
+
+    for nw_id in nw_ids
+        println("\n" * "=" ^ 60)
+        println("[round_and_select_topology_mn] Processing period $nw_id")
+        println("=" ^ 60)
+
+        period_math = deepcopy(mn_data["nw"][nw_id])
+
+        # Step 1: Solve relaxed MLD with the period's final weights
+        relaxed_soln = solve_mc_mld_shed_implicit_diff(period_math, solver;
+            ref_extensions=[ref_add_rounded_load_blocks!])
+
+        # Step 2: Extract switch/block states from relaxed solution
+        switch_states, block_status = extract_switch_block_states(relaxed_soln["solution"])
+        @info "[Period $nw_id] Relaxed switch states: $switch_states"
+        @info "[Period $nw_id] Relaxed block status: $block_status"
+
+        # Step 3: Instantiate model to get ref dict for radiality check
+        pm = _PMD.instantiate_mc_model(
+            period_math,
+            _PMD.LinDist3FlowPowerModel,
+            build_mc_mld_shedding_implicit_diff;
+            ref_extensions=[ref_add_rounded_load_blocks!]
+        )
+        ref = pm.ref[:it][:pmd][:nw][0]
+
+        # ================================================================
+        # Filter pipeline: N_bern → R → MLD_INT → AC_FEAS
+        # Each stage filters to feasible solutions from the previous stage
+        # ================================================================
+        n_bern = n_samples
+
+        # Stage 1: Bernoulli sampling → Radiality check (N_bern → R)
+        rng_seed = seed_base
+        samples = generate_bernoulli_samples(switch_states, n_bern, rng_seed)
+
+        _, _, block_ids, _, load_ids, _, radial_candidates =
+            radiality_check(ref, switch_states, block_status, samples; top_k=n_bern)
+
+        n_radial = length(radial_candidates)
+        @info "[Period $nw_id] Filter: N_bern=$n_bern → R=$n_radial"
+
+        if n_radial == 0
+            error("[Period $nw_id] Filter failed: N_bern=$n_bern → R=0 (no radial-feasible topology)")
+        end
+
+        # Stage 2: Radiality → Integer MLD check (R → MLD_INT)
+        # Use top-K radial candidates (sorted by distance to relaxed)
+        n_mld_candidates = min(n_top_k, n_radial)
+        math_out = Vector{Dict{String, Any}}()
+        mld_solutions = Vector{Dict{String, Any}}()
+        mld_feasible_idx = Int[]
+        feasible_statuses = [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL]
+
+        for (k, cand) in enumerate(radial_candidates[1:n_mld_candidates])
+            math_rounded = update_network(deepcopy(period_math), samples[cand.index], ref)
+            push!(math_out, math_rounded)
+
+            mld = solve_mc_mld_shed_random_round(math_rounded, solver)
+            push!(mld_solutions, mld)
+            @info "[Period $nw_id] MLD candidate $k (sample $(cand.index)): status=$(mld["termination_status"]), obj=$(mld["objective"])"
+
+            if mld["termination_status"] in feasible_statuses
+                push!(mld_feasible_idx, k)
+            end
+        end
+
+        n_mld_feas = length(mld_feasible_idx)
+        @info "[Period $nw_id] Filter: R=$n_radial → MLD_INT=$n_mld_feas (of $n_mld_candidates tested)"
+
+        if n_mld_feas == 0
+            error("[Period $nw_id] Filter failed: N_bern=$n_bern → R=$n_radial → MLD_INT=0")
+        end
+
+        # Stage 3: Integer MLD → AC feasibility check (MLD_INT → AC_FEAS)
+        ac_feas = Vector{Dict{String, Any}}()
+        ac_feasible_idx = Int[]
+
+        for k in mld_feasible_idx
+            @info "[Period $nw_id] AC feasibility test for MLD candidate $k"
+            math_ac = ac_network_update(math_out[k], ref; mld_solution=mld_solutions[k])
+            feas_dict = ac_feasibility_test(math_ac, k)
+            push!(ac_feas, feas_dict)
+
+            if feas_dict["feas_status"]
+                push!(ac_feasible_idx, k)
+            end
+        end
+
+        n_ac_feas = length(ac_feasible_idx)
+        @info "[Period $nw_id] Filter: N_bern=$n_bern → R=$n_radial → MLD_INT=$n_mld_feas → AC_FEAS=$n_ac_feas"
+
+        if n_ac_feas == 0
+            # Diagnostic: dump topology of all MLD-feasible candidates that failed AC
+            for k in mld_feasible_idx
+                sol = mld_solutions[k]["solution"]
+                sw_str = join(["s$(s)=$(round(sol["switch"][s]["state"], digits=2))" for s in sort(collect(keys(sol["switch"])))], ", ")
+                blk_str = join(["b$(b)=$(round(sol["block"][b]["status"], digits=2))" for b in sort(collect(keys(sol["block"])))], ", ")
+                load_shed = sum(sum(sol["load"][l]["pshed"]) for l in keys(sol["load"]))
+                load_served = sum(sum(sol["load"][l]["pd"]) for l in keys(sol["load"]))
+                @warn "[Period $nw_id] AC-failed candidate $k: switches=[$sw_str], blocks=[$blk_str], shed=$(round(load_shed, digits=1)), served=$(round(load_served, digits=1))"
+            end
+            error("[Period $nw_id] Filter failed: N_bern=$n_bern → R=$n_radial → MLD_INT=$n_mld_feas → AC_FEAS=0")
+        end
+
+        # Select best AC-feasible MLD (highest objective)
+        best_obj = -Inf
+        best_set = 0
+        best_mld = Dict{String, Any}()
+        for k in ac_feasible_idx
+            if mld_solutions[k]["objective"] > best_obj
+                best_obj = mld_solutions[k]["objective"]
+                best_set = k
+                best_mld = mld_solutions[k]
+            end
+        end
+
+        total_load_shed = NaN
+        if !isempty(best_mld) && haskey(best_mld, "solution") && haskey(best_mld["solution"], "load")
+            total_load_shed = sum(
+                sum(best_mld["solution"]["load"][string(i)]["pshed"])
+                for i in 1:length(best_mld["solution"]["load"])
+            )
+        end
+
+        @info "[Period $nw_id] Best AC-feasible MLD from candidate $best_set, objective=$(get(best_mld, "objective", NaN)), load_shed=$total_load_shed"
+
+        results[nw_id] = Dict(
+            "best_math" => best_set > 0 ? math_out[best_set] : nothing,
+            "best_mld" => best_mld,
+            "ac_feas" => ac_feas,
+            "total_load_shed" => total_load_shed,
+            "n_feasible_samples" => n_ac_feas,
+            "n_radial" => n_radial,
+            "n_mld_feasible" => n_mld_feas,
+            "n_ac_feasible" => n_ac_feas,
+            "relaxed_switch_states" => switch_states,
+            "relaxed_block_status" => block_status
+        )
+    end
+
+    return results
+end
 

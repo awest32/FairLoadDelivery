@@ -1,0 +1,4 @@
+Period,LoadScale,TotalLoadRef,TotalServed,TotalShed,PctServed,PctShed
+1,0.8,2772.8,1733.0,1039.8,62.5,37.5
+2,1.0,3466.0,1733.0,1733.0,50.0,50.0
+3,0.9,3119.4,1733.0,1386.4,55.56,44.44

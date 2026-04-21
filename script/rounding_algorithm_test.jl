@@ -99,9 +99,10 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float
             @constraint(model, switch_state[s] == bernoulli_samples[i][s])
         end
         # radiality
+        FairLoadDelivery.constraint_source_voltage_bounds_jump(model, ref_round, switch_state)
         FairLoadDelivery.constraint_radial_topology_jump(model, ref_round, switch_state)
         FairLoadDelivery.constraint_mc_isolate_block_jump(model, ref_round)
-        #FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
+        FairLoadDelivery.constraint_mc_block_energization_consistency_bigm_jump(model, ref_round)
 
         # Must be disabled if there is no generation in the network
         FairLoadDelivery.constraint_block_budget_jump(model, ref_round)

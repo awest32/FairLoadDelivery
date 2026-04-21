@@ -1,0 +1,3 @@
+case,fair_func,n_periods,total_demand_all_periods,total_pshed_lower,total_pshed_upper,pct_shed,bilevel_iters_completed,bilevel_iters_total,bilevel_last_status,bilevel_early_stop,max_delta_weights,max_delta_pshed,weights_converged
+motivation_c,palma,12,41591.99999999999,32597.42942630728,32285.806478138493,78.37427732810946,10,20,INFEASIBLE,true,0.5,15.000153608711003,true
+motivation_c,efficiency,12,41591.99999999999,21658.263694401627,21637.659421165496,52.073147947686174,20,20,LOCALLY_SOLVED,false,0.5000000947029051,8.835182191013548,false

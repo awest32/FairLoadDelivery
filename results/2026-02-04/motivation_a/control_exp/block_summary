@@ -1,0 +1,4 @@
+BlockID,GenCap,IntStatus,RelaxStatus,BlockSwitches
+1,0.8,1,0.8671416711261484,Set([1])
+2,0.8,1,0.8580534513307838,Set([2])
+3,0.8,1,0.9696657345617359,"Set([2, 1])"

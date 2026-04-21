@@ -1,0 +1,89 @@
+=== Feasibility check ===
+m=45, n_w=15
+  VIOLATION pshed[2] = 194.26720994642417 > pd[2] = 54.400000000000006
+  VIOLATION pshed[9] = 774.0000037310867 > pd[9] = 96.0
+  VIOLATION pshed[10] = 86.0000007510037 > pd[10] = 52.800000000000004
+  VIOLATION pshed[11] = 324.8951614621232 > pd[11] = 96.0
+  VIOLATION pshed[14] = 45.55231129778223 > pd[14] = 13.600000000000001
+  VIOLATION pshed[17] = 252.26720947652552 > pd[17] = 68.0
+  VIOLATION pshed[20] = 130.00000150599507 > pd[20] = 128.0
+  VIOLATION pshed[24] = 1005.0000023704715 > pd[24] = 120.0
+  VIOLATION pshed[25] = 120.00000048342136 > pd[25] = 66.0
+  VIOLATION pshed[26] = 421.8951606762582 > pd[26] = 120.0
+  VIOLATION pshed[29] = 59.152311187599096 > pd[29] = 17.0
+  VIOLATION pshed[32] = 223.26720960302015 > pd[32] = 61.2
+  VIOLATION pshed[39] = 889.5000027593194 > pd[39] = 108.0
+  VIOLATION pshed[40] = 103.0000005842955 > pd[40] = 59.4
+  VIOLATION pshed[41] = 373.39516088780954 > pd[41] = 108.0
+  VIOLATION pshed[44] = 52.352311217259896 > pd[44] = 15.3
+
+=== pshed vs pd ===
+  [1] t=0 l=1: pshed=52.4, pd=128.0, slack=75.6
+  [2] t=0 l=2: pshed=194.2672, pd=54.4, slack=-139.8672 *** TIGHT
+  [3] t=0 l=3: pshed=29.7841, pd=924.0, slack=894.2159
+  [4] t=0 l=4: pshed=69.1765, pd=388.0, slack=318.8235
+  [5] t=0 l=5: pshed=84.0, pd=102.4, slack=18.4
+  [6] t=0 l=6: pshed=51.8824, pd=184.0, slack=132.1176
+  [7] t=0 l=7: pshed=51.8824, pd=136.0, slack=84.1176
+  [8] t=0 l=8: pshed=4.3276, pd=93.6, slack=89.2724
+  [9] t=0 l=9: pshed=774.0, pd=96.0, slack=-678.0 *** TIGHT
+  [10] t=0 l=10: pshed=86.0, pd=52.8, slack=-33.2 *** TIGHT
+  [11] t=0 l=11: pshed=324.8952, pd=96.0, slack=-228.8952 *** TIGHT
+  [12] t=0 l=12: pshed=36.0, pd=232.0, slack=196.0
+  [13] t=0 l=13: pshed=86.0, pd=136.0, slack=50.0
+  [14] t=0 l=14: pshed=45.5523, pd=13.6, slack=-31.9523 *** TIGHT
+  [15] t=0 l=15: pshed=16.8013, pd=136.0, slack=119.1987
+  [16] t=1 l=1: pshed=78.0, pd=160.0, slack=82.0
+  [17] t=1 l=2: pshed=252.2672, pd=68.0, slack=-184.2672 *** TIGHT
+  [18] t=1 l=3: pshed=53.1841, pd=1155.0, slack=1101.8159
+  [19] t=1 l=4: pshed=101.1765, pd=485.0, slack=383.8235
+  [20] t=1 l=5: pshed=130.0, pd=128.0, slack=-2.0 *** TIGHT
+  [21] t=1 l=6: pshed=75.8824, pd=230.0, slack=154.1176
+  [22] t=1 l=7: pshed=75.8824, pd=170.0, slack=94.1176
+  [23] t=1 l=8: pshed=7.7276, pd=117.0, slack=109.2724
+  [24] t=1 l=9: pshed=1005.0, pd=120.0, slack=-885.0 *** TIGHT
+  [25] t=1 l=10: pshed=120.0, pd=66.0, slack=-54.0 *** TIGHT
+  [26] t=1 l=11: pshed=421.8952, pd=120.0, slack=-301.8952 *** TIGHT
+  [27] t=1 l=12: pshed=70.0, pd=290.0, slack=220.0
+  [28] t=1 l=13: pshed=120.0, pd=170.0, slack=50.0
+  [29] t=1 l=14: pshed=59.1523, pd=17.0, slack=-42.1523 *** TIGHT
+  [30] t=1 l=15: pshed=30.0013, pd=170.0, slack=139.9987
+  [31] t=2 l=1: pshed=65.2, pd=144.0, slack=78.8
+  [32] t=2 l=2: pshed=223.2672, pd=61.2, slack=-162.0672 *** TIGHT
+  [33] t=2 l=3: pshed=41.4841, pd=1039.5, slack=998.0159
+  [34] t=2 l=4: pshed=85.1765, pd=436.5, slack=351.3235
+  [35] t=2 l=5: pshed=107.0, pd=115.2, slack=8.2
+  [36] t=2 l=6: pshed=63.8824, pd=207.0, slack=143.1176
+  [37] t=2 l=7: pshed=63.8824, pd=153.0, slack=89.1176
+  [38] t=2 l=8: pshed=6.0276, pd=105.3, slack=99.2724
+  [39] t=2 l=9: pshed=889.5, pd=108.0, slack=-781.5 *** TIGHT
+  [40] t=2 l=10: pshed=103.0, pd=59.4, slack=-43.6 *** TIGHT
+  [41] t=2 l=11: pshed=373.3952, pd=108.0, slack=-265.3952 *** TIGHT
+  [42] t=2 l=12: pshed=53.0, pd=261.0, slack=208.0
+  [43] t=2 l=13: pshed=103.0, pd=153.0, slack=50.0
+  [44] t=2 l=14: pshed=52.3523, pd=15.3, slack=-37.0523 *** TIGHT
+  [45] t=2 l=15: pshed=23.4013, pd=153.0, slack=129.5987
+
+=== Jacobian max perturbation (worst case Δw in trust region) ===
+  [2] worst pshed=213.1 > pd=54.4, excess=158.7
+  [3] worst pshed=-2.13 < ε, deficit=2.13
+  [5] worst pshed=134.02 > pd=102.4, excess=31.62
+  [8] worst pshed=-0.31 < ε, deficit=0.31
+  [9] worst pshed=849.03 > pd=96.0, excess=753.03
+  [10] worst pshed=111.01 > pd=52.8, excess=58.21
+  [11] worst pshed=356.49 > pd=96.0, excess=260.49
+  [12] worst pshed=-14.02 < ε, deficit=14.02
+  [14] worst pshed=49.96 > pd=13.6, excess=36.36
+  [15] worst pshed=-1.2 < ε, deficit=1.2
+  [17] worst pshed=271.07 > pd=68.0, excess=203.07
+  [20] worst pshed=180.02 > pd=128.0, excess=52.02
+  [24] worst pshed=1080.03 > pd=120.0, excess=960.03
+  [25] worst pshed=145.01 > pd=66.0, excess=79.01
+  [26] worst pshed=453.5 > pd=120.0, excess=333.5
+  [29] worst pshed=63.55 > pd=17.0, excess=46.55
+  [32] worst pshed=242.09 > pd=61.2, excess=180.89
+  [35] worst pshed=157.02 > pd=115.2, excess=41.82
+  [39] worst pshed=964.53 > pd=108.0, excess=856.53
+  [40] worst pshed=128.01 > pd=59.4, excess=68.61
+  [41] worst pshed=405.0 > pd=108.0, excess=297.0
+  [44] worst pshed=56.76 > pd=15.3, excess=41.46

@@ -1,0 +1,6 @@
+Formulation,TotalServed_pct,TotalShed_kW,MaxBusShed_pct,MaxBusServed_pct,MinBusServed_pct,ShedStdDev_pct,JainsIndex,PalmaRatio,ProportionalFairness,GiniCoeff,CV_PctServed
+Efficiency,43.16,1970.14,100.0,100.0,0.0,46.28,0.494,428.3284,3.2338,0.5441,1.0735
+Palma Ratio,14.05,2978.96,100.0,100.0,0.0,43.4,0.2869,Inf,12.7235,0.7299,1.6722
+Min-Max,41.53,2026.55,100.0,100.0,0.0,44.57,0.5242,44.825,24.7389,0.5172,1.0105
+Equality Min,5.77,3266.0,100.0,100.0,0.0,33.33,0.1111,Inf,4.6052,0.8889,3.0
+Proportional,43.16,1970.14,100.0,100.0,0.0,46.28,0.494,428.3284,3.2338,0.5441,1.0735

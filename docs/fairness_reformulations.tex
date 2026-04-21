@@ -1,0 +1,206 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+
+\title{Upper-Level Fairness Reformulations for First-Iteration Feasibility}
+\author{FairLoadDelivery Package Documentation}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+
+\section{Background}
+
+The bilevel Fair Load Delivery Problem (FLDP) iterates between a lower-level Minimum Load Delivery (MLD) problem and an upper-level fairness optimization.
+At each iteration~$k$, the lower level returns load-shed values $\mathbf{p}^{\mathrm{shed}}$ and a Jacobian $\mathbf{J} = \partial \mathbf{p}^{\mathrm{shed}} / \partial \mathbf{w}$ via implicit differentiation.
+The upper level then updates the weight vector $\mathbf{w}$ to improve a chosen fairness metric, using a first-order Taylor approximation of the lower-level response:
+\begin{equation}\label{eq:taylor}
+    \hat{p}_i^{\mathrm{shed}}(\mathbf{w})
+    = p_i^{\mathrm{shed,(prev)}}
+      + \sum_{j=1}^{n} J_{ij} \bigl(w_j - w_j^{\mathrm{(prev)}}\bigr),
+    \qquad i = 1,\dots,n.
+\end{equation}
+
+All upper-level formulations share the following weight constraints:
+\begin{align}
+    1 &\le w_j \le 10, & j &= 1,\dots,n, \label{eq:wbounds}\\
+    |w_j - w_j^{\mathrm{(prev)}}| &\le \Delta, & j &= 1,\dots,n, \label{eq:trust}
+\end{align}
+where $\Delta = 0.5$ is the trust-region radius.
+The trust region is two-sided, limiting both increases and decreases to~$\Delta$ per iteration.
+This ensures the first-order Taylor approximation~\eqref{eq:taylor} remains accurate, since the Jacobian is only valid locally.
+
+\paragraph{Correction from one-sided trust region.}
+The original implementation used a one-sided constraint ($w_j - w_j^{\mathrm{(prev)}} \le \Delta$), which only limited weight \emph{increases}.
+On the first iteration with $\mathbf{w}^{\mathrm{(prev)}} = 10 \cdot \mathbf{1}$, weights could decrease by up to~$9$ units (to the lower bound of~$1$), far exceeding the region where the Taylor approximation is valid.
+This caused fairness objectives (Palma, equality-min, min-max) to produce degenerate solutions by uniformly decreasing all weights, inflating predicted load shed to~$100\%$ across all loads.
+
+\section{Proportional Fairness}\label{sec:proportional}
+
+\subsection{Original Formulation}
+
+Proportional fairness (Nash bargaining, $\alpha$-fairness with $\alpha=1$) maximizes the sum of logarithms of load served.
+The original formulation introduced auxiliary variables $s_i$ for load served:
+\begin{align}
+    \max_{\mathbf{w},\,\mathbf{s}} \quad & \sum_{i=1}^{n} \log(s_i) \\
+    \text{s.t.} \quad
+    & s_i = p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), & i &= 1,\dots,n, \label{eq:prop-eq}\\
+    & s_i \ge \varepsilon, & i &= 1,\dots,n, \label{eq:prop-lb}\\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}, \notag
+\end{align}
+where $p_i^{\mathrm{ref}}$ is the reference (pre-shedding) demand for load~$i$ and $\varepsilon = 10^{-6}$.
+
+\subsection{Issues}
+
+\begin{enumerate}
+    \item \textbf{Infeasibility from equality + lower bound.}
+    Constraint~\eqref{eq:prop-eq} forces $s_i = p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}}$.
+    If any load is fully shed on the first iteration ($p_i^{\mathrm{shed,(prev)}} \approx p_i^{\mathrm{ref}}$), the Taylor approximation~\eqref{eq:taylor} may not be able to reduce $\hat{p}_i^{\mathrm{shed}}$ enough within the trust region to satisfy $s_i \ge \varepsilon$.
+
+    \item \textbf{Index mismatch between $\mathbf{p}^{\mathrm{ref}}$ and $\mathbf{p}^{\mathrm{shed}}$.}
+    The original implementation built $\mathbf{p}^{\mathrm{ref}}$ from all loads in the network data dictionary (sorted by ID), while $\mathbf{p}^{\mathrm{shed}}$ from the lower level may exclude certain loads (e.g., source bus loads).
+    This caused $p_i^{\mathrm{ref}}$ to correspond to a different load than $p_i^{\mathrm{shed}}$, leading to $p_i^{\mathrm{ref}} - p_i^{\mathrm{shed}} < 0$ and \texttt{log(negative)} evaluations, which Ipopt reports as \texttt{INVALID\_MODEL}.
+\end{enumerate}
+
+\subsection{Reformulation: Shifted Logarithm with Aligned Indexing}
+
+We make two changes:
+\begin{enumerate}
+    \item \textbf{Signature change:} The function now receives a pre-aligned demand vector $\mathbf{p}^{\mathrm{ref}}$ (built by the caller from \texttt{pshed\_ids}), rather than constructing it internally from the math dictionary. This matches the pattern used by the Palma ratio function.
+    \item \textbf{Shifted log with variable-based formulation:} We use $\hat{p}_i^{\mathrm{shed}}$ as a JuMP variable (linked to the Taylor expression by equality constraints) and apply the shifted logarithm:
+\end{enumerate}
+\begin{align}
+    \max_{\mathbf{w},\,\hat{\mathbf{p}}^{\mathrm{shed}}} \quad & \sum_{i=1}^{n} \log\!\bigl(p_i^{\mathrm{ref}} - \hat{p}_i^{\mathrm{shed}} + c\bigr) \\
+    \text{s.t.} \quad
+    & \hat{p}_i^{\mathrm{shed}} = p_i^{\mathrm{shed,(prev)}} + \sum_{j=1}^{n} J_{ij} \Delta w_j, & i &= 1,\dots,n, \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}, \notag
+\end{align}
+where $c = 10^{-6}$ is a uniform shift applied to all loads' served values.
+The shift ensures $\log(\cdot)$ remains defined even when a load is fully shed ($\hat{p}_i^{\mathrm{shed}} = p_i^{\mathrm{ref}}$ gives $\log(c)$, which is finite).
+Ipopt's \texttt{warm\_start\_init\_point} option is enabled with starting values $\mathbf{w} = \mathbf{w}^{\mathrm{(prev)}}$ and $\hat{\mathbf{p}}^{\mathrm{shed}} = \mathbf{p}^{\mathrm{shed,(prev)}}$, ensuring the initial log evaluation is valid.
+
+\section{Min-Max Load Shed}\label{sec:minmax}
+
+\subsection{Original Formulation}
+
+The min-max objective minimizes the worst-case (maximum) load shed across all loads using an auxiliary variable~$t$:
+\begin{align}
+    \min_{\mathbf{w},\,t} \quad & t \\
+    \text{s.t.} \quad
+    & t \ge \max_i \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), \label{eq:mm-max}\\
+    & t \ge 1, \notag \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+\end{align}
+
+\subsection{Issues}
+
+Two problems made this formulation unreliable:
+\begin{enumerate}
+    \item The $\max(\cdot)$ in constraint~\eqref{eq:mm-max} was implemented using Julia's \texttt{maximum()} function on the JuMP expression array, which evaluates non-smoothly at model construction time rather than creating proper optimization constraints. This causes incorrect or infeasible behavior.
+    \item The lower bound $t \ge 1$ is unnecessarily restrictive; when all load-shed values are small, the problem may be infeasible.
+\end{enumerate}
+
+\subsection{Reformulation: Epigraph}
+
+We replace the non-smooth \texttt{maximum()} with individual constraints (the standard epigraph reformulation of the infinity norm) and relax $t \ge 1$ to $t \ge 0$:
+\begin{align}
+    \min_{\mathbf{w},\,t} \quad & t \\
+    \text{s.t.} \quad
+    & t \ge \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), & i &= 1,\dots,n, \\
+    & t \ge 0, \notag \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+\end{align}
+This is mathematically equivalent to $\min \|\hat{\mathbf{p}}^{\mathrm{shed}}\|_\infty$ but uses smooth, solver-compatible constraints.
+Note: JuMP does not support \texttt{norm(x, Inf)} as a nonlinear operator for any solver, so the epigraph form is required.
+
+\section{Palma Ratio}\label{sec:palma}
+
+\subsection{Original Formulation}
+
+The original Palma ratio formulation minimized the ratio of the top~10\% to bottom~40\% of sorted load-shed values using the Charnes-Cooper transformation:
+\begin{align}
+    \min_{\mathbf{w},\,\sigma} \quad & \sum_{i \in \mathrm{Top10}} \mathrm{sorted}_i \cdot \sigma \\
+    \text{s.t.} \quad
+    & \sum_{i \in \mathrm{Bot40}} \mathrm{sorted}_i \cdot \sigma = 1, \\
+    & \sigma \ge \varepsilon, \notag \\
+    & \text{permutation, McCormick, trust region constraints.} \notag
+\end{align}
+
+\subsection{Issues}
+
+\begin{enumerate}
+    \item \textbf{Wrong objective target.} Minimizing the Palma ratio pushes it below~$1$, meaning the top~10\% sheds \emph{less} than the bottom~40\%---reverse inequality, not fairness. The desired target is Palma ratio $= 1$ (proportional balance).
+    \item \textbf{No efficiency incentive.} The ratio objective has no penalty for increasing total load shed. The optimizer can equalize shedding by inflating all values toward~$100\%$, which achieves ratio $\approx 1$ but is a degenerate solution.
+\end{enumerate}
+
+\subsection{Reformulation: Target Ratio = 1}
+
+We replace the Charnes-Cooper transformation with a squared-deviation objective targeting Palma ratio $= 1$:
+\begin{align}
+    \min_{\mathbf{w}} \quad & \Bigl(\sum_{i \in \mathrm{Top10}} \mathrm{sorted}_i - \sum_{i \in \mathrm{Bot40}} \mathrm{sorted}_i\Bigr)^2 \\
+    \text{s.t.} \quad & \text{permutation, McCormick, trust region constraints.} \notag
+\end{align}
+This eliminates the Charnes-Cooper variable $\sigma$ and its quadratic constraint, simplifying the formulation.
+When the top~10\% and bottom~40\% sums are equal, the objective is zero and the Palma ratio is exactly~$1$.
+The Charnes-Cooper code is retained (commented out) for cases where direct ratio minimization is desired.
+
+\section{Equality-Min Fairness}\label{sec:equality}
+
+\subsection{Original Formulation}
+
+The equality-min objective seeks to equalize all load-shed values by minimizing a common target~$t$ subject to hard equality:
+\begin{align}
+    \min_{\mathbf{w},\,t} \quad & t \\
+    \text{s.t.} \quad
+    & t = \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), & i &= 1,\dots,n, \label{eq:eq-hard}\\
+    & t \ge 0, \notag \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+\end{align}
+
+\subsection{Infeasibility on Iteration~1}
+
+Constraint~\eqref{eq:eq-hard} requires all $n$ linearized shed values to be exactly equal.
+This imposes $n-1$ independent linear equations on the $n$ weight perturbations $\Delta w_j$.
+The system is infeasible when:
+\begin{enumerate}
+    \item The Jacobian $\mathbf{J}$ is rank-deficient (e.g., loads within the same load block have identical sensitivity rows), making it structurally impossible to independently equalize all shed values.
+    \item The required weight perturbation lies outside the feasible region defined by~\eqref{eq:wbounds}--\eqref{eq:trust}, even with full rank.
+\end{enumerate}
+Unlike the proportional fairness case, increasing the trust-region radius~$\Delta$ cannot resolve structural rank deficiency.
+
+\subsection{Reformulation: Relaxed Inequality with Quadratic Penalty}
+
+We relax the hard equality~\eqref{eq:eq-hard} to an inequality and add a quadratic penalty that encourages equal shedding:
+\begin{align}
+    \min_{\mathbf{w},\,t} \quad & t + \sum_{i=1}^{n} \bigl(\hat{p}_i^{\mathrm{shed}}(\mathbf{w}) - t\bigr)^2 \label{eq:eq-obj}\\
+    \text{s.t.} \quad
+    & t \ge \hat{p}_i^{\mathrm{shed}}(\mathbf{w}), & i &= 1,\dots,n, \label{eq:eq-ineq}\\
+    & t \ge 0, \notag \\
+    & \eqref{eq:wbounds},\;\eqref{eq:trust}. \notag
+\end{align}
+
+The inequality~\eqref{eq:eq-ineq} ensures the problem is always feasible ($t$ can simply take the maximum shed value).
+The quadratic penalty in~\eqref{eq:eq-obj} drives the shed values toward~$t$, recovering the equal-shedding behavior when the Jacobian permits it.
+When exact equality is achievable, the penalty vanishes and the solution coincides with the original formulation.
+
+\section{Summary of Changes}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Function} & \textbf{Issue} & \textbf{Fix} \\
+\midrule
+All functions & One-sided trust region $\Rightarrow$ degenerate solutions & Two-sided: $|w_j - w_j^{\mathrm{prev}}| \le \Delta$ \\
+\texttt{proportional\_fairness} & Equality + bound infeasible; index mismatch & Shifted $\log(\cdot + c)$; aligned \texttt{pd} from caller \\
+\texttt{min\_max\_load\_shed} & Non-smooth \texttt{maximum()} + tight $t\ge1$ & Epigraph: $t \ge \hat{p}_i^{\mathrm{shed}}\ \forall i$, $t \ge 0$ \\
+\texttt{palma\_ratio} & Minimized ratio (wrong target); no efficiency & Target ratio $= 1$: $\min(\Sigma\mathrm{top} - \Sigma\mathrm{bot})^2$ \\
+\texttt{equality\_min} & Hard equality structurally infeasible & Inequality + quadratic penalty \\
+\bottomrule
+\end{tabular}
+\caption{Reformulations applied to upper-level fairness functions.}
+\end{table}
+
+\end{document}

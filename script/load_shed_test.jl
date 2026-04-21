@@ -31,7 +31,7 @@ dir = dirname(@__FILE__)
 
 #case = "ieee_13_clean/ieee13.dss"
 #case = "ieee_13_aw_edit/case_file_1trans_kron_reduced_3ph3wr_all_switches.dss"
-case = "ieee_13_aw_edit/motivation_b.dss"
+case = "ieee_13_aw_edit/motivation_a.dss"
 #case = "13_bus_load_shed_test.dss"
 #case = "ieee_aw.dss"
 #case = "load_shed_test_single_phase.dss"
@@ -176,7 +176,7 @@ for (switch_id, switch) in enumerate(math["switch"])
 end
 math["switch"]["1"]["state"] = 0 # Open the switch to force load shedding
 math["switch"]["2"]["state"] = 0 # Open the switch to force load shedding
-math["switch"]["3"]["state"] = 0 # Open the switch to force load shedding
+#math["switch"]["3"]["state"] = 0 # Open the switch to force load shedding
 math["block"] = Dict{String,Any}()
 for (block, loads) in enumerate(lbs)
     math["block"][string(block)] = Dict("id"=>block, "state"=>0)

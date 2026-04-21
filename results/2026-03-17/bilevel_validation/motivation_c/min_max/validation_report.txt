@@ -1,0 +1,45 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_c
+  Fairness Function: min_max
+  Iterations: 20
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [+] voltage_limits: PASS
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] rounded_mld_converged_r2: PASS
+    [+] binary_values: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] voltage_limits_rounded_r2: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] block_label_consistency: PASS
+    [+] radiality_found: PASS
+    [+] switch_label_consistency: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r2: PASS
+
+  --- ac_feasibility ---
+    [X] ac_convergence: FAIL
+        - Status: LOCALLY_INFEASIBLE
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: NO
+    Termination Status: LOCALLY_INFEASIBLE
+    ** NO AC POWER FLOW FEASIBLE SOLUTION FOUND **
+
+  TOTALS: 21 checks, 19 passed, 2 failed
+======================================================================
