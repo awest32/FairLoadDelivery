@@ -285,7 +285,7 @@ function run_multiperiod_fald()
         println("    Lower-level shed: $(round(total_pshed, digits=6))")
 
         if FAIR_FUNC == "efficiency"
-            pshed_new_mn, weights_new_mn = complete_efficiency_load_shed_mn(
+            pshed_new_mn, weights_new_mn = efficient_load_shed_mn(
                 jacobian_mn, pshed_vals_mn, weight_vals_mn, mn_data; block_diagonal=BLOCK_DIAGONAL)
         elseif FAIR_FUNC == "min_max"
             pshed_new_mn, weights_new_mn = min_max_load_shed_mn(

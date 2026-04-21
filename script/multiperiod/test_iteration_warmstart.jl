@@ -92,9 +92,8 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs = lower_level_soln_mn(mn_new, fair_weights, k)
         n_loads = length(weight_ids)
 
-        pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(
-            dpshed, pshed_val, weight_vals, critical_id, weight_ids;
-            peak_time_costs=peak_time_costs, n_loads=n_loads)
+        pshed_new, fair_weight_vals, status = efficient_load_shed(
+            dpshed, pshed_val, weight_vals; critical_id, weight_ids, peak_time_costs=peak_time_costs)
 
         last_status = status
         @info "Iteration $k: upper-level status = $status"

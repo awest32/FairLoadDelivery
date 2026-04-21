@@ -103,7 +103,7 @@ end
 
 # Function to compute the proportional fairness of load served
 # With peak_time_costs (peak charges): max Σ_t λ[t] * Σ_i log(pref_t[i] - pshed_t[i])
-function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}, critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
+function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}, pd::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
     model = JuMP.Model(Ipopt.Optimizer)
     set_optimizer_attribute(model, "warm_start_init_point", "yes")
 
@@ -150,10 +150,10 @@ end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
 # With peak_time_costs (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
-function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64},critical_ids::Vector{Int}, weight_ids::Vector{Int}=Int[]; peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
+function efficient_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64};critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[])
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
-    n_per_period = n_loads > 0 ? n_loads : m
+    n_per_period =  m
     @variable(model, weights_new[1:m] .>= 1.0)
     for id in 1:m
         lid_idx = ((id - 1) % n_per_period) + 1
@@ -182,7 +182,7 @@ function complete_efficiency_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::V
     optimize!(model)
     status = termination_status(model)
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
-        @warn "[complete_efficiency_load_shed] Solver did not converge: $status"
+        @warn "[efficient_load_shed] Solver did not converge: $status"
     end
     return value.(pshed_new), value.(weights_new), status
 end

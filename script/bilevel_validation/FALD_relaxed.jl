@@ -21,7 +21,7 @@ for k in 1:ITERATIONS
         pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
         pshed_new, fair_weight_vals = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd);
     elseif fair_func == "efficiency"
-        pshed_new, fair_weight_vals = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new);
+        pshed_new, fair_weight_vals = efficient_load_shed(dpshed, pshed_val, weight_vals; critical_id, weight_ids)
     elseif fair_func == "min_max"
         pshed_new, fair_weight_vals = min_max_load_shed(dpshed, pshed_val, weight_vals);
     elseif fair_func == "equality_min"

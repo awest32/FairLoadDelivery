@@ -85,7 +85,7 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
             pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids]
             pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd, critical_id, weight_ids)
         elseif fair_func == "efficiency"
-            pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed, pshed_val, weight_vals, math_new, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed, pshed_val, weight_vals; critical_id, weight_ids)
         elseif fair_func == "min_max"
             pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids)
         elseif fair_func == "equality_min"
@@ -97,7 +97,7 @@ function run_bilevel_relaxed(data::Dict{String, Any}, iterations::Int, fair_weig
             for i in pshed_ids
                 push!(pd, sum(math_new["load"][string(i)]["pd"]))
             end
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd, critical_id, weight_ids)
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(dpshed, pshed_val, weight_vals, pd, critical_ids, weight_ids)
         else
             error("Unknown fairness function: $fair_func")
         end

@@ -500,7 +500,7 @@ function lin_palma_reformulated(
     dpshed_dw::Matrix{Float64},
     pshed_prev::Vector{Float64},
     weights_prev::Vector{Float64},
-    pd::Vector{Float64},
+    pd::Vector{Float64};
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[];
     peak_time_costs::Vector{Float64} = Float64[],

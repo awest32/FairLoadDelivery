@@ -99,7 +99,7 @@ function proportional_fairness_load_shed_param(dpshed_dw::Matrix{Float64}, pshed
     return value.(pshed_new), value.(weights_new)
 end
 
-function complete_efficiency_load_shed_param(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64},
+function efficient_load_shed_param(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64},
                                               weights_prev::Vector{Float64}, math::Dict{String,Any};
                                               weight_min=1.0, weight_max=10.0, step_size=0.1)
     model = JuMP.Model(Ipopt.Optimizer)
@@ -179,8 +179,8 @@ function run_bilevel_param(data::Dict{String, Any}, iterations::Int, fair_weight
             pshed_new, fair_weight_vals = proportional_fairness_load_shed_param(
                 dpshed, pshed_val, weight_vals; weight_min=weight_min, weight_max=weight_max, step_size=step_size)
         elseif fair_func == "efficiency"
-            pshed_new, fair_weight_vals = complete_efficiency_load_shed_param(
-                dpshed, pshed_val, weight_vals, math_new; weight_min=weight_min, weight_max=weight_max, step_size=step_size)
+            pshed_new, fair_weight_vals = efficient_load_shed_param(
+                dpshed, pshed_val, weight_vals; weight_min=weight_min, weight_max=weight_max, step_size=step_size)
         elseif fair_func == "min_max"
             pshed_new, fair_weight_vals = min_max_load_shed_param(
                 dpshed, pshed_val, weight_vals; weight_min=weight_min, weight_max=weight_max, step_size=step_size)

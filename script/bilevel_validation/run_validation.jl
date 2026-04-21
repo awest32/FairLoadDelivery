@@ -222,7 +222,7 @@ for k in 1:ITERATIONS
         pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids_k]
         pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, pd)
     elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals, status = complete_efficiency_load_shed(dpshed_k, pshed_val_k, weight_vals_k, math_new)
+        pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed_k, pshed_val_k, weight_vals_k; critical_id, weight_ids)
     elseif FAIR_FUNC == "jain"
         pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed_k, pshed_val_k, weight_vals_k)
     elseif FAIR_FUNC == "equality_min"
