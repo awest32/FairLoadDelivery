@@ -37,15 +37,17 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
 const CASES = ["motivation_c"]
-const FAIR_FUNCS = ["efficiency", "min_max", "equality_min", "proportional", "jain", "palma"]
+const FAIR_FUNCS = ["jain"]#, "min_max", "equality_min", "proportional", "jain", "palma"]
 const LS_PERCENT = 0.8
 const WARMSTART_ITERATIONS = 2  # Fixed warm-up phase; set to 0 to disable
 const ITERATIONS = 20           # Main iterations after warm-start
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 100
+const N_BERNOULLI_SAMPLES = 1000
+const SWITCH_RATING = 600.0
 const SOURCE_PU = 1.03
 const critical_buses = []
-const N_PERIODS = 3
+const N_PERIODS = 2
+
 
 # Gaussian load profile: peak at hour 14 (1pm), σ=4 hours
 # Base load 1.0, peak load 2.0
@@ -334,7 +336,7 @@ function run_comparison_mn()
         println("\n>>> Processing case: $case")
 
         # Setup base network
-        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, critical_buses)
+        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, SWITCH_RATING, critical_buses)
         sorted_load_ids = sort(parse.(Int, collect(keys(math["load"]))))
         n_loads = length(sorted_load_ids)
         fair_weights = Float64[math["load"][string(i)]["weight"] for i in sorted_load_ids]

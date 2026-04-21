@@ -135,7 +135,7 @@ for config in 0:(2^n_switches - 1)
 end
 
 radiality_feasible_networks = filter(row -> row.feasible, radiality_results)
-
+#64 -->52
 empty!(mld_results); 
 # For each radial config, fix switch states and test MLD feasibility.
 for row in eachrow(radiality_feasible_networks)
@@ -160,7 +160,7 @@ for row in eachrow(radiality_feasible_networks)
 end
  
 mld_feasible_networks = filter(row -> row.feasible, mld_results)
-
+#52-->52
 
 empty!(ac_results)
 # For each MLD-feasible config, apply the MLD shed decisions and run AC OPF
@@ -194,3 +194,4 @@ for row in eachrow(mld_feasible_networks)
 end
 
 ac_feasible_networks = filter(row -> row.feasible, ac_results)
+#52-->47
