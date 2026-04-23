@@ -233,7 +233,10 @@ function palma_ratio_minimization(
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
-    n_loads::Int = 0  # Number of loads per period (0 = infer from weights_prev length)
+    n_loads::Int = 0,  # Number of loads per period (0 = infer from weights_prev length)
+    reg::Float64 = 1e-4,  # Small efficiency-aligned regularizer; adds λ[t]·reg·Σ pshed/total_demand
+    alpha::Float64 = 1.0,  # Convex-combination weight: α=0 pure efficiency, α=1 pure Palma
+    weight_budget::Float64 = Inf  # Per-period upper bound on Σ_i weights_{t,i}; Inf = no constraint
 )
     m = length(pshed_prev)       # T*N: total pshed values (= total weights)
     w_min, w_max = w_bounds
@@ -267,20 +270,32 @@ function palma_ratio_minimization(
     jac_ratio = jac_min_nz > 0 ? jac_max / jac_min_nz : Inf
     @info "[Palma] Jacobian conditioning: max=$(round(jac_max, sigdigits=4)), min_nz=$(round(jac_min_nz, sigdigits=4)), ratio=$(round(jac_ratio, sigdigits=4))"
 
-    # Feasibility diagnostic: check if pshed_prev fits within [ε, pd] at Δw=0
-    n_above_pd = count(pshed_prev[j] > pd[j] for j in 1:m)
-    n_below_eps = count(pshed_prev[j] < ε for j in 1:m)
+    # Feasibility diagnostic: check if pshed_prev fits within [ε, pd] at Δw=0.
+    # Tolerate numerical noise (Jacobian multiply + solver ε); only fail if the
+    # violation is large enough to be a real feasibility problem.
+    feas_tol = 1e-5  # absolute tolerance; violations below this are silently clamped
+    n_above_pd = count(pshed_prev[j] > pd[j] + feas_tol for j in 1:m)
+    n_below_eps = count(pshed_prev[j] < ε - feas_tol for j in 1:m)
+    # Clamp small numerical drifts so the problem stays feasible.
+    for j in 1:m
+        if pshed_prev[j] > pd[j] && (pshed_prev[j] - pd[j]) <= feas_tol
+            pshed_prev[j] = pd[j]
+        end
+        if pshed_prev[j] < ε && (ε - pshed_prev[j]) <= feas_tol
+            pshed_prev[j] = ε
+        end
+    end
     if n_above_pd > 0 || n_below_eps > 0
-        @warn "[Palma] Starting point infeasible: $n_above_pd values > pd, $n_below_eps values < ε"
+        @warn "[Palma] Starting point infeasible beyond tolerance: $n_above_pd values > pd+$feas_tol, $n_below_eps values < ε-$feas_tol"
         for j in 1:m
-            if pshed_prev[j] > pd[j]
+            if pshed_prev[j] > pd[j] + feas_tol
                 error("  pshed_prev[$j]=$(round(pshed_prev[j], sigdigits=6)) > pd[$j]=$(round(pd[j], sigdigits=6)), excess=$(round(pshed_prev[j]-pd[j], sigdigits=4))")
-            elseif pshed_prev[j] < ε
+            elseif pshed_prev[j] < ε - feas_tol
                 error("  pshed_prev[$j]=$(round(pshed_prev[j], sigdigits=6)) < ε=$(round(ε, sigdigits=6)), deficit=$(round(ε - pshed_prev[j], sigdigits=4))")
             end
         end
     else
-        @info "[Palma] Starting point feasible: all pshed_prev ∈ [ε, pd]"
+        @info "[Palma] Starting point feasible: all pshed_prev ∈ [ε, pd] (±$feas_tol)"
     end
 
     # Create model
@@ -370,6 +385,15 @@ function palma_ratio_minimization(
         end
     end
 
+    # Per-period weight budget (upper bound only): Σ_i (weights_prev + Δw)_{t,i} ≤ weight_budget
+    if isfinite(weight_budget)
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            @constraint(model,
+                sum(weights_prev[offset + i] + Δw[offset + i] for i in 1:n) <= weight_budget)
+        end
+    end
+
     #=========================================================================
     # P_shed Bounds (Critical for McCormick feasibility)
     =========================================================================#
@@ -432,7 +456,28 @@ function palma_ratio_minimization(
     #   where σ[t] = 1 / bot_sum_t  (Charnes-Cooper)
     =========================================================================#
 
-    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))
+    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
+    # Convex combination of efficiency and Palma + small orthogonal reg term.
+    # Note: at α=0 the palma term contributes 0, but the σ·bot_sum=1 constraint
+    # is still binding, which can be infeasible when bot_sum → 0. We still emit
+    # the permutation/σ machinery here because the problem is already built;
+    # for a cleaner pure-efficiency solve at α=0 use `solve_mn_mc_mld_switch_integer`.
+    eff_terms = []
+    reg_terms = []
+    use_alpha = alpha < 1.0
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        total_demand_t = sum(pd[offset + i] for i in 1:n)
+        if total_demand_t > 0
+            eff_t = λ[t] * sum(pshed_new[offset + i] for i in 1:n) / total_demand_t
+            use_alpha && push!(eff_terms, eff_t)
+            reg > 0   && push!(reg_terms, reg * eff_t)
+        end
+    end
+    fairness_part = alpha * sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods)
+    eff_part = (isempty(eff_terms) ? 0.0 : (1.0 - alpha) * sum(eff_terms)) +
+               (isempty(reg_terms) ? 0.0 : sum(reg_terms))
+    @objective(model, Min, fairness_part + eff_part)
 
     #=========================================================================
     # Solve
@@ -502,9 +547,12 @@ function lin_palma_reformulated(
     weights_prev::Vector{Float64},
     pd::Vector{Float64};
     critical_ids::Vector{Int} = Int[],
-    weight_ids::Vector{Int} = Int[];
+    weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],
-    n_loads::Int = 0
+    n_loads::Int = 0,
+    reg::Float64 = 1e-4,
+    alpha::Float64 = 1.0,
+    weight_budget::Float64 = Inf
 )
     result = palma_ratio_minimization(
         dpshed_dw, pshed_prev, weights_prev, pd;
@@ -514,7 +562,10 @@ function lin_palma_reformulated(
         critical_ids = critical_ids,
         weight_ids = weight_ids,
         peak_time_costs = peak_time_costs,
-        n_loads = n_loads
+        n_loads = n_loads,
+        reg = reg,
+        alpha = alpha,
+        weight_budget = weight_budget
     )
 
     # Compute σ from result (for compatibility)

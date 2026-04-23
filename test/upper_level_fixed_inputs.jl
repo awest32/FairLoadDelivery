@@ -87,6 +87,6 @@ switch_states_df = DataFrame(
     title="Lower-level Switch States",
     xticks=switch_ids_sorted)
 
-# TODO add comparison with single level fairness trade-off parameter for each fairness function, to see how the upper-level solution with fixed inputs from the lower level compares to the single-level solutions.
+
 # TODO add regularization to the upper-level problem to see how it affects the solution with fixed inputs from the lower level.
 # TODO fix lower level test case such that the relaxed switch states are meaningfully different.

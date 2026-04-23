@@ -581,3 +581,191 @@ function objective_mn_fairly_weighted_max_load_served_regd(pm::_PMD.AbstractUnba
         end
     end
 end
+
+"""
+Multiperiod efficiency objective: minimize Σ_t λ_t * Σ_i w_{t,i} * pshed_{t,i}.
+Mirrors objective_fairly_weighted_min_load_shed across all time periods.
+peak_time_costs is a per-period weight; pass empty to weight all periods equally.
+"""
+function objective_mn_fairly_weighted_min_load_shed(pm::_PMD.AbstractUnbalancedPowerModel;
+                                                    peak_time_costs::Vector{<:Real}=Float64[])
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    T = length(nw_ids)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+
+    # fair_load_weights is a JuMP Parameter — product with pshed is a QuadExpr at
+    # assembly time, so use the same sum-of-generators pattern as the single-period
+    # objective_fairly_weighted_min_load_shed rather than add_to_expression! on an AffExpr.
+    weighted_shed_terms = []
+    for (idx, n) in enumerate(nw_ids)
+        push!(weighted_shed_terms,
+            λ[idx] * sum(_PMD.var(pm, n, :fair_load_weights, i) * _PMD.var(pm, n, :pshed, i)
+                         for i in _PMD.ids(pm, n, :load)))
+    end
+    return JuMP.@objective(pm.model, Min, sum(weighted_shed_terms))
+end
+
+"""
+Multiperiod min-max: sum of per-period max weighted shed,
+optionally weighted by peak_time_costs.
+
+With `alpha ∈ [0, 1]`: convex combination of efficiency and fairness terms.
+- alpha=0: pure efficiency (min Σ λ_t · Σ_i pshed_{t,i} / total_demand_t)
+- alpha=1: pure min-max fairness
+- `reg` is an orthogonal small efficiency regularizer kept for back-compat.
+"""
+function objective_mn_min_max(pm::_PMD.AbstractUnbalancedPowerModel;
+                              peak_time_costs::Vector{<:Real}=Float64[],
+                              reg::Float64=1e-4, alpha::Float64=1.0)
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    T = length(nw_ids)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
+
+    obj = JuMP.AffExpr(0.0)
+    for (idx, n) in enumerate(nw_ids)
+        max_shed_n = JuMP.@variable(pm.model, base_name="max_shed_nw_$(n)", lower_bound=0)
+        pshed = _PMD.var(pm, n, :pshed)
+        w = _PMD.var(pm, n, :fair_load_weights)
+        for (i, load) in _PMD.ref(pm, n, :load)
+            JuMP.@constraint(pm.model, max_shed_n >= sum(w[i] * pshed[i]))
+        end
+        total_demand_n = sum(sum(_PMD.ref(pm, n, :load, d)["pd"]) for d in _PMD.ids(pm, n, :load))
+        eff_term = sum(pshed[d] for d in _PMD.ids(pm, n, :load)) / total_demand_n
+        JuMP.add_to_expression!(obj, λ[idx] * (alpha * max_shed_n + (1.0 - alpha) * eff_term + reg * eff_term))
+    end
+    return JuMP.@objective(pm.model, Min, obj)
+end
+
+"""
+Multiperiod proportional fairness: Σ_t λ_t * Σ_i log(w_{t,i} * pd_{t,i} + ε).
+
+With `alpha ∈ [0, 1]`: Max α·Σ λ_t·Σ_i log(served) + (1-α)·Σ λ_t·served/total_demand.
+- alpha=0: pure efficiency (Max served = Min shed)
+- alpha=1: pure proportional fairness
+"""
+function objective_mn_proportional_fairness_mld(pm::_PMD.AbstractUnbalancedPowerModel;
+                                                peak_time_costs::Vector{<:Real}=Float64[],
+                                                epsilon::Float64=1e-6,
+                                                reg::Float64=1e-4, alpha::Float64=1.0)
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    T = length(nw_ids)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
+
+    log_terms = []
+    eff_terms = []
+    for (idx, n) in enumerate(nw_ids)
+        pd = _PMD.var(pm, n, :pd)
+        w = _PMD.var(pm, n, :fair_load_weights)
+        for i in _PMD.ids(pm, n, :load)
+            served = sum(w[i] * pd[i]) + epsilon
+            push!(log_terms, λ[idx] * log(served))
+        end
+        total_demand_n = sum(sum(_PMD.ref(pm, n, :load, d)["pd"]) for d in _PMD.ids(pm, n, :load))
+        push!(eff_terms, λ[idx] * sum(sum(pd[d]) for d in _PMD.ids(pm, n, :load)) / total_demand_n)
+    end
+    return JuMP.@objective(pm.model, Max,
+        alpha * sum(log_terms) + (1.0 - alpha) * sum(eff_terms) + reg * sum(eff_terms))
+end
+
+"""
+Multiperiod Jain: Σ_t λ_t * Jain_t where Jain_t is computed from weighted served in period t.
+
+With `alpha ∈ [0, 1]`: Max α·Σ λ_t·Jain_t + (1-α)·Σ λ_t·served/total_demand.
+- alpha=0: pure efficiency
+- alpha=1: pure Jain fairness
+"""
+function objective_mn_jain_mld(pm::_PMD.AbstractUnbalancedPowerModel;
+                               peak_time_costs::Vector{<:Real}=Float64[],
+                               reg::Float64=1e-4, alpha::Float64=1.0)
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    T = length(nw_ids)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
+
+    jain_terms = []
+    eff_terms = []
+    for (idx, n) in enumerate(nw_ids)
+        pd = _PMD.var(pm, n, :pd)
+        w = _PMD.var(pm, n, :fair_load_weights)
+        n_loads = length(collect(_PMD.ids(pm, n, :load)))
+        pd_sum = sum(sum(w[d] * pd[d]) for d in _PMD.ids(pm, n, :load))
+        pd_sum_sq = sum(sum(w[d] * pd[d])^2 for d in _PMD.ids(pm, n, :load))
+        push!(jain_terms, λ[idx] * (pd_sum^2) / (n_loads * pd_sum_sq))
+
+        total_demand_n = sum(sum(_PMD.ref(pm, n, :load, d)["pd"]) for d in _PMD.ids(pm, n, :load))
+        push!(eff_terms, λ[idx] * sum(sum(pd[d]) for d in _PMD.ids(pm, n, :load)) / total_demand_n)
+    end
+    return JuMP.@objective(pm.model, Max,
+        alpha * sum(jain_terms) + (1.0 - alpha) * sum(eff_terms) + reg * sum(eff_terms))
+end
+
+"""
+Multiperiod Palma: sum of per-period σ_t * top_sum_t (Charnes-Cooper reformulation
+of the Palma ratio), optionally weighted by peak_time_costs. Builds a binary
+permutation matrix per period to produce the sorted pshed vector.
+"""
+function objective_mn_palma_mld(pm::_PMD.AbstractUnbalancedPowerModel;
+                                peak_time_costs::Vector{<:Real}=Float64[],
+                                reg::Float64=1e-4, alpha::Float64=1.0)
+    nw_ids = sort(collect(_PMD.nw_ids(pm)))
+    T = length(nw_ids)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
+
+    # σ * top_sum is bilinear, so accumulate the per-period palma terms as a Julia array
+    # and let JuMP build the final QuadExpr in the @objective call.
+    palma_terms = []
+    eff_terms = []
+
+    for (idx, nw) in enumerate(nw_ids)
+        pshed = _PMD.var(pm, nw, :pshed)
+        load_ids = sort(collect(_PMD.ids(pm, nw, :load)))
+        n = length(load_ids)
+
+        P = Dict(d => sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in load_ids)
+        pshed_total = [sum(pshed[load_ids[j]]) for j in 1:n]
+
+        a = JuMP.@variable(pm.model, [1:n, 1:n], Bin, base_name="palma_perm_nw_$(nw)")
+        u = JuMP.@variable(pm.model, [1:n, 1:n], lower_bound=0, base_name="palma_u_nw_$(nw)")
+
+        for i in 1:n
+            JuMP.@constraint(pm.model, sum(a[i, j] for j in 1:n) == 1)
+        end
+        for j in 1:n
+            JuMP.@constraint(pm.model, sum(a[i, j] for i in 1:n) == 1)
+        end
+        for i in 1:n, j in 1:n
+            Pj = P[load_ids[j]]
+            JuMP.@constraint(pm.model, u[i, j] >= pshed_total[j] + a[i, j] * Pj - Pj)
+            JuMP.@constraint(pm.model, u[i, j] <= a[i, j] * Pj)
+            JuMP.@constraint(pm.model, u[i, j] <= pshed_total[j])
+        end
+
+        sorted = [sum(u[i, j] for j in 1:n) for i in 1:n]
+        for k in 1:n-1
+            JuMP.@constraint(pm.model, sorted[k] <= sorted[k+1])
+        end
+
+        n_top = max(1, ceil(Int, 0.1 * n))
+        n_bot = max(1, floor(Int, 0.4 * n))
+        top_sum = sum(sorted[i] for i in (n - n_top + 1):n)
+        bot_sum = sum(sorted[i] for i in 1:n_bot)
+
+        σ = JuMP.@variable(pm.model, base_name="palma_sigma_nw_$(nw)", lower_bound=1e-8)
+        JuMP.@constraint(pm.model, σ * bot_sum == 1.0)
+
+        push!(palma_terms, λ[idx] * σ * top_sum)
+
+        total_demand_n = sum(sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in _PMD.ids(pm, nw, :load))
+        push!(eff_terms, λ[idx] * sum(pshed[d] for d in _PMD.ids(pm, nw, :load)) / total_demand_n)
+    end
+    return JuMP.@objective(pm.model, Min,
+        alpha * sum(palma_terms) + (1.0 - alpha) * sum(eff_terms) + reg * sum(eff_terms))
+end

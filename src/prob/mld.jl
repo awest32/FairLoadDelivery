@@ -704,7 +704,7 @@
         _PMD.variable_mc_generator_power_on_off(pm)
 
         # # The on-off variable is making the solution error at the report statement in the variable function
-        _PMD.variable_mc_storage_power_mi_on_off(pm, relax=false, report=false)
+        _PMD.variable_mc_storage_power_mi_on_off(pm; relax=false)
     
 
         _PMD.variable_mc_load_indicator(pm; relax=false)
@@ -741,11 +741,13 @@
         # end
 
         for i in _PMD.ids(pm, :storage)
+            println("CASE CONTAINS STORAGE: Adding storage constraints for storage $i")
             _PMD.constraint_storage_state(pm, i)
             _PMD.constraint_storage_complementarity_mi(pm, i)
             _PMD.constraint_mc_storage_losses(pm, i)
             _PMD.constraint_mc_storage_thermal_limit(pm, i)
             constraint_mc_storage_on_off(pm, i)
+            # we don't set the initial energy here
         end
 
         for i in _PMD.ids(pm, :branch)
@@ -804,12 +806,12 @@
         # #objective_fair_max_load_served(pm,"jain")
         # #objective_fairly_weighted_max_load_served_with_penalty(pm)
         # #objective_fairly_weighted_min_load_shed(pm)
-        # JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
-        # open("integer_mld_mdel.txt", "w") do io
-        #     redirect_stdout(io) do
-        #         print(pm)
-        #     end
-        # end
+        JuMP._CONSTRAINT_LIMIT_FOR_PRINTING[] = 1E9
+        open("integer_mld_mdel.txt", "w") do io
+            redirect_stdout(io) do
+                print(pm)
+            end
+        end
 
     end
 
@@ -1949,6 +1951,188 @@
 
         # Use Gini coefficient promoting objective (minimize pairwise differences)
         objective_gini_mld(pm)
+    end
+
+    """
+    Helper: build per-period variables + topology/power-flow constraints used by
+    every multi-period fairness build. `relax` controls whether integer variables
+    (switch state, block indicator, load/gen/shunt/storage indicators) are relaxed.
+    """
+    function _build_mn_period_fair!(pm::_PMD.AbstractUBFModels, n::Int; relax::Bool)
+        _PMD.variable_mc_bus_voltage_indicator(pm; nw=n, relax=relax)
+        variable_mc_bus_voltage_magnitude_sqr_on_off(pm; nw=n)
+
+        _PMD.variable_mc_branch_power(pm; nw=n)
+        _PMD.variable_mc_switch_power(pm; nw=n)
+        _PMD.variable_mc_switch_state(pm; nw=n, relax=relax)
+        _PMD.variable_mc_shunt_indicator(pm; nw=n, relax=relax)
+        _PMD.variable_mc_transformer_power(pm; nw=n)
+
+        _PMD.variable_mc_gen_indicator(pm; nw=n, relax=relax)
+        _PMD.variable_mc_generator_power_on_off(pm; nw=n)
+
+        _PMD.variable_mc_load_indicator(pm; nw=n, relax=relax)
+        variable_mc_load_shed(pm; nw=n)
+
+        variable_block_indicator(pm; nw=n, relax=relax)
+        variable_mc_fair_load_weights(pm; nw=n)
+
+        _PMD.constraint_mc_model_current(pm; nw=n)
+
+        for i in _PMD.ids(pm, n, :ref_buses)
+            _PMD.constraint_mc_theta_ref(pm, i; nw=n)
+        end
+
+        _PMD.constraint_mc_bus_voltage_on_off(pm; nw=n)
+
+        for i in _PMD.ids(pm, n, :gen)
+            _PMD.constraint_mc_generator_power(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :bus)
+            constraint_mc_power_balance_shed(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :branch)
+            _PMD.constraint_mc_power_losses(pm, i; nw=n)
+            constraint_model_voltage_magnitude_difference_fld(pm, i; nw=n)
+            _PMD.constraint_mc_voltage_angle_difference(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :switch)
+            constraint_switch_state_on_off(pm, i; nw=n, relax=relax)
+            constraint_mc_switch_ampacity(pm, i; nw=n)
+            constraint_model_switch_voltage_magnitude_difference_fld(pm, i; nw=n)
+        end
+
+        for i in _PMD.ids(pm, n, :transformer)
+            _PMD.constraint_mc_transformer_power(pm, i; nw=n)
+        end
+
+        constraint_source_voltage_bounds(pm; nw=n)
+        constraint_mc_isolate_block(pm; nw=n)
+        constraint_radial_topology(pm; nw=n)
+
+        constraint_block_budget(pm; nw=n)
+        constraint_switch_budget(pm; nw=n)
+
+        constraint_load_shed_definition(pm; nw=n)
+
+        constraint_connect_block_load(pm; nw=n)
+        constraint_connect_load_bus(pm; nw=n)
+        constraint_connect_block_gen(pm; nw=n)
+        constraint_connect_block_voltage(pm; nw=n)
+        constraint_connect_block_shunt(pm; nw=n)
+    end
+
+    """
+    Multiperiod MLD with switch-integer formulation and per-period efficiency
+    objective (sum of fairly-weighted shed across periods, optionally weighted
+    by peak_time_costs).
+    """
+    function build_mn_mc_mld_switch_integer(pm::_PMD.AbstractUBFModels;
+                                             peak_time_costs::Vector{<:Real}=Float64[])
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_fairly_weighted_min_load_shed(pm; peak_time_costs=peak_time_costs)
+    end
+
+    function solve_mn_mc_mld_switch_integer(data::Dict{String,<:Any}, solver;
+                                             peak_time_costs::Vector{<:Real}=Float64[], kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_switch_integer(pm; peak_time_costs=peak_time_costs)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
+    """
+    Multiperiod MLD with min-max fairness objective (INTEGER).
+    """
+    function build_mn_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels;
+                                             peak_time_costs::Vector{<:Real}=Float64[],
+                                             reg::Float64=1e-4, alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_min_max(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_min_max_integer(data::Dict{String,<:Any}, solver;
+                                              peak_time_costs::Vector{<:Real}=Float64[],
+                                              reg::Float64=1e-4, alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_min_max_integer(pm;
+            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
+    """
+    Multiperiod MLD with proportional (Nash-bargaining) fairness objective (INTEGER).
+    """
+    function build_mn_mc_mld_proportional_fairness_integer(pm::_PMD.AbstractUBFModels;
+                                                           peak_time_costs::Vector{<:Real}=Float64[],
+                                                           reg::Float64=1e-4, alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_proportional_fairness_mld(pm;
+            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_proportional_fairness_integer(data::Dict{String,<:Any}, solver;
+                                                            peak_time_costs::Vector{<:Real}=Float64[],
+                                                            reg::Float64=1e-4, alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_proportional_fairness_integer(pm;
+            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
+    """
+    Multiperiod MLD with Jain's-index-promoting fairness objective (INTEGER).
+    """
+    function build_mn_mc_mld_jain_integer(pm::_PMD.AbstractUBFModels;
+                                          peak_time_costs::Vector{<:Real}=Float64[],
+                                          reg::Float64=1e-4, alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_jain_mld(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_jain_integer(data::Dict{String,<:Any}, solver;
+                                          peak_time_costs::Vector{<:Real}=Float64[],
+                                          reg::Float64=1e-4, alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_jain_integer(pm;
+            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
+    """
+    Multiperiod MLD with Palma-ratio fairness objective (INTEGER).
+    """
+    function build_mn_mc_mld_palma_integer(pm::_PMD.AbstractUBFModels;
+                                           peak_time_costs::Vector{<:Real}=Float64[],
+                                           reg::Float64=1e-4, alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_palma_mld(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_palma_integer(data::Dict{String,<:Any}, solver;
+                                            peak_time_costs::Vector{<:Real}=Float64[],
+                                            reg::Float64=1e-4, alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_palma_integer(pm;
+            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
     end
 
     "MLD problem for Branch Flow model "
