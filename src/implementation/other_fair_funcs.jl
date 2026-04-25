@@ -197,8 +197,12 @@ function proportional_fairness_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev:
     end
     @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] <= TRUST_RADIUS)
     @constraint(model, [i=1:m], weights_new[i]-weights_prev[i] >= -TRUST_RADIUS)
-    # Use variables (not expressions) for pshed_new so log doesn't nest expressions
-    @variable(model, pshed_new[i=1:m], start = pshed_prev[i])
+    # Use variables (not expressions) for pshed_new so log doesn't nest expressions.
+    # Bound pshed_new ∈ [0, pref] so the log argument (pref - pshed_new + c) stays
+    # strictly positive — without this, the linearization can predict pshed > pref
+    # and Ipopt evaluates log(negative) → INVALID_NUMBER_DETECTED, which kills the
+    # bilevel loop after iter 1 once any load is fully shed at the warm-start point.
+    @variable(model, 0.0 <= pshed_new[i=1:m] <= pref[i], start = clamp(pshed_prev[i], 0.0, pref[i]))
     @constraint(model, [i=1:m],
         pshed_new[i] == pshed_prev[i] + sum(dpshed_dw[i,j] * (weights_new[j] - weights_prev[j]) for j in 1:m)
     )
@@ -456,19 +460,18 @@ function jain_mn(served::Vector{<:AbstractVector{<:Real}};
     T = length(x)
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
     @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
-    num = 0.0
-    den = 0.0
+    num = Float64[]
+    den = Float64[]
     for t in 1:T
         xt = λ[t] * x[t]
         sx = sum(xt)
         sx2 = sum(xi^2 for xi in xt)
         if sx2 > 0
-            
             push!(num, (sx)^2)
             push!(den, length(xt) * sx2)
         end
     end
-    return den > 0 ? sum(num ./ den) : 0.0
+    return !isempty(den) ? sum(num ./ den) : 0.0
 end
 
 """
@@ -501,7 +504,7 @@ function proportional_mn(served::Vector{<:AbstractVector{<:Real}};
     T = length(x)
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
     @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
-    return (sum(log(max(λ[t] * s, 0.0) + epsilon) for s in x[t]) for t in 1:T)
+    return sum(λ[t] * sum(log(max(s, 0.0) + epsilon) for s in x[t]) for t in 1:T)
 end
 
 """

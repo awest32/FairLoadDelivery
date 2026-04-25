@@ -108,6 +108,13 @@ Returns Jacobian of shape (T*N) x (T*N) where:
 Also returns flattened pshed values, pshed IDs (tuples of (nw, load_id)),
 weight values (T*N), weight IDs (N, load IDs within one period), and the model.
 """
+# Override the bridge-layer dispatch so DiffOpt's leaf method gets a larger
+# `tol`. Default 1e-6 trips an inequality-dual sign assertion on near-degenerate
+# active sets in the lower-level MLD; 1e-4 absorbs that numerical noise.
+function DiffOpt.forward_differentiate!(model::MOI.Bridges.LazyBridgeOptimizer{DiffOpt.NonLinearProgram.Model})
+    return DiffOpt.forward_differentiate!(model.model; tol = 1e-4)
+end
+
 function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vector{Float64})
     nw_ids = model[:nw_ids]
     T = length(nw_ids)

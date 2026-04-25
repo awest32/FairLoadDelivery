@@ -303,7 +303,7 @@
 
             for i in _PMD.ids(pm, n, :storage)
                 _PMD.constraint_storage_state(pm, i; nw=n)
-                _PMD.constraint_storage_complementarity_mi(pm, i; nw=n)
+                _PMD.constraint_storage_complementarity_nl(pm, i; nw=n)
                 _PMD.constraint_mc_storage_losses(pm, i; nw=n)
                 _PMD.constraint_mc_storage_thermal_limit(pm, i; nw=n)
                 constraint_mc_storage_on_off(pm, i; nw=n)
