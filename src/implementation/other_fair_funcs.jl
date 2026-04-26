@@ -350,13 +350,14 @@ function equality_min(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, w
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
-    # Per-period max variables with quadratic penalty encouraging equal shedding
+    # Hard equality: every load's shed in period t equals the per-period level t_period[t].
+    # Minimize the cost-weighted sum of those levels — efficient + perfectly equal across loads.
     @variable(model, t_period[1:n_periods] >= 0)
     for t in 1:n_periods
         offset = (t - 1) * n
-        @constraint(model, [i=1:n], t_period[t] >= pshed_new[offset + i])
+        @constraint(model, [i=1:n], pshed_new[offset + i] == t_period[t])
     end
-    @objective(model, Min, sum(λ[t] * (t_period[t] + sum((pshed_new[(t-1)*n + i] - t_period[t])^2 for i in 1:n)) for t in 1:n_periods))
+    @objective(model, Min, sum(λ[t] * t_period[t] for t in 1:n_periods))
     optimize!(model)
     status = termination_status(model)
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]

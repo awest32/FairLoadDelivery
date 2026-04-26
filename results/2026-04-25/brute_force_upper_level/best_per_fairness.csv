@@ -1,0 +1,8 @@
+fair_func,direction,best_config_bits,best_total_pshed,best_obj
+efficient,min,101100,1540.0,1540.0
+jain,max,000100,3626.0,0.8961526009322855
+min_max,min,101100,1540.0,340.0
+proportional,max,010011,2906.0,33.543762983341175
+infinity_norm,min,101100,1540.0,170.0
+equality_min,min,101100,1540.0,547008.0
+palma,min,000000,6532.0,10.649350648051946

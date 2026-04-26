@@ -360,7 +360,8 @@
         objective_mn_fairly_weighted_max_load_served_regd(pm; regularization=0.05)
     end
 
-    function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
+    function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels;
+                                                 fixed_topology::Bool=false)
         pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(Ipopt.Optimizer))
         # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
         # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
@@ -461,9 +462,17 @@
         constraint_connect_block_shunt(pm)
         constraint_connect_block_storage(pm)
 
-        # Regularization keeps pd interior, fixing DiffOpt sensitivity computation
-        # See script/reformulation/debug/ for analysis
-        objective_fairly_weighted_max_load_served_regd(pm; regularization=0.05)
+        # Pin every switch state to math["switch"][i]["state"] when the caller is running a
+        # fixed-topology bilevel iteration (period 1 of the two-period flow). DiffOpt sees the
+        # switches as constants in the Jacobian.
+        if fixed_topology
+            constraint_set_switch_state_rounded(pm)
+        end
+
+        # Tiny regularizer (1e-6) keeps pd strictly interior so DiffOpt's KKT-based forward
+        # sensitivities stay well-defined at active bounds, without materially biasing the
+        # predicted shed (was 0.05 — large enough to inflate period-1 shed by ~80% in tests).
+        objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-6)
         #objective_fairly_weighted_max_load_served_with_penalty(pm)
         #objective_fairly_weighted_min_load_shed(pm)
     end
