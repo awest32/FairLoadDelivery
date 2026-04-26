@@ -86,3 +86,7 @@ switch_states_df = DataFrame(
     xlabel="Switch ID", ylabel="State (relaxed)",
     title="Lower-level Switch States",
     xticks=switch_ids_sorted)
+
+
+# TODO add regularization to the upper-level problem to see how it affects the solution with fixed inputs from the lower level.
+# TODO fix lower level test case such that the relaxed switch states are meaningfully different.

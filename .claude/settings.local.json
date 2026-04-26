@@ -5,7 +5,8 @@
       "Bash(julia --project=. script/multiperiod/test_palma_only.jl)",
       "Bash(grep -v \"^$\")",
       "Bash(julia:*)",
-      "Bash(tee /tmp/warmstart_20iter.log)"
+      "Bash(tee /tmp/warmstart_20iter.log)",
+      "Bash(chmod u+w /c/Users/awest/.julia/packages/DiffOpt/pIPwS/src/moi_wrapper.jl)"
     ]
   }
 }
