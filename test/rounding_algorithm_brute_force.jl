@@ -17,7 +17,7 @@ using Statistics
 # for the 13-bus motivation case. This is used to verify that the integer formulations are correctly.
 #--------------------------------------------------------------------------------------------------------
 
-case = "ieee_13_aw_edit/motivation_c.dss"
+case = "ieee_13_aw_edit/motivation_c_with_battery.dss"
 dir = @__DIR__
 casepath = joinpath(dir, "../data/", case)
 SWITCH_RATING = 600.0
@@ -183,7 +183,7 @@ for row in eachrow(mld_feasible_networks)
     ref_round = mld_model.ref[:it][:pmd][:nw][0]
 
     math_ac = ac_network_update(trial, ref_round; mld_solution=mld_res)
-    ac_res = PowerModelsDistribution.solve_mc_opf(math_ac, IVRUPowerModel, Ipopt.Optimizer)
+    ac_res = PowerModelsDistribution.solve_mc_pf(math_ac, ACRUPowerModel, Ipopt.Optimizer)
     
     tstat = ac_res["termination_status"]
     feasible = tstat in (MOI.LOCALLY_SOLVED, MOI.OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)

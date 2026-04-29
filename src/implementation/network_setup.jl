@@ -1,6 +1,6 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64, source_pu::Float64, switch_rating::Float64, critical_load::Vector{Any})
+function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.03, switch_rating::Float64=600.0, critical_load::Vector{Any}=Any[])
 
     data = case 
     vscale = 1
@@ -120,7 +120,12 @@ function setup_network(case::String, ls_percent::Float64, source_pu::Float64, sw
                 switch["current_rating"][:] .= switch_rating#264
             end
         end
-    elseif case == "ieee_13_aw_edit/pmonm_13bus_mod.dss"
+    elseif case == "ieee_13_aw_edit/motivation_c_with_battery.dss"
+       for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1.0
+            switch["current_rating"][:] .= switch_rating
+        end
+    elseif case == "ieee_13_aw_edit/pmonm_13_bus_mod.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             switch["current_rating"][:] .= switch_rating
@@ -434,11 +439,25 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
             end
         end
 
-        # 5. De-energize storage on disconnected blocks
+        # 5. Carry storage dispatch + status from MLD solution. PMD's solve_mc_pf
+        # pins real power via constraint_mc_storage_power_setpoint_real, which sums
+        # the per-phase ps variables and equates them to the SCALAR data["ps"]:
+        #   sum(ps_per_phase) == data["storage"][i]["ps"]
+        # So we sum the MLD's per-phase dispatch into a scalar before writing.
+        # qs isn't pinned by PF, but write the scalar total for consistency.
         if haskey(sol, "storage") && haskey(data, "storage")
             for (stid, st_sol) in sol["storage"]
-                if haskey(data["storage"], stid) && haskey(st_sol, "status") && st_sol["status"] <= 0.0
+                if !haskey(data["storage"], stid)
+                    continue
+                end
+                if haskey(st_sol, "status") && st_sol["status"] <= 0.0
                     data["storage"][stid]["status"] = 0.0
+                end
+                if haskey(st_sol, "ps")
+                    data["storage"][stid]["ps"] = sum(st_sol["ps"])
+                end
+                if haskey(st_sol, "qs")
+                    data["storage"][stid]["qs"] = sum(st_sol["qs"])
                 end
             end
         end
