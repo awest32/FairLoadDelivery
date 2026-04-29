@@ -46,7 +46,8 @@ highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 case = "case3_balanced"
 gen_cap = 1000.0
 # Inputs: case file path, percentage of load shed, list of critical load IDs
-eng, math, lbs, critical_id = setup_network( "pmd_opendss/$case.dss", gen_cap, 1.03,[])
+dir = @__DIR__
+eng, math, lbs, critical_id = setup_network( "$dir/../../data/pmd_opendss/$case.dss", gen_cap)
 # Create the folder to store the results
     today = Dates.today()
     # Create a results folder
