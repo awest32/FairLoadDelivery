@@ -37,47 +37,20 @@ mkpath(outdir)
 const TIE_TOL_REL = 1e-4
 const TIE_TOL_ABS = 1e-7
 
-const FAIR_FUNCS = ["efficient", "jain", "min_max", "proportional",
-                    "equality_min", "palma"]
+const FAIR_FUNCS = ["efficiency", "palma"]
 
 const FAIR_DIRECTIONS = Dict(
-    "efficient"     => :min,
-    "jain"          => :max,
-    "min_max"       => :min,
-    "proportional"  => :max,
-    "equality_min"  => :min,
-    "palma"         => :min,
+    "efficient" => :min,
+    "palma"     => :min,
 )
 
 #--------------------------------------------------------------------------------------------------------
 # Single-period fairness formulas — same as the JuMP objectives in other_fair_funcs.jl, evaluated
-# directly on the fixed pshed vector. Proportional drops the ε offset (per request).
+# directly on the fixed pshed vector.
 #--------------------------------------------------------------------------------------------------------
 
-eval_efficient(p)     = sum(p)
-eval_min_max(p)       = maximum(p)
-
-function eval_jain(p)
-    sp  = sum(p)
-    sp2 = sum(pi^2 for pi in p)
-    return sp2 > 1e-12 ? (sp^2) / (length(p) * sp2) : 0.0
-end
-
-function eval_proportional(p, pd)
-    # log(served + 1): finite floor of 0 for fully-shed loads (instead of -Inf), positive
-    # contribution for any partial/full service. Avoids the corner-solution failure where
-    # the integer-MLD's all-or-nothing block shedding makes log(served) = -Inf for every config.
-    val = 0.0
-    for i in eachindex(p)
-        served = pd[i] - p[i]
-        val += log(max(served, 0.0) + 1.0)
-    end
-    return val
-end
-
-eval_equality_min(p) = sum(p) + (maximum(p) - minimum(p))
-
-eval_palma(p) = FairLoadDelivery.palma_ratio(p)
+eval_efficient(p) = sum(p)
+eval_palma(p)     = FairLoadDelivery.palma_ratio(p)
 
 #--------------------------------------------------------------------------------------------------------
 # Setup
@@ -120,18 +93,11 @@ for row in eachrow(ac_feasible_networks)
     config_mld_status[cfg] = Symbol(tstat)
 
     config_obj[cfg] = Dict(
-        "efficient"     => eval_efficient(pshed),
-        "jain"          => eval_jain(pshed),
-        "min_max"       => eval_min_max(pshed),
-        "proportional"  => eval_proportional(pshed, pd_per_load),
-        "equality_min"  => eval_equality_min(pshed),
-        "palma"         => eval_palma(pshed),
+        "efficient" => eval_efficient(pshed),
+        "palma"     => eval_palma(pshed),
     )
 
     @info "config $cfg: total_shed=$(round(sum(pshed), digits=3))  " *
-          "jain=$(round(config_obj[cfg]["jain"], digits=4))  " *
-          "min_max=$(round(config_obj[cfg]["min_max"], digits=3))  " *
-          "prop=$(round(config_obj[cfg]["proportional"], digits=3))  " *
           "palma=$(round(config_obj[cfg]["palma"], digits=3))"
 end
 
@@ -143,20 +109,14 @@ successful_configs = sort(collect(keys(config_obj)))
 
 # 1) Wide summary: one row per config with totals + every fairness value.
 summary_df = DataFrame(
-    config_bits       = String[],
-    total_pshed       = Float64[],
-    obj_efficient     = Float64[],
-    obj_jain          = Float64[],
-    obj_min_max       = Float64[],
-    obj_proportional  = Float64[],
-    obj_equality_min  = Float64[],
-    obj_palma         = Float64[],
+    config_bits   = String[],
+    total_pshed   = Float64[],
+    obj_efficient = Float64[],
+    obj_palma     = Float64[],
 )
 for cfg in successful_configs
     push!(summary_df, (cfg, sum(config_pshed[cfg]),
-        config_obj[cfg]["efficient"], config_obj[cfg]["jain"],
-        config_obj[cfg]["min_max"],   config_obj[cfg]["proportional"],
-        config_obj[cfg]["equality_min"], config_obj[cfg]["palma"]))
+        config_obj[cfg]["efficient"], config_obj[cfg]["palma"]))
 end
 CSV.write(joinpath(outdir, "summary.csv"), summary_df)
 
@@ -237,97 +197,60 @@ end
 cfg_labels = summary_df.config_bits
 
 plt_eff   = bar(cfg_labels, summary_df.obj_efficient;
-                title="Efficient: min Σ pshed",            xrotation=90, legend=false)
-plt_jain  = bar(cfg_labels, summary_df.obj_jain;
-                title="Jain: max",                         xrotation=90, legend=false)
-plt_mm    = bar(cfg_labels, summary_df.obj_min_max;
-                title="Min-Max: min",                      xrotation=90, legend=false)
-plt_prop  = bar(cfg_labels, summary_df.obj_proportional;
-                title="Proportional: max Σ log(served + 1)", xrotation=90, legend=false)
-plt_eq    = bar(cfg_labels, summary_df.obj_equality_min;
-                title="Equality-min: min",                 xrotation=90, legend=false)
+                title="Efficient: min Σ pshed", xrotation=90, legend=false)
 plt_palma = bar(cfg_labels, summary_df.obj_palma;
-                title="Palma: min",                        xrotation=90, legend=false)
-fig = plot(plt_eff, plt_jain, plt_mm, plt_prop, plt_eq, plt_palma;
-           layout=(3, 2), size=(1600, 1200),
+                title="Palma: min",             xrotation=90, legend=false)
+fig = plot(plt_eff, plt_palma;
+           layout=(1, 2), size=(1400, 600),
            plot_title="Post-hoc fairness evaluation over $(length(successful_configs)) AC-feasible configs")
 savefig(fig, joinpath(outdir, "brute_force_upper_level.svg"))
 display(fig)
 
 #--------------------------------------------------------------------------------------------------------
-# Jain vs Min-Max comparison on the de-duplicated representative configs
+# Efficient vs Palma comparison on the de-duplicated representative configs
 #--------------------------------------------------------------------------------------------------------
 
 unique_summary = filter(row -> row.config_bits in unique_configs, summary_df)
 sort!(unique_summary, :total_pshed)
 
-# Scatter (min_max, jain) — each point a distinct operating topology, sized by total shed,
-# annotated with the representative config bits. Min-Max best is bottom-left of x; Jain best
-# is top of y. If they disagree, you'll see them at different points on the cloud.
-size_scale = 6 .+ 18 .* (unique_summary.total_pshed .- minimum(unique_summary.total_pshed)) ./
-                       max(maximum(unique_summary.total_pshed) - minimum(unique_summary.total_pshed), 1.0)
+# Drop configs where Palma is non-finite — they collapse to Inf when the bottom-40% pshed sum is 0.
+finite_palma = filter(row -> isfinite(row.obj_palma), unique_summary)
 
-best_mm_idx   = argmin(unique_summary.obj_min_max)
-best_jain_idx = argmax(unique_summary.obj_jain)
+if isempty(finite_palma)
+    @warn "All distinct configs have Palma = Inf (bottom-40% pshed sum is zero everywhere)."
+else
+    best_eff_idx   = argmin(finite_palma.obj_efficient)
+    best_palma_idx = argmin(finite_palma.obj_palma)
 
-scatter_jain_mm = scatter(unique_summary.obj_min_max, unique_summary.obj_jain;
-    xlabel = "Min-Max objective (lower → fairer worst case)",
-    ylabel = "Jain index (higher → more uniform shed)",
-    title  = "Jain vs Min-Max across $(length(unique_configs)) distinct operating points",
-    markersize = size_scale,
-    markeralpha = 0.6,
-    color  = :steelblue,
-    label  = "config (size ∝ total shed)",
-    legend = :bottomright)
-for r in eachrow(unique_summary)
-    annotate!(scatter_jain_mm, r.obj_min_max, r.obj_jain,
-              text(r.config_bits, 7, :black, :bottom))
+    scatter_eff_palma = scatter(finite_palma.obj_efficient, finite_palma.obj_palma;
+        xlabel = "Σ pshed (lower → more efficient)",
+        ylabel = "Palma ratio (lower → fairer top-vs-bottom)",
+        title  = "Efficient vs Palma across $(nrow(finite_palma)) distinct operating points",
+        markersize = 8, markeralpha = 0.7, color = :steelblue, label = "config",
+        legend = :topright)
+    for r in eachrow(finite_palma)
+        annotate!(scatter_eff_palma, r.obj_efficient, r.obj_palma,
+                  text(r.config_bits, 7, :black, :bottom))
+    end
+    scatter!(scatter_eff_palma,
+        [finite_palma.obj_efficient[best_eff_idx]], [finite_palma.obj_palma[best_eff_idx]];
+        markersize = 12, markershape = :star5, color = :red,
+        label = "Efficient best (cfg $(finite_palma.config_bits[best_eff_idx]))")
+    scatter!(scatter_eff_palma,
+        [finite_palma.obj_efficient[best_palma_idx]], [finite_palma.obj_palma[best_palma_idx]];
+        markersize = 12, markershape = :diamond, color = :green,
+        label = "Palma best (cfg $(finite_palma.config_bits[best_palma_idx]))")
+    savefig(scatter_eff_palma, joinpath(outdir, "efficient_vs_palma.svg"))
+    display(scatter_eff_palma)
+
+    CSV.write(joinpath(outdir, "efficient_vs_palma.csv"),
+              select(finite_palma, :config_bits, :total_pshed, :obj_efficient, :obj_palma))
+
+    @info "Efficient vs Palma best topologies:"
+    @info "  Efficient best: cfg=$(finite_palma.config_bits[best_eff_idx]) " *
+          "efficient=$(finite_palma.obj_efficient[best_eff_idx]) " *
+          "palma=$(round(finite_palma.obj_palma[best_eff_idx], digits=4))"
+    @info "  Palma best:     cfg=$(finite_palma.config_bits[best_palma_idx]) " *
+          "efficient=$(finite_palma.obj_efficient[best_palma_idx]) " *
+          "palma=$(round(finite_palma.obj_palma[best_palma_idx], digits=4))"
 end
-scatter!(scatter_jain_mm,
-    [unique_summary.obj_min_max[best_mm_idx]], [unique_summary.obj_jain[best_mm_idx]];
-    markersize = 12, markershape = :star5, color = :red,
-    label = "Min-Max best (cfg $(unique_summary.config_bits[best_mm_idx]), shed=$(Int(unique_summary.total_pshed[best_mm_idx])))")
-scatter!(scatter_jain_mm,
-    [unique_summary.obj_min_max[best_jain_idx]], [unique_summary.obj_jain[best_jain_idx]];
-    markersize = 12, markershape = :diamond, color = :green,
-    label = "Jain best (cfg $(unique_summary.config_bits[best_jain_idx]), shed=$(Int(unique_summary.total_pshed[best_jain_idx])))")
-savefig(scatter_jain_mm, joinpath(outdir, "jain_vs_min_max.svg"))
-display(scatter_jain_mm)
-
-# Side-by-side: total shed vs each metric, so the "min_max sheds less than Jain" pattern is direct.
-plt_shed_mm   = scatter(unique_summary.obj_min_max,   unique_summary.total_pshed;
-    xlabel="Min-Max",  ylabel="Total shed", title="Total shed vs Min-Max",
-    markersize=8, color=:steelblue, label=false)
-scatter!(plt_shed_mm, [unique_summary.obj_min_max[best_mm_idx]],
-    [unique_summary.total_pshed[best_mm_idx]];
-    markersize=12, markershape=:star5, color=:red,
-    label="Min-Max best")
-
-plt_shed_jain = scatter(unique_summary.obj_jain,      unique_summary.total_pshed;
-    xlabel="Jain index", ylabel="Total shed", title="Total shed vs Jain",
-    markersize=8, color=:steelblue, label=false)
-scatter!(plt_shed_jain, [unique_summary.obj_jain[best_jain_idx]],
-    [unique_summary.total_pshed[best_jain_idx]];
-    markersize=12, markershape=:diamond, color=:green,
-    label="Jain best")
-
-fig_shed = plot(plt_shed_mm, plt_shed_jain; layout=(1, 2), size=(1400, 500),
-    plot_title="Total load shed vs each fairness metric (de-dup'd configs)")
-savefig(fig_shed, joinpath(outdir, "shed_vs_jain_min_max.svg"))
-display(fig_shed)
-
-# Also dump the head-to-head table so the comparison is in CSV form.
-jain_vs_mm_df = select(unique_summary, :config_bits, :total_pshed, :obj_min_max, :obj_jain)
-jain_vs_mm_df.delta_shed_to_mm_best   = jain_vs_mm_df.total_pshed .- minimum(jain_vs_mm_df.total_pshed[unique_summary.obj_min_max .== minimum(unique_summary.obj_min_max)])
-jain_vs_mm_df.delta_shed_to_jain_best = jain_vs_mm_df.total_pshed .- jain_vs_mm_df.total_pshed[best_jain_idx]
-CSV.write(joinpath(outdir, "jain_vs_min_max.csv"), jain_vs_mm_df)
-
-@info "Jain vs Min-Max best topologies:"
-@info "  Min-Max best: cfg=$(unique_summary.config_bits[best_mm_idx]) " *
-      "min_max=$(unique_summary.obj_min_max[best_mm_idx]) " *
-      "jain=$(round(unique_summary.obj_jain[best_mm_idx], digits=4)) " *
-      "total_shed=$(unique_summary.total_pshed[best_mm_idx])"
-@info "  Jain best:    cfg=$(unique_summary.config_bits[best_jain_idx]) " *
-      "min_max=$(unique_summary.obj_min_max[best_jain_idx]) " *
-      "jain=$(round(unique_summary.obj_jain[best_jain_idx], digits=4)) " *
-      "total_shed=$(unique_summary.total_pshed[best_jain_idx])"

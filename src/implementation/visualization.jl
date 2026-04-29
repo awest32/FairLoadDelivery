@@ -2397,3 +2397,161 @@ function create_shed_distribution_plot(case::String, per_load_data::Dict, power_
     Plots.savefig(p, joinpath(save_dir, filename))
     return p
 end
+
+
+"""
+    plot_fairness_efficiency_pareto(results; ...) -> Plots.Plot
+
+Pareto scatter showing the fairness/efficiency trade-off across methods. Each
+entry in `results` becomes one point — x is total load shed, y is the Jain
+index. Method keys that match `FAIR_FUNC_COLORS`/`LABELS`/`MARKERS` (e.g.
+`"efficiency"`, `"palma"`, `"jain"`) get the standard styling; unknown keys
+fall back to defaults or to per-entry overrides.
+
+# Arguments
+- `results::AbstractDict` — keys are method names, values are NamedTuples (or
+  any object accessed via `.total_shed`/`.jain`) carrying `total_shed` and
+  `jain` numerics. Optional NT fields `label::String`, `color`, `marker`
+  override defaults for that point.
+
+# Keywords
+- `title`, `xlabel`, `ylabel` — Plots styling.
+- `markersize::Int=12` — marker size.
+- `legend=:bottomright` — legend placement (passed through to `plot`).
+- `save_path::Union{Nothing,String}=nothing` — if non-nothing, save SVG here.
+
+# Example
+```julia
+results = Dict(
+    "efficiency"     => (total_shed=312.0, jain=0.41),
+    "palma_bilevel"  => (total_shed=358.0, jain=0.67, label="Palma (bilevel)"),
+)
+plot_fairness_efficiency_pareto(results;
+    save_path=joinpath(outdir, "pareto.svg"))
+```
+"""
+function plot_fairness_efficiency_pareto(
+    results::AbstractDict;
+    title::String="Fairness vs Efficiency",
+    xlabel::String="Total Load Shed (kW)",
+    ylabel::String="Jain's Index (post-hoc)",
+    markersize::Int=12,
+    legend=:bottomright,
+    save_path::Union{Nothing,String}=nothing,
+)
+    p = Plots.plot(
+        title  = title,
+        xlabel = xlabel,
+        ylabel = ylabel,
+        legend = legend,
+        size   = (900, 600),
+    )
+
+    for (method, data) in results
+        styled    = haskey(FAIR_FUNC_COLORS, method)
+        label_def = styled ? FAIR_FUNC_LABELS[method]  : String(method)
+        color_def = styled ? FAIR_FUNC_COLORS[method]  : :auto
+        marker_def = styled ? FAIR_FUNC_MARKERS[method] : :circle
+
+        label  = hasproperty(data, :label)  ? data.label  : label_def
+        color  = hasproperty(data, :color)  ? data.color  : color_def
+        marker = hasproperty(data, :marker) ? data.marker : marker_def
+
+        Plots.scatter!(p, [data.total_shed], [data.jain];
+            label = label,
+            color = color,
+            marker = marker,
+            markersize = markersize,
+        )
+    end
+
+    if save_path !== nothing
+        Plots.savefig(p, save_path)
+    end
+    return p
+end
+
+
+"""
+    plot_loadshed_distribution_comparison(per_load_pshed; ...) -> Plots.Plot
+
+Per-load shed distribution as a grouped bar chart, comparing two or more
+methods (e.g. `"efficiency"` vs `"palma_bilevel"`). One bar per method per
+load. Method keys matching `FAIR_FUNC_COLORS`/`LABELS` get standard styling.
+
+# Arguments
+- `per_load_pshed::AbstractDict` — keys are method names, values are per-load
+  pshed `Vector{<:Real}` (must have the same length across methods).
+
+# Keywords
+- `load_labels::Vector{String}=String[]` — x-axis tick labels (e.g. load names).
+  If empty, uses 1..N.
+- `title`, `xlabel`, `ylabel` — Plots styling.
+- `save_path::Union{Nothing,String}=nothing` — if non-nothing, save SVG here.
+
+# Example
+```julia
+plot_loadshed_distribution_comparison(
+    Dict(
+        "efficiency"    => pshed_eff,
+        "palma_bilevel" => pshed_palma,
+    );
+    load_labels = string.(load_ids_sorted),
+    save_path   = joinpath(outdir, "shed_distribution.svg"),
+)
+```
+"""
+function plot_loadshed_distribution_comparison(
+    per_load_pshed::AbstractDict;
+    load_labels::Vector{String}=String[],
+    title::String="Per-Load Shed Distribution",
+    xlabel::String="Load",
+    ylabel::String="Load Shed (kW)",
+    save_path::Union{Nothing,String}=nothing,
+)
+    methods = collect(keys(per_load_pshed))
+    isempty(methods) && return Plots.plot(title=title)
+
+    n_loads = length(per_load_pshed[first(methods)])
+    @assert all(length(per_load_pshed[m]) == n_loads for m in methods) "All methods must have the same number of loads"
+
+    if isempty(load_labels)
+        load_labels = string.(1:n_loads)
+    else
+        @assert length(load_labels) == n_loads "load_labels length ($(length(load_labels))) must match per-load vector length ($n_loads)"
+    end
+
+    n_methods = length(methods)
+    bar_width = 0.8 / n_methods
+    base_x    = collect(1:n_loads)
+
+    # Cap horizontal size so the plot area can't go negative under heavy margins.
+    fig_width = clamp(60 * n_loads, 900, 1800)
+
+    p = Plots.plot(
+        title     = title,
+        xlabel    = xlabel,
+        ylabel    = ylabel,
+        legend    = :topright,
+        size      = (fig_width, 600),
+        xticks    = (base_x, load_labels),
+        xrotation = 45,
+    )
+
+    for (m_idx, method) in enumerate(methods)
+        offsets = base_x .+ (m_idx - 1) * bar_width .- (n_methods - 1) * bar_width / 2
+        label   = haskey(FAIR_FUNC_LABELS, method) ? FAIR_FUNC_LABELS[method] : String(method)
+        color   = haskey(FAIR_FUNC_COLORS, method) ? FAIR_FUNC_COLORS[method] : :auto
+        Plots.bar!(p, offsets, per_load_pshed[method];
+            label     = label,
+            color     = color,
+            bar_width = bar_width,
+            linecolor = :black,
+        )
+    end
+
+    if save_path !== nothing
+        Plots.savefig(p, save_path)
+    end
+    return p
+end

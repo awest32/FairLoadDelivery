@@ -1,0 +1,3 @@
+config_bits,total_pshed,obj_min_max,obj_jain,delta_shed_to_mm_best,delta_shed_to_jain_best
+0111111,255.0,230.0,0.06108501643964302,0.0,-958.0
+0011011,1213.0,485.0,0.18726902703074208,958.0,0.0

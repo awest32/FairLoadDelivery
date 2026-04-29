@@ -33,8 +33,9 @@ include("../../src/implementation/network_setup.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_c"
-const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
+const CASE = "motivation_c_with_battery"
+dir = @__DIR__
+const CASE_FILE = joinpath(dir, "../../","data/ieee_13_aw_edit", "$CASE.dss")
 const N_PERIODS = 3  # Number of time periods
 const LS_PERCENT = 0.8  # Generation limit as fraction of total load
 
@@ -247,7 +248,7 @@ function run_multiperiod_fldp()
 
     # Step 1: Setup base network (using shared setup_network function)
     println("\n[1] Setting up base network...")
-    eng, math, lbs, _ = setup_network(CASE_FILE, LS_PERCENT, [])
+    eng, math, lbs, _ = setup_network(CASE_FILE, LS_PERCENT)
 
     println("  Loads: $(length(math["load"]))")
     println("  Buses: $(length(math["bus"]))")

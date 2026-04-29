@@ -13,7 +13,7 @@ using StatsPlots
 using Statistics
 
 # Load the test case
-case = "ieee_13_aw_edit/motivation_c.dss"
+case = "ieee_13_aw_edit/pmonm_13_bus_mod.dss"
 dir = joinpath(@__DIR__,"../", "data")
 file = joinpath(dir, case)
 

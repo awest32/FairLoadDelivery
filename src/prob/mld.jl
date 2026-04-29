@@ -162,6 +162,8 @@
             _PMD.variable_mc_switch_state(pm; nw=n, relax=true)
             _PMD.variable_mc_shunt_indicator(pm; nw=n, relax=true)
             _PMD.variable_mc_transformer_power(pm; nw=n)
+            
+            _PMD.variable_mc_storage_power_mi_on_off(pm; nw=n, relax=true, report=true)
 
             _PMD.variable_mc_gen_indicator(pm; nw=n, relax=true)
             _PMD.variable_mc_generator_power_on_off(pm; nw=n)
@@ -187,6 +189,14 @@
 
             for i in _PMD.ids(pm, n, :bus)
                 FairLoadDelivery.constraint_mc_power_balance_shed(pm, i; nw=n)
+            end
+
+            for i in _PMD.ids(pm, n, :storage)
+                _PMD.constraint_storage_state(pm, i; nw=n)
+                _PMD.constraint_storage_complementarity_nl(pm, i; nw=n)
+                _PMD.constraint_mc_storage_losses(pm, i; nw=n)
+                _PMD.constraint_mc_storage_thermal_limit(pm, i; nw=n)
+                constraint_mc_storage_on_off(pm, i; nw=n)
             end
 
             for i in _PMD.ids(pm, n, :branch)
@@ -217,7 +227,7 @@
 
             FairLoadDelivery.constraint_connect_block_load(pm; nw=n)
             FairLoadDelivery.constraint_connect_load_bus(pm; nw=n)
-            FairLoadDelivery.constraint_connect_load_bus(pm; nw=n)
+            FairLoadDelivery.constraint_connect_block_storage(pm; nw=n)
             FairLoadDelivery.constraint_connect_block_gen(pm; nw=n)
             FairLoadDelivery.constraint_connect_block_voltage(pm; nw=n)
             FairLoadDelivery.constraint_connect_block_shunt(pm; nw=n)
@@ -275,6 +285,18 @@
             _PMD.variable_mc_generator_power_on_off(pm; nw=n)
 
             _PMD.variable_mc_storage_power_mi_on_off(pm; nw=n, relax=true, report=true)
+
+            # PMD's variable_mc_storage_power_mi_on_off does not forward `relax` to its inner
+            # variable_mc_storage_indicator call, so z_storage is declared binary regardless.
+            # Force continuous so DiffOpt + Ipopt don't choke on ZeroOne constraints.
+            for i in _PMD.ids(pm, n, :storage)
+                z = _PMD.var(pm, n, :z_storage, i)
+                if JuMP.is_binary(z)
+                    JuMP.unset_binary(z)
+                    JuMP.set_lower_bound(z, 0.0)
+                    JuMP.set_upper_bound(z, 1.0)
+                end
+            end
 
             _PMD.variable_mc_load_indicator(pm; nw=n, relax=true)
             variable_mc_load_shed(pm; nw=n)
@@ -366,7 +388,7 @@
         # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
         # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
         #@info pm.model typeof(pm.model)
-        
+
         _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
         variable_mc_bus_voltage_magnitude_sqr_on_off(pm)
 
@@ -382,7 +404,18 @@
 
         # # The on-off variable is making the solution error at the report statement in the variable function
         _PMD.variable_mc_storage_power_mi_on_off(pm, relax=true, report=true)
-    
+
+        # PMD's variable_mc_storage_power_mi_on_off does not forward `relax` to its inner
+        # variable_mc_storage_indicator call, so z_storage is declared binary regardless.
+        # Force continuous so DiffOpt + Ipopt don't choke on ZeroOne constraints.
+        for i in _PMD.ids(pm, :storage)
+            z = _PMD.var(pm, :z_storage, i)
+            if JuMP.is_binary(z)
+                JuMP.unset_binary(z)
+                JuMP.set_lower_bound(z, 0.0)
+                JuMP.set_upper_bound(z, 1.0)
+            end
+        end
 
         _PMD.variable_mc_load_indicator(pm; relax=true)
         # #variable_mc_demand_indicator(pm; relax=true)
@@ -399,8 +432,8 @@
             _PMD.constraint_mc_theta_ref(pm, i)
         end
 
-        _PMD.constraint_mc_bus_voltage_on_off(pm)    
-        
+        _PMD.constraint_mc_bus_voltage_on_off(pm)
+
         for i in _PMD.ids(pm, :gen)
             _PMD.constraint_mc_generator_power(pm, i)
             #constraint_mc_gen_power_on_off(pm, i)
@@ -412,7 +445,10 @@
 
         for i in _PMD.ids(pm, :storage)
             _PMD.constraint_storage_state(pm, i)
-            _PMD.constraint_storage_complementarity_mi(pm, i)
+            # NL formulation (smooth ps·sd ≤ 0 product) instead of MI here so DiffOpt can
+            # differentiate through the complementarity; mirrors what
+            # build_mn_mc_mld_shedding_implicit_diff already does for multinetwork.
+            _PMD.constraint_storage_complementarity_nl(pm, i)
             _PMD.constraint_mc_storage_losses(pm, i)
             _PMD.constraint_mc_storage_thermal_limit(pm, i)
             constraint_mc_storage_on_off(pm, i)
@@ -1980,6 +2016,22 @@
         _PMD.variable_mc_gen_indicator(pm; nw=n, relax=relax)
         _PMD.variable_mc_generator_power_on_off(pm; nw=n)
 
+        _PMD.variable_mc_storage_power_mi_on_off(pm; nw=n, relax=relax, report=true)
+
+        # PMD's variable_mc_storage_power_mi_on_off does not forward `relax` to its inner
+        # variable_mc_storage_indicator call, so z_storage is declared binary regardless.
+        # When relaxing, force continuous so DiffOpt + Ipopt don't choke on ZeroOne constraints.
+        if relax
+            for i in _PMD.ids(pm, n, :storage)
+                z = _PMD.var(pm, n, :z_storage, i)
+                if JuMP.is_binary(z)
+                    JuMP.unset_binary(z)
+                    JuMP.set_lower_bound(z, 0.0)
+                    JuMP.set_upper_bound(z, 1.0)
+                end
+            end
+        end
+
         _PMD.variable_mc_load_indicator(pm; nw=n, relax=relax)
         variable_mc_load_shed(pm; nw=n)
 
@@ -2018,6 +2070,15 @@
             _PMD.constraint_mc_transformer_power(pm, i; nw=n)
         end
 
+        for i in _PMD.ids(pm, n, :storage)
+            _PMD.constraint_storage_state(pm, i; nw=n)
+            _PMD.constraint_storage_complementarity_mi(pm, i; nw=n)
+            _PMD.constraint_mc_storage_losses(pm, i; nw=n)
+            _PMD.constraint_mc_storage_thermal_limit(pm, i; nw=n)
+            constraint_mc_storage_on_off(pm, i; nw=n)
+        end
+
+
         constraint_source_voltage_bounds(pm; nw=n)
         constraint_mc_isolate_block(pm; nw=n)
         constraint_radial_topology(pm; nw=n)
@@ -2032,6 +2093,7 @@
         constraint_connect_block_gen(pm; nw=n)
         constraint_connect_block_voltage(pm; nw=n)
         constraint_connect_block_shunt(pm; nw=n)
+        constraint_connect_block_storage(pm; nw=n)
     end
 
     """

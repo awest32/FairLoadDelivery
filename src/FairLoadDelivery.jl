@@ -100,6 +100,7 @@ export lin_palma_reformulated, lin_palma_w_grad_input, proportional_fairness_loa
 export plot_dpshed_heatmap, plot_load_shed_per_bus, plot_weights_per_load, export_results, create_save_folder, visualize_network_svg, plot_network_load_shed, build_load_name_map, build_bus_name_maps
 export get_bus_voltage_per_phase, extract_voltage_by_bus_name, extract_per_bus_loadshed
 export plot_voltage_per_bus_comparison, plot_loadshed_per_bus_comparison, create_grouped_bar_chart
+export plot_fairness_efficiency_pareto, plot_loadshed_distribution_comparison
 export FAIR_FUNC_COLORS, FAIR_FUNC_LABELS, FAIR_FUNC_MARKERS
 
 end #module FairLoadDelivery

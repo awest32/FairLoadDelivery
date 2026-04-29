@@ -15,11 +15,11 @@ using Statistics
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "ieee_13_aw_edit/motivation_c.dss"
+const CASE = "ieee_13_aw_edit/pmonm_13_bus_mod.dss"
 const LS_PERCENT = 0.8  # 10% load shed, 90% generation capacity
 
 # Save results
-save_dir = "results/$(Dates.today())/brute_force_motivation_c"
+save_dir = "results/$(Dates.today())/brute_force_pmonm_13_bus_mod"
 mkpath(save_dir)
 
 # Solver
@@ -638,7 +638,7 @@ end
 # ============================================================
 
 function main()
-    @info "=== Brute Force Network Testing: motivation_c ==="
+    @info "=== Brute Force Network Testing: pmonm_13_bus_mod ==="
     @info "Date: $(Dates.today())"
 
     # Setup
