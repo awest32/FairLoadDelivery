@@ -16,7 +16,7 @@ using CSV
 using Plots
 using Dates
 
-include("../../src/implementation/visualization.jl")
+include("../src/implementation/visualization.jl")
 
 """
 This is the control case.
@@ -34,20 +34,20 @@ Save these results in the location:
     results/date/control_exp/
 """
 
-include("../../src/implementation/network_setup.jl")
-include("../../src/implementation/export_results.jl")
-include("../../src/implementation/visualization.jl")
+include("../src/implementation/network_setup.jl")
+include("../src/implementation/export_results.jl")
+include("../src/implementation/visualization.jl")
 ipopt = Ipopt.Optimizer
 gurobi = Gurobi.Optimizer
 
 ipopt = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 highs = optimizer_with_attributes(HiGHS.Optimizer, "output_flag" => false)
 
-case = "case3_balanced"
+case = "case3_balanced_switch"
 gen_cap = 1000.0
 # Inputs: case file path, percentage of load shed, list of critical load IDs
 dir = @__DIR__
-eng, math, lbs, critical_id = setup_network( "$dir/../../data/pmd_opendss/$case.dss", gen_cap)
+eng, math, lbs, critical_id = setup_network( "$dir/../data/pmd_opendss/$case.dss", gen_cap)
 # Create the folder to store the results
     today = Dates.today()
     # Create a results folder
@@ -298,6 +298,6 @@ end
 for (block_id, block) in (math["block"])
     block_selection[parse(Int,block_id)] = math["block"][block_id]["state"]
 end
-math_ac = ac_network_update(math, ref)
+math_ac = ac_network_update(math, ref; mld_solution=mld_test)
 
 pm_ivr_soln = solve_mc_pf(math_ac, IVRUPowerModel, ipopt)

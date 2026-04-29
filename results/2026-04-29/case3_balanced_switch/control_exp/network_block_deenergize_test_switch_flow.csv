@@ -1,0 +1,4 @@
+switch_name,phase,p,q,c_mag,current_rating,is_closed
+ohline,1,0.0,0.0,0.0,138.5640646055102,false
+ohline,2,0.0,0.0,0.0,138.5640646055102,false
+ohline,3,0.0,0.0,0.0,138.5640646055102,false

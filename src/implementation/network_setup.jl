@@ -376,7 +376,7 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
         if haskey(sol, "block")
             for (bid, block_sol) in sol["block"]
                 if haskey(data["block"], bid) && haskey(block_sol, "status")
-                    data["block"][bid]["state"] = block_sol["status"]
+                    data["block"][bid]["state"] = round(block_sol["status"])
                 end
             end
         end
