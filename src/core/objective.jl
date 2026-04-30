@@ -330,7 +330,7 @@ Minimizes the maximum load shed across all loads, promoting fairness by ensuring
 
 """
 
-function objective_min_max(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true, reg::Float64=1e-4)
+function objective_min_max(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw_id_default, report::Bool=true, alpha::Float64=1e-4)
     # Create auxiliary variable for the maximum shed amount
     max_shed = JuMP.@variable(pm.model, base_name="max_shed", lower_bound=0)
 
@@ -341,13 +341,14 @@ function objective_min_max(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw
     load_prioritization_weights = _PMD.var(pm, nw, :fair_load_weights)
     # Constrain max_shed to be greater than or equal to each load's shed amount
     for (i, load) in _PMD.ref(pm, nw, :load)
-        JuMP.@constraint(pm.model, max_shed >= sum(load_prioritization_weights[i] * pshed[i]))
+        JuMP.@constraint(pm.model, max_shed >= sum(pshed[i]))
     end
-
     total_demand = sum(sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in _PMD.ids(pm, nw, :load))
-    reg_term = reg * sum(pshed[d] for d in _PMD.ids(pm, nw, :load)) / total_demand
-    return JuMP.@objective(pm.model, Min, max_shed + reg_term)
+    fairness_term = max_shed / total_demand
+    efficiency_term = sum(pshed[d] for d in _PMD.ids(pm, nw, :load)) / total_demand
+    return JuMP.@objective(pm.model, Min, (alpha)*efficiency_term + (1-alpha)*fairness_term)
 end
+
 
 """
     objective_proportional_fairness_mld(pm::AbstractUnbalancedPowerModel; nw::Int=nw_id_default)

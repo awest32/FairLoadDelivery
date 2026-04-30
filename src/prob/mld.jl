@@ -1224,7 +1224,6 @@
         constraint_mc_isolate_block(pm)
         constraint_radial_topology(pm)
 
-        constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)
@@ -1308,7 +1307,6 @@
         constraint_mc_isolate_block(pm)
         constraint_radial_topology(pm)
 
-        constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)
@@ -1394,7 +1392,7 @@
         constraint_mc_isolate_block(pm)
         constraint_radial_topology(pm)
 
-        constraint_block_budget(pm)
+        #constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)
@@ -1479,7 +1477,7 @@
         constraint_mc_isolate_block(pm)
         constraint_radial_topology(pm)
 
-        constraint_block_budget(pm)
+        #constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)
