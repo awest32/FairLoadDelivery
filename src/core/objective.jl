@@ -346,7 +346,7 @@ function objective_min_max(pm::_PMD.AbstractUnbalancedPowerModel; nw::Int=_IM.nw
     total_demand = sum(sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in _PMD.ids(pm, nw, :load))
     fairness_term = max_shed / total_demand
     efficiency_term = sum(pshed[d] for d in _PMD.ids(pm, nw, :load)) / total_demand
-    return JuMP.@objective(pm.model, Min, (alpha)*efficiency_term + (1-alpha)*fairness_term)
+    return JuMP.@objective(pm.model, Min, (alpha)*fairness_term + (1-alpha)*efficiency_term)
 end
 
 

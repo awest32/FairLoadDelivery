@@ -22,6 +22,7 @@ New linecode.4/0QUAD nphases=3 basefreq=50  ! ohms per 100ft
 New Line.OHLine  bus1=sourcebus.1.2.3  bus2=Primary.1.2.3  linecode = 556MCM   length=1  switch=y ! 5 mile line
 New Line.QuadA    Bus1=Primary.1.2.3  bus2=loadbusA.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 New Line.QuadB    Bus1=Primary.1.2.3  bus2=loadbusB.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
+New Line.QuadC    Bus1=loadbusB.1.2.3  bus2=loadbusC.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 
 !Loads - single phase
 
@@ -30,6 +31,9 @@ New Load.L2 phases=1  loadbusA.2.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
 New Load.L3 phases=1  loadbusA.3.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
 
 New Load.L4 phases=1  loadbusB.3.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
+
+New Load.L5 phases=1  loadbusC.2.0   ( 0.4 3 sqrt / )   kW=3   kvar=3  model=1
+New Load.L6 phases=2  loadbusC.1.3.0   ( 0.4 3 sqrt / )   kW=10   kvar=3  model=1
 
 Set voltagebases=[0.4]
 Set tolerance=0.000001
