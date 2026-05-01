@@ -176,7 +176,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
     for (i,load) in math["load"]
         if load["name"] in critical_load
             load["critical"] = 1
-            load["weight"] = 100
+            load["weight"] = 10
             push!(critical_id,parse(Int,i))
             #println("Load $(load["name"]) at math load node $(i) is critical.")
         else

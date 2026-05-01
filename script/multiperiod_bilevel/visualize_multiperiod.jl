@@ -68,8 +68,9 @@ println("=" ^ 70)
 #critical_buses = []  # Match computation script
 
 for case in CASES
+      case_file = joinpath(@__DIR__,"../../data/pmd_opendss/$case.dss")
     # Reconstruct network for bus/load name mapping
-    _, math_viz, _, _ = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, critical_buses)
+    _, math_viz, _, _ = FairLoadDelivery.setup_network(case_file, LS_PERCENT; source_pu=1.0)
 
     bus_name_map = build_bus_name_maps(math_viz)
     nw_ids_sorted = [string(i) for i in 0:(N_PERIODS-1)]
@@ -248,9 +249,9 @@ for case in CASES
             xlabel=any_critical ? "Weight  (★ = critical load, w > 20)" : "Weight",
             tickfontsize=8,
             framestyle=:box, top_margin=-5Plots.mm)
-        lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
+        #lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
         p_combined = plot(weight_panes..., p_cb,
-            layout=lay,
+   #         layout=lay,
             size=(400 * n_panes, 650), bottom_margin=10Plots.mm,
             plot_title="Final Weights (Period × Load): $case",
             plot_titlefontsize=12)
@@ -321,9 +322,9 @@ for case in CASES
             color=:RdYlBu, clims=(0, 100), colorbar=false,
             yticks=false, xlabel="Shed (%)", tickfontsize=8,
             framestyle=:box, top_margin=-5Plots.mm)
-        lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
+#        lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
         p_combined = plot(shed_panes..., p_cb,
-            layout=lay,
+ #           layout=lay,
             size=(400 * n_panes, 650), bottom_margin=10Plots.mm,
             plot_title="Load Shed % (Period × Bus): $case",
             plot_titlefontsize=12)
@@ -418,9 +419,9 @@ for case in CASES
             color=:RdYlBu, clims=(0.9, 1.1), colorbar=false,
             yticks=false, xlabel="Voltage (p.u.)  (× = de-energized)", tickfontsize=8,
             framestyle=:box, top_margin=-5Plots.mm)
-        lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
+#        lay = @layout [grid(1, n_panes){0.93h}; a{0.07h}]
         p_combined = plot(volt_panes..., p_cb,
-            layout=lay,
+ #           layout=lay,
             size=(400 * n_panes, 650), bottom_margin=10Plots.mm,
             plot_title="Bus Voltage p.u. (Period × Bus): $case",
             plot_titlefontsize=12)

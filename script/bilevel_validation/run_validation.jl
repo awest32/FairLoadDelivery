@@ -38,13 +38,13 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch"
+const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-const LS_PERCENT = 0.7
+const LS_PERCENT = 100.0
 const ITERATIONS = 10
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+const N_BERNOULLI_SAMPLES = 10
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -362,13 +362,14 @@ bernoulli_selection_index = []
 bernoulli_samples = Dict{Int, Vector{Dict{Int, Float64}}}()
 
 # Run multiple rounds of bernoulli rounding with different RNG seeds
-for r in 1:N_ROUNDS
-    rng = 100 * r
+#for r in 1:N_ROUNDS
+    r=1
+    rng=100
     # Generate bernoulli samples for switches and blocks
     bernoulli_samples[r] = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, rng)
 
     # Find the best bernoulli sample that is topology feasible and closest to the relaxed solution
-    index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status = radiality_check(ref, switch_states, block_status, bernoulli_samples[r])
+    index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status = FairLoadDelivery.radiality_check(ref, switch_states, block_status, bernoulli_samples[r])
 
     if index === nothing
         @warn "[$CASE/$FAIR_FUNC] Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
@@ -383,7 +384,7 @@ for r in 1:N_ROUNDS
     push!(bernoulli_switch_selection_exp, switch_states_radial)
     push!(bernoulli_block_selection_exp, Dict(zip(block_ids, block_status_radial)))
     push!(bernoulli_load_selection_exp, Dict(zip(load_ids, load_status)))
-end
+#end
 
 # Check if any round found a radial topology
 passed_radial = any(idx !== nothing for idx in bernoulli_selection_index)
@@ -393,9 +394,10 @@ print_check_result("Radial topology found", passed_radial)
 # Check that rounded values are binary (1.0 or 0.0)
 binary_check_passed = true
 non_binary_values = []
-for r in 1:N_ROUNDS
+#for r in 1:N_ROUNDS
+    r = 1 
     if bernoulli_selection_index[r] === nothing
-        continue
+        @error("No Bernoulli radial samples")
     end
     # Check switch states
     for (s_id, state) in bernoulli_switch_selection_exp[r]
@@ -418,7 +420,7 @@ for r in 1:N_ROUNDS
             push!(non_binary_values, "Round $r: Load $l_id = $status")
         end
     end
-end
+#end
 rounding_checks["binary_values"] = Dict("passed" => binary_check_passed, "details" => non_binary_values)
 print_check_result("Rounded values are binary (0.0 or 1.0)", binary_check_passed, isempty(non_binary_values) ? "" : join(non_binary_values[1:min(5,length(non_binary_values))], "; "))
 
@@ -512,7 +514,7 @@ function find_best_mld_solution(mlds::Vector{Dict{String, Any}}, ipopt)
     @info " the number of mlds to evaluate is: $(length(mlds))"
     for (id, mld) in enumerate(mlds)
         @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
-        if best_obj <= mld["objective"] 
+        if best_obj >= mld["objective"] 
             best_obj = mld["objective"]
             best_set = id
             best_mld = mld

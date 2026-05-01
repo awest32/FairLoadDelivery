@@ -117,7 +117,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, z_relaxed::Dict{Int, Float
         optimize!(model)
 
         if termination_status(model) == MOI.OPTIMAL
-            d = sum((bernoulli_samples[i][s] - z_relaxed[s])^2 for s in switch_ids)
+            d = sum((bernoulli_samples[i][s]^2 + z_relaxed[s]^2)^2 for s in switch_ids)
             if d < best_dist
                 best_dist = d
                 best_i = i

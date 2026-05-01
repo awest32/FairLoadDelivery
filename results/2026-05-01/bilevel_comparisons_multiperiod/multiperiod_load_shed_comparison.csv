@@ -1,0 +1,2 @@
+case,fair_func,n_periods,total_demand_all_periods,total_pshed_lower,total_pshed_upper,pct_shed,bilevel_iters_completed,bilevel_iters_total,bilevel_last_status,bilevel_early_stop,max_delta_weights,max_delta_pshed,weights_converged,bilevel_time_s,rounding_time_s
+case6_unbalanced_switch_good4integer,min_max,1,125.44,84.45219201891304,84.45212393336087,67.32477042324062,20,20,LOCALLY_SOLVED,false,0.499998187963794,0.00023239861453383526,true,65.15199995040894,NaN

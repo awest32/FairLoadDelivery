@@ -75,14 +75,14 @@ max_shed   = [maximum(loadshed[i, 1:n])  for i in 1:alpha_points]
 alphas     = loadshed[:, end]
 
 # Pareto curve: total shed (efficiency) vs max load shed (fairness)
-p3 = plot(total_shed,max_shed,
+p3 = plot(total_shed,max_shed,label="solution (kW)",
     seriestype = :line,
     lc = :grey,
     marker = :circle,
     marker_z = alphas, colorbar_title = "alpha", color = :cividis,
     ylabel = "max load shed (fairness)",
     xlabel = "total load shed (efficiency)",
-    title  = "Pareto front: integer problem fairness vs efficiency",
+    #title  = "Pareto front: integer problem fairness vs efficiency",
     legend = true)
 
 plot!(p3)#, total_shed, max_shed)
@@ -95,24 +95,36 @@ plot!(p4, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
 savefig(plot(p3, p4, layout=(1,2), size=(900,400)),
           joinpath(output_dir, "pareto_summary_integer.svg"))
 
-n = length(ref[:load])                                                 
+n = length(ref[:load])
 load_labels = [load_data["name"] for (id, load_data) in sort(ref[:load])]
-pshed_per_load = loadshed[1, 1:n]  
-p_dist = bar(load_labels, pshed_per_load,
-    xlabel = "Load",
-    ylabel = "Load shed (kW)",
-    title  = "Per-load shed — integer solution",
-    legend = false,
-    color  = :steelblue,
-    linecolor = :black,
-)
-for (i, v) in enumerate(pshed_per_load)
-    annotate!(p_dist, i, v + maximum(pshed_per_load)*0.02,
-            text("$(round(v, digits=1))", 8, :center))
+
+function build_dist_plot(pshed_per_load, title_str)
+    p = bar(load_labels, pshed_per_load,
+        xlabel = "load ID",
+        ylabel = "load shed (kW)",
+        title  = title_str,
+        legend = false,
+        color  = :steelblue,
+        linecolor = :black,
+    )
+    for (i, v) in enumerate(pshed_per_load)
+        annotate!(p, i, v + maximum(pshed_per_load)*0.02,
+                text("$(round(v, digits=1))", 8, :center))
+    end
+    return p
 end
-savefig(p_dist, joinpath(output_dir,
-"loadshed_distribution_integer.svg"))
-plot(p_dist,p3,p4)
+
+p_dist_a0 = build_dist_plot(loadshed[1, 1:n],   "alpha = 0 (efficiency)")
+p_dist_a1 = build_dist_plot(loadshed[end, 1:n], "alpha = 1 (fairness)")
+
+savefig(p_dist_a0, joinpath(output_dir, "loadshed_distribution_integer_alpha0.svg"))
+savefig(p_dist_a1, joinpath(output_dir, "loadshed_distribution_integer_alpha1.svg"))
+
+combined = plot(p_dist_a0, p_dist_a1, p4, p3, layout=(2,2), size=(1400, 900),
+    left_margin=10Plots.mm, right_margin=5Plots.mm,
+    top_margin=5Plots.mm, bottom_margin=10Plots.mm)
+savefig(combined, joinpath(output_dir, "summary_integer_all.svg"))
+display(combined)
 
 # JuMP.set_optimizer(mld_model.model, Ipopt.Optimizer)
 # for (index,alpha) in enumerate(LinRange(0,1,alpha_points))

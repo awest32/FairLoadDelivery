@@ -1,0 +1,10 @@
+case,fair_func,period,load_id,weight
+case6_unbalanced_switch_good4integer,min_max,0,5,1.0001243359690661
+case6_unbalanced_switch_good4integer,min_max,0,4,3.4998552882417777
+case6_unbalanced_switch_good4integer,min_max,0,6,4.101253280315375
+case6_unbalanced_switch_good4integer,min_max,0,7,1.0000500614242789
+case6_unbalanced_switch_good4integer,min_max,0,2,1.0000004330562875
+case6_unbalanced_switch_good4integer,min_max,0,9,1.0000009856995293
+case6_unbalanced_switch_good4integer,min_max,0,8,2.277259505362502
+case6_unbalanced_switch_good4integer,min_max,0,3,9.999909646095801
+case6_unbalanced_switch_good4integer,min_max,0,1,4.141456143724118

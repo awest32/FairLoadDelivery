@@ -36,17 +36,17 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]
-const FAIR_FUNCS = ["jain"]#, "min_max", "equality_min", "proportional", "jain", "palma"]
+const CASES = ["case6_unbalanced_switch_good4integer"]
+const FAIR_FUNCS = ["min_max"]#, "min_max", "equality_min", "proportional", "jain", "palma"]
 const LS_PERCENT = 0.8
 const WARMSTART_ITERATIONS = 2  # Fixed warm-up phase; set to 0 to disable
 const ITERATIONS = 20           # Main iterations after warm-start
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 1000
-const SWITCH_RATING = 600.0
+const N_BERNOULLI_SAMPLES = 2000
+const SWITCH_RATING = 15.0
 const SOURCE_PU = 1.03
-const critical_buses = []
-const N_PERIODS = 2
+const critical_buses = ["l8"]
+const N_PERIODS = 1
 
 
 # Gaussian load profile: peak at hour 14 (1pm), σ=4 hours
@@ -154,9 +154,9 @@ function run_bilevel_relaxed_mn(mn_data::Dict{String,Any}, iterations::Int, fair
         if fair_func == "proportional"
             pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed, pshed_val, weight_vals, pd_all, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "efficiency"
-            pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed, pshed_val, weight_vals; critical_id, weight_ids, peak_time_costs=peak_time_costs)
+            pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed, pshed_val, weight_vals; critical_ids, weight_ids, peak_time_costs=peak_time_costs)
         elseif fair_func == "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
+            pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed, pshed_val, weight_vals; critical_ids=Int[], weight_ids, peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "equality_min"
             pshed_new, fair_weight_vals, status = equality_min(dpshed, pshed_val, weight_vals, critical_id, weight_ids; peak_time_costs=peak_time_costs, n_loads=n_loads)
         elseif fair_func == "jain"
@@ -334,9 +334,10 @@ function run_comparison_mn()
 
     for case in CASES
         println("\n>>> Processing case: $case")
+        case_file = joinpath(@__DIR__,"../../data/pmd_opendss/$case.dss")
 
         # Setup base network
-        eng, math, lbs, critical_id = FairLoadDelivery.setup_network("ieee_13_aw_edit/$case.dss", LS_PERCENT, SOURCE_PU, SWITCH_RATING, critical_buses)
+        eng, math, lbs, critical_id = FairLoadDelivery.setup_network(case_file, LS_PERCENT; switch_rating=SWITCH_RATING, critical_load=critical_buses)
         sorted_load_ids = sort(parse.(Int, collect(keys(math["load"]))))
         n_loads = length(sorted_load_ids)
         fair_weights = Float64[math["load"][string(i)]["weight"] for i in sorted_load_ids]
