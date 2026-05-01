@@ -1,0 +1,45 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: case6_unbalanced_switch
+  Fairness Function: min_max
+  Iterations: 10
+
+  --- setup ---
+    [+] switches_have_ratings: PASS
+    [X] gen_forces_shedding: FAIL
+    [+] math_has_required_keys: PASS
+    [+] weights_initialized: PASS
+    [+] voltage_limits_set: PASS
+
+  --- relaxed_fldp ---
+    [+] voltage_limits: PASS
+    [+] current_limits: PASS
+    [+] voltage_source_consistency: PASS
+    [+] iteration_label_consistency: PASS
+
+  --- random_rounding ---
+    [+] rounded_mld_converged_r1: PASS
+    [+] binary_values: PASS
+    [+] block_label_consistency: PASS
+    [+] voltage_source_after_rounding: PASS
+    [+] radiality_found: PASS
+    [+] voltage_limits_rounded_r1: PASS
+    [+] current_limits_rounded_r1: PASS
+    [+] switch_label_consistency: PASS
+
+  --- ac_feasibility ---
+    [+] ac_convergence: PASS
+    [+] current_limits_ac: PASS
+    [+] voltage_limits_ac: PASS
+
+  --- AC FEASIBILITY SUMMARY ---
+    Convergence: YES
+    Termination Status: LOCALLY_SOLVED
+    Voltage Violations: 0
+    Current Rating Violations: 0
+    AC solution is feasible with correct voltage and current ratings.
+
+  TOTALS: 20 checks, 19 passed, 1 failed
+======================================================================

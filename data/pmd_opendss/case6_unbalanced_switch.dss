@@ -1,7 +1,7 @@
 Clear
-New Circuit.3Bus_example
+New Circuit.4Bus_example
 !  define a really stiff source
-~ basekv=0.4   pu=0.9959  MVAsc1=1e6  MVAsc3=1e6
+~ basekv=0.4   pu=1.03  MVAsc1=1e6  MVAsc3=1e6
 
 !Define Linecodes
 
@@ -19,18 +19,21 @@ New linecode.4/0QUAD nphases=3 basefreq=50  ! ohms per 100ft
 
 !Define lines
 
-New Line.OHLine  bus1=sourcebus.1.2.3  Primary.1.2.3  linecode = 556MCM   length=1   switch=y ! 5 mile line
-New Line.Quad    Bus1=Primary.1.2.3  loadbus.1.2.3  linecode = 4/0QUAD  length=1   switch=y ! 100 ft
+New Line.OHLine  bus1=sourcebus.1.2.3  bus2=Primary.1.2.3  linecode = 556MCM   length=1  switch=y ! 5 mile line
+New Line.QuadA    Bus1=Primary.1.2.3  bus2=loadbusA.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 New Line.QuadB    Bus1=Primary.1.2.3  bus2=loadbusB.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
+New Line.QuadC    Bus1=loadbusB.1.2.3  bus2=loadbusC.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 
 !Loads - single phase
-New Loadshape.ls1 npts=10 pmult=(file=./load_profile.csv)
 
-New Load.L1 phases=1  loadbus.1.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1  daily=ls1
-New Load.L2 phases=1  loadbus.2.0   ( 0.4 3 sqrt / )   kW=9   kvar=3  model=1  daily=ls1
-New Load.L3 phases=1  loadbus.3.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1  daily=ls1
+New Load.L1 phases=1  loadbusA.1.0   ( 0.4 3 sqrt / )   kW=100   kvar=20  model=1
+New Load.L2 phases=1  loadbusA.2.0   ( 0.4 3 sqrt / )   kW=50   kvar=12  model=1
+New Load.L3 phases=1  loadbusA.3.0   ( 0.4 3 sqrt / )   kW=120   kvar=68  model=1
 
 New Load.L4 phases=3  loadbusB.1.2.3.0   ( 0.4 3 sqrt / )   kW=100   kvar=13  model=1
+
+New Load.L5 phases=1  loadbusC.2.0   ( 0.4 3 sqrt / )   kW=80   kvar=20  model=1
+New Load.L6 phases=2  loadbusC.1.3.0   ( 0.4 3 sqrt / )   kW=20   kvar=26  model=1
 
 
 Set voltagebases=[0.4]

@@ -133,12 +133,12 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     end
 
     # Per-period weight budget (upper bound only)
-    if isfinite(weight_budget)
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            @constraint(model, sum(weights_new[offset + i] for i in 1:n) <= weight_budget)
-        end
-    end
+    # if isfinite(weight_budget)
+    #     for t in 1:n_periods
+    #         offset = (t - 1) * n
+    #         @constraint(model, sum(weights_new[offset + i] for i in 1:n) <= weight_budget)
+    #     end
+    # end
 
     @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
     reg_terms = []
@@ -158,10 +158,10 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
             end
         end
     end
-    fairness_part = alpha * sum(λ[t] * t_period[t] for t in 1:n_periods)
-    eff_part = (isempty(eff_terms) ? 0.0 : (1.0 - alpha) * sum(eff_terms)) +
-               (isempty(reg_terms) ? 0.0 : sum(reg_terms))
-    @objective(model, Min, fairness_part + eff_part)
+    fairness_term = sum(λ[t] * t_period[t] for t in 1:n_periods)
+    #eff_part = (isempty(eff_terms) ? 0.0 : (1.0 - alpha) * sum(eff_terms)) +
+               #(isempty(reg_terms) ? 0.0 : sum(reg_terms))
+    @objective(model, Min, fairness_term)
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)

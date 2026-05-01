@@ -1,6 +1,6 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.03, switch_rating::Float64=600.0, critical_load::Vector{Any}=Any[])
+function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.03, switch_rating::Float64=600.0, critical_load::Vector{String}=String[])
 
     data = case 
     vscale = 1
@@ -120,15 +120,14 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= switch_rating#264
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_c_with_battery.dss"
+    else
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             switch["current_rating"][:] .= switch_rating
-        end
-    elseif case == "ieee_13_aw_edit/pmonm_13_bus_mod.dss"
-       for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
-            switch["current_rating"][:] .= switch_rating
+            switch["thermal_rating"][:] .= switch_rating
+       end
+       for (i, branch) in math["branch"]
+            branch["c_rating_a"][:] .= switch_rating
        end
     end
     # Ensure the generation from the source bus is less than the max load

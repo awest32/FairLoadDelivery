@@ -38,13 +38,13 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_c"
-const CASE_FILE = "ieee_13_aw_edit/$CASE.dss"
-const LS_PERCENT = 0.8
-const ITERATIONS = 20
+const CASE = "case6_unbalanced_switch"
+const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
+const LS_PERCENT = 0.7
+const ITERATIONS = 10
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
-const N_ROUNDS = 2
-const N_BERNOULLI_SAMPLES = 1000
+const N_ROUNDS = 1
+const N_BERNOULLI_SAMPLES = 2000
 
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -74,7 +74,7 @@ global_logger(TeeLogger(
 # ============================================================
 print_validation_header("Step 1: Network Setup")
 
-eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT, [])
+eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT)
 
 setup_checks = Dict{String, Any}()
 
@@ -542,7 +542,7 @@ ac_summary = Dict{String, Any}()
 
 # Set generation capacity high for AC feasibility (slack bus)
 #math_ac = deepcopy(math_rounded)
-math_ac = ac_network_update(math_rounded, ref)
+math_ac = ac_network_update(math_rounded, ref;mld_solution=mld_rounded)
 
 
 # Run AC power flow
@@ -627,3 +627,31 @@ if ac_converged && haskey(ac_result, "solution")
 end
 
 println("\nValidation complete.")
+
+load_ids       = sort(collect(keys(mld_rounded["solution"]["load"])),
+by=x->parse(Int,x))                                                    
+load_labels    = [math_rounded["load"][lid]["name"] for lid in
+load_ids]
+pshed_per_load = [sum(mld_rounded["solution"]["load"][lid]["pshed"])
+for lid in load_ids]
+
+p_dist = bar(load_labels, pshed_per_load,
+    xlabel = "Load",
+    ylabel = "Load shed (kW)",
+    title  = "Per-load shed rounded integer solution ($CASE /
+$FAIR_FUNC)",
+    legend = false,
+    color  = :steelblue,
+    linecolor = :black,
+    xrotation = 45,
+)
+
+# label the max bar
+max_val = maximum(pshed_per_load)
+max_idx = argmax(pshed_per_load)
+# annotate!(p_dist, max_idx, max_val + max_val*0.03,
+#         text("max=$(round(max_val, digits=1))", 9, :center, :red))
+
+display(p_dist)
+savefig(p_dist, joinpath(save_dir,
+"loadshed_distribution_rounded.png"))
