@@ -124,7 +124,6 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             switch["current_rating"][:] .= switch_rating
-            switch["thermal_rating"][:] .= switch_rating
        end
        for (i, branch) in math["branch"]
             branch["c_rating_a"][:] .= switch_rating

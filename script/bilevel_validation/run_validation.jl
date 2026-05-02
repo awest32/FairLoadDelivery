@@ -41,11 +41,11 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 const LS_PERCENT = 100.0
-const ITERATIONS = 10
+const ITERATIONS = 1
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 10
-
+switch_rating = 15
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer

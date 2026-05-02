@@ -126,42 +126,13 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     # pshed_new through the Jacobian (dpshed/dw). Keeping this unweighted keeps
     # the formulation linear and matches the role weights play in the bilevel:
     # handles for influencing the lower level, not multipliers in the objective.
-    @variable(model, t_period[1:n_periods] >= 0)
+    @variable(model, max_shed >= 0)
     for t in 1:n_periods
         offset = (t - 1) * n
-        @constraint(model, [i=1:n], t_period[t] >= pshed_new[offset + i])
+        @constraint(model, [i=1:n], max_shed >= λ[t]*pshed_new[offset + i])
     end
 
-    # Per-period weight budget (upper bound only)
-    # if isfinite(weight_budget)
-    #     for t in 1:n_periods
-    #         offset = (t - 1) * n
-    #         @constraint(model, sum(weights_new[offset + i] for i in 1:n) <= weight_budget)
-    #     end
-    # end
-
-    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
-    reg_terms = []
-    eff_terms = []  # per-period shed/total_demand for α convex combination
-    have_pd = !isempty(pd)
-    have_pd && @assert length(pd) == m "pd must have length $m when supplied"
-    use_reg = reg > 0 && have_pd
-    use_alpha = alpha < 1.0 && have_pd
-    if have_pd
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            total_demand_t = sum(pd[offset + i] for i in 1:n)
-            if total_demand_t > 0
-                eff_t = λ[t] * sum(pshed_new[offset + i] for i in 1:n) / total_demand_t
-                use_alpha && push!(eff_terms, eff_t)
-                use_reg   && push!(reg_terms, reg * eff_t)
-            end
-        end
-    end
-    fairness_term = sum(λ[t] * t_period[t] for t in 1:n_periods)
-    #eff_part = (isempty(eff_terms) ? 0.0 : (1.0 - alpha) * sum(eff_terms)) +
-               #(isempty(reg_terms) ? 0.0 : sum(reg_terms))
-    @objective(model, Min, fairness_term)
+    @objective(model, Min, max_shed)
     JuMP.set_silent(model)
     optimize!(model)
     status = termination_status(model)

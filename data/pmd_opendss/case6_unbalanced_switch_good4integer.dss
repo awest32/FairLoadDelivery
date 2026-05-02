@@ -33,8 +33,7 @@ New Load.L2 phases=1  loadbusA.2.0   ( 0.4 3 sqrt / )   kW=4   kvar=4.5  model=1
 New Load.L3 phases=1  loadbusA.3.0   ( 0.4 3 sqrt / )   kW=8   kvar=3  model=1
 
 New Load.L4 phases=1  loadbusB.1.0   ( 0.4 3 sqrt / )   kW=2   kvar=1 model=1
-New Load.L5 phases=1  loadbusB.2.0   ( 0.4 3 sqrt / )   kW=6   kvar=3  model=1
-New Load.L6 phases=1  loadbusB.3.0   ( 0.4 3 sqrt / )   kW=9   kvar=6  model=1
+
 
 New Load.L9 phases=3  loadbusC.1.2.3.0   ( 0.4 3 sqrt / )   kW=15   kvar=4.5  model=1
 
