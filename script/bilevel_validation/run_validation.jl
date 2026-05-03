@@ -40,12 +40,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-const LS_PERCENT = 100.0
-const ITERATIONS = 1
+const LS_PERCENT = 1.0
+const ITERATIONS = 2
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 10
-switch_rating = 15
+const N_BERNOULLI_SAMPLES = 2000
+switch_rating = [26.0,23.0,21.0]*LS_PERCENT
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
@@ -74,7 +74,7 @@ global_logger(TeeLogger(
 # ============================================================
 print_validation_header("Step 1: Network Setup")
 
-eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT)
+eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT; switch_rating=switch_rating)
 
 setup_checks = Dict{String, Any}()
 
@@ -148,6 +148,8 @@ for (l_id, load) in sort(collect(math["load"]), by=x->parse(Int,x[1]))
 end
 
 validation_results["setup"] = setup_checks
+mld_integer_initial = FairLoadDelivery.solve_mc_mld_switch_integer(math,Gurobi.Optimizer)
+mld_relaxed_initial = FairLoadDelivery.solve_mc_mld_switch_relaxed(math,Gurobi.Optimizer)
 
 # ============================================================
 # STEP 2: INITIAL LOWER-LEVEL SOLVE
@@ -205,8 +207,12 @@ for k in 1:ITERATIONS
     global fair_weights, iteration_label_consistent
     println("\n  --- Iteration $k ---")
 
+    # Solve integer problem first
+    mld_integer_solution = solve_mc_mld_switch_integer(math_new, Gurobi.Optimizer)
+
+    math_updated = update_network(mld_integer_solution["solution"], math_new)    
     # Solve lower-level
-    dpshed_k, pshed_val_k, pshed_ids_k, weight_vals_k, weight_ids_k, model_k = lower_level_soln(math_new, fair_weights, k);
+    dpshed_k, pshed_val_k, pshed_ids_k, weight_vals_k, weight_ids_k, model_k = lower_level_soln(math_updated, fair_weights, k);
 
     # Check label consistency at each iteration
     passed_k, issues_k = check_label_consistency(math_new, pshed_ids_k, weight_ids_k, "iteration_$k")
@@ -270,6 +276,7 @@ print_check_result("Label consistency across all iterations", iteration_label_co
 # Now solve the relaxed MLD with the final weights and check limits
 print_validation_header("Step 3: Solving relaxed MLD with final weights...")
 mld_relaxed_final = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math_new, ipopt_solver; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]);
+mld_integer_final = FairLoadDelivery.solve_mc_mld_switch_integer(math_new,Gurobi.Optimizer)
 
 # Check voltage limits on relaxed solution
 v_passed, v_violations, v_summary = check_voltage_limits_relaxed(mld_relaxed_final, math_new)

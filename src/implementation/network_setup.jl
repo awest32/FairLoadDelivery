@@ -1,6 +1,6 @@
 using PowerModelsDistribution
 
-function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.03, switch_rating::Float64=600.0, critical_load::Vector{String}=String[])
+function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.03, switch_rating::Vector{Float64}=[600.0,600.0,600.0], critical_load::Vector{String}=String[])
 
     data = case 
     vscale = 1
@@ -123,7 +123,27 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
     else
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
-            switch["current_rating"][:] .= switch_rating
+            if switch["name"] == "quadbc"
+                switch["current_rating"][1] = 6
+                switch["current_rating"][2] = 6
+                switch["current_rating"][3] = 6
+            elseif switch["name"] == "quadad"
+                switch["current_rating"][1] = 5
+                switch["current_rating"][2] = 5
+                switch["current_rating"][3] = 5
+            elseif switch["name"] == "quadpa"
+                switch["current_rating"][1] = 11
+                switch["current_rating"][2] = 8
+                switch["current_rating"][3] = 12
+            elseif switch["name"] == "quadpb"
+                switch["current_rating"][1] = 7
+                switch["current_rating"][2] = 13
+                switch["current_rating"][3] = 15
+            else #switch["name"] == "ohline"
+                switch["current_rating"][1] = switch_rating[1]
+                switch["current_rating"][2] = switch_rating[2]
+                switch["current_rating"][3] = switch_rating[3]
+            end
        end
        for (i, branch) in math["branch"]
             branch["c_rating_a"][:] .= switch_rating
