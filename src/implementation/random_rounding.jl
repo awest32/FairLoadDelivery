@@ -166,7 +166,6 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
             @constraint(model, z_block[b] == 1)
         end
 
-        FairLoadDelivery.constraint_block_budget_jump(model, ref_round)
         FairLoadDelivery.constraint_switch_budget_jump(model, ref_round)
 
         FairLoadDelivery.constraint_connect_block_load_jump(model, ref_round)
@@ -177,7 +176,7 @@ function radiality_check(ref_round::Dict{Symbol,Any}, zs_relaxed::Dict{Int, Floa
 
         optimize!(model);
         if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.LOCALLY_SOLVED || termination_status(model) == MOI.ALMOST_LOCALLY_SOLVED
-            d = sum((bernoulli_samples[i][s]^2 + zs_relaxed[s]^2)^2 for s in switch_ids)
+            d = sqrt(sum((bernoulli_samples[i][s] - zs_relaxed[s])^2 for s in switch_ids))
             push!(feasible_candidates, (dist=d, index=i, block_status=value.(z_block), load_status=value.(z_demand)))
         end
     end

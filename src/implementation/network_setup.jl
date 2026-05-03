@@ -58,7 +58,11 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 bus["vmin"][:] .= 0.95
             end
     end
-
+    # Calculate apparent power given P and Q
+    function calc_apparent_power(p,q)
+        s = sqrt(p^2+q^2)
+        return s
+    end
     # Update the current limits on the switches based upon the case
     if case == "ieee_13_aw_edit/motivation_a.dss"
         for (i,switch) in math["switch"]
@@ -124,22 +128,22 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1.0
             if switch["name"] == "quadbc"
-                switch["current_rating"][1] = 6
-                switch["current_rating"][2] = 6
-                switch["current_rating"][3] = 6
+                switch["current_rating"][1] = sqrt(5^2+1.5^2) 
+                switch["current_rating"][2] = sqrt(5^2+1.5^2) 
+                switch["current_rating"][3] = sqrt(5^2+1.5^2) 
             elseif switch["name"] == "quadad"
-                switch["current_rating"][1] = 5
-                switch["current_rating"][2] = 5
-                switch["current_rating"][3] = 5
+                switch["current_rating"][1] = sqrt(5^2+4)
+                switch["current_rating"][2] = sqrt(5^2+4)
+                switch["current_rating"][3] = sqrt(5^2+4)
             elseif switch["name"] == "quadpa"
-                switch["current_rating"][1] = 11
-                switch["current_rating"][2] = 8
-                switch["current_rating"][3] = 12
+                switch["current_rating"][1] = sqrt(14^2+5^2) 
+                switch["current_rating"][2] = calc_apparent_power(10,2.5)
+                switch["current_rating"][3] = calc_apparent_power(15,4.5)
             elseif switch["name"] == "quadpb"
-                switch["current_rating"][1] = 7
-                switch["current_rating"][2] = 13
-                switch["current_rating"][3] = 15
-            else #switch["name"] == "ohline"
+                switch["current_rating"][1] = calc_apparent_power(8,3)
+                switch["current_rating"][2] = calc_apparent_power(5,2)
+                switch["current_rating"][3] = calc_apparent_power(5,2)
+            elseif switch["name"] == "ohline"
                 switch["current_rating"][1] = switch_rating[1]
                 switch["current_rating"][2] = switch_rating[2]
                 switch["current_rating"][3] = switch_rating[3]

@@ -40,12 +40,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-const LS_PERCENT = 1.0
+const LS_PERCENT = 0.8
 const ITERATIONS = 2
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
-switch_rating = [26.0,23.0,21.0]*LS_PERCENT
+switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
@@ -149,7 +149,7 @@ end
 
 validation_results["setup"] = setup_checks
 mld_integer_initial = FairLoadDelivery.solve_mc_mld_switch_integer(math,Gurobi.Optimizer)
-mld_relaxed_initial = FairLoadDelivery.solve_mc_mld_switch_relaxed(math,Gurobi.Optimizer)
+mld_relaxed_initial = FairLoadDelivery.solve_mc_mld_switch_relaxed(math,Ipopt.Optimizer)
 
 # ============================================================
 # STEP 2: INITIAL LOWER-LEVEL SOLVE
@@ -372,11 +372,12 @@ bernoulli_samples = Dict{Int, Vector{Dict{Int, Float64}}}()
 #for r in 1:N_ROUNDS
     r=1
     rng=100
+
     # Generate bernoulli samples for switches and blocks
     bernoulli_samples[r] = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, rng)
 
     # Find the best bernoulli sample that is topology feasible and closest to the relaxed solution
-    index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status = FairLoadDelivery.radiality_check(ref, switch_states, block_status, bernoulli_samples[r])
+    index, switch_states_radial, block_ids, block_status_radial, load_ids, load_status, feasible_candidates = FairLoadDelivery.radiality_check(ref, switch_states, block_status, bernoulli_samples[r])
 
     if index === nothing
         @warn "[$CASE/$FAIR_FUNC] Round $r failed at: RADIAL FEASIBILITY — no Bernoulli sample produced a feasible radial topology"
@@ -478,50 +479,49 @@ end
 rounding_checks["voltage_source_after_rounding"] = Dict("passed" => vs_ok_round)
 print_check_result("Voltage source consistency after rounding", vs_ok_round)
 
-# Solve rounded MLD for each round and check limits
+# Solve rounded integer MLD for each round and check limits
 mld_rounded_results = Vector{Dict{String, Any}}()
 math_rounded_results = Vector{Dict{String, Any}}()
-for r in 1:N_ROUNDS
-    if math_out[r] === nothing
-        @warn "[$CASE/$FAIR_FUNC] Skipping rounded MLD for round $r (no feasible radial topology)"
-        continue
-    end
-    println("\n  Solving rounded MLD for round $r...")
-    mld_rounded_r = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_out[r], gurobi_solver)
-    rounded_term = mld_rounded_r["termination_status"]
-    passed_term = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED || rounded_term == MOI.ALMOST_LOCALLY_SOLVED)
-    rounding_checks["rounded_mld_converged_r$r"] = Dict("passed" => passed_term, "details" => ["Status: $rounded_term"])
-    print_check_result("Rounded MLD converge status (round $r)", passed_term, "Status: $rounded_term")
+r=1
+if math_out[r] === nothing
+    @error("[$CASE/$FAIR_FUNC] Skipping rounded MLD for round $r (no feasible radial topology)")
+end
+println("\n  Solving rounded MLD for round $r...")
+mld_rounded_r = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_out[r], gurobi_solver)
+rounded_term = mld_rounded_r["termination_status"]
+passed_term = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED || rounded_term == MOI.ALMOST_LOCALLY_SOLVED)
+rounding_checks["rounded_mld_converged_r$r"] = Dict("passed" => passed_term, "details" => ["Status: $rounded_term"])
+print_check_result("Rounded MLD converge status (round $r)", passed_term, "Status: $rounded_term")
 
-    if passed_term
-        push!(mld_rounded_results, mld_rounded_r)
-        push!(math_rounded_results, math_out[r])
-        # Check voltage limits
-        v_passed_r, v_violations_r, v_summary_r = check_voltage_limits_relaxed(mld_rounded_r, math_out[r])
-        rounding_checks["voltage_limits_rounded_r$r"] = Dict("passed" => v_passed_r, "details" => [string(v) for v in v_violations_r])
-        print_check_result("Voltage limits (rounded MLD, round $r)", v_passed_r, "$(v_summary_r["violations"]) violations")
+if passed_term
+    push!(mld_rounded_results, mld_rounded_r)
+    push!(math_rounded_results, math_out[r])
+    # Check voltage limits
+    v_passed_r, v_violations_r, v_summary_r = check_voltage_limits_relaxed(mld_rounded_r, math_out[r])
+    rounding_checks["voltage_limits_rounded_r$r"] = Dict("passed" => v_passed_r, "details" => [string(v) for v in v_violations_r])
+    print_check_result("Voltage limits (rounded MLD, round $r)", v_passed_r, "$(v_summary_r["violations"]) violations")
 
-        # Check current limits
-        c_passed_r, c_violations_r, c_summary_r = check_switch_ampacity(mld_rounded_r, math_out[r])
-        rounding_checks["current_limits_rounded_r$r"] = Dict("passed" => c_passed_r, "details" => [string(v) for v in c_violations_r])
-        print_check_result("Switch ampacity (rounded MLD, round $r)", c_passed_r, "$(c_summary_r["violations"]) violations")
+    # Check current limits
+    c_passed_r, c_violations_r, c_summary_r = check_switch_ampacity(mld_rounded_r, math_out[r])
+    rounding_checks["current_limits_rounded_r$r"] = Dict("passed" => c_passed_r, "details" => [string(v) for v in c_violations_r])
+    print_check_result("Switch ampacity (rounded MLD, round $r)", c_passed_r, "$(c_summary_r["violations"]) violations")
 
-        if haskey(c_summary_r, "utilizations")
-            println("    Switch utilizations (rounded, round $r):")
-            for (s_id, util) in sort(collect(c_summary_r["utilizations"]), by=x->parse(Int, x[1]))
-                println("      Switch $s_id: $(round(util, digits=1))%")
-            end
+    if haskey(c_summary_r, "utilizations")
+        println("    Switch utilizations (rounded, round $r):")
+        for (s_id, util) in sort(collect(c_summary_r["utilizations"]), by=x->parse(Int, x[1]))
+            println("      Switch $s_id: $(round(util, digits=1))%")
         end
     end
 end
-function find_best_mld_solution(mlds::Vector{Dict{String, Any}}, ipopt)
+
+function find_best_mld_solution(mlds::Vector{Dict{String, Any}})
     best_obj = -Inf
     best_set = 0
     best_mld = Dict{String, Any}()
     @info " the number of mlds to evaluate is: $(length(mlds))"
     for (id, mld) in enumerate(mlds)
         @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
-        if best_obj >= mld["objective"] 
+        if best_obj <= mld["objective"] 
             best_obj = mld["objective"]
             best_set = id
             best_mld = mld
@@ -535,7 +535,7 @@ if isempty(mld_rounded_results)
     @error "[$CASE/$FAIR_FUNC] FAILED — no feasible rounded MLD solution found across all $N_ROUNDS rounds. Check warnings above for failure stage ROUNDED MLD SOLVE."
     error("No feasible solution — cannot proceed to AC feasibility test")
 end
-best_set, best_mld = find_best_mld_solution(mld_rounded_results, ipopt_solver)
+best_set, best_mld = find_best_mld_solution(mld_rounded_results)
 math_rounded = math_rounded_results[best_set]
 mld_rounded = mld_rounded_results[best_set]
 
