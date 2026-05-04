@@ -100,8 +100,8 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
         lid_idx = ((id - 1) % n_per_period) + 1
         load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
         if load_id in critical_ids
-            @constraint(model, weights_new[id] >= 50.0)
-            @constraint(model, weights_new[id] <= 100.0)
+            @constraint(model, weights_new[id] >= 10.0)
+            @constraint(model, weights_new[id] <= 10.0)
         else
             @constraint(model, weights_new[id] >= 1.0)
             @constraint(model, weights_new[id] <= 10.0)

@@ -180,7 +180,7 @@ function _ref_add_load_blocks!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
         ref[:block_graph_edge_map][Graphs.Edge(f_block, t_block)] = s
         ref[:block_graph_edge_map][Graphs.Edge(t_block, f_block)] = s
 
-        if Int(switch["dispatchable"]) == Int(_PMD.YES) && Int(switch["status"]) == Int(_PMD.ENABLED)
+        if Int(switch["dispatchable"]) == Int(_PMD.YES) #&& Int(switch["status"]) == Int(_PMD.ENABLED)
             push!(ref[:block_switches][f_block], s)
             push!(ref[:block_switches][t_block], s)
         end

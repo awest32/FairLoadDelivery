@@ -66,7 +66,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
     # Update the current limits on the switches based upon the case
     if case == "ieee_13_aw_edit/motivation_a.dss"
         for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= switch_rating#308
             elseif switch["name"] == "632645"
@@ -75,7 +75,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         end
     elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
         for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= switch_rating#308
             elseif switch["name"] == "632645"
@@ -84,7 +84,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         end
     elseif case == "ieee_13_aw_edit/motivation_b.dss"
        for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= switch_rating#304
             elseif switch["name"] == "632645"
@@ -95,7 +95,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         end
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             switch["current_rating"][:] .= switch_rating
             # if switch["name"] == "632633"
             #     switch["current_rating"][:] .= 700#310
@@ -113,7 +113,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
        for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             if switch["name"] == "632633"
                 switch["current_rating"][:] .= switch_rating#310
             elseif switch["name"] == "632645"
@@ -126,23 +126,23 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         end
     else
        for (i,switch) in math["switch"]
-            switch["dispatchable"] = 1.0
+            switch["dispatchable"] = 1
             if switch["name"] == "quadbc"
-                switch["current_rating"][1] = sqrt(5^2+1.5^2) 
-                switch["current_rating"][2] = sqrt(5^2+1.5^2) 
+                switch["current_rating"][1] = sqrt(5^2+1.5^2)
+                switch["current_rating"][2] = sqrt(5^2+1.5^2)
                 switch["current_rating"][3] = sqrt(5^2+1.5^2) 
             elseif switch["name"] == "quadad"
-                switch["current_rating"][1] = sqrt(5^2+4)
-                switch["current_rating"][2] = sqrt(5^2+4)
-                switch["current_rating"][3] = sqrt(5^2+4)
+                switch["current_rating"][1] = sqrt(5^2+4) 
+                switch["current_rating"][2] = sqrt(5^2+4) 
+                switch["current_rating"][3] = sqrt(5^2+4) 
             elseif switch["name"] == "quadpa"
-                switch["current_rating"][1] = sqrt(14^2+5^2) 
-                switch["current_rating"][2] = calc_apparent_power(10,2.5)
-                switch["current_rating"][3] = calc_apparent_power(15,4.5)
+                switch["current_rating"][1] = sqrt(14^2+5^2) #*ls_percent 
+                switch["current_rating"][2] = calc_apparent_power(10,2.5)#*ls_percent 
+                switch["current_rating"][3] = calc_apparent_power(15,4.5)#*ls_percent 
             elseif switch["name"] == "quadpb"
-                switch["current_rating"][1] = calc_apparent_power(8,3)
-                switch["current_rating"][2] = calc_apparent_power(5,2)
-                switch["current_rating"][3] = calc_apparent_power(5,2)
+                switch["current_rating"][1] = calc_apparent_power(8,3)#*ls_percent 
+                switch["current_rating"][2] = calc_apparent_power(5,2)#*ls_percent 
+                switch["current_rating"][3] = calc_apparent_power(5,2)#*ls_percent 
             elseif switch["name"] == "ohline"
                 switch["current_rating"][1] = switch_rating[1]
                 switch["current_rating"][2] = switch_rating[2]
@@ -243,7 +243,7 @@ end
 function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load_selection::Dict{}, switch_selection::Dict{})
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
-        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        data["switch"][string(switch_id)]["dispatchable"] = 1
         #@info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
         data["switch"][string(switch_id)]["state"] = switch_state
         data["switch"][string(switch_id)]["status"] = switch_state
@@ -281,7 +281,7 @@ function update_network(data_in::Dict{String,Any}, block_selection::Dict{}, load
                 # @info typeof(branch_id)
                 data["branch"][string(branch_id)]["status"] = 0.0
                 data["branch"][string(branch_id)]["br_status"] = 0.0
-                data["branch"][string(branch_id)]["dispatchable"] = 0.0
+                data["branch"][string(branch_id)]["dispatchable"] = 0
                 data["branch"][string(branch_id)]["vbase"] = 0
             end
         end
@@ -310,7 +310,7 @@ end
 function update_network(data_in::Dict{String,Any}, switch_selection::Dict{}, ref::Dict{Symbol,Any})
     data = deepcopy(data_in)
     for (switch_id, switch_state) in switch_selection
-        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        data["switch"][string(switch_id)]["dispatchable"] = 1
         #@info "Setting switch $switch_id to state $switch_state in math dictionary for round $r"
         data["switch"][string(switch_id)]["state"] = switch_state
         data["switch"][string(switch_id)]["status"] = switch_state
@@ -340,9 +340,9 @@ function update_network(solution_in:: Dict{String,Any}, data_in::Dict{String,Any
     data = deepcopy(data_in)
     for (switch_id, switch_dict) in solution_in["switch"]
   #      @info "Updating switch $switch_id to state $(switch_dict["state"]) in update_network function"
-        data["switch"][string(switch_id)]["dispatchable"] = 1.0
+        data["switch"][string(switch_id)]["dispatchable"] = 1
         data["switch"][string(switch_id)]["state"] = switch_dict["state"]
-        data["switch"][string(switch_id)]["status"] = switch_dict["state"]
+        #data["switch"][string(switch_id)]["status"] = switch_dict["state"]
    #     @info "Switch $switch_id state in math dictionary is now $(data["switch"][string(switch_id)]["state"])"
     end
 
@@ -389,7 +389,7 @@ function ac_network_update(data_in::Dict{String,Any}, ref::Dict{Symbol,Any};
                 if haskey(data["switch"], sid) && haskey(sw_sol, "state")
                     data["switch"][sid]["state"] = sw_sol["state"]
                     data["switch"][sid]["status"] = sw_sol["state"]
-                    data["switch"][sid]["dispatchable"] = 1.0
+                    data["switch"][sid]["dispatchable"] = 1
                 end
             end
         end
@@ -530,4 +530,5 @@ function ensure_switches_in_solution!(solution::Dict{String,Any}, math::Dict{Str
         end
     end
     return solution
+
 end

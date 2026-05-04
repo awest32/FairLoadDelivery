@@ -382,11 +382,8 @@
         objective_mn_fairly_weighted_max_load_served_regd(pm; regularization=0.05)
     end
 
-    function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels;
-                                                 fixed_topology::Bool=false)
+    function build_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
         pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(Ipopt.Optimizer))
-        # JuMP.set_attribute(pm.model, "hsllib", HSL_jll.libhsl_path)
-        # JuMP.set_attribute(pm.model, "linear_solver", "ma27")
         #@info pm.model typeof(pm.model)
 
         _PMD.variable_mc_bus_voltage_indicator(pm; relax=true)
@@ -485,11 +482,10 @@
         constraint_mc_block_energization_consistency_bigm(pm)
 
         # Must be disabled if there is no generation in the network
-        constraint_block_budget(pm)
+        #constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)
-        #constraint_shed_single_load(pm)
     
         constraint_connect_block_load(pm)
         constraint_connect_load_bus(pm)
@@ -498,18 +494,17 @@
         constraint_connect_block_shunt(pm)
         constraint_connect_block_storage(pm)
 
-        # Pin every switch state to math["switch"][i]["state"] when the caller is running a
-        # fixed-topology bilevel iteration (period 1 of the two-period flow). DiffOpt sees the
-        # switches as constants in the Jacobian.
-        if fixed_topology
-            constraint_set_switch_state_rounded(pm)
-        end
+        # # Pin every switch state to math["switch"][i]["state"] when the caller is running a
+        # # fixed-topology bilevel iteration (period 1 of the two-period flow). DiffOpt sees the
+        # # switches as constants in the Jacobian.
+        # if fixed_topology
+        #     constraint_set_switch_state_rounded(pm)
+        # end
 
         # Tiny regularizer (1e-6) keeps pd strictly interior so DiffOpt's KKT-based forward
         # sensitivities stay well-defined at active bounds, without materially biasing the
         # predicted shed (was 0.05 — large enough to inflate period-1 shed by ~80% in tests).
         objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-6)
-        #objective_fairly_weighted_max_load_served_with_penalty(pm)
         #objective_fairly_weighted_min_load_shed(pm)
     end
 
@@ -1138,7 +1133,6 @@
         constraint_mc_isolate_block(pm)
         constraint_radial_topology(pm)
 
-        constraint_block_budget(pm)
         constraint_switch_budget(pm)
 
         constraint_load_shed_definition(pm)

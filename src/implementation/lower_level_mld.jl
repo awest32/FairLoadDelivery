@@ -15,6 +15,9 @@ using PowerPlots
 using DataFrames
 using CSV
 using Plots
+using Dates
+import MathOptInterface
+const MOI = MathOptInterface
 # using DataFrames
 # ipopt = Ipopt.Optimizer
 # gurobi = Gurobi.Optimizer
@@ -29,7 +32,7 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
     weight_params = model[:fair_load_weights]
     pshed_vars = model[:pshed]
     #pserved_vars = model[:pd]
-    
+
     weight_keys = (collect(eachindex(weight_params)))
     pshed_keys = (collect(eachindex(pshed_vars)))
     #pserved_keys = (collect(eachindex(pserved_vars)))
@@ -40,6 +43,17 @@ function diff_forward_full_jacobian(model::JuMP.Model, fair_load_weights::Vector
     n_weights = length(weight_keys)
     n_pshed = length(pshed_keys)
     #n_pserved = length(pserved_keys)
+
+    # Set fair_load_weights parameter values before solving. If empty, retain the
+    # model's initial parameter values (populated from ref[:load_weights] at model
+    # construction) — JuMP container axes are the canonical load ordering, so callers
+    # should not construct weights externally on the first iteration.
+    if !isempty(fair_load_weights)
+        @assert length(fair_load_weights) == n_weights "Expected $(n_weights) weights, got $(length(fair_load_weights))"
+        for (idx, wkey) in enumerate(weight_keys)
+            JuMP.set_parameter_value(weight_params[wkey], fair_load_weights[idx])
+        end
+    end
 
     # Solve once — perturbations only affect differentiation direction, not the optimal solution
     optimize!(model)

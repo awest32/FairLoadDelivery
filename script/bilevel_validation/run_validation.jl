@@ -41,11 +41,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 const LS_PERCENT = 0.8
-const ITERATIONS = 2
+const ITERATIONS = 20
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+const N_BERNOULLI_SAMPLES = 100
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
+#critical_buses = []
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
@@ -223,16 +224,16 @@ for k in 1:ITERATIONS
 
     # Apply upper-level fairness function
     if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k; critical_ids=critical_id)
     elseif FAIR_FUNC == "proportional"
         pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids_k]
-        pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, pd)
+        pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, pd; critical_ids=critical_id)
     elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed_k, pshed_val_k, weight_vals_k; critical_id, weight_ids)
+        pshed_new, fair_weight_vals, status = efficient_load_shed(dpshed_k, pshed_val_k, weight_vals_k; weight_ids, critical_ids=critical_id)
     elseif FAIR_FUNC == "jain"
-        pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = jains_fairness_index(dpshed_k, pshed_val_k, weight_vals_k; critical_ids=critical_id)
     elseif FAIR_FUNC == "equality_min"
-        pshed_new, fair_weight_vals, status = equality_min(dpshed_k, pshed_val_k, weight_vals_k)
+        pshed_new, fair_weight_vals, status = equality_min(dpshed_k, pshed_val_k, weight_vals_k; critical_ids=critical_id)
     elseif FAIR_FUNC == "palma"
         pd = Float64[]
         for i in pshed_ids_k
@@ -521,6 +522,7 @@ function find_best_mld_solution(mlds::Vector{Dict{String, Any}})
     @info " the number of mlds to evaluate is: $(length(mlds))"
     for (id, mld) in enumerate(mlds)
         @info "Rounded solution from set $id has termination status: $(mld["termination_status"]) and objective value: $(mld["objective"])"
+        # Objective is to maximize the load served
         if best_obj <= mld["objective"] 
             best_obj = mld["objective"]
             best_set = id
