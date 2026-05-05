@@ -19,18 +19,19 @@ using Dates
 include("../../src/implementation/visualization.jl")
 
 # Set the network path
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+#case_name = "../../data/ieee_13_aw_edit/motivation_c.dss"
 dir = @__DIR__
 case_path = joinpath(dir,case_name)
 date = Dates.format(now(), "yyyy-mm-dd")  
-
-eng,math,lbs, critical_id  = setup_network(case_path, 0.7; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
+LS_PERCENT = 0.8
+eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 mld_model_int = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]
-
+#pf_soln = PowerModelsDistribution.solve_mc_pf(math, ACRUPowerModel, Ipopt.Optimizer)
 # set alpha sweep for the functions
-alpha_points = 10
+alpha_points = 20
 loadshed = zeros(alpha_points,length(ref[:load])+2)
 
 output_dir = joinpath(@__DIR__, "../../results/$date/trade_off")

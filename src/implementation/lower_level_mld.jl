@@ -94,21 +94,17 @@ function lower_level_soln(math, weights_new, k)
     # end
 
     mld_paramed = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_shedding_implicit_diff; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
-    ref = mld_paramed.ref[:it][:pmd][:nw][0]
 
+    # On k==1, pass empty weights so diff_forward_full_jacobian retains the model's
+    # initial parameter values (populated from ref[:load_weights] at construction).
+    # The JuMP container's axes are the canonical load ordering — building weights_prev
+    # externally in sorted load-id order would misalign with the container's
+    # dict-iteration order on Dict{Int,Float64}.
+    weights_prev = k == 1 ? Float64[] : weights_new
 
-    # On the first iteration, use the weights from the math dictionary.
-    # On subsequent iterations, use the weights from the upper-level fairness function.
-    if k == 1
-        load_ids_sorted = sort(parse.(Int, collect(keys(math["load"]))))
-        weights_prev = Float64[math["load"][string(i)]["weight"] for i in load_ids_sorted]
-    else
-        weights_prev = weights_new
-    end
-    @info "Iteration $k: Solving lower-level MLD with weights: $weights_prev, with type: $(typeof(weights_prev))"
-    # Use the parameterized MLD solution to perform implicit differentiation with DiffOpt.jl
-    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
-    return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, ref, mld_paramed
+    @info "Iteration $k: Solving lower-level MLD with $(isempty(weights_prev) ? "initial parameter values from ref" : "$(length(weights_prev)) weights from upper level")"
+    dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, _ = diff_forward_full_jacobian(mld_paramed.model, weights_prev)
+    return dpshed_mat, pshed_val, pshed_ids, weight_vals, weight_ids, mld_paramed
 end
 
 # dpshed, pshed_val, pshed_ids, weight_vals, weight_ids = lower_level_soln(math, 10*ones(length(math["load"])), 1)

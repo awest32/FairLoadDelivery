@@ -2,7 +2,7 @@
 ======================================================================
   BILEVEL VALIDATION SUMMARY REPORT
 ======================================================================
-  Case: case6_unbalanced_switch_good4integer
+  Case: motivation_c
   Fairness Function: min_max
   Iterations: 20
 
@@ -38,7 +38,7 @@
     Convergence: YES
     Termination Status: LOCALLY_SOLVED
     Voltage Violations: 0
-    Current Rating Violations: 0
+    Current Rating Violations: -1
     AC solution is feasible with correct voltage and current ratings.
 
   TOTALS: 20 checks, 19 passed, 1 failed

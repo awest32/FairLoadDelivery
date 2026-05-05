@@ -34,7 +34,7 @@ for (load_id, load) in math["load"]
 end
 
 # Run initial lower-level solve
-dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, ref, mld_paramed = lower_level_soln(math, fair_weights, 1)
+dpshed, pshed_val, pshed_ids, weight_vals, weight_ids, mld_paramed = lower_level_soln(math, fair_weights, 1)
 
 # Test the upper level problem with the fixed inputs from the lower level solution
 pshed_new_efficiency, fair_weight_vals_efficiency, status_efficiency = efficient_load_shed(dpshed, pshed_val, weight_vals)

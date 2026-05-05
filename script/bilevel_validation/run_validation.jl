@@ -40,12 +40,18 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 const CASE = "case6_unbalanced_switch_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-const LS_PERCENT = 0.8
-const ITERATIONS = 20
+
+# const CASE = "motivation_c"
+# const CASE_FILE = joinpath(@__DIR__,"../../data/ieee_13_aw_edit/$CASE.dss")
+
+LS_PERCENT = 0.8
+const ITERATIONS = 30
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 100
+const N_BERNOULLI_SAMPLES = 2000
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
+
+#switch_rating=[400*LS_PERCENT].*ones(3)
 #critical_buses = []
 # Solvers
 ipopt_solver = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)

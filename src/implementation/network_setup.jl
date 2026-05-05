@@ -96,20 +96,20 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
     elseif case == "ieee_13_aw_edit/motivation_c.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
-            switch["current_rating"][:] .= switch_rating
-            # if switch["name"] == "632633"
-            #     switch["current_rating"][:] .= 700#310
-            # elseif switch["name"] == "632645"
-            #     switch["current_rating"][:] .= 700#264
-            # elseif switch["name"] == "671692"
-            #     switch["current_rating"][:] .= 700#70   
-            # elseif switch["name"] == "646611"
-            #     switch["current_rating"][:] .= 700#264
-            # elseif switch["name"] == "634675"
-            #     switch["current_rating"][:] .= 700
-            # elseif switch["name"] == "670671"
-            #     switch["current_rating"][:] .= 700
-            # end
+            #switch["current_rating"][:] .= switch_rating
+            if switch["name"] == "632633"
+                switch["current_rating"][:] .= 310
+            elseif switch["name"] == "632645"
+                switch["current_rating"][:] .= 264
+            elseif switch["name"] == "671692"
+                switch["current_rating"][:] .= 70   
+            elseif switch["name"] == "646611"
+                switch["current_rating"][:] .= 264
+            elseif switch["name"] == "634675"
+                switch["current_rating"][:] .= 700
+            elseif switch["name"] == "670671"
+                switch["current_rating"][:] .= 700
+            end
         end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
        for (i,switch) in math["switch"]
@@ -143,6 +143,10 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][1] = calc_apparent_power(8,3)#*ls_percent 
                 switch["current_rating"][2] = calc_apparent_power(5,2)#*ls_percent 
                 switch["current_rating"][3] = calc_apparent_power(5,2)#*ls_percent 
+            elseif switch["name"] == "quadae"
+                switch["current_rating"][1] = calc_apparent_power(1,0.33)#*ls_percent 
+                switch["current_rating"][2] = calc_apparent_power(0.66,1.8)#*ls_percent 
+                switch["current_rating"][3] = calc_apparent_power(2.66,0.66)#*ls_percent 
             elseif switch["name"] == "ohline"
                 switch["current_rating"][1] = switch_rating[1]
                 switch["current_rating"][2] = switch_rating[2]
