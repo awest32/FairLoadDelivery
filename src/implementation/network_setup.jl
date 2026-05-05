@@ -128,9 +128,13 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "quadbc"
-                switch["current_rating"][1] = sqrt(5^2+1.5^2)
-                switch["current_rating"][2] = sqrt(5^2+1.5^2)
-                switch["current_rating"][3] = sqrt(5^2+1.5^2) 
+                # 5% margin above L9's per-phase demand to break the exact constraint
+                # coincidence that makes DiffOpt's KKT system rank-deficient at L9's
+                # active-set boundary (manifests as a wrong-sign, inflated-magnitude
+                # gradient column for L9 in the bilevel loop).
+                switch["current_rating"][1] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][2] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][3] = sqrt(5^2+1.5^2) * 1.0001
             elseif switch["name"] == "quadad"
                 switch["current_rating"][1] = sqrt(5^2+4) 
                 switch["current_rating"][2] = sqrt(5^2+4) 

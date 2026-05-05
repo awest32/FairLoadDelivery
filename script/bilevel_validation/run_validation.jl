@@ -672,3 +672,8 @@ max_idx = argmax(pshed_per_load)
 display(p_dist)
 savefig(p_dist, joinpath(save_dir,
 "loadshed_distribution_rounded.png"))
+
+  l9_idx = 7# findfirst(==("8"), weight_ids)
+  @info "dpshed[:, L9] = $(dpshed[:, l9_idx])"
+  @info "dpshed[L9, L9] = $(dpshed[l9_idx, l9_idx])"
+  @info "pshed[L9] = $(pshed_val[l9_idx]),  pd[L9] =$(sum(math_new["load"]["8"]["pd"]))"
