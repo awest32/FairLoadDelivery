@@ -136,11 +136,11 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][2] = sqrt(5^2+1.5^2) * 1.0001
                 switch["current_rating"][3] = sqrt(5^2+1.5^2) * 1.0001
             elseif switch["name"] == "quadad"
-                switch["current_rating"][1] = sqrt(5^2+4) 
-                switch["current_rating"][2] = sqrt(5^2+4) 
-                switch["current_rating"][3] = sqrt(5^2+4) 
+                switch["current_rating"][1] = sqrt(5^2+4) * 1.0001
+                switch["current_rating"][2] = sqrt(5^2+4) * 1.0001
+                switch["current_rating"][3] = sqrt(5^2+4) * 1.0001
             elseif switch["name"] == "quadpa"
-                switch["current_rating"][1] = sqrt(14^2+5^2) #*ls_percent 
+                switch["current_rating"][1] = sqrt(14^2+5^2)#*ls_percent 
                 switch["current_rating"][2] = calc_apparent_power(10,2.5)#*ls_percent 
                 switch["current_rating"][3] = calc_apparent_power(15,4.5)#*ls_percent 
             elseif switch["name"] == "quadpb"

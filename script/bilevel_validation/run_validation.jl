@@ -677,3 +677,9 @@ savefig(p_dist, joinpath(save_dir,
   @info "dpshed[:, L9] = $(dpshed[:, l9_idx])"
   @info "dpshed[L9, L9] = $(dpshed[l9_idx, l9_idx])"
   @info "pshed[L9] = $(pshed_val[l9_idx]),  pd[L9] =$(sum(math_new["load"]["8"]["pd"]))"
+
+  mld_int_direct = FairLoadDelivery.solve_mc_mld_min_max_integer(math, Gurobi.Optimizer)
+  for (lid, ld) in sort(collect(mld_int_direct["solution"]["load"]),
+  by=x->parse(Int,x[1]))
+      println("Load $lid ($(math["load"][lid]["name"])): pshed = $(sum(ld["pshed"]))")
+  end

@@ -501,10 +501,15 @@
         #     constraint_set_switch_state_rounded(pm)
         # end
 
-        # Tiny regularizer (1e-6) keeps pd strictly interior so DiffOpt's KKT-based forward
-        # sensitivities stay well-defined at active bounds, without materially biasing the
-        # predicted shed (was 0.05 — large enough to inflate period-1 shed by ~80% in tests).
-        objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-6)
+        # Tikhonov regularizer keeps pd strictly interior so DiffOpt's KKT-based forward
+        # sensitivities stay well-defined at active bounds. Tradeoff: larger coefficient ->
+        # more robust to active-set degeneracy (Ipopt restoration failures), but biases
+        # the solution toward shedding. Calibration history on case6 meshed:
+        #   0.05  -> inflated period-1 shed by ~80% (too aggressive)
+        #   1e-3  -> shed L8 unnecessarily (still too aggressive)
+        #   1e-6  -> too weak; LOCALLY_INFEASIBLE at iter 4 in meshed case
+        #   1e-4  -> current compromise
+        objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-4)
         #objective_fairly_weighted_min_load_shed(pm)
     end
 
