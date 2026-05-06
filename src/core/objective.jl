@@ -630,7 +630,7 @@ With `alpha ∈ [0, 1]`: convex combination of efficiency and fairness terms.
 """
 function objective_mn_min_max_absolute(pm::_PMD.AbstractUnbalancedPowerModel;
                                        peak_time_costs::Vector{<:Real}=Float64[],
-                                       reg::Float64=1e-4, alpha::Float64=1.0)
+                                       alpha::Float64=1.0)
     nw_ids = sort(collect(_PMD.nw_ids(pm)))
     T = length(nw_ids)
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
@@ -646,8 +646,11 @@ function objective_mn_min_max_absolute(pm::_PMD.AbstractUnbalancedPowerModel;
             JuMP.@constraint(pm.model, max_shed_n >= sum(w[i] * pshed[i]))
         end
         total_demand_n = sum(sum(_PMD.ref(pm, n, :load, d)["pd"]) for d in _PMD.ids(pm, n, :load))
+        # Normalize fairness term by total_demand_n so it's unitless and on the same
+        # scale as eff_term (both ∈ [0, ~1]); matches the single-period formulation.
+        fairness_term = max_shed_n / total_demand_n
         eff_term = sum(pshed[d] for d in _PMD.ids(pm, n, :load)) / total_demand_n
-        JuMP.add_to_expression!(obj, λ[idx] * (alpha * max_shed_n + (1.0 - alpha) * eff_term + reg * eff_term))
+        JuMP.add_to_expression!(obj, λ[idx] * (alpha * fairness_term + (1.0 - alpha) * eff_term))
     end
     return JuMP.@objective(pm.model, Min, obj)
 end
@@ -659,7 +662,7 @@ optionally weighted by peak_time_costs and convex-combined with efficiency.
 """
 function objective_mn_min_max_proportional(pm::_PMD.AbstractUnbalancedPowerModel;
                                            peak_time_costs::Vector{<:Real}=Float64[],
-                                           reg::Float64=1e-4, alpha::Float64=1.0)
+                                           alpha::Float64=1.0)
     nw_ids = sort(collect(_PMD.nw_ids(pm)))
     T = length(nw_ids)
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
@@ -668,6 +671,8 @@ function objective_mn_min_max_proportional(pm::_PMD.AbstractUnbalancedPowerModel
 
     obj = JuMP.AffExpr(0.0)
     for (idx, n) in enumerate(nw_ids)
+        # max_shed_n is already a per-load shed *fraction*, so it's unitless and
+        # on the same scale as eff_term — no extra normalization needed.
         max_shed_n = JuMP.@variable(pm.model, base_name="max_shed_nw_$(n)", lower_bound=0)
         pshed = _PMD.var(pm, n, :pshed)
         w = _PMD.var(pm, n, :fair_load_weights)
@@ -678,7 +683,7 @@ function objective_mn_min_max_proportional(pm::_PMD.AbstractUnbalancedPowerModel
         end
         total_demand_n = sum(sum(_PMD.ref(pm, n, :load, d)["pd"]) for d in _PMD.ids(pm, n, :load))
         eff_term = sum(pshed[d] for d in _PMD.ids(pm, n, :load)) / total_demand_n
-        JuMP.add_to_expression!(obj, λ[idx] * (alpha * max_shed_n + (1.0 - alpha) * eff_term + reg * eff_term))
+        JuMP.add_to_expression!(obj, λ[idx] * (alpha * max_shed_n + (1.0 - alpha) * eff_term))
     end
     return JuMP.@objective(pm.model, Min, obj)
 end

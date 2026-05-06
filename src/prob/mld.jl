@@ -2119,19 +2119,44 @@
     """
     function build_mn_mc_mld_min_max_integer(pm::_PMD.AbstractUBFModels;
                                              peak_time_costs::Vector{<:Real}=Float64[],
-                                             reg::Float64=1e-4, alpha::Float64=1.0)
+                                             alpha::Float64=1.0)
         nw_ids = sort(collect(_PMD.nw_ids(pm)))
         for n in nw_ids
             _build_mn_period_fair!(pm, n; relax=false)
         end
-        objective_mn_min_max_absolute(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        objective_mn_min_max_absolute(pm; peak_time_costs=peak_time_costs, alpha=alpha)
     end
 
     function solve_mn_mc_mld_min_max_integer(data::Dict{String,<:Any}, solver;
                                               peak_time_costs::Vector{<:Real}=Float64[],
-                                              reg::Float64=1e-4, alpha::Float64=1.0, kwargs...)
+                                              alpha::Float64=1.0, kwargs...)
         build_fn = (pm) -> build_mn_mc_mld_min_max_integer(pm;
-            peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+            peak_time_costs=peak_time_costs, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
+    """
+    Multiperiod MLD with min-max-on-shed-FRACTION objective (INTEGER). Mirrors
+    build_mn_mc_mld_min_max_integer but routes through objective_mn_min_max_proportional.
+    Note: per-load shed is 0 or full in integer mode, so the fairness signal
+    collapses; useful mainly for the relaxed analogue or as a baseline.
+    """
+    function build_mn_mc_mld_min_max_proportional_integer(pm::_PMD.AbstractUBFModels;
+                                                          peak_time_costs::Vector{<:Real}=Float64[],
+                                                          alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=false)
+        end
+        objective_mn_min_max_proportional(pm; peak_time_costs=peak_time_costs, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_min_max_proportional_integer(data::Dict{String,<:Any}, solver;
+                                                          peak_time_costs::Vector{<:Real}=Float64[],
+                                                          alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_min_max_proportional_integer(pm;
+            peak_time_costs=peak_time_costs, alpha=alpha)
         return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
             multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
     end
