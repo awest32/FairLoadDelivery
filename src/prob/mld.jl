@@ -1234,7 +1234,7 @@
         constraint_connect_block_shunt(pm)
         constraint_connect_block_storage(pm)
 
-        objective_min_max(pm)
+        objective_min_max_absolute(pm)
     end
 
     """
@@ -1318,7 +1318,7 @@
         constraint_connect_block_storage(pm)
 
         # Use equality_min (min-max fairness) objective
-        objective_min_max(pm)
+        objective_min_max_absolute(pm)
     end
 
 
@@ -2124,7 +2124,7 @@
         for n in nw_ids
             _build_mn_period_fair!(pm, n; relax=false)
         end
-        objective_mn_min_max(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
+        objective_mn_min_max_absolute(pm; peak_time_costs=peak_time_costs, reg=reg, alpha=alpha)
     end
 
     function solve_mn_mc_mld_min_max_integer(data::Dict{String,<:Any}, solver;

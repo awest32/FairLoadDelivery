@@ -38,15 +38,16 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch_good4integer"
+const CASE = "case6_unbalanced_switch_meshed_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 
 # const CASE = "motivation_c"
 # const CASE_FILE = joinpath(@__DIR__,"../../data/ieee_13_aw_edit/$CASE.dss")
 
 LS_PERCENT = 0.8
-const ITERATIONS = 30
+const ITERATIONS = 20
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
+pshed_type = "proportional"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
@@ -230,7 +231,9 @@ for k in 1:ITERATIONS
 
     # Apply upper-level fairness function
     if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k; critical_ids=critical_id)
+        pd_k = pshed_type == "proportional" ?
+               Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids_k] : Float64[]
+        pshed_new, fair_weight_vals, status = min_max_load_shed(dpshed_k, pshed_val_k, weight_vals_k; critical_ids=critical_id, pd=pd_k, pshed_type=pshed_type)
     elseif FAIR_FUNC == "proportional"
         pd = Float64[sum(math_new["load"][string(i)]["pd"]) for i in pshed_ids_k]
         pshed_new, fair_weight_vals, status = proportional_fairness_load_shed(dpshed_k, pshed_val_k, weight_vals_k, pd; critical_ids=critical_id)
@@ -630,13 +633,13 @@ validation_results["ac_feasibility_summary"] = ac_summary
 # ============================================================
 # GENERATE FINAL REPORT
 # ============================================================
-report_path = joinpath(save_dir, "validation_report.txt")
+report_path = joinpath(save_dir, "validation_report_$(pshed_type).txt")
 generate_summary_report(validation_results, report_path)
 
 # Save final network plot
 if ac_converged && haskey(ac_result, "solution")
     if !isempty(ac_result["solution"])
-        plot_path = joinpath(save_dir, "network_load_shed.svg")
+        plot_path = joinpath(save_dir, "network_load_shed_$(pshed_type).svg")
         plot_network_load_shed(mld_rounded["solution"], math_rounded; output_file=plot_path)
     else
         println("  [!] Cannot plot network - 0 power flow in AC solution available.")
@@ -671,15 +674,29 @@ max_idx = argmax(pshed_per_load)
 
 display(p_dist)
 savefig(p_dist, joinpath(save_dir,
-"loadshed_distribution_rounded.png"))
+"loadshed_distribution_rounded_$(pshed_type).png"))
 
-  l9_idx = 7# findfirst(==("8"), weight_ids)
-  @info "dpshed[:, L9] = $(dpshed[:, l9_idx])"
-  @info "dpshed[L9, L9] = $(dpshed[l9_idx, l9_idx])"
-  @info "pshed[L9] = $(pshed_val[l9_idx]),  pd[L9] =$(sum(math_new["load"]["8"]["pd"]))"
+#   l9_idx = 7# findfirst(==("8"), weight_ids)
+#   @info "dpshed[:, L9] = $(dpshed[:, l9_idx])"
+#   @info "dpshed[L9, L9] = $(dpshed[l9_idx, l9_idx])"
+#   @info "pshed[L9] = $(pshed_val[l9_idx]),  pd[L9] =$(sum(math_new["load"]["8"]["pd"]))"
 
-  mld_int_direct = FairLoadDelivery.solve_mc_mld_min_max_integer(math, Gurobi.Optimizer)
-  for (lid, ld) in sort(collect(mld_int_direct["solution"]["load"]),
-  by=x->parse(Int,x[1]))
-      println("Load $lid ($(math["load"][lid]["name"])): pshed = $(sum(ld["pshed"]))")
-  end
+#   mld_int_direct = FairLoadDelivery.solve_mc_mld_min_max_integer(math, Gurobi.Optimizer)
+#   for (lid, ld) in sort(collect(mld_int_direct["solution"]["load"]),
+#   by=x->parse(Int,x[1]))
+#       println("Load $lid ($(math["load"][lid]["name"])): pshed = $(sum(ld["pshed"]))")
+#   end
+
+#    @info "Final relaxed switch states (target for rounding):"
+#   for (sid, sw) in sort(collect(mld_relaxed_final["solution"]["switch"]),
+#    by=x->parse(Int,x[1]))
+#       println("  switch $sid ($(math_new["switch"][sid]["name"])): state
+#   = $(round(sw["state"], digits=3))")
+#   end
+#   @info "Final relaxed pshed (what min-max was trying to balance):"
+#   for (lid, ld) in sort(collect(mld_relaxed_final["solution"]["load"]),
+#   by=x->parse(Int,x[1]))
+#       println("  load $lid ($(math_new["load"][lid]["name"])): pshed =
+#   $(round(sum(ld["pshed"]), digits=2)),  weight =
+#   $(round(math_new["load"][lid]["weight"], digits=2))")
+#   end

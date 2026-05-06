@@ -91,7 +91,10 @@ end
 # With alpha ∈ [0,1] and pd supplied: convex combination of efficiency and min-max.
 #   - alpha=0: pure efficiency
 #   - alpha=1: pure min-max fairness
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, pd::Vector{Float64}=Float64[],reg::Float64=1e-4, alpha::Float64=1.0, weight_budget::Float64=Inf)
+# pshed_type ∈ ("absolute", "proportional"):
+#   - "absolute": max_shed ≥ λ[t] · pshed_new[i]
+#   - "proportional": max_shed ≥ λ[t] · pshed_new[i] / pd[i]  (requires pd; loads with pd==0 skipped)
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, pd::Vector{Float64}=Float64[],reg::Float64=1e-4, alpha::Float64=1.0, weight_budget::Float64=Inf, pshed_type::String="absolute")
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -127,9 +130,21 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     # the formulation linear and matches the role weights play in the bilevel:
     # handles for influencing the lower level, not multipliers in the objective.
     @variable(model, max_shed >= 0)
+    @assert pshed_type in ("absolute", "proportional") "pshed_type must be \"absolute\" or \"proportional\", got \"$pshed_type\""
+    if pshed_type == "proportional"
+        @assert !isempty(pd) "pshed_type=\"proportional\" requires pd to be supplied"
+        @assert length(pd) == m "pd must have length $m when pshed_type=\"proportional\", got $(length(pd))"
+    end
     for t in 1:n_periods
         offset = (t - 1) * n
-        @constraint(model, [i=1:n], max_shed >= λ[t]*pshed_new[offset + i])
+        if pshed_type == "absolute"
+            @constraint(model, [i=1:n], max_shed >= λ[t]*pshed_new[offset + i])
+        else  # "proportional": skip loads with zero reference demand
+            for i in 1:n
+                pd[offset + i] > 0 || continue
+                @constraint(model, max_shed >= λ[t]*pshed_new[offset + i] / pd[offset + i])
+            end
+        end
     end
 
     @objective(model, Min, max_shed)
@@ -450,7 +465,7 @@ end
     min_max_mn(shed; peak_time_costs=Float64[], weights=nothing)
 
 Σ_t λ_t · max_i (w_{t,i} · pshed_{t,i}). Matches the shape of
-`objective_mn_min_max` (which maxes on `w · pshed` inside the MILP).
+`objective_mn_min_max_absolute` (which maxes on `w · pshed` inside the MILP).
 """
 function min_max_mn(shed::Vector{<:AbstractVector{<:Real}};
                     peak_time_costs::Vector{<:Real}=Float64[],

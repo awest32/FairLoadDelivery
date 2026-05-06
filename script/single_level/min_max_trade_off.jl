@@ -25,13 +25,16 @@ dir = @__DIR__
 case_path = joinpath(dir,case_name)
 date = Dates.format(now(), "yyyy-mm-dd")  
 LS_PERCENT = 0.8
+pshed_type = "proportional"  # "absolute" or "proportional"
+min_max_obj = pshed_type == "proportional" ? FairLoadDelivery.objective_min_max_proportional :
+                                             FairLoadDelivery.objective_min_max_absolute
 eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 mld_model_int = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]
 #pf_soln = PowerModelsDistribution.solve_mc_pf(math, ACRUPowerModel, Ipopt.Optimizer)
 # set alpha sweep for the functions
-alpha_points = 20
+alpha_points = 10
 loadshed = zeros(alpha_points,length(ref[:load])+2)
 
 output_dir = joinpath(@__DIR__, "../../results/$date/trade_off")
@@ -46,7 +49,7 @@ loadshed_keys = []
 
 for (index,alpha) in enumerate(LinRange(0,1,alpha_points))
     # set the objective for the min_max, efficiency trade-off with alpha*fairness + (1-alpha)*efficiency
-    FairLoadDelivery.objective_min_max(mld_model_int; alpha=alpha)
+    min_max_obj(mld_model_int; alpha=alpha)
 
     # solve the problem
     JuMP.optimize!(mld_model_int.model)
@@ -94,7 +97,7 @@ plot!(p4, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
 
 
 savefig(plot(p3, p4, layout=(1,2), size=(900,400)),
-          joinpath(output_dir, "pareto_summary_integer.svg"))
+          joinpath(output_dir, "pareto_summary_integer_$(pshed_type).svg"))
 
 n = length(ref[:load])
 load_labels = [load_data["name"] for (id, load_data) in sort(ref[:load])]
@@ -124,13 +127,13 @@ savefig(p_dist_a1, joinpath(output_dir, "loadshed_distribution_integer_alpha1.sv
 combined = plot(p_dist_a0, p_dist_a1, p4, p3, layout=(2,2), size=(1400, 900),
     left_margin=10Plots.mm, right_margin=5Plots.mm,
     top_margin=5Plots.mm, bottom_margin=10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all.svg"))
+savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type).svg"))
 display(combined)
 
 JuMP.set_optimizer(mld_model.model, Gurobi.Optimizer)
 for (index,alpha) in enumerate(LinRange(0,1,alpha_points))
     # set the objective for the min_max, efficiency trade-off with alpha*fairness + (1-alpha)*efficiency
-    FairLoadDelivery.objective_min_max(mld_model; alpha=alpha)
+    min_max_obj(mld_model; alpha=alpha)
 
     # solve the problem
     JuMP.optimize!(mld_model.model)
@@ -181,4 +184,4 @@ plot!(p2, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
 
 plot(p1, p2, layout=(1,2), size=(900,400))
 savefig(plot(p1, p2, layout=(1,2), size=(900,400)),
-          joinpath(output_dir, "pareto_summary_relaxed.svg"))
+          joinpath(output_dir, "pareto_summary_relaxed_$(pshed_type).svg"))
