@@ -28,12 +28,11 @@ case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
 
-# Multi-period setup: 24 hourly periods with diurnal load + TOU peak-cost profiles
+# Multi-period setup: 24 hourly periods with linear-ramp load + TOU peak-cost profiles
 const N_PERIODS = 24
-# Two-bump load scale: morning ramp around h≈8, evening peak around h≈19
-const LOAD_SCALE_FACTORS = [round(0.55 + 0.35 * exp(-((h - 8)^2) / (2 * 3.0^2))
-                                       + 0.65 * exp(-((h - 19)^2) / (2 * 4.0^2)), digits=3)
-                            for h in 0:N_PERIODS-1]
+# Linear ramp from 0.7 (period 1) to 1.0 (period 24): every period is a distinct
+# load level, monotonically increasing across the day.
+const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 # TOU pricing: low overnight, peak in evening (h≈18)
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
@@ -42,7 +41,7 @@ const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)),
 # overnight off-peak (h=3), morning ramp (h=8), evening peak (h=19)
 const REP_PERIODS = [4, 9, 20]
 
-pshed_type = "absolute"  # "absolute" or "proportional"
+pshed_type = "proportional"  # "absolute" or "proportional"
 solve_min_max = pshed_type == "proportional" ?
     FairLoadDelivery.solve_mn_mc_mld_min_max_proportional_integer :
     FairLoadDelivery.solve_mn_mc_mld_min_max_integer

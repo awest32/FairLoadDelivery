@@ -25,7 +25,7 @@ dir = @__DIR__
 case_path = joinpath(dir,case_name)
 date = Dates.format(now(), "yyyy-mm-dd")  
 LS_PERCENT = 0.8
-pshed_type = "proportional"  # "absolute" or "proportional"
+pshed_type = "absolute"  # "absolute" or "proportional"
 min_max_obj = pshed_type == "proportional" ? FairLoadDelivery.objective_min_max_proportional :
                                              FairLoadDelivery.objective_min_max_absolute
 eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)

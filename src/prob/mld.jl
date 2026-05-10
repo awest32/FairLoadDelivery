@@ -509,7 +509,7 @@
         #   1e-3  -> shed L8 unnecessarily (still too aggressive)
         #   1e-6  -> too weak; LOCALLY_INFEASIBLE at iter 4 in meshed case
         #   1e-4  -> current compromise
-        objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-4)
+        objective_fairly_weighted_max_load_served_regd(pm; regularization=1e-6)
         #objective_fairly_weighted_min_load_shed(pm)
     end
 

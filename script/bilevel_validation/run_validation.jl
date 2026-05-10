@@ -45,9 +45,9 @@ const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 # const CASE_FILE = joinpath(@__DIR__,"../../data/ieee_13_aw_edit/$CASE.dss")
 
 LS_PERCENT = 0.8
-const ITERATIONS = 20
+const ITERATIONS = 10
 const FAIR_FUNC = "min_max"  # simplest fairness function for testing
-pshed_type = "proportional"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
+pshed_type = "absolute"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT

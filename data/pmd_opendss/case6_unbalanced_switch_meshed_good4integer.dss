@@ -25,7 +25,7 @@ New Line.QuadPB    Bus1=Primary.1.2.3  bus2=loadbusB.1.2.3  linecode = 4/0QUAD  
 New Line.QuadBC    Bus1=loadbusB.1.2.3  bus2=loadbusC.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 New Line.QuadAD    Bus1=loadbusA.1.2.3  bus2=loadbusD.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 New Line.QuadPE    Bus1=Primary.1.2.3  bus2=loadbusE.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
-New Line.QuadAB    Bus1=loadbusA.1.2.3  bus2=loadbusE.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
+New Line.QuadAC    Bus1=loadbusA.1.2.3  bus2=loadbusC.1.2.3  linecode = 4/0QUAD  length=1  switch=y ! 100 ft
 
 !Loads - single phase
 
