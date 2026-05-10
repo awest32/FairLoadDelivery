@@ -32,16 +32,16 @@ LS_PERCENT = 0.8
 const N_PERIODS = 24
 # Linear ramp from 0.7 (period 1) to 1.0 (period 24): every period is a distinct
 # load level, monotonically increasing across the day.
-const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
+const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.65, 1.4, N_PERIODS)]
 # TOU pricing: low overnight, peak in evening (h≈18)
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
 
 # Representative subset (1-indexed period indices) for the busy plots:
 # overnight off-peak (h=3), morning ramp (h=8), evening peak (h=19)
-const REP_PERIODS = [4, 9, 20]
+const REP_PERIODS = [6, 11, 20]
 
-pshed_type = "proportional"  # "absolute" or "proportional"
+pshed_type = "absolute"  # "absolute" or "proportional"
 solve_min_max = pshed_type == "proportional" ?
     FairLoadDelivery.solve_mn_mc_mld_min_max_proportional_integer :
     FairLoadDelivery.solve_mn_mc_mld_min_max_integer
