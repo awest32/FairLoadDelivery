@@ -1,0 +1,1370 @@
+[ PowerModelsDistribution | Info ] : Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_meshed_good4integer.dss'
+[ PowerModelsDistribution | Info ] : Command 'calcvoltagebases' on line 51 in 'case6_unbalanced_switch_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : Command 'solve' on line 53 in 'case6_unbalanced_switch_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadab does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xb07ec39c
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-02, 5e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24666 rows and 14047 columns
+Presolve time: 1.32s
+Presolved: 486 rows, 281 columns, 1491 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 255 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 4.815343e+01, 173 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   48.15343    0   12          -   48.15343      -     -    1s
+     0     0   48.54778    0   10          -   48.54778      -     -    1s
+     0     0   48.78298    0   15          -   48.78298      -     -    1s
+     0     0   49.19370    0   10          -   49.19370      -     -    1s
+     0     0   49.35057    0   10          -   49.35057      -     -    1s
+     0     0   49.70971    0    2          -   49.70971      -     -    1s
+     0     0   49.70971    0    1          -   49.70971      -     -    1s
+H    0     0                      54.8574284   49.70971  9.38%     -    1s
+H    0     0                      52.8222855   49.70971  5.89%     -    1s
+     0     0   49.70971    0    1   52.82229   49.70971  5.89%     -    1s
+     0     0   49.70971    0    2   52.82229   49.70971  5.89%     -    1s
+H    0     0                      49.9491427   49.70971  0.48%     -    1s
+     0     0   49.70971    0    2   49.94914   49.70971  0.48%     -    1s
+H    0     0                      49.7097141   49.70971  0.00%     -    1s
+     0     0   49.70971    0    2   49.70971   49.70971  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Implied bound: 4
+  MIR: 3
+  StrongCG: 2
+  Flow cover: 9
+  RLT: 3
+  Relax-and-lift: 2
+
+Explored 1 nodes (468 simplex iterations) in 1.38 seconds (0.70 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 49.7097 49.9491 52.8223 54.8574 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.970971410434e+01, best bound 4.970971410434e+01, gap 0.0000%
+
+User-callback calls 1111, time in user-callback 0.00 sec
+alpha=0.0  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x0afdc622
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [5e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.36s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.576145e+01, 185 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      59.2864960   45.76145  22.8%     -    1s
+     0     0   45.76145    0    8   59.28650   45.76145  22.8%     -    1s
+     0     0   47.30418    0    6   59.28650   47.30418  20.2%     -    1s
+H    0     0                      58.8217442   47.93880  18.5%     -    1s
+     0     0   47.93880    0    6   58.82174   47.93880  18.5%     -    1s
+     0     0   48.09144    0    5   58.82174   48.09144  18.2%     -    1s
+H    0     0                      54.4066013   48.30028  11.2%     -    1s
+     0     0   48.37316    0    6   54.40660   48.37316  11.1%     -    1s
+     0     0   49.29433    0    1   54.40660   49.29433  9.40%     -    1s
+H    0     0                      49.2943306   49.29433  0.00%     -    1s
+     0     0   49.29433    0    1   49.29433   49.29433  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 2
+  Implied bound: 4
+  Clique: 1
+  MIR: 3
+  Flow cover: 3
+  Relax-and-lift: 1
+
+Explored 1 nodes (352 simplex iterations) in 1.41 seconds (0.70 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 49.2943 54.4066 58.8217 59.2865 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.929433061961e+01, best bound 4.929433061961e+01, gap 0.0000%
+
+User-callback calls 1084, time in user-callback 0.00 sec
+alpha=0.05263157894736842  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x3b4f4d7c
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.54s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.811076e+01, 350 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   48.11076    0    8          -   48.11076      -     -    1s
+     0     0   48.87895    0    2          -   48.87895      -     -    1s
+     0     0   48.87895    0    3          -   48.87895      -     -    1s
+     0     0   48.87895    0    2          -   48.87895      -     -    1s
+     0     0   48.87895    0    2          -   48.87895      -     -    1s
+H    0     0                      52.7770222   48.87895  7.39%     -    1s
+     0     0   48.87895    0    -   52.77702   48.87895  7.39%     -    1s
+     0     0   48.87895    0    3   52.77702   48.87895  7.39%     -    1s
+H    0     0                      49.2995786   48.87895  0.85%     -    1s
+     0     0   48.87895    0    3   49.29958   48.87895  0.85%     -    1s
+     0     0   48.87895    0    1   49.29958   48.87895  0.85%     -    1s
+     0     0   48.87895    0    1   49.29958   48.87895  0.85%     -    1s
+H    0     0                      48.8789470   48.87895  0.00%     -    1s
+     0     0   48.87895    0    1   48.87895   48.87895  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 18
+  Clique: 5
+  MIR: 5
+  Flow cover: 15
+  Mod-K: 2
+  RLT: 5
+
+Explored 1 nodes (697 simplex iterations) in 1.62 seconds (0.78 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: 48.8789 49.2996 52.777 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.887894703164e+01, best bound 4.887894702915e+01, gap 0.0000%
+
+User-callback calls 1113, time in user-callback 0.00 sec
+alpha=0.10526315789473684  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x244380ff
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.49s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.497568e+01, 319 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   44.97568    0   11          -   44.97568      -     -    1s
+     0     0   45.41786    0    7          -   45.41786      -     -    1s
+     0     0   46.10310    0    7          -   46.10310      -     -    1s
+     0     0   46.59036    0    7          -   46.59036      -     -    1s
+     0     0   46.73714    0    6          -   46.73714      -     -    1s
+H    0     0                      55.5414057   46.73714  15.9%     -    1s
+H    0     0                      53.5533005   46.73714  12.7%     -    1s
+     0     0   46.81471    0    5   53.55330   46.81471  12.6%     -    1s
+H    0     0                      49.1736012   46.81471  4.80%     -    1s
+     0     0   47.24760    0    5   49.17360   47.24760  3.92%     -    1s
+     0     0   47.47790    0    5   49.17360   47.47790  3.45%     -    1s
+     0     0   47.48467    0    5   49.17360   47.48467  3.43%     -    1s
+     0     0   48.01397    0    6   49.17360   48.01397  2.36%     -    1s
+     0     0   48.10434    0    6   49.17360   48.10434  2.17%     -    1s
+     0     0   48.46356    0    4   49.17360   48.46356  1.44%     -    1s
+H    0     0                      48.4635636   48.46356  0.00%     -    1s
+
+Cutting planes:
+  Cover: 2
+  Implied bound: 37
+  Clique: 6
+  MIR: 6
+  StrongCG: 1
+  Flow cover: 12
+  RLT: 6
+  Relax-and-lift: 21
+
+Explored 1 nodes (813 simplex iterations) in 1.62 seconds (0.78 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 48.4636 49.1736 53.5533 55.5414 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.846356362562e+01, best bound 4.846356362562e+01, gap 0.0000%
+
+User-callback calls 1142, time in user-callback 0.00 sec
+alpha=0.15789473684210525  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x6fb92b3e
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.39s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.574329e+01, 183 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      53.8434811   45.74329  15.0%     -    1s
+     0     0   45.74329    0    8   53.84348   45.74329  15.0%     -    1s
+     0     0   46.71600    0    4   53.84348   46.71600  13.2%     -    1s
+     0     0   46.90416    0    4   53.84348   46.90416  12.9%     -    1s
+     0     0   47.30346    0    4   53.84348   47.30346  12.1%     -    1s
+     0     0   47.46756    0    4   53.84348   47.46756  11.8%     -    1s
+H    0     0                      48.0481803   47.46756  1.21%     -    1s
+     0     0     cutoff    0        48.04818   48.04818  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 2
+  MIR: 3
+  StrongCG: 2
+  Flow cover: 3
+
+Explored 1 nodes (339 simplex iterations) in 1.45 seconds (0.72 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 48.0482 53.8435 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.804818033672e+01, best bound 4.804818033364e+01, gap 0.0000%
+
+User-callback calls 1082, time in user-callback 0.00 sec
+alpha=0.21052631578947367  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xe6ca0e0d
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.62s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.679348e+01, 335 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   46.79348    0    8          -   46.79348      -     -    1s
+     0     0   47.62715    0    7          -   47.62715      -     -    1s
+     0     0   47.63280    0    1          -   47.63280      -     -    1s
+H    0     0                      51.1375336   47.63280  6.85%     -    1s
+     0     0   47.63280    0    4   51.13753   47.63280  6.85%     -    1s
+H    0     0                      48.7930073   47.63280  2.38%     -    1s
+     0     0   47.63280    0    4   48.79301   47.63280  2.38%     -    1s
+H    0     0                      47.6327968   47.63280  0.00%     -    1s
+*    0     0               0      47.6327968   47.63280  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 2
+  Cover: 2
+  Implied bound: 31
+  Clique: 5
+  MIR: 10
+  Flow cover: 10
+  Mod-K: 2
+  RLT: 8
+  Relax-and-lift: 6
+  BQP: 1
+
+Explored 1 nodes (754 simplex iterations) in 1.74 seconds (0.77 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: 47.6328 48.793 51.1375 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.763279677042e+01, best bound 4.763279677042e+01, gap 0.0000%
+
+User-callback calls 1110, time in user-callback 0.00 sec
+alpha=0.2631578947368421  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xad65b5df
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.53s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.379703e+01, 325 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   43.79703    0   11          -   43.79703      -     -    1s
+     0     0   44.51885    0    5          -   44.51885      -     -    1s
+     0     0   45.02412    0    4          -   45.02412      -     -    1s
+     0     0   45.48049    0    8          -   45.48049      -     -    1s
+     0     0   45.60546    0    8          -   45.60546      -     -    1s
+H    0     0                      52.9390976   45.60546  13.9%     -    1s
+H    0     0                      52.6550826   45.84748  12.9%     -    1s
+     0     0   45.84748    0    5   52.65508   45.84748  12.9%     -    1s
+H    0     0                      48.8956841   45.84748  6.23%     -    1s
+     0     0   46.48074    0    5   48.89568   46.48074  4.94%     -    1s
+     0     0   46.61166    0    7   48.89568   46.61166  4.67%     -    1s
+     0     0   46.85212    0    7   48.89568   46.85212  4.18%     -    1s
+H    0     0                      48.5181653   47.21741  2.68%     -    1s
+     0     0   47.21741    0    5   48.51817   47.21741  2.68%     -    1s
+     0     0   47.21741    0    6   48.51817   47.21741  2.68%     -    1s
+H    0     0                      48.1598270   47.21741  1.96%     -    1s
+     0     0   47.21741    0    5   48.15983   47.21741  1.96%     -    1s
+H    0     0                      47.6563458   47.21741  0.92%     -    1s
+     0     0   47.21741    0    5   47.65635   47.21741  0.92%     -    1s
+     0     0   47.21741    0    5   47.65635   47.21741  0.92%     -    1s
+H    0     0                      47.2174134   47.21741  0.00%     -    1s
+
+Cutting planes:
+  Cover: 2
+  Implied bound: 27
+  Clique: 6
+  MIR: 5
+  StrongCG: 1
+  Flow cover: 7
+  RLT: 6
+  Relax-and-lift: 23
+
+Explored 1 nodes (771 simplex iterations) in 1.68 seconds (0.73 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 7: 47.2174 47.6563 48.1598 ... 52.9391
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.721741343424e+01, best bound 4.721741343424e+01, gap 0.0000%
+
+User-callback calls 1163, time in user-callback 0.00 sec
+alpha=0.3157894736842105  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x57898dfe
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.57s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.340415e+01, 321 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   43.40415    0   11          -   43.40415      -     -    1s
+     0     0   44.15933    0    6          -   44.15933      -     -    1s
+     0     0   44.62609    0    5          -   44.62609      -     -    1s
+     0     0   45.07327    0    6          -   45.07327      -     -    1s
+     0     0   45.19162    0    7          -   45.19162      -     -    1s
+H    0     0                      52.0716615   45.19162  13.2%     -    1s
+H    0     0                      51.9038344   45.81203  11.7%     -    1s
+     0     0   45.81203    0    5   51.90383   45.81203  11.7%     -    1s
+H    0     0                      48.3512028   45.81203  5.25%     -    1s
+     0     0   45.81203    0    5   48.35120   45.81203  5.25%     -    1s
+     0     0   45.86411    0    4   48.35120   45.86411  5.14%     -    1s
+     0     0   45.99560    0    4   48.35120   45.99560  4.87%     -    1s
+H    0     0                      47.6153457   45.99560  3.40%     -    1s
+     0     0   46.37538    0    4   47.61535   46.37538  2.60%     -    1s
+     0     0   46.46484    0    3   47.61535   46.46484  2.42%     -    1s
+     0     0   46.46484    0    3   47.61535   46.46484  2.42%     -    1s
+     0     0   46.80203    0    3   47.61535   46.80203  1.71%     -    1s
+H    0     0                      47.1505938   46.80203  0.74%     -    1s
+H    0     0                      47.1118645   46.80203  0.66%     -    1s
+     0     0   46.80203    0    3   47.11186   46.80203  0.66%     -    1s
+     0     0   46.80203    0    3   47.11186   46.80203  0.66%     -    1s
+H    0     0                      46.8020299   46.80203  0.00%     -    1s
+
+Cutting planes:
+  Cover: 2
+  Implied bound: 35
+  Clique: 6
+  MIR: 3
+  StrongCG: 1
+  Flow cover: 9
+  RLT: 4
+  Relax-and-lift: 22
+
+Explored 1 nodes (723 simplex iterations) in 1.70 seconds (0.76 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 7: 46.802 47.1119 47.1506 ... 52.0717
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.680202991181e+01, best bound 4.680202991181e+01, gap 0.0000%
+
+User-callback calls 1161, time in user-callback 0.00 sec
+alpha=0.3684210526315789  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x76c32169
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24170 rows and 13764 columns
+Presolve time: 1.55s
+Presolved: 982 rows, 564 columns, 3010 nonzeros
+Presolved model has 42 quadratic constraint(s)
+Variable types: 520 continuous, 44 integer (44 binary)
+
+Root relaxation: objective 4.301127e+01, 321 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   43.01127    0   11          -   43.01127      -     -    1s
+     0     0   43.79981    0    6          -   43.79981      -     -    1s
+     0     0   44.22806    0    5          -   44.22806      -     -    1s
+     0     0   44.66097    0    5          -   44.66097      -     -    1s
+     0     0   44.67813    0    6          -   44.67813      -     -    1s
+H    0     0                      51.2042254   44.67813  12.7%     -    1s
+H    0     0                      51.1525863   44.89205  12.2%     -    1s
+     0     0   45.04501    0    7   51.15259   45.04501  11.9%     -    1s
+H    0     0                      47.8067217   45.04501  5.78%     -    1s
+     0     0   45.04501    0    7   47.80672   45.04501  5.78%     -    1s
+     0     0   45.19292    0    6   47.80672   45.19292  5.47%     -    1s
+     0     0   45.48370    0    5   47.80672   45.48370  4.86%     -    1s
+     0     0   45.99555    0    5   47.80672   45.99555  3.79%     -    1s
+H    0     0                      47.0708645   45.99555  2.28%     -    1s
+     0     0   46.07755    0    5   47.07086   46.07755  2.11%     -    1s
+     0     0   46.38665    0    5   47.07086   46.38665  1.45%     -    1s
+H    0     0                      46.6448420   46.38665  0.55%     -    1s
+     0     0   46.38665    0    5   46.64484   46.38665  0.55%     -    1s
+H    0     0                      46.3866465   46.38665  0.00%     -    1s
+
+Cutting planes:
+  Cover: 3
+  Implied bound: 39
+  Clique: 6
+  MIR: 4
+  StrongCG: 1
+  Flow cover: 11
+  RLT: 4
+  Relax-and-lift: 23
+
+Explored 1 nodes (743 simplex iterations) in 1.68 seconds (0.77 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 6: 46.3866 46.6448 47.0709 ... 51.2042
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.638664649807e+01, best bound 4.638664649807e+01, gap 0.0000%
+
+User-callback calls 1150, time in user-callback 0.00 sec
+alpha=0.42105263157894735  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xa22b46bd
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.44s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.597126e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   45.97126    0    5          -   45.97126      -     -    1s
+     0     0   45.97126    0    -          -   45.97126      -     -    1s
+     0     0   45.97126    0    2          -   45.97126      -     -    1s
+     0     0   45.97126    0    -          -   45.97126      -     -    1s
+     0     0   45.97126    0    2          -   45.97126      -     -    1s
+     0     0   45.97126    0    2          -   45.97126      -     -    1s
+H    0     0                      45.9712630   45.97126  0.00%     -    1s
+*    0     0               0      45.9712630   45.97126  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.49 seconds (0.69 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 45.9713 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.597126296535e+01, best bound 4.597126296535e+01, gap 0.0000%
+
+User-callback calls 1078, time in user-callback 0.00 sec
+alpha=0.47368421052631576  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xb9f0a8c8
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.61s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.555588e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   45.55588    0    5          -   45.55588      -     -    1s
+     0     0   45.55588    0    -          -   45.55588      -     -    1s
+     0     0   45.55588    0    2          -   45.55588      -     -    1s
+     0     0   45.55588    0    -          -   45.55588      -     -    1s
+     0     0   45.55588    0    2          -   45.55588      -     -    1s
+     0     0   45.55588    0    2          -   45.55588      -     -    1s
+H    0     0                      45.5558796   45.55588  0.00%     -    1s
+*    0     0               0      45.5558796   45.55588  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.66 seconds (0.75 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 45.5559 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.555587956187e+01, best bound 4.555587956187e+01, gap 0.0000%
+
+User-callback calls 1076, time in user-callback 0.00 sec
+alpha=0.5263157894736842  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x7a34d32d
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.63s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.495823e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   44.95823    0    5          -   44.95823      -     -    1s
+     0     0   44.95823    0    -          -   44.95823      -     -    1s
+     0     0   44.95823    0    2          -   44.95823      -     -    1s
+     0     0   44.95823    0    -          -   44.95823      -     -    1s
+     0     0   44.95823    0    2          -   44.95823      -     -    1s
+     0     0   44.95823    0    2          -   44.95823      -     -    1s
+H    0     0                      44.9582254   44.95823  0.00%     -    1s
+*    0     0               0      44.9582254   44.95823  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.68 seconds (0.76 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 44.9582 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.495822544532e+01, best bound 4.495822544532e+01, gap 0.0000%
+
+User-callback calls 1080, time in user-callback 0.00 sec
+alpha=0.5789473684210527  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x3f3b463f
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.80s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.399880e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   43.99880    0    5          -   43.99880      -     -    1s
+     0     0   43.99880    0    -          -   43.99880      -     -    1s
+     0     0   43.99880    0    2          -   43.99880      -     -    1s
+     0     0   43.99880    0    -          -   43.99880      -     -    1s
+     0     0   43.99880    0    2          -   43.99880      -     -    1s
+     0     0   43.99880    0    2          -   43.99880      -     -    1s
+H    0     0                      43.9988044   43.99880  0.00%     -    1s
+*    0     0               0      43.9988044   43.99880  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.85 seconds (0.79 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 43.9988 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.399880442894e+01, best bound 4.399880442888e+01, gap 0.0000%
+
+User-callback calls 1076, time in user-callback 0.00 sec
+alpha=0.631578947368421  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x2538bb75
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.87s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 4.194292e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   41.94292    0    5          -   41.94292      -     -    1s
+     0     0   41.94292    0    -          -   41.94292      -     -    1s
+     0     0   41.94292    0    2          -   41.94292      -     -    1s
+     0     0   41.94292    0    -          -   41.94292      -     -    1s
+     0     0   41.94292    0    2          -   41.94292      -     -    1s
+     0     0   41.94292    0    2          -   41.94292      -     -    1s
+H    0     0                      41.9429172   41.94292  0.00%     -    1s
+*    0     0               0      41.9429172   41.94292  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.92 seconds (0.69 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 41.9429 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.194291721961e+01, best bound 4.194291721961e+01, gap 0.0000%
+
+User-callback calls 1077, time in user-callback 0.00 sec
+alpha=0.6842105263157895  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xdc7aa7fe
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.63s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 260 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 3.977738e+01, 175 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   39.77738    0    5          -   39.77738      -     -    1s
+     0     0   39.77738    0    -          -   39.77738      -     -    1s
+     0     0   39.77738    0    2          -   39.77738      -     -    1s
+     0     0   39.77738    0    -          -   39.77738      -     -    1s
+     0     0   39.77738    0    2          -   39.77738      -     -    1s
+     0     0   39.77738    0    2          -   39.77738      -     -    1s
+H    0     0                      39.7773834   39.77738  0.00%     -    1s
+*    0     0               0      39.7773834   39.77738  0.00%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 28
+  Clique: 5
+  MIR: 4
+  Flow cover: 9
+  RLT: 7
+  Relax-and-lift: 13
+
+Explored 1 nodes (341 simplex iterations) in 1.69 seconds (0.71 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 39.7774 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.977738336488e+01, best bound 3.977738336488e+01, gap 0.0000%
+
+User-callback calls 1078, time in user-callback 0.00 sec
+alpha=0.7368421052631579  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x1f85bb70
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.48s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 256 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 3.628679e+01, 192 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      38.8783007   36.28679  6.67%     -    1s
+     0     0   36.28679    0   12   38.87830   36.28679  6.67%     -    1s
+     0     0   36.84407    0   11   38.87830   36.84407  5.23%     -    1s
+H    0     0                      38.1663157   37.09328  2.81%     -    1s
+     0     0   37.09328    0   11   38.16632   37.09328  2.81%     -    1s
+     0     0   37.13564    0   12   38.16632   37.13564  2.70%     -    1s
+H    0     0                      37.6874586   37.14470  1.44%     -    1s
+     0     0   37.15080    0   11   37.68746   37.15080  1.42%     -    1s
+     0     0   37.22400    0   11   37.68746   37.22400  1.23%     -    1s
+     0     0   37.22604    0   11   37.68746   37.22604  1.22%     -    1s
+     0     0   37.26425    0   10   37.68746   37.26425  1.12%     -    1s
+     0     0   37.30930    0   10   37.68746   37.30930  1.00%     -    1s
+     0     0   37.31285    0    7   37.68746   37.31285  0.99%     -    1s
+H    0     0                      37.6118495   37.31285  0.79%     -    1s
+     0     0   37.31285    0    7   37.61185   37.31285  0.79%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 2
+  Implied bound: 4
+  Clique: 1
+  MIR: 4
+  Flow cover: 3
+  RLT: 2
+  Relax-and-lift: 3
+
+Explored 1 nodes (353 simplex iterations) in 1.58 seconds (0.64 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 37.6118 37.6875 38.1663 38.8783 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.761184954258e+01, best bound 3.761184954258e+01, gap 0.0000%
+
+User-callback calls 1126, time in user-callback 0.00 sec
+alpha=0.7894736842105263  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xf70376df
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 2.07s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 256 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 3.412468e+01, 192 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      36.4421503   34.12468  6.36%     -    2s
+     0     0   34.12468    0   12   36.44215   34.12468  6.36%     -    2s
+     0     0   34.63197    0   11   36.44215   34.63197  4.97%     -    2s
+H    0     0                      35.8183759   34.84333  2.72%     -    2s
+     0     0   34.84333    0    9   35.81838   34.84333  2.72%     -    2s
+     0     0   35.00244    0   10   35.81838   35.00244  2.28%     -    2s
+H    0     0                      35.4592330   35.00647  1.28%     -    2s
+     0     0   35.00647    0   10   35.45923   35.00647  1.28%     -    2s
+H    0     0                      35.4025262   35.01163  1.10%     -    2s
+     0     0   35.24812    0    8   35.40253   35.24812  0.44%     -    2s
+     0     0   35.35673    0    7   35.40253   35.35673  0.13%     -    2s
+     0     0   35.36711    0    7   35.40253   35.36711  0.10%     -    2s
+     0     0   35.36711    0    7   35.40253   35.36711  0.10%     -    2s
+H    0     0                      35.3899247   35.36711  0.06%     -    2s
+     0     0   35.36711    0    7   35.38992   35.36711  0.06%     -    2s
+     0     0   35.36711    0    7   35.38992   35.36711  0.06%     -    2s
+     0     0   35.38992    0    7   35.38992   35.38992  0.00%     -    2s
+
+Cutting planes:
+  Implied bound: 1
+  Clique: 1
+  MIR: 3
+  Flow cover: 1
+  RLT: 1
+  Relax-and-lift: 1
+
+Explored 1 nodes (330 simplex iterations) in 2.18 seconds (0.62 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: 35.3899 35.4025 35.4592 ... 36.4422
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.538992473519e+01, best bound 3.538992473519e+01, gap 0.0000%
+
+User-callback calls 1140, time in user-callback 0.00 sec
+alpha=0.8421052631578947  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0xf2f38bb4
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.59s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 256 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 3.174362e+01, 192 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      33.7870526   31.74362  6.05%     -    1s
+     0     0   31.74362    0   12   33.78705   31.74362  6.05%     -    1s
+     0     0   32.20092    0   11   33.78705   32.20092  4.69%     -    1s
+H    0     0                      33.2514887   32.42024  2.50%     -    1s
+     0     0   32.42024    0    8   33.25149   32.42024  2.50%     -    1s
+     0     0   32.57824    0   10   33.25149   32.57824  2.02%     -    1s
+H    0     0                      33.0120601   32.60263  1.24%     -    1s
+     0     0   32.68422    0    5   33.01206   32.68422  0.99%     -    1s
+     0     0   32.79462    0    8   33.01206   32.79462  0.66%     -    1s
+H    0     0                      32.9742556   32.80893  0.50%     -    1s
+     0     0   32.88605    0    2   32.97426   32.88605  0.27%     -    1s
+     0     0   32.88605    0    2   32.97426   32.88605  0.27%     -    1s
+     0     0   32.88605    0    -   32.97426   32.88605  0.27%     -    1s
+     0     0   32.88605    0    1   32.97426   32.88605  0.27%     -    1s
+H    0     0                      32.8860451   32.88605  0.00%     -    1s
+     0     0   32.88605    0    1   32.88605   32.88605  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 1
+  Clique: 1
+  MIR: 1
+
+Explored 1 nodes (336 simplex iterations) in 1.67 seconds (0.64 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: 32.886 32.9743 33.0121 ... 33.7871
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.288604505800e+01, best bound 3.288604505800e+01, gap 0.0000%
+
+User-callback calls 1108, time in user-callback 0.00 sec
+alpha=0.8947368421052632  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x4ec776b1
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [5e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.51s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 256 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 2.936257e+01, 192 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      31.1319548   29.36257  5.68%     -    1s
+     0     0   29.36257    0   12   31.13195   29.36257  5.68%     -    1s
+     0     0   29.76975    0   11   31.13195   29.76975  4.38%     -    1s
+H    0     0                      30.6846014   29.77452  2.97%     -    1s
+     0     0   30.04529    0    6   30.68460   30.04529  2.08%     -    1s
+     0     0   30.26874    0    5   30.68460   30.26874  1.36%     -    1s
+H    0     0                      30.5648871   30.26930  0.97%     -    1s
+     0     0   30.29247    0    6   30.56489   30.29247  0.89%     -    1s
+     0     0   30.38217    0    2   30.56489   30.38217  0.60%     -    1s
+H    0     0                      30.3821653   30.38217  0.00%     -    1s
+     0     0   30.38217    0    2   30.38217   30.38217  0.00%     -    1s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 1
+  Implied bound: 4
+  Clique: 1
+  MIR: 3
+  Flow cover: 2
+  RLT: 1
+  Relax-and-lift: 1
+
+Explored 1 nodes (309 simplex iterations) in 1.57 seconds (0.64 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 30.3822 30.5649 30.6846 31.132 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.038216532941e+01, best bound 3.038216532941e+01, gap 0.0000%
+
+User-callback calls 1091, time in user-callback 0.00 sec
+alpha=0.9473684210526315  status=OPTIMAL
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 25152 rows, 14328 columns and 60720 nonzeros
+Model fingerprint: 0x5c1a172d
+Model has 720 quadratic constraints
+Variable types: 13416 continuous, 912 integer (912 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 2e+04]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-02, 5e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R104 by 5.600000000
+
+Presolve removed 24661 rows and 14046 columns
+Presolve time: 1.33s
+Presolved: 491 rows, 282 columns, 1505 nonzeros
+Presolved model has 21 quadratic constraint(s)
+Variable types: 256 continuous, 26 integer (22 binary)
+
+Root relaxation: objective 2.698152e+01, 180 iterations, 0.00 seconds (0.00 work units)
+Another try with MIP start
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   26.98152    0    8          -   26.98152      -     -    1s
+     0     0   27.39157    0   12          -   27.39157      -     -    1s
+     0     0   27.74324    0    8          -   27.74324      -     -    1s
+     0     0   27.80887    0    8          -   27.80887      -     -    1s
+     0     0   27.83823    0   10          -   27.83823      -     -    1s
+     0     0   27.84831    0   10          -   27.84831      -     -    1s
+     0     0   27.87103    0    8          -   27.87103      -     -    1s
+     0     0   27.87103    0    8          -   27.87103      -     -    1s
+H    0     0                      28.1177142   27.87103  0.88%     -    1s
+H    0     0                      27.8782856   27.87103  0.03%     -    1s
+
+Cutting planes:
+  Cover: 1
+  Implied bound: 6
+  MIR: 9
+  Flow cover: 3
+
+Explored 1 nodes (375 simplex iterations) in 1.40 seconds (0.64 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 27.8783 28.1177 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.787828564536e+01, best bound 2.787828564536e+01, gap 0.0000%
+
+User-callback calls 1093, time in user-callback 0.00 sec
+alpha=1.0  status=OPTIMAL
