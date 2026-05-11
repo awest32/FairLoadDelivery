@@ -1,0 +1,270 @@
+┌ Info: Logging to results/2026-05-10/bilevel_validation_mn/case6_unbalanced_switch_meshed_good4integer/palma_absolute\run_validation_mn.log
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:91
+┌ Info: N_PERIODS=5, hours=[3, 9, 13, 18, 22], scales=[0.7, 0.825, 0.95, 1.075, 1.2], λ=[5.0, 5.04, 8.38, 30.0, 11.95]
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:92
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_meshed_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 51 in 'case6_unbalanced_switch_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 53 in 'case6_unbalanced_switch_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Info: Built multinetwork with 5 periods, 9 loads per period
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:135
+┌ Info: Iteration 1: Solving multiperiod lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery C:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:279
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: [sparsify_jacobian multi-period] zeroed 161 entries below |max|·1.0e-6 = 0.00963; ratio max/min_nz: 3.34e14 → 982000.0
+└ @ FairLoadDelivery C:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:161
+┌ Info: [Palma-global] Jacobian conditioning: max=9625.0, min_nz=0.009804, ratio=981700.0
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:598
+┌ Info: [Palma-global] Per-period sort + single CC: 5 period(s), 9 loads/period, 405 binaries; λ range = [5.0, 30.0]; σ ∈ [1e-8, 1.33e8]
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:631
+┌ Info: [Palma-global] Solver status: TIME_LIMIT (solve_time=120.67s)
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:737
+┌ Warning: [Palma-global] Solver returned TIME_LIMIT with no incumbent after 120.7s — returning previous iterate as fallback
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:771
+┌ Info: [palma/absolute] iter 1 upper-level status = TIME_LIMIT
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:190
+┌ Warning: upper-level not converged at iter 1 — stopping
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:192
+┌ Debug: pm model build time: 0.06700015068054199
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 3.3529999256134033
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: relaxed multi-period termination: LOCALLY_SOLVED
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:224
+┌ Debug: pm model build time: 1.2290000915527344
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 1.5239999294281006
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 12.500999927520752
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 2.4060001373291016
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.011999845504760742
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01699995994567871
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.018999814987182617
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01699995994567871
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009000062942504883
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.018000125885009766
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54

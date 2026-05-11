@@ -51,8 +51,8 @@ const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
 
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "min_max"
-pshed_type = "proportional"  # "absolute" or "proportional"
+const FAIR_FUNC = "palma"
+pshed_type = "absolute"  # "absolute" or "proportional"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 

@@ -50,7 +50,7 @@ const CASE = "case6_unbalanced_switch_meshed_good4integer"
 const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
 
 LS_PERCENT = 0.8
-const ITERATIONS = 10
+const ITERATIONS = 2
 const ALPHAS = [0.0, 0.5, 1.0]
 switch_rating = sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT
 
