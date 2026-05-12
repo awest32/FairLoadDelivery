@@ -174,8 +174,13 @@ for k in 1:ITERATIONS
             critical_ids=critical_id, weight_ids=weight_ids,
             peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
             pd=pd_all, pshed_type=pshed_type)
+    elseif FAIR_FUNC == "palma"
+        pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+            dpshed, pshed_val, weight_vals, pd_all;
+            critical_ids=critical_id, weight_ids=weight_ids,
+            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
     else
-        error("Only FAIR_FUNC=\"min_max\" wired up for now (pshed_type toggle).")
+        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\".")
     end
     last_status = status
     @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
@@ -221,6 +226,7 @@ print_validation_header("Step 4: Per-period rounding + AC feasibility")
 
 per_period_results = Dict{String,Any}()
 mn_rounded = Dict{String,Dict{String,Any}}()  # rounded math per nw_id
+mn_rounded_solutions = Dict{String,Dict{String,Any}}()  # rounded MLD solution per nw_id (for plotting)
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, scale=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t])) -----")
@@ -308,14 +314,15 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     end
 
     mn_rounded[nw_id] = math_t_rounded
+    mn_rounded_solutions[nw_id] = mld_rounded_t
     per_period_results["period_$t"] = period_checks
 end
 
 validation_results["per_period"] = per_period_results
 
 # ============================================================
-# REPORT
+# STEP 5: LOAD-SHED HEATMAP + FINAL RESULT + REPORT
+# (extracted so it can be re-run standalone in REPL)
 # ============================================================
-report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type).txt")
-generate_summary_report(validation_results, report_path)
-println("\nMulti-period validation complete. Report → $report_path")
+include("results_block_mn.jl")
+println("\nMulti-period validation complete.")

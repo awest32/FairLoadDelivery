@@ -32,7 +32,7 @@ LS_PERCENT = 0.8
 const N_PERIODS = 24
 # Linear ramp from 0.7 (period 1) to 1.0 (period 24): every period is a distinct
 # load level, monotonically increasing across the day.
-const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.65, 1.4, N_PERIODS)]
+const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 # TOU pricing: low overnight, peak in evening (h≈18)
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]

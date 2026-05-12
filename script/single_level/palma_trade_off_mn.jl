@@ -79,7 +79,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 const N_PERIODS = 24
-const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.65, 1.4, N_PERIODS)]
+const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
 const REP_PERIODS = [6, 11, 20]   # off-peak, mid-day, evening peak
