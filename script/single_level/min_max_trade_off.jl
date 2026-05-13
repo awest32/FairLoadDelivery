@@ -19,8 +19,9 @@ using Dates
 include("../../src/implementation/visualization.jl")
 
 # Set the network path
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
-#case_name = "../../data/ieee_13_aw_edit/motivation_c.dss"
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case ="13_bus"
 dir = @__DIR__
 case_path = joinpath(dir,case_name)
 date = Dates.format(now(), "yyyy-mm-dd")  
@@ -28,7 +29,7 @@ LS_PERCENT = 0.8
 pshed_type = "absolute"  # "absolute" or "proportional"
 min_max_obj = pshed_type == "proportional" ? FairLoadDelivery.objective_min_max_proportional :
                                              FairLoadDelivery.objective_min_max_absolute
-eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
+eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating = [Inf, Inf, Inf])#switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 mld_model_int = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]
@@ -41,6 +42,8 @@ output_dir = joinpath(@__DIR__, "../../results/$date/trade_off")
 if !isdir(output_dir)
     mkpath(output_dir)
 end
+load_summary_path = joinpath(output_dir, "load_summary_$(pshed_type)_$case.csv")
+isfile(load_summary_path) && rm(load_summary_path)
 
 # Integer check
 loadshed = zeros(alpha_points,length(ref[:load])+2)
@@ -70,6 +73,9 @@ for (index,alpha) in enumerate(LinRange(0,1,alpha_points))
         loadshed[index, length(loads)+1] = sum(loadshed[index,1:length(loads)])
         loadshed[index, end] = alpha
     end
+    pshed_by_load = Dict(lid => sum(value.(ld[:pshed])) for (lid, ld) in loads)
+    append_load_summary!(load_summary_path,
+        load_summary_rows(math, pshed_by_load; extra=(stage="integer", alpha=alpha)))
 end
 
 # Plot Pareto curve 
@@ -97,7 +103,7 @@ plot!(p4, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
 
 
 savefig(plot(p3, p4, layout=(1,2), size=(900,400)),
-          joinpath(output_dir, "pareto_summary_integer_$(pshed_type).svg"))
+          joinpath(output_dir, "pareto_summary_integer_$(pshed_type)_$case.svg"))
 
 n = length(ref[:load])
 load_labels = [load_data["name"] for (id, load_data) in sort(ref[:load])]
@@ -127,7 +133,7 @@ savefig(p_dist_a1, joinpath(output_dir, "loadshed_distribution_integer_alpha1.sv
 combined = plot(p_dist_a0, p_dist_a1, p4, p3, layout=(2,2), size=(1400, 900),
     left_margin=10Plots.mm, right_margin=5Plots.mm,
     top_margin=5Plots.mm, bottom_margin=10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type).svg"))
+savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type)_$case.svg"))
 display(combined)
 
 JuMP.set_optimizer(mld_model.model, Gurobi.Optimizer)
@@ -153,6 +159,9 @@ for (index,alpha) in enumerate(LinRange(0,1,alpha_points))
         loadshed[index, length(loads)+1] = sum(loadshed[index,1:length(loads)])
         loadshed[index, end] = alpha
     end
+    pshed_by_load = Dict(lid => sum(value.(ld[:pshed])) for (lid, ld) in loads)
+    append_load_summary!(load_summary_path,
+        load_summary_rows(math, pshed_by_load; extra=(stage="relaxed", alpha=alpha)))
 end
 
 # Plot Pareto curve 
@@ -184,4 +193,4 @@ plot!(p2, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
 
 plot(p1, p2, layout=(1,2), size=(900,400))
 savefig(plot(p1, p2, layout=(1,2), size=(900,400)),
-          joinpath(output_dir, "pareto_summary_relaxed_$(pshed_type).svg"))
+          joinpath(output_dir, "pareto_summary_relaxed_$(pshed_type)_$case.svg"))

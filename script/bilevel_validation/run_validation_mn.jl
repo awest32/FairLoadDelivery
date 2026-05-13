@@ -46,25 +46,28 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch_meshed_good4integer"
-const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+#const CASE = "case6_unbalanced_switch_meshed_good4integer"
+const CASE = "motivation_c_good4integer"
+case ="13_bus"
 
+#const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "palma"
+const FAIR_FUNC = "min_max"
 pshed_type = "absolute"  # "absolute" or "proportional"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 
 # Multi-period setup: 24 hourly periods with linear-ramp load + TOU peak-cost profiles
-const N_PERIODS = 24
+const N_PERIODS = 12
 const PERIOD_HOURS        = collect(0:N_PERIODS-1)
 # Linear ramp from 0.7 (period 1) to 1.0 (period 24).
 const LOAD_SCALE_FACTORS  = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS     = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                              for h in PERIOD_HOURS]
 
-switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
+switch_rating = [Inf, Inf, Inf]# sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
 # Solvers
 ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)

@@ -41,7 +41,10 @@ include("../../src/implementation/visualization.jl")
 # ----------------------------------------------------------------------------
 # Configuration
 # ----------------------------------------------------------------------------
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case ="13_bus"
+
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -49,7 +52,7 @@ LS_PERCENT = 0.8
 pshed_type = "absolute"  # only absolute supported in this script
 
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
-    switch_rating = sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
+    switch_rating = [Inf,Inf,Inf])#sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
 
 # Build with the min-max MLD problem so the constraint set matches
 # `min_max_trade_off.jl`; we'll overwrite the objective with the Palma+α one.
@@ -63,6 +66,8 @@ palma_ratio_log = fill(NaN, alpha_points)
 
 output_dir = joinpath(@__DIR__, "../../results/$date/palma_trade_off")
 isdir(output_dir) || mkpath(output_dir)
+load_summary_path = joinpath(output_dir, "load_summary_$(pshed_type)_$case.csv")
+isfile(load_summary_path) && rm(load_summary_path)
 
 # ----------------------------------------------------------------------------
 # Palma helpers (local — formulation mirrors load_shed_as_parameter.jl)
@@ -253,6 +258,9 @@ for (index, alpha) in enumerate(LinRange(0, 1, alpha_points))
     for (load_id, load_data) in loads
         loadshed[index, load_id] = sum(value.(load_data[:pshed]))
     end
+    pshed_by_load = Dict(lid => sum(value.(ld[:pshed])) for (lid, ld) in loads)
+    append_load_summary!(load_summary_path,
+        load_summary_rows(math, pshed_by_load; extra=(stage="integer", alpha=alpha)))
     loadshed[index, length(loads) + 1] = sum(loadshed[index, 1:length(loads)])
     loadshed[index, end] = alpha
 

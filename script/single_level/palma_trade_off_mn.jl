@@ -70,7 +70,10 @@ include("../../src/implementation/visualization.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case ="13_bus"
+
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -82,7 +85,7 @@ const N_PERIODS = 24
 const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
-const REP_PERIODS = [6, 11, 20]   # off-peak, mid-day, evening peak
+ REP_PERIODS = [6, 11, 20]   # off-peak, mid-day, evening peak
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
@@ -93,7 +96,7 @@ alphas = collect(LinRange(0.0, 1.0, alpha_points))
 # NETWORK SETUP + MULTINETWORK DATA
 # ============================================================
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
-    switch_rating = sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
+    switch_rating =[Inf,Inf,Inf])# sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
 
 "Replicate single-period math dict into a multinetwork dict with per-period load scaling."
 function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
@@ -291,13 +294,73 @@ palma = add_palma_machinery_aggregate!(mld_mn;
     nw_ids_int = nw_ids_int_sorted, relax_binary = false)
 
 # ============================================================
+# WARMSTART: pure-efficiency multi-period MLD (no Palma machinery)
+# ============================================================
+# At low α the σ·bot_sum=1 + binary-permutation MIP can leave Gurobi
+# without a feasible incumbent in TimeLimit (root LP relaxation is loose
+# for the McCormick u and the 24-period MLD stack). We pre-solve the same
+# constraint set with a pure-efficiency objective — no σ, no permutation —
+# then push its (pshed, switch, block, a, u, σ) values onto `mld_mn` as
+# JuMP start values so Gurobi has an incumbent at root for every α.
+println("Warmstart: solving pure-efficiency multi-period MLD (no Palma machinery)…")
+build_fn_eff = pm -> FairLoadDelivery.build_mn_mc_mld_min_max_integer(pm;
+    peak_time_costs = PEAK_TIME_COSTS, alpha = 0.0)
+mld_eff = _PMD.instantiate_mc_model(mn_data, _PMD.LinDist3FlowPowerModel, build_fn_eff;
+    multinetwork = true, ref_extensions = [FairLoadDelivery.ref_add_load_blocks!])
+JuMP.set_optimizer(mld_eff.model, Gurobi.Optimizer)
+JuMP.set_optimizer_attribute(mld_eff.model, "MIPGap",    1e-2)
+JuMP.set_optimizer_attribute(mld_eff.model, "TimeLimit", 60 * 5)
+JuMP.set_optimizer_attribute(mld_eff.model, "MIPFocus",  1)
+JuMP.optimize!(mld_eff.model)
+@assert JuMP.primal_status(mld_eff.model) == MOI.FEASIBLE_POINT  "warmstart efficiency MLD produced no incumbent — increase TimeLimit"
+println("  efficiency-warmstart status=$(JuMP.termination_status(mld_eff.model))")
+
+# Copy MLD decisions (pshed continuous + switch_state / z_block / z_demand binaries) onto mld_mn.
+# Use broadcast so this works whether PMD returns a scalar VariableRef (single-phase)
+# or a JuMP container (per-phase vector / DenseAxisArray) for each variable family.
+for nw in nw_ids_int_sorted
+    for lid in palma.load_ids
+        eff_var   = _PMD.var(mld_eff, nw, :pshed, lid)
+        palma_var = _PMD.var(mld_mn,  nw, :pshed, lid)
+        JuMP.set_start_value.(palma_var, JuMP.value.(eff_var))
+    end
+    eff_v   = _PMD.var(mld_eff, nw)
+    palma_v = _PMD.var(mld_mn,  nw)
+    for sym in (:switch_state, :z_block, :z_demand)
+        haskey(eff_v, sym) || continue
+        JuMP.set_start_value.(palma_v[sym], JuMP.value.(eff_v[sym]))
+    end
+end
+
+# Palma-specific (a, u, σ) from per-load aggregate served.
+pshed_warm_agg = [sum(sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
+                      for nw in nw_ids_int_sorted)
+                  for lid in palma.load_ids]
+pserved_warm = palma.P_total .- pshed_warm_agg
+perm         = sortperm(pserved_warm)              # ascending positions
+a_start      = zeros(palma.n, palma.n)
+for (i, j) in enumerate(perm); a_start[i, j] = 1.0; end
+u_start      = a_start .* reshape(pserved_warm, 1, :)
+n_bot_palma  = max(1, floor(Int, 0.4 * palma.n))
+bot_sum_val  = sum(pserved_warm[perm[k]] for k in 1:n_bot_palma)
+σ_start      = 1.0 / max(bot_sum_val, 1e-8)
+for i in 1:palma.n, j in 1:palma.n
+    JuMP.set_start_value(palma.a[i, j], a_start[i, j])
+    JuMP.set_start_value(palma.u[i, j], u_start[i, j])
+end
+JuMP.set_start_value(palma.σ, σ_start)
+println("  warm pshed_total=$(round(sum(pshed_warm_agg), digits=2))   σ_start=$(round(σ_start, digits=6))")
+
+# ============================================================
 # ALPHA SWEEP
 # ============================================================
-total_shed       = zeros(alpha_points, N_PERIODS)         # per-period totals (for plots)
-max_shed         = zeros(alpha_points, N_PERIODS)
+# NaN-init so a TimeLimit-with-no-incumbent α leaves explicit NaN in the
+# CSV and plots, rather than masquerading as 0 shed.
+total_shed       = fill(NaN, alpha_points, N_PERIODS)     # per-period totals (for plots)
+max_shed         = fill(NaN, alpha_points, N_PERIODS)
 palma_ratio_log  = fill(NaN, alpha_points)                # one aggregate Palma per α
-per_load_dist_a0 = zeros(n_loads, N_PERIODS)
-per_load_dist_a1 = zeros(n_loads, N_PERIODS)
+per_load_dist_a0 = fill(NaN, n_loads, N_PERIODS)
+per_load_dist_a1 = fill(NaN, n_loads, N_PERIODS)
 
 for (idx, alpha) in enumerate(alphas)
     set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
@@ -309,8 +372,8 @@ for (idx, alpha) in enumerate(alphas)
     println("alpha=$alpha  status=$status")
     flush(stdout)
     if JuMP.primal_status(mld_mn.model) != MOI.FEASIBLE_POINT
-        @warn "non-feasible at alpha=$alpha — skipping"
-        continue
+        @warn "non-feasible at alpha=$alpha — skipping; total_shed/max_shed/palma left as NaN"
+        continue   # NaN-init means CSV + plots will show this α as missing, not as 0 shed.
     end
 
     # Per-period totals/distributions (still useful for visualizing how each

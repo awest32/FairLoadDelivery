@@ -29,6 +29,7 @@ using DataFrames
 using CSV
 using Dates
 using Logging, LoggingExtras
+using Statistics
 
 # Load validation utilities
 include("validation_utils.jl")
@@ -41,15 +42,15 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 const CASE = "case6_unbalanced_switch_meshed_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 
-# const CASE = "motivation_c"
+# const CASE = "motivation_c_good4integer"
 # const CASE_FILE = joinpath(@__DIR__,"../../data/ieee_13_aw_edit/$CASE.dss")
-
+case = "6_bus"#"13_bus"
 LS_PERCENT = 0.8
 const ITERATIONS = 20
 const FAIR_FUNC = "palma"  # simplest fairness function for testing
 pshed_type = "absolute"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+const N_BERNOULLI_SAMPLES = 1000
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
 #switch_rating=[400*LS_PERCENT].*ones(3)
@@ -116,16 +117,17 @@ print_check_result("Voltage limits set to [0.95, 1.05]", v_limits_ok)
 
 # Check 1.4: Generation capacity limited (forces load shedding)
 gen_limited = false
+total_pd_ref = 0
 for (i, gen) in math["gen"]
     if gen["source_id"] == "voltage_source.source"
         total_pmax = sum(gen["pmax"])
         @info "Generation $i ($(gen["name"])) capacity: $total_pmax"
-        total_pd = sum(sum(load["pd"]) for (_, load) in math["load"])
-        @info "Total demand in system: $total_pd"
-        if total_pmax < total_pd
+        total_pd_ref = sum(sum(load["pd"]) for (_, load) in math["load"])
+        @info "Total demand in system: $total_pd_ref"
+        if total_pmax < total_pd_ref
             gen_limited = true
         end
-        println("    Generation capacity: $total_pmax, Total demand: $total_pd")
+        println("    Generation capacity: $total_pmax, Total demand: $total_pd_ref")
     end
 end
 setup_checks["gen_forces_shedding"] = Dict("passed" => gen_limited)
@@ -633,13 +635,13 @@ validation_results["ac_feasibility_summary"] = ac_summary
 # ============================================================
 # GENERATE FINAL REPORT
 # ============================================================
-report_path = joinpath(save_dir, "validation_report_$(pshed_type).txt")
+report_path = joinpath(save_dir, "validation_report_$(pshed_type)_$case.txt")
 generate_summary_report(validation_results, report_path)
 
 # Save final network plot
 if ac_converged && haskey(ac_result, "solution")
     if !isempty(ac_result["solution"])
-        plot_path = joinpath(save_dir, "network_load_shed_$(pshed_type).svg")
+        plot_path = joinpath(save_dir, "network_load_shed_$(pshed_type)_$case.svg")
         plot_network_load_shed(mld_rounded["solution"], math_rounded; output_file=plot_path)
     else
         println("  [!] Cannot plot network - 0 power flow in AC solution available.")
@@ -658,12 +660,12 @@ for lid in load_ids]
 p_dist = bar(load_labels, pshed_per_load,
     xlabel = "Load",
     ylabel = "Load shed (kW)",
-    title  = "Per-load shed rounded integer solution ($CASE /
-$FAIR_FUNC)",
+    #title  = "Load shed distribution",
     legend = false,
     color  = :steelblue,
     linecolor = :black,
     xrotation = 45,
+    xticks = (1:length(load_labels), load_labels)
 )
 
 # label the max bar
@@ -674,8 +676,41 @@ max_idx = argmax(pshed_per_load)
 
 display(p_dist)
 savefig(p_dist, joinpath(save_dir,
-"loadshed_distribution_rounded_$(pshed_type).png"))
+"loadshed_distribution_rounded_$(pshed_type)_$(case)_$(FAIR_FUNC).svg"))
 
+mean = Statistics.mean(pshed_per_load)
+std_dev = Statistics.std(pshed_per_load)
+cv = std_dev / mean
+n = length(pshed_per_load)
+total_shed   = sum(pshed_per_load)
+total_served = total_pd_ref - total_shed
+pct_shed     = total_pd_ref > 0 ? 100 * total_shed   / total_pd_ref : NaN
+pct_served   = total_pd_ref > 0 ? 100 * total_served / total_pd_ref : NaN
+l1           = LinearAlgebra.norm(pshed_per_load, 1)
+l2           = LinearAlgebra.norm(pshed_per_load, 2)
+linf         = LinearAlgebra.norm(pshed_per_load, Inf)
+μ            = n > 0 ? total_shed / n : NaN
+σ            = n > 1 ? Statistics.std(pshed_per_load; corrected=true) : 0.0
+cv           = (isfinite(μ) && μ > 0) ? σ / μ : NaN
+
+metrics = Dict{Symbol,Float64}(
+    :total_pd_kw     => total_pd_ref,
+    :total_shed_kw   => total_shed,
+    :total_served_kw => total_served,
+    :pct_shed        => pct_shed,
+    :pct_served      => pct_served,
+    :l1_norm         => l1,
+    :l2_norm         => l2,
+    :linf_norm       => linf,
+    :cv              => cv,
+)
+
+cols = [:total_pd_kw, :total_shed_kw, :total_served_kw, :pct_shed, :pct_served,
+        :l1_norm, :l2_norm, :linf_norm, :cv]
+df = DataFrames.DataFrame((c => [metrics[c]] for c in cols)...)
+savepath = joinpath(save_dir, "load_shed_metrics_$(pshed_type)_$(case)_$(FAIR_FUNC).csv")
+CSV.write(savepath, df)
+println("Saved load shed metrics to $savepath")
 #   l9_idx = 7# findfirst(==("8"), weight_ids)
 #   @info "dpshed[:, L9] = $(dpshed[:, l9_idx])"
 #   @info "dpshed[L9, L9] = $(dpshed[l9_idx, l9_idx])"

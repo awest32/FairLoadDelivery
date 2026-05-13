@@ -111,6 +111,59 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= 700
             end
         end
+    elseif case == "ieee_13_aw_edit/motivation_c_good4integer.dss"
+       # Per-phase switch ratings = calc_apparent_power(P_phase, Q_phase) * 1.05,
+       # using radial-config ACPF flows from
+       # script/single_level/acpf_probe_motivation_c_good4integer.jl
+       # (RADIAL_OPEN = ("634675","646611")). 634675 / 646611 mirror their
+       # loop-partners (632633 / 632645) so radiality can swap which switch
+       # breaks each loop. 671700 / 700701 / 701702 have empty downstream
+       # blocks (loads 700/701/702 are commented out).
+       for (i, branch) in math["branch"]
+            branch["c_rating_a"][:] .= switch_rating[1]
+       end
+       for (i,switch) in math["switch"]
+            switch["dispatchable"] = 1
+            if switch["name"] == "632633"
+                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*1.05
+                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*1.05
+                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*1.05
+            elseif switch["name"] == "632645"
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*1.05
+                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*1.05
+            elseif switch["name"] == "634675"
+                # Loop-partner of 632633.
+                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*1.05
+                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*1.05
+                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*1.05
+            elseif switch["name"] == "646611"
+                # Loop-partner of 632645.
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*1.05
+                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*1.05
+            elseif switch["name"] == "670671"
+                switch["current_rating"][1] = calc_apparent_power(280.53, 70.27)*1.05
+                switch["current_rating"][2] = calc_apparent_power(130.24, 146.65)*1.05
+                switch["current_rating"][3] = calc_apparent_power(290.36, 170.45)*1.05
+            elseif switch["name"] == "671692"
+                switch["current_rating"][1] = calc_apparent_power(140.33, 140.55)*1.05
+                switch["current_rating"][2] = calc_apparent_power(70.24, 176.64)*1.05
+                switch["current_rating"][3] = calc_apparent_power(160.24, 130.24)*1.05
+            elseif switch["name"] == "671700"
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+            elseif switch["name"] == "700701"
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+            elseif switch["name"] == "701702"
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+            end
+        end
     elseif case == "ieee_13_aw_edit/motivation_d.dss"
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1

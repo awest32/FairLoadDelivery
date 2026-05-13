@@ -45,7 +45,7 @@ p_heat = heatmap(load_labels, period_labels, pshed_matrix,
     xrotation = 45,
 )
 display(p_heat)
-savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type).png"))
+savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.png"))
 
 # ---- Grouped bar over representative periods (matches min_max_trade_off_mn style) ----
 rep_valid = filter(t -> 1 <= t <= N_PERIODS, REP_PERIODS)
@@ -69,7 +69,7 @@ if !isempty(rep_valid)
         linecolor = :black,
     )
     display(p_grouped)
-    savefig(p_grouped, joinpath(save_dir, "loadshed_grouped_$(pshed_type).png"))
+    savefig(p_grouped, joinpath(save_dir, "loadshed_grouped_$(pshed_type)_$case.png"))
 end
 
 valid_mask = .!isnan.(pshed_matrix)
@@ -117,7 +117,7 @@ validation_results["final"] = Dict(
     "relaxed_mn_objective"   => mn_relaxed_final["objective"],
 )
 
-report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type).txt")
+report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type)_$case.txt")
 generate_summary_report(validation_results, report_path)
-println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type).png"))")
+println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.png"))")
 println("Report → $report_path")

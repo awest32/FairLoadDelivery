@@ -22,7 +22,9 @@ include("../../src/implementation/visualization.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case = "13_bus"
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -32,14 +34,14 @@ LS_PERCENT = 0.8
 const N_PERIODS = 24
 # Linear ramp from 0.7 (period 1) to 1.0 (period 24): every period is a distinct
 # load level, monotonically increasing across the day.
-const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
+const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.75, 1.1, N_PERIODS)]
 # TOU pricing: low overnight, peak in evening (h≈18)
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
 
 # Representative subset (1-indexed period indices) for the busy plots:
 # overnight off-peak (h=3), morning ramp (h=8), evening peak (h=19)
-const REP_PERIODS = [6, 11, 20]
+ REP_PERIODS = [6, 11, 20]
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 solve_min_max = pshed_type == "proportional" ?
@@ -50,7 +52,7 @@ solve_min_max = pshed_type == "proportional" ?
 # NETWORK SETUP
 # ============================================================
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
-    switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
+    switch_rating = [Inf,Inf,Inf])#sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 
 """
 Replicate a single-period math dict into a multinetwork dict with per-period
@@ -141,7 +143,7 @@ for (k, t) in enumerate(REP_PERIODS)
             marker = period_markers[mod1(k, length(period_markers))], lw = 2,
             line_z = alphas)
 end
-savefig(p3d, joinpath(output_dir, "pareto3d_integer_$(pshed_type).svg"))
+savefig(p3d, joinpath(output_dir, "pareto3d_integer_$(pshed_type)_$case.svg"))
 display(p3d)
 
 # Per-period 2D Pareto panel (grid layout — readable for many periods)
@@ -162,7 +164,7 @@ for t in 1:N_PERIODS
           colorbar = false, legend = false,
           titlefontsize = 8, guidefontsize = 7, tickfontsize = 6)
 end
-savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type).svg"))
+savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type)_$case.svg"))
 display(panel)
 
 # Global metrics across alpha (cost-weighted aggregates)
@@ -171,7 +173,7 @@ weighted_max   = [sum(PEAK_TIME_COSTS[t] * max_shed[i, t]   for t in 1:N_PERIODS
 p_metrics = plot(alphas, weighted_total, label = "Σ_t λ_t · total shed_t", lw = 2, marker = :circle,
                  xlabel = "alpha", ylabel = "kW (cost-weighted)")
 plot!(p_metrics, alphas, weighted_max, label = "Σ_t λ_t · max shed_t", lw = 2, marker = :square)
-savefig(p_metrics, joinpath(output_dir, "metrics_vs_alpha_integer_$(pshed_type).svg"))
+savefig(p_metrics, joinpath(output_dir, "metrics_vs_alpha_integer_$(pshed_type)_$case.svg"))
 display(p_metrics)
 
 # ============================================================
@@ -211,5 +213,5 @@ combined = plot(p_dist_a0, p_dist_a1, p_metrics, p_pareto_combined,
     layout = (2, 2), size = (1400, 900),
     left_margin = 10Plots.mm, right_margin = 5Plots.mm,
     top_margin = 5Plots.mm, bottom_margin = 10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type).svg"))
+savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type)_$case.svg"))
 display(combined)
