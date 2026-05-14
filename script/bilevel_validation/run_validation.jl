@@ -159,6 +159,7 @@ end
 
 validation_results["setup"] = setup_checks
 mld_integer_initial = FairLoadDelivery.solve_mc_mld_switch_integer(math,Gurobi.Optimizer)
+mld_implicit_diff_initial = FairLoadDelivery.solve_mc_mld_shed_implicit_diff(math, ipopt_solver; ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!]);
 mld_relaxed_initial = FairLoadDelivery.solve_mc_mld_switch_relaxed(math,Ipopt.Optimizer)
 
 # ============================================================

@@ -199,10 +199,11 @@ function objective_fairly_weighted_max_load_served_regd(pm::_PMD.AbstractUnbalan
     regularization_term = []
     for d in _PMD.ids(pm, nw, :load)
         pd_var = _PMD.var(pm, nw, :pd)[d]
+        ref_pd = sum(_PMD.ref(pm, nw, :load, d)["pd"])
         push!(weighted_load_served, sum(fair_load_weights[d] .* pd_var))
         # Quadratic regularization to keep pd interior (fixes DiffOpt sensitivity computation)
         if regularization > 0.0
-            push!(regularization_term, sum(pd_var .^ 2))
+            push!(regularization_term, sum(pd_var/ref_pd .^ 2))
         end
     end
     #@info fair_load_weights
