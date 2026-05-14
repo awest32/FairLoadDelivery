@@ -20,8 +20,10 @@ include("../../src/implementation/visualization.jl")
 
 # Set the network path
 #case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
-case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case ="13_bus"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+#case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+
+case ="more_meshed_6bus"
 dir = @__DIR__
 case_path = joinpath(dir,case_name)
 date = Dates.format(now(), "yyyy-mm-dd")  
@@ -29,7 +31,7 @@ LS_PERCENT = 0.8
 pshed_type = "absolute"  # "absolute" or "proportional"
 min_max_obj = pshed_type == "proportional" ? FairLoadDelivery.objective_min_max_proportional :
                                              FairLoadDelivery.objective_min_max_absolute
-eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating = [Inf, Inf, Inf])#switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
+eng,math,lbs, critical_id  = setup_network(case_path, LS_PERCENT; switch_rating=sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 mld_model = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 mld_model_int = instantiate_mc_model(math, LinDist3FlowPowerModel, build_mc_mld_min_max_integer; ref_extensions=[FairLoadDelivery.ref_add_load_blocks!])
 ref = mld_model.ref[:it][:pmd][:nw][0]

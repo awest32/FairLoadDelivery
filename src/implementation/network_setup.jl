@@ -208,6 +208,10 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][1] = switch_rating[1]
                 switch["current_rating"][2] = switch_rating[2]
                 switch["current_rating"][3] = switch_rating[3]
+            else 
+                switch["current_rating"][1] = calc_apparent_power(10,12)#*ls_percent 
+                switch["current_rating"][2] = calc_apparent_power(10,12)#*ls_percent 
+                switch["current_rating"][3] = calc_apparent_power(10,12)#*ls_percent 
             end
        end
        for (i, branch) in math["branch"]
