@@ -10,6 +10,7 @@ using Distributions
 using DiffOpt
 using JuMP
 using LinearAlgebra, SparseArrays
+using Statistics
 using PowerPlots
 using DataFrames
 using CSV
@@ -104,6 +105,8 @@ max_shed   = zeros(alpha_points, N_PERIODS)
 # Per-load × period distribution captured at alpha=0 and alpha=1 for the summary
 per_load_dist_a0 = zeros(n_loads, N_PERIODS)
 per_load_dist_a1 = zeros(n_loads, N_PERIODS)
+# Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
+per_load_agg = zeros(alpha_points, n_loads)
 
 for (idx, alpha) in enumerate(alphas)
     soln = solve_min_max(mn_data, Gurobi.Optimizer;
@@ -120,6 +123,7 @@ for (idx, alpha) in enumerate(alphas)
         per_load_shed = [sum(loads_t[lid]["pshed"]) for lid in sorted_load_ids]
         total_shed[idx, t] = sum(per_load_shed)
         max_shed[idx, t]   = maximum(per_load_shed)
+        per_load_agg[idx, :] .+= per_load_shed
         if idx == 1
             per_load_dist_a0[:, t] .= per_load_shed
         elseif idx == alpha_points
@@ -127,6 +131,29 @@ for (idx, alpha) in enumerate(alphas)
         end
     end
 end
+
+# ============================================================
+# Per-α aggregates and per-load-shed-vector norms
+# ============================================================
+agg_total_shed = [sum(total_shed[i, :]) for i in 1:alpha_points]
+agg_max_shed   = [maximum(per_load_agg[i, :]) for i in 1:alpha_points]
+
+function shed_norms(shed_vec::AbstractVector{<:Real})
+    m = mean(shed_vec)
+    s = std(shed_vec)
+    return (
+        l1   = norm(shed_vec, 1),
+        l2   = norm(shed_vec, 2),
+        linf = norm(shed_vec, Inf),
+        cov  = m > 1e-9 ? s / m : NaN,
+    )
+end
+
+norms_per_alpha = [shed_norms(per_load_agg[i, :]) for i in 1:alpha_points]
+l1_vec   = [nm.l1   for nm in norms_per_alpha]
+l2_vec   = [nm.l2   for nm in norms_per_alpha]
+linf_vec = [nm.linf for nm in norms_per_alpha]
+cov_vec  = [nm.cov  for nm in norms_per_alpha]
 
 # ============================================================
 # 3D PARETO PLOT (one curve per period along z = period index)
@@ -167,51 +194,84 @@ end
 savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type)_$case.svg"))
 display(panel)
 
-# Global metrics across alpha (cost-weighted aggregates)
-weighted_total = [sum(PEAK_TIME_COSTS[t] * total_shed[i, t] for t in 1:N_PERIODS) for i in 1:alpha_points]
-weighted_max   = [sum(PEAK_TIME_COSTS[t] * max_shed[i, t]   for t in 1:N_PERIODS) for i in 1:alpha_points]
-p_metrics = plot(alphas, weighted_total, label = "Σ_t λ_t · total shed_t", lw = 2, marker = :circle,
-                 xlabel = "alpha", ylabel = "kW (cost-weighted)")
-plot!(p_metrics, alphas, weighted_max, label = "Σ_t λ_t · max shed_t", lw = 2, marker = :square)
-savefig(p_metrics, joinpath(output_dir, "metrics_vs_alpha_integer_$(pshed_type)_$case.svg"))
-display(p_metrics)
-
 # ============================================================
-# SUMMARY PLOT (mirrors single-period summary_integer_all_*.svg)
+# FIGURE 1: per-load aggregate shed distribution at α=0 and α=1, plus
+# aggregate total + max per-load shed vs α (raw kW, summed across periods).
+# Distributions show per-load shed summed across all periods (one bar per load).
 # ============================================================
 ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by=x->parse(Int, x))]
-# Distributions and overlay Pareto use only the representative subset for readability
-rep_period_labels = reshape(["t=$t" for t in REP_PERIODS], 1, length(REP_PERIODS))
 
-function build_dist_plot_mn(per_load_per_period::Matrix{Float64}, title_str::String)
-    groupedbar(load_labels, per_load_per_period[:, REP_PERIODS],
-        bar_position = :dodge,
-        labels = rep_period_labels,
+const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
+                 titlefontsize = 18, legendfontsize = 16)
+
+function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
+    p = bar(load_labels, per_load_agg_vec,
         xlabel = "load",
-        ylabel = "load shed (kW)",
+        ylabel = "aggregate load shed (kW)",
         title  = title_str,
-        legend = :topright,
-        linecolor = :black)
+        legend = false,
+        color  = :steelblue,
+        linecolor = :black;
+        FONT_KW...)
+    ymax = maximum(per_load_agg_vec)
+    for (i, v) in enumerate(per_load_agg_vec)
+        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
+            text("$(round(v, digits = 1))", 14, :center))
+    end
+    return p
 end
 
-p_dist_a0 = build_dist_plot_mn(per_load_dist_a0, "alpha = 0 (efficiency) — rep. periods")
-p_dist_a1 = build_dist_plot_mn(per_load_dist_a1, "alpha = 1 (fairness) — rep. periods")
+p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :],
+    "alpha = 0 (efficiency) — aggregate over periods")
+p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :],
+    "alpha = 1 (fairness) — aggregate over periods")
 
-# Combined Pareto overlay limited to representative periods (full set is in the panel grid)
-p_pareto_combined = plot(xlabel = "total shed (kW)", ylabel = "max shed (kW)",
-                         title = "Pareto by period (rep.)", legend = :topright)
-for (k, t) in enumerate(REP_PERIODS)
-    plot!(p_pareto_combined, total_shed[:, t], max_shed[:, t],
-          marker = period_markers[mod1(k, length(period_markers))],
-          label = "t=$t (s=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t]))",
-          line_z = alphas, color = :cividis)
+p_metrics = plot(alphas, agg_total_shed, label = "total shed (kW)",
+    lw = 2, marker = :circle,
+    xlabel = "alpha", ylabel = "aggregate load shed (kW)",
+    title  = "Aggregate total + max per-load shed vs alpha";
+    FONT_KW...)
+plot!(p_metrics, alphas, agg_max_shed, label = "max per-load shed (kW)",
+    lw = 2, marker = :square)
+
+fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
+    layout = (1, 3), size = (1900, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type)_$case.svg"))
+display(fig1)
+
+# ============================================================
+# FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
+# per-load aggregate-shed vector), α encoded by marker color. Colorbar lives
+# in a dedicated narrow subplot so the four data panels stay equally sized.
+# ============================================================
+function pareto_norm_plot(total_shed_vec, norm_vec, alphas_vec, ylab)
+    plot(total_shed_vec, norm_vec,
+        seriestype = :line, lc = :grey,
+        marker = :circle, marker_z = alphas_vec, color = :cividis,
+        clims = (0.0, 1.0), colorbar = false,
+        xlabel = "total load shed (kW)", ylabel = ylab,
+        legend = false; FONT_KW...)
 end
 
-combined = plot(p_dist_a0, p_dist_a1, p_metrics, p_pareto_combined,
-    layout = (2, 2), size = (1400, 900),
-    left_margin = 10Plots.mm, right_margin = 5Plots.mm,
-    top_margin = 5Plots.mm, bottom_margin = 10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type)_$case.svg"))
-display(combined)
+p_l1   = pareto_norm_plot(agg_total_shed, l1_vec,   alphas, "L1 norm of shed (kW)")
+p_l2   = pareto_norm_plot(agg_total_shed, l2_vec,   alphas, "L2 norm of shed (kW)")
+p_linf = pareto_norm_plot(agg_total_shed, linf_vec, alphas, "L∞ norm of shed (kW)")
+p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
+
+p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
+    color = :cividis, colorbar = false,
+    xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
+    ylabel = "alpha", title = "", framestyle = :box,
+    tickfontsize = 16, guidefontsize = 22)
+
+fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
+    layout = @layout([a b c d e{0.02w}]),
+    size = (2200, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type)_$case.svg"))
+display(fig2)

@@ -1,0 +1,596 @@
+┌ Info: Logging to results/2026-05-14/bilevel_validation/case6_unbalanced_switch_good4integer/palma\run_validation.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:79
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 50 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 52 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: Assignment to `v_limits_ok` in soft scope is ambiguous because a global variable by the same name exists: `v_limits_ok` will be treated as a new local. Disambiguate by using `local v_limits_ok` to suppress this warning or `global v_limits_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:111
+┌ Warning: Assignment to `total_pd_ref` in soft scope is ambiguous because a global variable by the same name exists: `total_pd_ref` will be treated as a new local. Disambiguate by using `local total_pd_ref` to suppress this warning or `global total_pd_ref` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:125
+┌ Warning: Assignment to `gen_limited` in soft scope is ambiguous because a global variable by the same name exists: `gen_limited` will be treated as a new local. Disambiguate by using `local gen_limited` to suppress this warning or `global gen_limited` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:128
+┌ Info: Generation 1 (_virtual_gen.voltage_source.source) capacity: 56.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:124
+┌ Info: Total demand in system: 70.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:126
+┌ Warning: Assignment to `weights_init_ok` in soft scope is ambiguous because a global variable by the same name exists: `weights_init_ok` will be treated as a new local. Disambiguate by using `local weights_init_ok` to suppress this warning or `global weights_init_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:140
+┌ Debug: pm model build time: 0.18999981880187988
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.05900001525878906
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.2969999313354492
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: Iteration 1: Solving lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:105
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Debug: message: repl/getvariables
+│   time = 17787621411
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621413
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621501
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621501
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621523
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621523
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17787621530
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17787621530
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17787621531
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621531
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621630
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621630
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621637
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621637
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621638
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621638
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621639
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621639
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621646
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621646
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621650
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621650
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621656
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621656
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621658
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621658
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17787621683
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17787621683
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Info: Logging to results/2026-05-14/bilevel_validation/case6_unbalanced_switch_good4integer/min_max\run_validation.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:79
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 50 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 52 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: Assignment to `v_limits_ok` in soft scope is ambiguous because a global variable by the same name exists: `v_limits_ok` will be treated as a new local. Disambiguate by using `local v_limits_ok` to suppress this warning or `global v_limits_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:111
+┌ Warning: Assignment to `total_pd_ref` in soft scope is ambiguous because a global variable by the same name exists: `total_pd_ref` will be treated as a new local. Disambiguate by using `local total_pd_ref` to suppress this warning or `global total_pd_ref` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:125
+┌ Warning: Assignment to `gen_limited` in soft scope is ambiguous because a global variable by the same name exists: `gen_limited` will be treated as a new local. Disambiguate by using `local gen_limited` to suppress this warning or `global gen_limited` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:128
+┌ Info: Generation 1 (_virtual_gen.voltage_source.source) capacity: 56.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:124
+┌ Info: Total demand in system: 70.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:126
+┌ Warning: Assignment to `weights_init_ok` in soft scope is ambiguous because a global variable by the same name exists: `weights_init_ok` will be treated as a new local. Disambiguate by using `local weights_init_ok` to suppress this warning or `global weights_init_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:140
+┌ Debug: pm model build time: 0.18799996376037598
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.051000118255615234
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.21499991416931152
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: Iteration 1: Solving lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:105
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Debug: message: repl/getvariables
+│   time = 17787621715
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621716
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621727
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621727
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621831
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621831
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ┌ Info: Logging to results/2026-05-14/bilevel_validation/case6_unbalanced_switch_good4integer/palma\run_validation.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:79
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 50 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 52 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: Assignment to `v_limits_ok` in soft scope is ambiguous because a global variable by the same name exists: `v_limits_ok` will be treated as a new local. Disambiguate by using `local v_limits_ok` to suppress this warning or `global v_limits_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:111
+┌ Warning: Assignment to `total_pd_ref` in soft scope is ambiguous because a global variable by the same name exists: `total_pd_ref` will be treated as a new local. Disambiguate by using `local total_pd_ref` to suppress this warning or `global total_pd_ref` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:125
+┌ Warning: Assignment to `gen_limited` in soft scope is ambiguous because a global variable by the same name exists: `gen_limited` will be treated as a new local. Disambiguate by using `local gen_limited` to suppress this warning or `global gen_limited` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:128
+┌ Info: Generation 1 (_virtual_gen.voltage_source.source) capacity: 56.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:124
+┌ Info: Total demand in system: 70.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:126
+┌ Warning: Assignment to `weights_init_ok` in soft scope is ambiguous because a global variable by the same name exists: `weights_init_ok` will be treated as a new local. Disambiguate by using `local weights_init_ok` to suppress this warning or `global weights_init_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:140
+┌ Debug: pm model build time: 0.18999981880187988
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.05900001525878906
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.2969999313354492
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: Iteration 1: Solving lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:105
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Debug: message: repl/getvariables
+│   time = 17787621411
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621413
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621489
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621501
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621501
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621523
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621523
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17787621530
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17787621530
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17787621531
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621531
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621555
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621630
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621630
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621637
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621637
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621638
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621638
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621639
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621639
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621646
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621646
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621650
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621650
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621656
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621656
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621658
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621658
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17787621683
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17787621683
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Info: Logging to results/2026-05-14/bilevel_validation/case6_unbalanced_switch_good4integer/min_max\run_validation.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:79
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 50 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 52 in 'case6_unbalanced_switch_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: Assignment to `v_limits_ok` in soft scope is ambiguous because a global variable by the same name exists: `v_limits_ok` will be treated as a new local. Disambiguate by using `local v_limits_ok` to suppress this warning or `global v_limits_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:111
+┌ Warning: Assignment to `total_pd_ref` in soft scope is ambiguous because a global variable by the same name exists: `total_pd_ref` will be treated as a new local. Disambiguate by using `local total_pd_ref` to suppress this warning or `global total_pd_ref` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:125
+┌ Warning: Assignment to `gen_limited` in soft scope is ambiguous because a global variable by the same name exists: `gen_limited` will be treated as a new local. Disambiguate by using `local gen_limited` to suppress this warning or `global gen_limited` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:128
+┌ Info: Generation 1 (_virtual_gen.voltage_source.source) capacity: 56.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:124
+┌ Info: Total demand in system: 70.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:126
+┌ Warning: Assignment to `weights_init_ok` in soft scope is ambiguous because a global variable by the same name exists: `weights_init_ok` will be treated as a new local. Disambiguate by using `local weights_init_ok` to suppress this warning or `global weights_init_ok` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation.jl:140
+┌ Debug: pm model build time: 0.18799996376037598
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.051000118255615234
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.21499991416931152
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: Iteration 1: Solving lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:105
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Debug: message: repl/getvariables
+│   time = 17787621715
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17787621716
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621727
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621727
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17787621831
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17787621831
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193

@@ -1,4 +1,19 @@
 #=
+RETIRED 2026-05-14 — moved from script/bilevel_validation/ to legacy/bi-level/.
+
+Reason: this script's only purpose was sweeping α over the bilevel Palma upper
+level. The upper-level fairness functions in src/ are now pure fairness — the
+α convex-combination knob and the efficiency/reg terms were removed from
+`palma_ratio_minimization` and `lin_palma_reformulated`. With α gone, the
+outer ALPHAS = [0.0, 0.5, 1.0] loop here would run 3 identical bilevel solves.
+
+For the equivalent single-α bilevel Palma run, use
+`script/bilevel_validation/run_validation.jl` with FAIR_FUNC = "palma".
+For trade-off curves, use the single-level controls in
+`script/single_level/palma_trade_off.jl` or `palma_trade_off_mn.jl`.
+
+(Original header preserved below for context.)
+
 Bilevel Palma trade-off — 3-point alpha sweep
 =============================================
 
@@ -131,7 +146,6 @@ for alpha in ALPHAS
             dpshed_k, pshed_val_k, weight_vals_k, pd_k;
             critical_ids = critical_id,
             weight_ids   = weight_ids_k,
-            alpha        = alpha,
         )
 
         @info "    upper-level status: $status"

@@ -56,6 +56,7 @@ using Distributions
 using DiffOpt
 using JuMP
 using LinearAlgebra, SparseArrays
+using Statistics
 using PowerPlots
 using DataFrames
 using CSV
@@ -191,10 +192,15 @@ function add_palma_machinery_aggregate!(pm; nw_ids_int::Vector{Int},
     total_demand_all = sum(P_total)
     @assert total_demand_all > 0 "Aggregate demand is zero; Palma is undefined."
 
-    # Aggregate per-load shed / served (sum over periods + phases)
+    # Aggregate per-load shed / served (sum over periods + phases).
+    # pserved_agg reads from the PMD-native :pd dispatch variable directly
+    # (equivalent to P_total[k] − pshed_agg[k] via constraint_load_shed_definition,
+    # but reads as "served" without the subtraction). pshed_agg is kept for
+    # post-hoc reporting in the sweep loop below.
     pshed_agg = JuMP.@expression(model, [k = 1:n],
         sum(sum(_PMD.var(pm, nw, :pshed, load_ids[k])) for nw in nw_ids_int))
-    pserved_agg = JuMP.@expression(model, [k = 1:n], P_total[k] - pshed_agg[k])
+    pserved_agg = JuMP.@expression(model, [k = 1:n],
+        sum(sum(_PMD.var(pm, nw, :pd, load_ids[k])) for nw in nw_ids_int))
 
     # Permutation matrix
     a = if relax_binary
@@ -361,6 +367,8 @@ max_shed         = fill(NaN, alpha_points, N_PERIODS)
 palma_ratio_log  = fill(NaN, alpha_points)                # one aggregate Palma per α
 per_load_dist_a0 = fill(NaN, n_loads, N_PERIODS)
 per_load_dist_a1 = fill(NaN, n_loads, N_PERIODS)
+# Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
+per_load_agg     = fill(NaN, alpha_points, n_loads)
 
 for (idx, alpha) in enumerate(alphas)
     set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
@@ -394,8 +402,9 @@ for (idx, alpha) in enumerate(alphas)
     # model sanity check (y-space y_top_sum should equal the same Palma value
     # because y_bot_sum = 1 forces y = (top_x/bot_x) at equality).
     pshed_agg_vals   = [JuMP.value(palma.pshed_agg[k])   for k in 1:palma.n]
-    pserved_agg_vals = palma.P_total .- pshed_agg_vals
+    pserved_agg_vals = [JuMP.value(palma.pserved_agg[k]) for k in 1:palma.n]
     palma_ratio_log[idx] = palma_ratio_value(pserved_agg_vals)
+    per_load_agg[idx, :] .= pshed_agg_vals
 
     σ_val   = JuMP.value(palma.σ)
     top_val = JuMP.value(palma.top_sum)
@@ -450,66 +459,126 @@ end
 savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type).svg"))
 display(panel)
 
-# ============================================================
-# COST-WEIGHTED METRICS VS ALPHA (+ aggregate Palma on a twin axis)
-# ============================================================
+# Cost-weighted aggregates retained for CSV export only (no plot).
 weighted_total = [sum(PEAK_TIME_COSTS[t] * total_shed[i, t] for t in 1:N_PERIODS) for i in 1:alpha_points]
 weighted_max   = [sum(PEAK_TIME_COSTS[t] * max_shed[i, t]   for t in 1:N_PERIODS) for i in 1:alpha_points]
 
-p_metrics = plot(alphas, weighted_total, label = "Σ_t λ_t · total shed_t",
-    lw = 2, marker = :circle, xlabel = "alpha", ylabel = "kW (cost-weighted)")
-plot!(p_metrics, alphas, weighted_max, label = "Σ_t λ_t · max shed_t",
-    lw = 2, marker = :square)
-# Aggregate Palma on a twin y-axis. Plot only finite entries to keep the axis
-# readable when the α=1 corner returns Palma = Inf.
-finite_idx = findall(isfinite, palma_ratio_log)
-if !isempty(finite_idx)
-    plot!(twinx(p_metrics), alphas[finite_idx], palma_ratio_log[finite_idx],
-        label = "aggregate Palma", lw = 2, marker = :diamond, ls = :dash,
-        color = :purple, ylabel = "aggregate Palma (top10/bot40, served-day)",
-        legend = :topleft)
+# ============================================================
+# Per-α aggregates and per-load-shed-vector norms.
+# Norms are computed on the per-load aggregate-shed vector (sum across
+# periods); NaN-α rows (TimeLimit-with-no-incumbent) propagate as NaN.
+# ============================================================
+agg_total_shed = [all(isfinite, per_load_agg[i, :]) ? sum(per_load_agg[i, :]) : NaN
+                  for i in 1:alpha_points]
+agg_max_shed   = [all(isfinite, per_load_agg[i, :]) ? maximum(per_load_agg[i, :]) : NaN
+                  for i in 1:alpha_points]
+
+function shed_norms(shed_vec::AbstractVector{<:Real})
+    any(!isfinite, shed_vec) && return (l1 = NaN, l2 = NaN, linf = NaN, cov = NaN)
+    m = mean(shed_vec)
+    s = std(shed_vec)
+    return (
+        l1   = norm(shed_vec, 1),
+        l2   = norm(shed_vec, 2),
+        linf = norm(shed_vec, Inf),
+        cov  = m > 1e-9 ? s / m : NaN,
+    )
 end
-savefig(p_metrics, joinpath(output_dir, "metrics_vs_alpha_integer_$(pshed_type).svg"))
-display(p_metrics)
+
+norms_per_alpha = [shed_norms(per_load_agg[i, :]) for i in 1:alpha_points]
+l1_vec   = [nm.l1   for nm in norms_per_alpha]
+l2_vec   = [nm.l2   for nm in norms_per_alpha]
+linf_vec = [nm.linf for nm in norms_per_alpha]
+cov_vec  = [nm.cov  for nm in norms_per_alpha]
 
 # ============================================================
-# SUMMARY (mirrors min_max_trade_off_mn.jl's 2×2 layout)
+# FIGURE 1: per-load aggregate shed distribution at α=0 and α=1, plus
+# aggregate total shed + served-Palma (twin axis) vs α.
 # ============================================================
 ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by = x -> parse(Int, x))]
-rep_period_labels = reshape(["t=$t" for t in REP_PERIODS], 1, length(REP_PERIODS))
 
-function build_dist_plot_mn(per_load_per_period::Matrix{Float64}, title_str::String)
-    groupedbar(load_labels, per_load_per_period[:, REP_PERIODS],
-        bar_position = :dodge,
-        labels    = rep_period_labels,
-        xlabel    = "load",
-        ylabel    = "load shed (kW)",
-        title     = title_str,
-        legend    = :topright,
-        linecolor = :black)
+const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
+                 titlefontsize = 18, legendfontsize = 16)
+
+function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
+    p = bar(load_labels, per_load_agg_vec,
+        xlabel = "load",
+        ylabel = "aggregate load shed (kW)",
+        title  = title_str,
+        legend = false,
+        color  = :steelblue,
+        linecolor = :black;
+        FONT_KW...)
+    ymax = maximum(filter(isfinite, per_load_agg_vec); init = 0.0)
+    for (i, v) in enumerate(per_load_agg_vec)
+        isfinite(v) || continue
+        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
+            text("$(round(v, digits = 1))", 14, :center))
+    end
+    return p
 end
 
-p_dist_a0 = build_dist_plot_mn(per_load_dist_a0, "alpha = 0 (efficiency) — rep. periods")
-p_dist_a1 = build_dist_plot_mn(per_load_dist_a1, "alpha = 1 (Palma) — rep. periods")
+p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :],
+    "alpha = 0 (efficiency) — aggregate over periods")
+p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :],
+    "alpha = 1 (Palma) — aggregate over periods")
 
-# Combined Pareto overlay (rep periods, total shed vs max shed) — same as min_max
-p_pareto_combined = plot(xlabel = "total shed (kW)", ylabel = "max shed (kW)",
-                         title = "Pareto by period (rep.)", legend = :topright)
-for (k, t) in enumerate(REP_PERIODS)
-    plot!(p_pareto_combined, total_shed[:, t], max_shed[:, t],
-          marker = period_markers[mod1(k, length(period_markers))],
-          label = "t=$t (s=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t]))",
-          line_z = alphas, color = :cividis)
+# Total shed (left axis) + served-Palma (right axis, finite entries only).
+p_metrics = plot(alphas, agg_total_shed, label = "total shed (kW)",
+    lw = 2, marker = :circle, color = :steelblue,
+    xlabel = "alpha", ylabel = "aggregate load shed (kW)",
+    title  = "Aggregate total shed + served-Palma vs alpha", legend = :topleft;
+    FONT_KW...)
+finite_palma = findall(isfinite, palma_ratio_log)
+if !isempty(finite_palma)
+    plot!(twinx(p_metrics), alphas[finite_palma], palma_ratio_log[finite_palma],
+        label = "Palma (top10/bot40 served)", lw = 2, marker = :diamond,
+        ls = :dash, color = :darkorange,
+        ylabel = "aggregate Palma (served-day)", legend = :topright;
+        FONT_KW...)
 end
 
-combined = plot(p_dist_a0, p_dist_a1, p_metrics, p_pareto_combined,
-    layout = (2, 2), size = (1400, 900),
-    left_margin = 10Plots.mm, right_margin = 5Plots.mm,
-    top_margin  = 5Plots.mm,  bottom_margin = 10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type).svg"))
-display(combined)
+fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
+    layout = (1, 3), size = (1900, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type).svg"))
+display(fig1)
+
+# ============================================================
+# FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
+# per-load aggregate-shed vector), α encoded by marker color. Colorbar lives
+# in a dedicated narrow subplot so the four data panels stay equally sized.
+# ============================================================
+function pareto_norm_plot(total_shed_vec, norm_vec, alphas_vec, ylab)
+    plot(total_shed_vec, norm_vec,
+        seriestype = :line, lc = :grey,
+        marker = :circle, marker_z = alphas_vec, color = :cividis,
+        clims = (0.0, 1.0), colorbar = false,
+        xlabel = "total load shed (kW)", ylabel = ylab,
+        legend = false; FONT_KW...)
+end
+
+p_l1   = pareto_norm_plot(agg_total_shed, l1_vec,   alphas, "L1 norm of shed (kW)")
+p_l2   = pareto_norm_plot(agg_total_shed, l2_vec,   alphas, "L2 norm of shed (kW)")
+p_linf = pareto_norm_plot(agg_total_shed, linf_vec, alphas, "L∞ norm of shed (kW)")
+p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
+
+p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
+    color = :cividis, colorbar = false,
+    xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
+    ylabel = "alpha", title = "", framestyle = :box,
+    tickfontsize = 16, guidefontsize = 22)
+
+fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
+    layout = @layout([a b c d e{0.02w}]),
+    size = (2200, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type).svg"))
+display(fig2)
 
 # ============================================================
 # CSV: per-period shed + one aggregate Palma per α

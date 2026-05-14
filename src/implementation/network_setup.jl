@@ -208,14 +208,31 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][1] = switch_rating[1]
                 switch["current_rating"][2] = switch_rating[2]
                 switch["current_rating"][3] = switch_rating[3]
-            else 
-                switch["current_rating"][1] = calc_apparent_power(10,12)#*ls_percent 
-                switch["current_rating"][2] = calc_apparent_power(10,12)#*ls_percent 
-                switch["current_rating"][3] = calc_apparent_power(10,12)#*ls_percent 
+            elseif switch["name"] == "quadac"
+                # Alternate path to loadbusC; mirrors quadbc (L9 per-phase demand).
+                switch["current_rating"][1] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][2] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][3] = sqrt(5^2+1.5^2) * 1.0001
+            elseif switch["name"] == "quadec"
+                # Alternate path to loadbusC; mirrors quadbc (L9 per-phase demand).
+                switch["current_rating"][1] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][2] = sqrt(5^2+1.5^2) * 1.0001
+                switch["current_rating"][3] = sqrt(5^2+1.5^2) * 1.0001
+            else
+                switch["current_rating"][1] = calc_apparent_power(10,12)#*ls_percent
+                switch["current_rating"][2] = calc_apparent_power(10,12)#*ls_percent
+                switch["current_rating"][3] = calc_apparent_power(10,12)#*ls_percent
             end
        end
-       for (i, branch) in math["branch"]
-            branch["c_rating_a"][:] .= switch_rating
+       # Match each switchable branch's c_rating_a to its associated switch's
+       # current_rating (paired by source_id). Non-switchable branches keep
+       # PMD's parsed default.
+       for (_, switch) in math["switch"]
+            for (_, branch) in math["branch"]
+                if branch["source_id"] == switch["source_id"]
+                    branch["c_rating_a"][:] .= switch["current_rating"]
+                end
+            end
        end
     end
     # Ensure the generation from the source bus is less than the max load

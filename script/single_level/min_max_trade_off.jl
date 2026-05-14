@@ -10,6 +10,7 @@ using Distributions
 using DiffOpt
 using JuMP
 using LinearAlgebra,SparseArrays
+using Statistics
 using PowerPlots
 using DataFrames
 using CSV
@@ -80,35 +81,42 @@ for (index,alpha) in enumerate(LinRange(0,1,alpha_points))
         load_summary_rows(math, pshed_by_load; extra=(stage="integer", alpha=alpha)))
 end
 
-# Plot Pareto curve 
-n=length(ref[:load])
-total_shed = loadshed[:,n+1]
+# ----------------------------------------------------------------------------
+# Per-α aggregates and per-load-shed-vector norms
+# ----------------------------------------------------------------------------
+n          = length(ref[:load])
+total_shed = loadshed[:, n + 1]
 max_shed   = [maximum(loadshed[i, 1:n])  for i in 1:alpha_points]
 alphas     = loadshed[:, end]
 
-# Pareto curve: total shed (efficiency) vs max load shed (fairness)
-p3 = plot(total_shed,max_shed,label="solution (kW)",
-    seriestype = :line,
-    lc = :grey,
-    marker = :circle,
-    marker_z = alphas, colorbar_title = "alpha", color = :cividis,
-    ylabel = "max load shed (fairness)",
-    xlabel = "total load shed (efficiency)",
-    #title  = "Pareto front: integer problem fairness vs efficiency",
-    legend = true)
+# Norms of the per-load shed vector x = [pshed_i]_i (kW).
+# CoV = std/mean; NaN when mean ≈ 0 (the α=0 corner may shed essentially
+# nothing on some loads, but total_shed ≈ 0 only if the problem is trivially
+# feasible — kept defensive so the plot doesn't blow up).
+function shed_norms(shed_vec::AbstractVector{<:Real})
+    m = mean(shed_vec)
+    s = std(shed_vec)
+    return (
+        l1   = norm(shed_vec, 1),
+        l2   = norm(shed_vec, 2),
+        linf = norm(shed_vec, Inf),
+        cov  = m > 1e-9 ? s / m : NaN,
+    )
+end
 
-plot!(p3)#, total_shed, max_shed)
-# Metrics vs alpha
-p4 = plot(alphas, total_shed, label="total shed (kW)", lw=2, marker=:circle,
-        xlabel="alpha", ylabel=" load shed (kW)")
-plot!(p4, alphas, max_shed, label="max load shed (kW)", lw=2, marker=:square)
+norms_per_alpha = [shed_norms(loadshed[i, 1:n]) for i in 1:alpha_points]
+l1_vec   = [nm.l1   for nm in norms_per_alpha]
+l2_vec   = [nm.l2   for nm in norms_per_alpha]
+linf_vec = [nm.linf for nm in norms_per_alpha]
+cov_vec  = [nm.cov  for nm in norms_per_alpha]
 
-
-savefig(plot(p3, p4, layout=(1,2), size=(900,400)),
-          joinpath(output_dir, "pareto_summary_integer_$(pshed_type)_$case.svg"))
-
-n = length(ref[:load])
+# ----------------------------------------------------------------------------
+# Figure 1: load-shed distribution at α=0, at α=1, and total+max-shed vs α
+# ----------------------------------------------------------------------------
 load_labels = [load_data["name"] for (id, load_data) in sort(ref[:load])]
+
+const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
+                 titlefontsize = 18, legendfontsize = 16)
 
 function build_dist_plot(pshed_per_load, title_str)
     p = bar(load_labels, pshed_per_load,
@@ -117,11 +125,13 @@ function build_dist_plot(pshed_per_load, title_str)
         title  = title_str,
         legend = false,
         color  = :steelblue,
-        linecolor = :black,
+        linecolor = :black;
+        FONT_KW...,
     )
+    ymax = maximum(pshed_per_load)
     for (i, v) in enumerate(pshed_per_load)
-        annotate!(p, i, v + maximum(pshed_per_load)*0.02,
-                text("$(round(v, digits=1))", 8, :center))
+        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
+            text("$(round(v, digits = 1))", 14, :center))
     end
     return p
 end
@@ -132,11 +142,52 @@ p_dist_a1 = build_dist_plot(loadshed[end, 1:n], "alpha = 1 (fairness)")
 savefig(p_dist_a0, joinpath(output_dir, "loadshed_distribution_integer_alpha0.svg"))
 savefig(p_dist_a1, joinpath(output_dir, "loadshed_distribution_integer_alpha1.svg"))
 
-combined = plot(p_dist_a0, p_dist_a1, p4, p3, layout=(2,2), size=(1400, 900),
-    left_margin=10Plots.mm, right_margin=5Plots.mm,
-    top_margin=5Plots.mm, bottom_margin=10Plots.mm)
-savefig(combined, joinpath(output_dir, "summary_integer_all_$(pshed_type)_$case.svg"))
-display(combined)
+p_metrics = plot(alphas, total_shed, label = "total shed (kW)",
+    lw = 2, marker = :circle, xlabel = "alpha", ylabel = "load shed (kW)",
+    title = "Total + max per-load shed vs alpha"; FONT_KW...)
+plot!(p_metrics, alphas, max_shed, label = "max load shed (kW)",
+    lw = 2, marker = :square)
+
+fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
+    layout = (1, 3), size = (1900, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type)_$case.svg"))
+display(fig1)
+
+# ----------------------------------------------------------------------------
+# Figure 2: Pareto fronts (total shed vs L1 / L2 / L∞ / CoV of shed vector),
+# α encoded by marker color. Colorbar lives in a dedicated narrow subplot so
+# the four data panels stay equally sized.
+# ----------------------------------------------------------------------------
+function pareto_norm_plot(total_shed_vec, norm_vec, alphas_vec, ylab)
+    plot(total_shed_vec, norm_vec,
+        seriestype = :line, lc = :grey,
+        marker = :circle, marker_z = alphas_vec, color = :cividis,
+        clims = (0.0, 1.0), colorbar = false,
+        xlabel = "total load shed (kW)", ylabel = ylab,
+        legend = false; FONT_KW...)
+end
+
+p_l1   = pareto_norm_plot(total_shed, l1_vec,   alphas, "L1 norm of shed (kW)")
+p_l2   = pareto_norm_plot(total_shed, l2_vec,   alphas, "L2 norm of shed (kW)")
+p_linf = pareto_norm_plot(total_shed, linf_vec, alphas, "L∞ norm of shed (kW)")
+p_cov  = pareto_norm_plot(total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
+
+# Dedicated colorbar strip: heatmap of α∈[0,1] in :cividis, ticked at 0/0.5/1.
+p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
+    color = :cividis, colorbar = false,
+    xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
+    ylabel = "alpha", title = "", framestyle = :box,
+    tickfontsize = 16, guidefontsize = 22)
+
+fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
+    layout = @layout([a b c d e{0.02w}]),
+    size = (2200, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
+savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type)_$case.svg"))
+display(fig2)
 
 JuMP.set_optimizer(mld_model.model, Gurobi.Optimizer)
 for (index,alpha) in enumerate(LinRange(0,1,alpha_points))

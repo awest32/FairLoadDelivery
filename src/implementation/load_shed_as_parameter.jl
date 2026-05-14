@@ -11,14 +11,15 @@ Key simplification:
 - Eliminates n variables and their equality constraints
 - Full dynamic sorting is PRESERVED via permutation matrix optimization
 
-Mathematical formulation:
+Mathematical formulation (served-Palma):
     min_{Δw, A} [Σ_{i∈Top10%} sorted[i]] / [Σ_{i∈Bot40%} sorted[i]]
 
-    s.t. sorted[i] = Σ_j a[i,j] · pshed_new[j]   (sorting via permutation)
-         pshed_new[j] = pshed_prev[j] + Σ_k J[j,k]·Δw[k]  (Taylor expression)
-         Σ_j a[i,j] = 1, Σ_i a[i,j] = 1          (doubly stochastic)
-         sorted[k] ≤ sorted[k+1]                  (ascending order)
-         |Δw| ≤ trust_radius                      (trust region)
+    s.t. sorted[i]    = Σ_j a[i,j] · pserved_new[j]  (sorting via permutation)
+         pserved_new[j] = pd[j] − pshed_new[j]       (served = demand − shed)
+         pshed_new[j]   = pshed_prev[j] + Σ_k J[j,k]·Δw[k]  (Taylor expression)
+         Σ_j a[i,j] = 1, Σ_i a[i,j] = 1              (doubly stochastic)
+         sorted[k] ≤ sorted[k+1]                      (ascending order)
+         |Δw| ≤ trust_radius                          (trust region)
 
 Uses Charnes-Cooper transformation to convert ratio to linear objective.
 Uses McCormick envelopes for bilinear terms a[i,j] * pshed_new[j].
@@ -204,17 +205,20 @@ NamedTuple with fields:
 - u[i,j] ≥ 0: McCormick auxiliary for a[i,j] * pshed_new[j]
 - σ ≥ ε: Charnes-Cooper scaling variable
 
-## P_shed as Expression
+## P_shed / P_served as Expressions
 ```
-pshed_new[j] = pshed_prev[j] + Σ_k dpshed_dw[j,k] * Δw[k]
+pshed_new[j]   = pshed_prev[j] + Σ_k dpshed_dw[j,k] * Δw[k]
+pserved_new[j] = pd[j] − pshed_new[j]
 ```
+Palma sort + Charnes-Cooper operates on `pserved_new` (top10% served / bot40% served).
+The objective is pure Palma — no efficiency term, no regularizer.
 
-## McCormick Envelopes for u[i,j] = a[i,j] * pshed_new[j]
-Since a[i,j] ∈ {0,1} and pshed_new[j] ∈ [0, P_j]:
+## McCormick Envelopes for u[i,j] = a[i,j] * pserved_new[j]
+Since a[i,j] ∈ {0,1} and pserved_new[j] ∈ [0, P_j]:
 1. u[i,j] ≥ 0
-2. u[i,j] ≥ pshed_new[j] + a[i,j]*P_j - P_j
+2. u[i,j] ≥ pserved_new[j] + a[i,j]*P_j - P_j
 3. u[i,j] ≤ a[i,j] * P_j
-4. u[i,j] ≤ pshed_new[j]
+4. u[i,j] ≤ pserved_new[j]
 
 ## Charnes-Cooper Transformation
 Transform min(num/denom) to: min(num*σ) s.t. denom*σ = 1
@@ -234,8 +238,6 @@ function palma_ratio_minimization(
     weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
     n_loads::Int = 0,  # Number of loads per period (0 = infer from weights_prev length)
-    reg::Float64 = 1e-4,  # Small efficiency-aligned regularizer; adds λ[t]·reg·Σ pshed/total_demand
-    alpha::Float64 = 1.0,  # Convex-combination weight: α=0 pure efficiency, α=1 pure Palma
     weight_budget::Float64 = Inf  # Per-period upper bound on Σ_i weights_{t,i}; Inf = no constraint
 )
     m = length(pshed_prev)       # T*N: total pshed values (= total weights)
@@ -360,13 +362,19 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # P_shed as EXPRESSION (Core Simplification)
+    # P_shed and P_served as EXPRESSIONS (Core Simplification)
+    #
+    # pshed_new is the first-order Taylor estimate from the lower-level Jacobian.
+    # pserved_new = pd − pshed_new is the served counterpart; the Palma sort /
+    # Charnes-Cooper machinery below operates on pserved_new (top10% / bot40%
+    # of *served*, not shed). Efficiency term still uses pshed_new.
     =========================================================================#
 
     # pshed_new via first-order Taylor expansion; Jacobian is m×m
     @expression(model, pshed_new[j=1:m],
         pshed_prev[j] + sum(dpshed_dw[j, k] * Δw[k] for k in 1:m)
     )
+    @expression(model, pserved_new[j=1:m], pd[j] - pshed_new[j])
 
     #=========================================================================
     # Trust Region and Weight Bounds
@@ -426,14 +434,17 @@ function palma_ratio_minimization(
             @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
         end
 
-        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pshed_new[offset+j]
+        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pserved_new[offset+j]
+        # with bounds 0 ≤ pserved_new[j] ≤ pd[j] (pshed ∈ [ε, pd] ⇒ pserved ∈ [0, pd−ε];
+        # we use the looser [0, pd] envelope here for symmetry with the single-level
+        # served-Palma scripts).
         for i in 1:n, j in 1:n
             gj = offset + j
             P_j = pd[gj]
 
-            @constraint(model, u[t][i, j] >= pshed_new[gj] + a[t][i, j] * P_j - P_j)
+            @constraint(model, u[t][i, j] >= pserved_new[gj] + a[t][i, j] * P_j - P_j)
             @constraint(model, u[t][i, j] <= a[t][i, j] * P_j)
-            @constraint(model, u[t][i, j] <= pshed_new[gj])
+            @constraint(model, u[t][i, j] <= pserved_new[gj])
         end
 
         # Sorted values for this period (ascending)
@@ -451,33 +462,13 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Objective: Cost-weighted sum of per-period Palma ratios
-    #   min Σ_t λ[t] * σ[t] * top_sum_t
-    #   where σ[t] = 1 / bot_sum_t  (Charnes-Cooper)
+    # Objective: pure cost-weighted sum of per-period Palma ratios
+    #   min Σ_t λ[t] * σ[t] * top_sum_t       (σ[t] = 1 / bot_sum_t)
+    #
+    # No efficiency term, no regularizer — the upper level is pure served-Palma.
     =========================================================================#
 
-    @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1], got $alpha"
-    # Convex combination of efficiency and Palma + small orthogonal reg term.
-    # Note: at α=0 the palma term contributes 0, but the σ·bot_sum=1 constraint
-    # is still binding, which can be infeasible when bot_sum → 0. We still emit
-    # the permutation/σ machinery here because the problem is already built;
-    # for a cleaner pure-efficiency solve at α=0 use `solve_mn_mc_mld_switch_integer`.
-    eff_terms = []
-    reg_terms = []
-    use_alpha = alpha < 1.0
-    for t in 1:n_periods
-        offset = (t - 1) * n
-        total_demand_t = sum(pd[offset + i] for i in 1:n)
-        if total_demand_t > 0
-            eff_t = λ[t] * sum(pshed_new[offset + i] for i in 1:n) / total_demand_t
-            use_alpha && push!(eff_terms, eff_t)
-            reg > 0   && push!(reg_terms, reg * eff_t)
-        end
-    end
-    fairness_part = alpha * sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods)
-    eff_part = (isempty(eff_terms) ? 0.0 : (1.0 - alpha) * sum(eff_terms)) +
-               (isempty(reg_terms) ? 0.0 : sum(reg_terms))
-    @objective(model, Min, fairness_part + eff_part)
+    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))
 
     #=========================================================================
     # Solve
@@ -496,20 +487,21 @@ function palma_ratio_minimization(
         Δw_val = value.(Δw)
         weights_new = weights_prev .+ Δw_val
 
-        # Compute pshed_new from the expression
-        pshed_new_val = pshed_prev .+ dpshed_dw * Δw_val
+        # Compute pshed_new from the expression, then pserved_new = pd − pshed_new
+        pshed_new_val   = pshed_prev .+ dpshed_dw * Δw_val
+        pserved_new_val = pd .- pshed_new_val
 
-        # Collect per-period permutation matrices and sorted values
+        # Collect per-period permutation matrices and sorted SERVED values
         a_vals = [value.(a[t]) for t in 1:n_periods]
         sorted_val = Float64[]
         for t in 1:n_periods
             offset = (t - 1) * n
-            pshed_t = pshed_new_val[offset+1:offset+n]
-            append!(sorted_val, a_vals[t] * pshed_t)
+            pserved_t = pserved_new_val[offset+1:offset+n]
+            append!(sorted_val, a_vals[t] * pserved_t)
         end
 
-        # Compute actual Palma ratio (from unsorted pshed_new)
-        actual_palma = palma_ratio(pshed_new_val)
+        # Compute actual Palma ratio over SERVED (top10% / bot40% of pserved_new)
+        actual_palma = palma_ratio(pserved_new_val)
 
         return (
             weights_new = weights_new,
@@ -550,8 +542,6 @@ function lin_palma_reformulated(
     weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],
     n_loads::Int = 0,
-    reg::Float64 = 1e-4,
-    alpha::Float64 = 1.0,
     weight_budget::Float64 = Inf
 )
     result = palma_ratio_minimization(
@@ -563,16 +553,16 @@ function lin_palma_reformulated(
         weight_ids = weight_ids,
         peak_time_costs = peak_time_costs,
         n_loads = n_loads,
-        reg = reg,
-        alpha = alpha,
         weight_budget = weight_budget
     )
 
-    # Compute σ from result (for compatibility)
+    # Compute σ from result (for compatibility). σ is the Charnes-Cooper scaling
+    # 1/bot_sum, where bot_sum is now the bottom-40% of SERVED (pd − pshed).
     m = length(pshed_prev)
     _, bottom_40_idx = compute_palma_indices(m)
-    sorted_pshed = sort(result.pshed_new)
-    denom = sum(sorted_pshed[i] for i in bottom_40_idx)
+    pserved_new = pd .- result.pshed_new
+    sorted_pserved = sort(pserved_new)
+    denom = sum(sorted_pserved[i] for i in bottom_40_idx)
     σ = denom > 0 ? 1.0 / denom : 1e-8
 
     return result.pshed_new, result.weights_new, result.status
@@ -618,7 +608,7 @@ function test_with_synthetic_data(; n::Int=5, seed::Int=42)
     println("  pd (demands):     ", round.(pd, digits=3))
     println("  pshed_prev:       ", round.(pshed_prev, digits=3))
     println("  weights_prev:     ", weights_prev)
-    println("  Initial Palma:    ", round(palma_ratio(pshed_prev), digits=4))
+    println("  Initial Palma:    ", round(palma_ratio(pd .- pshed_prev), digits=4))
     println()
 
     # Solve
@@ -656,8 +646,8 @@ function test_with_synthetic_data(; n::Int=5, seed::Int=42)
     println("Is ascending:  ", is_ascending)
     println()
 
-    # Verify Palma ratio matches
-    computed_palma = palma_ratio(result.pshed_new)
+    # Verify Palma ratio matches (served-Palma: pd − pshed_new)
+    computed_palma = palma_ratio(pd .- result.pshed_new)
     println("Palma ratio verification:")
     println("  From optimization: ", round(result.palma_ratio, digits=6))
     println("  Computed directly: ", round(computed_palma, digits=6))
