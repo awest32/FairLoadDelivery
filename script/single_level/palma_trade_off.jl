@@ -42,10 +42,10 @@ include("../../src/implementation/visualization.jl")
 # ----------------------------------------------------------------------------
 # Configuration
 # ----------------------------------------------------------------------------
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
 #case ="13_bus"
-case ="radial_6bus"
+case ="more_meshed_6bus"
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
@@ -293,8 +293,8 @@ max_shed   = [maximum(loadshed[i, 1:n]) for i in 1:alpha_points]
 alphas     = loadshed[:, end]
 
 function shed_norms(shed_vec::AbstractVector{<:Real})
-    m = mean(shed_vec)
-    s = std(shed_vec)
+    m = Statistics.mean(shed_vec)
+    s = Statistics.std(shed_vec)
     return (
         l1   = norm(shed_vec, 1),
         l2   = norm(shed_vec, 2),

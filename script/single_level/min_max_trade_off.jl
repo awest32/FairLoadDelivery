@@ -94,8 +94,8 @@ alphas     = loadshed[:, end]
 # nothing on some loads, but total_shed ≈ 0 only if the problem is trivially
 # feasible — kept defensive so the plot doesn't blow up).
 function shed_norms(shed_vec::AbstractVector{<:Real})
-    m = mean(shed_vec)
-    s = std(shed_vec)
+    m = Statistics.mean(shed_vec)
+    s = Statistics.std(shed_vec)
     return (
         l1   = norm(shed_vec, 1),
         l2   = norm(shed_vec, 2),

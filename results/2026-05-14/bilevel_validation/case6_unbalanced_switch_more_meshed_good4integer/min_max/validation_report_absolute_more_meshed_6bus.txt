@@ -31,18 +31,15 @@
 
   --- ac_feasibility ---
     [+] ac_convergence: PASS
-    [X] current_limits_ac: FAIL
-        - (switch_id = "6", phase = 1, s_squared = 27.256652402522125, limit = 27.2554502725, utilization_pct = 100.00220527776116, z_switch = 1.0, w = 1.0, rating = 5.22067526978072)
-        - (switch_id = "6", phase = 2, s_squared = 27.256650153775574, limit = 27.2554502725, utilization_pct = 100.00220115253668, z_switch = 1.0, w = 1.0, rating = 5.22067526978072)
-        - (switch_id = "6", phase = 3, s_squared = 27.256649153820298, limit = 27.2554502725, utilization_pct = 100.0021993181636, z_switch = 1.0, w = 1.0, rating = 5.22067526978072)
+    [+] current_limits_ac: PASS
     [+] voltage_limits_ac: PASS
 
   --- AC FEASIBILITY SUMMARY ---
     Convergence: YES
     Termination Status: LOCALLY_SOLVED
     Voltage Violations: 0
-    Current Rating Violations: 3
-    ** AC SOLUTION IS NOT FEASIBLE WITH CORRECT RATINGS **
+    Current Rating Violations: 0
+    AC solution is feasible with correct voltage and current ratings.
 
-  TOTALS: 20 checks, 18 passed, 2 failed
+  TOTALS: 20 checks, 19 passed, 1 failed
 ======================================================================

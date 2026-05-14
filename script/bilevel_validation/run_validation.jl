@@ -39,15 +39,15 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch_meshed_good4integer"
+const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
 const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 
 # const CASE = "motivation_c_good4integer"
 # const CASE_FILE = joinpath(@__DIR__,"../../data/ieee_13_aw_edit/$CASE.dss")
-case = "meshed_6bus"#"13_bus"
+case = "more_meshed_6bus"#"13_bus"
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "min_max"  # simplest fairness function for testing
+const FAIR_FUNC = "palma"  # simplest fairness function for testing
 pshed_type = "absolute"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000

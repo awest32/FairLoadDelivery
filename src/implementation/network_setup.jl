@@ -219,9 +219,9 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][2] = sqrt(5^2+1.5^2) * 1.0001
                 switch["current_rating"][3] = sqrt(5^2+1.5^2) * 1.0001
             else
-                switch["current_rating"][1] = calc_apparent_power(10,12)#*ls_percent
-                switch["current_rating"][2] = calc_apparent_power(10,12)#*ls_percent
-                switch["current_rating"][3] = calc_apparent_power(10,12)#*ls_percent
+                switch["current_rating"][1] = calc_apparent_power(10,5)#*ls_percent
+                switch["current_rating"][2] = calc_apparent_power(10,5)#*ls_percent
+                switch["current_rating"][3] = calc_apparent_power(10,5)#*ls_percent
             end
        end
        # Match each switchable branch's c_rating_a to its associated switch's
