@@ -47,7 +47,7 @@ const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 case = "6_bus"#"13_bus"
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "palma"  # simplest fairness function for testing
+const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 pshed_type = "absolute"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 1000
@@ -651,11 +651,45 @@ end
 println("\nValidation complete.")
 
 load_ids       = sort(collect(keys(mld_rounded["solution"]["load"])),
-by=x->parse(Int,x))                                                    
+by=x->parse(Int,x))
 load_labels    = [math_rounded["load"][lid]["name"] for lid in
 load_ids]
 pshed_per_load = [sum(mld_rounded["solution"]["load"][lid]["pshed"])
 for lid in load_ids]
+weight_per_load = [math_new["load"][lid]["weight"] for lid in load_ids]
+pd_per_load    = [sum(math_rounded["load"][lid]["pd"]) for lid in load_ids]
+
+df_loads = DataFrames.DataFrame(
+    load_id   = load_ids,
+    load_name = load_labels,
+    pd_kw     = pd_per_load,
+    pshed_kw  = pshed_per_load,
+    weight    = weight_per_load,
+)
+loads_savepath = joinpath(save_dir, "per_load_weights_$(pshed_type)_$(case)_$(FAIR_FUNC).csv")
+CSV.write(loads_savepath, df_loads)
+println("Saved per-load fairness weights to $loads_savepath")
+
+df_weights_only = DataFrames.DataFrame(
+    load_id = load_labels,
+    weight  = weight_per_load,
+)
+weights_only_savepath = joinpath(save_dir, "weights_only_$(pshed_type)_$(case)_$(FAIR_FUNC).csv")
+CSV.write(weights_only_savepath, df_weights_only)
+println("Saved load prioritization weights to $weights_only_savepath")
+
+p_weights = bar(load_labels, weight_per_load,
+    xlabel = "Load",
+    ylabel = "Prioritization weight",
+    legend = false,
+    color  = :steelblue,
+    linecolor = :black,
+    xrotation = 45,
+    xticks = (1:length(load_labels), load_labels)
+)
+display(p_weights)
+savefig(p_weights, joinpath(save_dir,
+    "weight_distribution_$(pshed_type)_$(case)_$(FAIR_FUNC).svg"))
 
 p_dist = bar(load_labels, pshed_per_load,
     xlabel = "Load",
