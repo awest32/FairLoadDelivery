@@ -108,7 +108,8 @@ norms_per_alpha = [shed_norms(loadshed[i, 1:n]) for i in 1:alpha_points]
 l1_vec   = [nm.l1   for nm in norms_per_alpha]
 l2_vec   = [nm.l2   for nm in norms_per_alpha]
 linf_vec = [nm.linf for nm in norms_per_alpha]
-cov_vec  = [nm.cov  for nm in norms_per_alpha]
+cov_vec  = [nm.cov  for 
+nm in norms_per_alpha]
 
 # ----------------------------------------------------------------------------
 # Figure 1: load-shed distribution at α=0, at α=1, and total+max-shed vs α

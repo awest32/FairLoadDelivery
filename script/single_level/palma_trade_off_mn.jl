@@ -82,8 +82,16 @@ LS_PERCENT = 0.8
 pshed_type = "absolute"  # only absolute supported in this script
 
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
-const N_PERIODS = 24
-const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
+# Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
+# deterministically mapped to (schedule, ±1h shift). The per-period demand level
+# is implicit in the reported load-shed values, so no aggregate-scale label is
+# carried in plots or CSVs.
+const N_PERIODS = FairLoadDelivery.SCHEDULE_LENGTH   # 24
+# Peak-stress multiplier: scales every schedule value uniformly so peak-hour
+# demand pushes past nameplate. Bump up for more shedding, down for less.
+const PEAK_STRESS = 1.4
+# OLD uniform-scalar profile (commented for reference / quick A/B):
+# const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                             for h in 0:N_PERIODS-1]
  REP_PERIODS = [6, 11, 20]   # off-peak, mid-day, evening peak
@@ -99,35 +107,45 @@ alphas = collect(LinRange(0.0, 1.0, alpha_points))
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
     switch_rating =[Inf,Inf,Inf])# sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
 
-"Replicate single-period math dict into a multinetwork dict with per-period load scaling."
-function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
-    @assert length(load_scales) == n_periods
-    mn_data = Dict{String,Any}(
-        "multinetwork" => true,
-        "per_unit"     => true,
-        "data_model"   => PMD.MATHEMATICAL,
-        "nw"           => Dict{String,Any}()
-    )
-    for key in ["baseMVA", "basekv", "bus_lookup", "settings"]
-        haskey(base_math, key) && (mn_data[key] = deepcopy(base_math[key]))
-    end
-    for t in 1:n_periods
-        nw_id = string(t - 1)
-        nw_data = deepcopy(base_math)
-        delete!(nw_data, "multinetwork")
-        scale = load_scales[t]
-        for (_, load) in nw_data["load"]
-            load["pd"] = load["pd"] .* scale
-            load["qd"] = load["qd"] .* scale
-        end
-        nw_data["time_period"] = t
-        nw_data["load_scale"]  = scale
-        mn_data["nw"][nw_id] = nw_data
-    end
-    return mn_data
-end
+# OLD uniform-scalar multinetwork builder. Kept commented for reference;
+# replaced by `create_multinetwork_data_profiled` (per-load, per-phase schedules
+# from Hamilton & Aliprantis 2023).
+#
+# function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
+#     @assert length(load_scales) == n_periods
+#     mn_data = Dict{String,Any}(
+#         "multinetwork" => true,
+#         "per_unit"     => true,
+#         "data_model"   => PMD.MATHEMATICAL,
+#         "nw"           => Dict{String,Any}()
+#     )
+#     for key in ["baseMVA", "basekv", "bus_lookup", "settings"]
+#         haskey(base_math, key) && (mn_data[key] = deepcopy(base_math[key]))
+#     end
+#     for t in 1:n_periods
+#         nw_id = string(t - 1)
+#         nw_data = deepcopy(base_math)
+#         delete!(nw_data, "multinetwork")
+#         scale = load_scales[t]
+#         for (_, load) in nw_data["load"]
+#             load["pd"] = load["pd"] .* scale
+#             load["qd"] = load["qd"] .* scale
+#         end
+#         nw_data["time_period"] = t
+#         nw_data["load_scale"]  = scale
+#         mn_data["nw"][nw_id] = nw_data
+#     end
+#     return mn_data
+# end
+# mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
 
-mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
+mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
+    peak_stress = PEAK_STRESS)
+
+println("Load profile assignments for $case:")
+for row in FairLoadDelivery.profile_assignment_table(math)
+    println("  ", row)
+end
 nw_ids_sorted     = sort(collect(keys(mn_data["nw"])), by = x -> parse(Int, x))
 nw_ids_int_sorted = parse.(Int, nw_ids_sorted)        # ints, matches PMD nw_ids
 n_loads           = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
@@ -429,7 +447,7 @@ p3d = plot3d(xlabel = "total load shed (kW)",
              legend = :topright)
 for (k, t) in enumerate(REP_PERIODS)
     plot3d!(p3d, total_shed[:, t], max_shed[:, t], fill(t, alpha_points),
-            label  = "t=$t (λ=$(PEAK_TIME_COSTS[t]), s=$(LOAD_SCALE_FACTORS[t]))",
+            label  = "t=$t (λ=$(PEAK_TIME_COSTS[t]))",
             marker = period_markers[mod1(k, length(period_markers))], lw = 2,
             line_z = alphas)
 end
@@ -452,7 +470,7 @@ for t in 1:N_PERIODS
           marker = :circle, lc = :grey, marker_z = alphas, color = :cividis,
           xlabel = row == panel_rows ? "total shed (kW)" : "",
           ylabel = col == 1            ? "max shed (kW)"   : "",
-          title  = "t=$t  s=$(LOAD_SCALE_FACTORS[t])  λ=$(PEAK_TIME_COSTS[t])",
+          title  = "t=$t  λ=$(PEAK_TIME_COSTS[t])",
           colorbar = false, legend = false,
           titlefontsize = 8, guidefontsize = 7, tickfontsize = 6)
 end
@@ -584,9 +602,9 @@ display(fig2)
 # CSV: per-period shed + one aggregate Palma per α
 # ============================================================
 period_rows = DataFrame(alpha = Float64[], period = Int[], lambda = Float64[],
-    load_scale = Float64[], total_shed = Float64[], max_shed = Float64[])
+    total_shed = Float64[], max_shed = Float64[])
 for (i, a) in enumerate(alphas), t in 1:N_PERIODS
-    push!(period_rows, (a, t, PEAK_TIME_COSTS[t], LOAD_SCALE_FACTORS[t],
+    push!(period_rows, (a, t, PEAK_TIME_COSTS[t],
                         total_shed[i, t], max_shed[i, t]))
 end
 CSV.write(joinpath(output_dir, "palma_sweep_mn_per_period_$(pshed_type).csv"), period_rows)
