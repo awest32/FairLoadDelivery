@@ -68,12 +68,15 @@ const PMD  = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
+# Unified 10pt Arial font defaults for every figure in this script.
+include(joinpath(@__DIR__, "../figure_defaults.jl"))
+
 # ============================================================
 # CONFIGURATION
 # ============================================================
-#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_meshed_good4integer.dss"
-case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case ="13_bus"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+#case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case ="more_meshed_6_bus" #"13_bus"
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
@@ -89,7 +92,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 const N_PERIODS = FairLoadDelivery.SCHEDULE_LENGTH   # 24
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
-const PEAK_STRESS = 1.4
+const PEAK_STRESS = 1.0
 # OLD uniform-scalar profile (commented for reference / quick A/B):
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
@@ -105,7 +108,7 @@ alphas = collect(LinRange(0.0, 1.0, alpha_points))
 # NETWORK SETUP + MULTINETWORK DATA
 # ============================================================
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
-    switch_rating =[Inf,Inf,Inf])# sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
+    switch_rating = sqrt.([(26.0^2 + 13.1^2), (23.0^2 + 9^2), (21.0^2 + 9.5^2)]) * LS_PERCENT)
 
 # OLD uniform-scalar multinetwork builder. Kept commented for reference;
 # replaced by `create_multinetwork_data_profiled` (per-load, per-phase schedules
@@ -461,8 +464,7 @@ panel_cols = N_PERIODS <= 6 ? N_PERIODS : 6
 panel_rows = ceil(Int, N_PERIODS / panel_cols)
 panel = plot(layout = (panel_rows, panel_cols),
              size = (220 * panel_cols, 180 * panel_rows),
-             plot_title = "Per-period Pareto ($(pshed_type), Palma) — color = alpha",
-             plot_titlefontsize = 11)
+             plot_title = "Per-period Pareto ($(pshed_type), Palma) — color = alpha")
 for t in 1:N_PERIODS
     row = ceil(Int, t / panel_cols)
     col = ((t - 1) % panel_cols) + 1
@@ -471,8 +473,7 @@ for t in 1:N_PERIODS
           xlabel = row == panel_rows ? "total shed (kW)" : "",
           ylabel = col == 1            ? "max shed (kW)"   : "",
           title  = "t=$t  λ=$(PEAK_TIME_COSTS[t])",
-          colorbar = false, legend = false,
-          titlefontsize = 8, guidefontsize = 7, tickfontsize = 6)
+          colorbar = false, legend = false)
 end
 savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type).svg"))
 display(panel)
@@ -517,8 +518,11 @@ ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by = x -> parse(Int, x))]
 
-const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
-                 titlefontsize = 18, legendfontsize = 16)
+# FONT_KW kept for backwards compat with existing call sites, but now matches
+# the 10pt Arial defaults set in figure_defaults.jl so nothing in this script
+# overrides the unified font sizes.
+const FONT_KW = (tickfontsize = 10, guidefontsize = 10,
+                 titlefontsize = 10, legendfontsize = 10)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
     p = bar(load_labels, per_load_agg_vec,
@@ -533,7 +537,7 @@ function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str
     for (i, v) in enumerate(per_load_agg_vec)
         isfinite(v) || continue
         annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 14, :center))
+            text("$(round(v, digits = 1))", 10, "Arial", :center))
     end
     return p
 end
@@ -587,8 +591,7 @@ p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
 p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
     color = :cividis, colorbar = false,
     xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "alpha", title = "", framestyle = :box,
-    tickfontsize = 16, guidefontsize = 22)
+    ylabel = "alpha", title = "", framestyle = :box)
 
 fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     layout = @layout([a b c d e{0.02w}]),

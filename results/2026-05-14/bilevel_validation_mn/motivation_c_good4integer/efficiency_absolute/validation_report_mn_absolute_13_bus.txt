@@ -1,0 +1,10 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: motivation_c_good4integer
+  Fairness Function: efficiency
+  Iterations: 20
+
+  TOTALS: 0 checks, 0 passed, 0 failed
+======================================================================

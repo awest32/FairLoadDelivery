@@ -20,6 +20,9 @@ const PMD = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
+# Unified 10pt Arial font defaults for every figure in this script.
+include(joinpath(@__DIR__, "../figure_defaults.jl"))
+
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -42,7 +45,7 @@ const N_PERIODS = FairLoadDelivery.SCHEDULE_LENGTH   # 24
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful
 # schedules cap at ~1.10; bump this to drive more shedding, dial it down for
 # less stress.
-const PEAK_STRESS = 1.4
+const PEAK_STRESS = 1.0
 
 # OLD: uniform linear-ramp scalar applied to every load/phase identically.
 # Kept (commented) for reference / quick A/B against the per-load profiles.
@@ -65,7 +68,7 @@ solve_min_max = pshed_type == "proportional" ?
 # NETWORK SETUP
 # ============================================================
 eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
-    switch_rating = [Inf,Inf,Inf])#sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
+    switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT)
 
 # OLD: uniform-scalar multinetwork builder. Kept commented for reference;
 # replaced by `create_multinetwork_data_profiled` (per-load, per-phase
@@ -130,6 +133,8 @@ per_load_dist_a0 = zeros(n_loads, N_PERIODS)
 per_load_dist_a1 = zeros(n_loads, N_PERIODS)
 # Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
 per_load_agg = zeros(alpha_points, n_loads)
+# Full per-(α, load, period) tensor — used for per-α distribution heatmaps.
+per_load_period_shed = zeros(alpha_points, n_loads, N_PERIODS)
 
 for (idx, alpha) in enumerate(alphas)
     soln = solve_min_max(mn_data, Gurobi.Optimizer;
@@ -147,6 +152,7 @@ for (idx, alpha) in enumerate(alphas)
         total_shed[idx, t] = sum(per_load_shed)
         max_shed[idx, t]   = maximum(per_load_shed)
         per_load_agg[idx, :] .+= per_load_shed
+        per_load_period_shed[idx, :, t] .= per_load_shed
         if idx == 1
             per_load_dist_a0[:, t] .= per_load_shed
         elseif idx == alpha_points
@@ -201,8 +207,7 @@ panel_cols = N_PERIODS <= 6 ? N_PERIODS : 6
 panel_rows = ceil(Int, N_PERIODS / panel_cols)
 panel = plot(layout = (panel_rows, panel_cols),
              size = (220 * panel_cols, 180 * panel_rows),
-             plot_title = "Per-period Pareto ($(pshed_type), integer) — color = alpha",
-             plot_titlefontsize = 11)
+             plot_title = "Per-period Pareto ($(pshed_type), integer) — color = alpha")
 for t in 1:N_PERIODS
     row = ceil(Int, t / panel_cols)
     col = ((t - 1) % panel_cols) + 1
@@ -211,8 +216,7 @@ for t in 1:N_PERIODS
           xlabel = row == panel_rows ? "total shed (kW)" : "",
           ylabel = col == 1            ? "max shed (kW)"   : "",
           title  = "t=$t  λ=$(PEAK_TIME_COSTS[t])",
-          colorbar = false, legend = false,
-          titlefontsize = 8, guidefontsize = 7, tickfontsize = 6)
+          colorbar = false, legend = false)
 end
 savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type)_$case.svg"))
 display(panel)
@@ -226,8 +230,11 @@ ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by=x->parse(Int, x))]
 
-const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
-                 titlefontsize = 18, legendfontsize = 16)
+# FONT_KW kept for backwards compat with existing call sites, but now matches
+# the 10pt Arial defaults set in figure_defaults.jl so nothing in this script
+# overrides the unified font sizes.
+const FONT_KW = (tickfontsize = 10, guidefontsize = 10,
+                 titlefontsize = 10, legendfontsize = 10)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
     p = bar(load_labels, per_load_agg_vec,
@@ -241,7 +248,7 @@ function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str
     ymax = maximum(per_load_agg_vec)
     for (i, v) in enumerate(per_load_agg_vec)
         annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 14, :center))
+            text("$(round(v, digits = 1))", 10, "Arial", :center))
     end
     return p
 end
@@ -288,8 +295,7 @@ p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
 p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
     color = :cividis, colorbar = false,
     xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "alpha", title = "", framestyle = :box,
-    tickfontsize = 16, guidefontsize = 22)
+    ylabel = "alpha", title = "", framestyle = :box)
 
 fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     layout = @layout([a b c d e{0.02w}]),
@@ -298,3 +304,44 @@ fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
 savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type)_$case.svg"))
 display(fig2)
+
+# ============================================================
+# PERSIST SWEEP DATA FOR STANDALONE VISUALIZATION SCRIPTS
+# Filename pins (case, pshed_type) so each sweep lands in its own JLD2 and
+# downstream visualization scripts (e.g. per_alpha_heatmaps_mn.jl) can target
+# them by key. Includes everything the heatmap renderer needs without
+# re-running the α-sweep.
+# ============================================================
+using JLD2
+math_ref = mn_data["nw"][nw_ids_sorted[1]]
+bus_name_map = FairLoadDelivery.build_bus_name_maps(math_ref)
+ref_load_ids = sort(collect(keys(math_ref["load"])), by = x -> parse(Int, x))
+load_bus_names = [get(bus_name_map, math_ref["load"][lid]["load_bus"],
+                      "bus_$(math_ref["load"][lid]["load_bus"])")
+                  for lid in ref_load_ids]
+
+per_load_period_pd = zeros(n_loads, N_PERIODS)
+for (t, nw_id) in enumerate(nw_ids_sorted)
+    nw_data = mn_data["nw"][nw_id]
+    for (j, lid) in enumerate(ref_load_ids)
+        per_load_period_pd[j, t] = sum(nw_data["load"][lid]["pd"])
+    end
+end
+
+jld_path = joinpath(output_dir, "trade_off_mn_$(case)_$(pshed_type).jld2")
+JLD2.jldsave(jld_path;
+    alphas               = alphas,
+    per_load_period_shed = per_load_period_shed,  # alpha × load × period
+    per_load_period_pd   = per_load_period_pd,    # load × period
+    per_load_agg         = per_load_agg,          # alpha × load (sum over periods)
+    total_shed           = total_shed,            # alpha × period
+    max_shed             = max_shed,              # alpha × period
+    load_labels          = load_labels,
+    load_bus_names       = load_bus_names,
+    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
+    N_PERIODS            = N_PERIODS,
+    PEAK_STRESS          = PEAK_STRESS,
+    case                 = case,
+    pshed_type           = pshed_type,
+)
+println("Saved trade-off sweep data → $jld_path")

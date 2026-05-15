@@ -35,6 +35,12 @@ const LOAD_SCHEDULES = [
 const N_SCHEDULES     = length(LOAD_SCHEDULES)
 const SCHEDULE_LENGTH = length(LOAD_SCHEDULES[1])
 const SCHEDULE_SHIFTS = (-1, 0, +1)
+# Daily mean of each raw schedule — used when `center_at_nominal=true` so that
+# the *daily-average* per-load scale equals 1.0× nominal pd (peaks above, troughs
+# below). Without it, the paper schedules average ~0.75× nominal and only barely
+# touch 1.0× at peak, making nameplate pd effectively the daily peak rather
+# than the daily mean.
+const SCHEDULE_MEANS = [sum(s) / length(s) for s in LOAD_SCHEDULES]
 
 """
     assign_load_profile(load_name) -> (schedule_idx::Int, shift::Int)
@@ -55,7 +61,8 @@ function schedule_value(sched_idx::Int, shift::Int, t::Int)
 end
 
 """
-    per_phase_scale_matrix(load_dict, n_periods; peak_stress=1.0) -> Matrix{Float64} (n_phases × n_periods)
+    per_phase_scale_matrix(load_dict, n_periods; peak_stress=1.0, center_at_nominal=false)
+        -> Matrix{Float64} (n_phases × n_periods)
 
 Per-phase, per-period scale factor for one math-model load dict.
 
@@ -65,13 +72,19 @@ Per-phase, per-period scale factor for one math-model load dict.
   rotated to (schedule_idx + p - 1, shift + p - 1) so the per-phase profiles
   diverge across the day.
 
-`peak_stress` scales every schedule value uniformly. Paper-faithful schedules
-peak at ~1.10, which barely stresses our networks; multi-period scripts pass
-`peak_stress > 1` to push peak-hour demand past nameplate and force shedding.
+`peak_stress` scales every schedule value uniformly. When `center_at_nominal`
+is false (default), the raw paper schedules are used — their daily mean is
+~0.75× nominal and peaks barely reach 1.0× nominal, so multi-period scripts
+typically pass `peak_stress > 1` to force shedding. When `center_at_nominal`
+is true, each schedule is first divided by its own daily mean so the daily-
+average scale equals `peak_stress` exactly (and the nameplate pd is the daily
+*mean* rather than the daily peak). This makes the multi-period mean comparable
+to the single-period nominal load.
 """
 function per_phase_scale_matrix(load_dict::Dict{String,Any}, n_periods::Int;
                                 balance_tol::Float64 = 1e-6,
-                                peak_stress::Float64 = 1.0)
+                                peak_stress::Float64 = 1.0,
+                                center_at_nominal::Bool = false)
     @assert n_periods == SCHEDULE_LENGTH "n_periods must equal $SCHEDULE_LENGTH (paper schedules are hourly over 24h)"
 
     name     = load_dict["name"]
@@ -85,8 +98,9 @@ function per_phase_scale_matrix(load_dict::Dict{String,Any}, n_periods::Int;
         all(abs(pd[p] - pd[1]) ≤ balance_tol * max(abs(pd[1]), 1.0) for p in 1:n_phases)
 
     if is_balanced
+        norm = center_at_nominal ? SCHEDULE_MEANS[sched_id] : 1.0
         for t in 1:n_periods
-            v = peak_stress * schedule_value(sched_id, shift, t)
+            v = peak_stress * schedule_value(sched_id, shift, t) / norm
             for p in 1:n_phases
                 M[p, t] = v
             end
@@ -96,8 +110,9 @@ function per_phase_scale_matrix(load_dict::Dict{String,Any}, n_periods::Int;
         for p in 1:n_phases
             p_sched = mod(sched_id - 1 + (p - 1), N_SCHEDULES) + 1
             p_shift = SCHEDULE_SHIFTS[mod(shift_idx0 + (p - 1), length(SCHEDULE_SHIFTS)) + 1]
+            norm = center_at_nominal ? SCHEDULE_MEANS[p_sched] : 1.0
             for t in 1:n_periods
-                M[p, t] = peak_stress * schedule_value(p_sched, p_shift, t)
+                M[p, t] = peak_stress * schedule_value(p_sched, p_shift, t) / norm
             end
         end
     end
@@ -116,7 +131,8 @@ single-level `_mn.jl` scripts: each period still has a full deep-copied math
 dict, but loads no longer share a single scalar scale.
 """
 function create_multinetwork_data_profiled(base_math::Dict{String,Any}, n_periods::Int;
-                                            peak_stress::Float64 = 1.0)
+                                            peak_stress::Float64 = 1.0,
+                                            center_at_nominal::Bool = false)
     mn_data = Dict{String,Any}(
         "multinetwork" => true,
         "per_unit"     => true,
@@ -131,7 +147,8 @@ function create_multinetwork_data_profiled(base_math::Dict{String,Any}, n_period
     base_pd     = Dict{String,Vector{Float64}}()
     base_qd     = Dict{String,Vector{Float64}}()
     for (lid, load) in base_math["load"]
-        load_scales[lid] = per_phase_scale_matrix(load, n_periods; peak_stress=peak_stress)
+        load_scales[lid] = per_phase_scale_matrix(load, n_periods;
+            peak_stress=peak_stress, center_at_nominal=center_at_nominal)
         base_pd[lid]     = copy(load["pd"])
         base_qd[lid]     = copy(load["qd"])
     end
@@ -159,11 +176,12 @@ pd. Equals `sum_load_phase(pd_p * scale_p,t) / sum_load_phase(pd_p)` — a
 scalar replacement for the old uniform `LOAD_SCALE_FACTORS[t]`, useful for
 labeling per-period plots when individual loads now follow distinct schedules.
 """
-function aggregate_demand_fraction(base_math::Dict{String,Any}, n_periods::Int)
+function aggregate_demand_fraction(base_math::Dict{String,Any}, n_periods::Int;
+                                   center_at_nominal::Bool = false)
     total_pd = 0.0
     weighted_t = zeros(n_periods)
     for (_, load) in base_math["load"]
-        scales = per_phase_scale_matrix(load, n_periods)
+        scales = per_phase_scale_matrix(load, n_periods; center_at_nominal=center_at_nominal)
         pd     = load["pd"]
         for p in 1:length(pd)
             total_pd += pd[p]

@@ -14,6 +14,9 @@
 
 using StatsPlots
 
+# Unified 10pt Arial font defaults for every figure produced here.
+include(joinpath(@__DIR__, "../figure_defaults.jl"))
+
 # Representative periods for grouped bar (override before include() to customize)
 if !@isdefined(REP_PERIODS)
     REP_PERIODS = [6, 11, 20]
@@ -37,15 +40,49 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     end
 end
 
-p_heat = heatmap(load_labels, period_labels, pshed_matrix,
-    xlabel = "Load",
+# ---- Bus on/off status across load buses × ALL periods. Integer MLD fully
+# sheds or serves each load, so served_fraction lives in {0, 1} per
+# (period, bus). Restricted to buses that actually host a load.
+math_ref = mn_new["nw"][nw_ids_sorted[1]]
+bus_name_map = FairLoadDelivery.build_bus_name_maps(math_ref)
+load_bus_set = Set(math_ref["load"][lid]["load_bus"] for lid in ref_load_ids)
+all_bus_ids = sort(collect(load_bus_set))
+bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in all_bus_ids]
+
+# pshed_matrix column j → load_id, so map each load to its bus column index
+bus_col = Dict(bid => k for (k, bid) in enumerate(all_bus_ids))
+load_to_bus_col = [bus_col[math_ref["load"][lid]["load_bus"]] for lid in ref_load_ids]
+
+bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
+bus_pd_matrix    = zeros(N_PERIODS, length(all_bus_ids))
+for (t, nw_id) in enumerate(nw_ids_sorted)
+    nw_data = mn_new["nw"][nw_id]
+    for (j, lid) in enumerate(ref_load_ids)
+        pd_total = sum(nw_data["load"][lid]["pd"])
+        bus_pd_matrix[t, load_to_bus_col[j]] += pd_total
+        v = pshed_matrix[t, j]
+        bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(v) ? 0.0 : v
+    end
+end
+
+bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
+for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
+    if bus_pd_matrix[t, b] > 1e-9
+        bus_status_matrix[t, b] = 1.0 - bus_pshed_matrix[t, b] / bus_pd_matrix[t, b]
+    end
+end
+
+p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
+    xlabel = "Bus",
     ylabel = "Period",
-    title  = "Per-load shed across periods ($CASE / $FAIR_FUNC / $pshed_type)",
-    color  = :viridis,
+    color  = :grays,
+    clims  = (0.0, 1.0),
     xrotation = 45,
+    yticks = (1:N_PERIODS, period_labels),
+    colorbar_title = "served fraction (0 = off, 1 = on)",
 )
 display(p_heat)
-savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.png"))
+savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))
 
 # ---- Grouped bar over representative periods (matches min_max_trade_off_mn style) ----
 rep_valid = filter(t -> 1 <= t <= N_PERIODS, REP_PERIODS)
@@ -119,5 +156,5 @@ validation_results["final"] = Dict(
 
 report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type)_$case.txt")
 generate_summary_report(validation_results, report_path)
-println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.png"))")
+println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))")
 println("Report → $report_path")

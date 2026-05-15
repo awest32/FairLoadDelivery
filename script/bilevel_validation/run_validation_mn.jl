@@ -46,12 +46,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-#const CASE = "case6_unbalanced_switch_meshed_good4integer"
-const CASE = "motivation_c_good4integer"
-case ="13_bus"
+const CASE = "case6_unbalanced_switch_meshed_good4integer"
+#const CASE = "motivation_c_good4integer"
+case = "more_meshed_6bus"#"13_bus"
 
-#const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
-const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+#const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 LS_PERCENT = 0.8
 const ITERATIONS = 20
 const FAIR_FUNC = "min_max"
@@ -59,13 +59,15 @@ pshed_type = "absolute"  # "absolute" or "proportional"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 
-# Multi-period setup: 24 hourly periods with linear-ramp load + TOU peak-cost profiles
-const N_PERIODS = 12
-const PERIOD_HOURS        = collect(0:N_PERIODS-1)
-# Linear ramp from 0.7 (period 1) to 1.0 (period 24).
-const LOAD_SCALE_FACTORS  = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
-const PEAK_TIME_COSTS     = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
-                             for h in PERIOD_HOURS]
+# Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
+# Each load name is deterministically mapped to (schedule_idx, ±1h shift) so
+# loads peak at different periods — replaces the old uniform LOAD_SCALE_FACTORS.
+const N_PERIODS    = FairLoadDelivery.SCHEDULE_LENGTH   # 24
+const PEAK_STRESS  = 1.0                                # uniform multiplier over the paper schedules
+const CENTER_AT_NOMINAL = true                          # divide each schedule by its daily mean
+const PERIOD_HOURS = collect(0:N_PERIODS-1)
+const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+                         for h in PERIOD_HOURS]
 
 switch_rating = [Inf, Inf, Inf]# sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -73,24 +75,12 @@ switch_rating = [Inf, Inf, Inf]# sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5
 ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
 
-validation_results = Dict{String,Any}(
-    "case"             => CASE,
-    "fair_func"        => FAIR_FUNC,
-    "iterations"       => ITERATIONS,
-    "n_periods"        => N_PERIODS,
-    "period_hours"     => PERIOD_HOURS,
-    "load_scales"      => LOAD_SCALE_FACTORS,
-    "peak_time_costs"  => PEAK_TIME_COSTS,
-    "pshed_type"       => pshed_type,
-)
-
 save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
 global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
 @info "Logging to $log_file"
-@info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, scales=$LOAD_SCALE_FACTORS, λ=$PEAK_TIME_COSTS"
 
 # ============================================================
 # STEP 1: NETWORK + MULTINETWORK SETUP
@@ -100,40 +90,35 @@ print_validation_header("Step 1: Network + Multinetwork Setup")
 eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT;
     switch_rating=switch_rating)
 
-"""
-Replicate a single-period math dict into a multinetwork with per-period load scaling.
-"""
-function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})
-    @assert length(load_scales) == n_periods
-    mn_data = Dict{String,Any}(
-        "multinetwork" => true,
-        "per_unit"     => true,
-        "data_model"   => PMD.MATHEMATICAL,
-        "nw"           => Dict{String,Any}()
-    )
-    for key in ["baseMVA", "basekv", "bus_lookup", "settings"]
-        haskey(base_math, key) && (mn_data[key] = deepcopy(base_math[key]))
-    end
-    for t in 1:n_periods
-        nw_id = string(t - 1)
-        nw_data = deepcopy(base_math)
-        delete!(nw_data, "multinetwork")
-        scale = load_scales[t]
-        for (_, load) in nw_data["load"]
-            load["pd"] = load["pd"] .* scale
-            load["qd"] = load["qd"] .* scale
-        end
-        nw_data["time_period"] = t
-        nw_data["load_scale"]  = scale
-        mn_data["nw"][nw_id]   = nw_data
-    end
-    return mn_data
-end
+# System aggregate scale per period — used by results_block_mn.jl print rows and
+# by downstream plotting. Per-load shape now comes from the H&A schedules.
+LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
+    center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
 
-mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
+validation_results = Dict{String,Any}(
+    "case"             => CASE,
+    "fair_func"        => FAIR_FUNC,
+    "iterations"       => ITERATIONS,
+    "n_periods"        => N_PERIODS,
+    "period_hours"     => PERIOD_HOURS,
+    "load_scales"      => LOAD_SCALE_FACTORS,
+    "peak_stress"      => PEAK_STRESS,
+    "peak_time_costs"  => PEAK_TIME_COSTS,
+    "pshed_type"       => pshed_type,
+)
+
+@info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, agg_scales=$LOAD_SCALE_FACTORS, peak_stress=$PEAK_STRESS, λ=$PEAK_TIME_COSTS"
+
+mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
+    peak_stress = PEAK_STRESS, center_at_nominal = CENTER_AT_NOMINAL)
+
+println("Load profile assignments for $CASE:")
+for row in FairLoadDelivery.profile_assignment_table(math)
+    println("  ", row)
+end
 nw_ids_sorted = sort(collect(keys(mn_data["nw"])), by=x->parse(Int, x))
 n_loads_per_period = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
-@info "Built multinetwork with $N_PERIODS periods, $n_loads_per_period loads per period"
+@info "Built multinetwork with $N_PERIODS periods, $n_loads_per_period loads per period (profiled)"
 
 # ============================================================
 # STEP 2: BILEVEL ITERATIONS (multi-period)
@@ -182,8 +167,13 @@ for k in 1:ITERATIONS
             dpshed, pshed_val, weight_vals, pd_all;
             critical_ids=critical_id, weight_ids=weight_ids,
             peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
+    elseif FAIR_FUNC == "efficiency"
+        pshed_new, fair_weight_vals, status = efficient_load_shed(
+            dpshed, pshed_val, weight_vals;
+            critical_ids=critical_id, weight_ids=weight_ids,
+            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
     else
-        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\".")
+        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
     end
     last_status = status
     @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
@@ -325,7 +315,34 @@ validation_results["per_period"] = per_period_results
 
 # ============================================================
 # STEP 5: LOAD-SHED HEATMAP + FINAL RESULT + REPORT
-# (extracted so it can be re-run standalone in REPL)
+# (extracted so it can be re-run standalone in REPL — builds pshed_matrix,
+# load_labels, period_labels, period_total, period_max, rounded_objectives)
 # ============================================================
 include("results_block_mn.jl")
+
+# ============================================================
+# STEP 6: PERSIST PER-RUN DATA FOR STANDALONE PLOTTING
+# Filename pins (CASE, FAIR_FUNC, pshed_type) so each fair_func × case run
+# lands in its own JLD2 and downstream plot scripts can target them by key.
+# Reuses pshed_matrix / load_labels / etc. built by results_block_mn.jl.
+# ============================================================
+using JLD2
+jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
+JLD2.jldsave(jld_path;
+    pshed_matrix         = pshed_matrix,
+    load_labels          = load_labels,
+    period_labels        = period_labels,
+    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
+    CASE                 = CASE,
+    FAIR_FUNC            = FAIR_FUNC,
+    pshed_type           = pshed_type,
+    N_PERIODS            = N_PERIODS,
+    period_total         = period_total,
+    period_max           = period_max,
+    rounded_objectives   = rounded_objectives,
+    relaxed_mn_objective = mn_relaxed_final["objective"],
+)
+println("Saved bilevel run data → $jld_path")
+
 println("\nMulti-period validation complete.")

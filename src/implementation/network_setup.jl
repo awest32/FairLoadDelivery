@@ -64,7 +64,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
         return s
     end
     # Update the current limits on the switches based upon the case
-    if case == "ieee_13_aw_edit/motivation_a.dss"
+    if endswith(case, "ieee_13_aw_edit/motivation_a.dss") || endswith(case, "ieee_13_aw_edit\\motivation_a.dss")
         for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "632633"
@@ -73,7 +73,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= switch_rating#322
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_a_with_storage.dss"
+    elseif endswith(case, "ieee_13_aw_edit/motivation_a_with_storage.dss") || endswith(case, "ieee_13_aw_edit\\motivation_a_with_storage.dss")
         for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "632633"
@@ -82,7 +82,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= switch_rating#322
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_b.dss"
+    elseif endswith(case, "ieee_13_aw_edit/motivation_b.dss") || endswith(case, "ieee_13_aw_edit\\motivation_b.dss")
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "632633"
@@ -93,7 +93,7 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= switch_rating#80
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_c.dss"
+    elseif endswith(case, "ieee_13_aw_edit/motivation_c.dss") || endswith(case, "ieee_13_aw_edit\\motivation_c.dss")
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             #switch["current_rating"][:] .= switch_rating
@@ -111,60 +111,71 @@ function setup_network(case::String, ls_percent::Float64; source_pu::Float64=1.0
                 switch["current_rating"][:] .= 700
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_c_good4integer.dss"
-       # Per-phase switch ratings = calc_apparent_power(P_phase, Q_phase) * 1.05,
+    elseif endswith(case, "ieee_13_aw_edit/motivation_c_good4integer.dss") || endswith(case, "ieee_13_aw_edit\\motivation_c_good4integer.dss")
+       # Per-phase switch ratings = calc_apparent_power(P_phase, Q_phase) * rating_margin,
        # using radial-config ACPF flows from
        # script/single_level/acpf_probe_motivation_c_good4integer.jl
        # (RADIAL_OPEN = ("634675","646611")). 634675 / 646611 mirror their
        # loop-partners (632633 / 632645) so radiality can swap which switch
        # breaks each loop. 671700 / 700701 / 701702 have empty downstream
        # blocks (loads 700/701/702 are commented out).
-       for (i, branch) in math["branch"]
-            branch["c_rating_a"][:] .= switch_rating[1]
-       end
+       # rating_margin: headroom above nominal radial flow. Raise it to let the
+       # bilevel keep larger sub-trees fed when per-load schedules peak above
+       # nominal; reduce it to tighten the bottleneck and force more shedding.
+       rating_margin = 5.0
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "632633"
-                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*1.05
-                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*1.05
-                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*1.05
+                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*rating_margin
             elseif switch["name"] == "632645"
-                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*1.05
-                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*1.05
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*rating_margin
             elseif switch["name"] == "634675"
                 # Loop-partner of 632633.
-                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*1.05
-                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*1.05
-                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*1.05
+                switch["current_rating"][1] = calc_apparent_power(70.04, 35.07)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(60.04, 30.05)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(80.09, 40.1)*rating_margin
             elseif switch["name"] == "646611"
                 # Loop-partner of 632645.
-                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*1.05
-                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*1.05
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(140.04, 70.04)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(60.01, 30.05)*rating_margin
             elseif switch["name"] == "670671"
-                switch["current_rating"][1] = calc_apparent_power(280.53, 70.27)*1.05
-                switch["current_rating"][2] = calc_apparent_power(130.24, 146.65)*1.05
-                switch["current_rating"][3] = calc_apparent_power(290.36, 170.45)*1.05
+                switch["current_rating"][1] = calc_apparent_power(280.53, 70.27)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(130.24, 146.65)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(290.36, 170.45)*rating_margin
             elseif switch["name"] == "671692"
-                switch["current_rating"][1] = calc_apparent_power(140.33, 140.55)*1.05
-                switch["current_rating"][2] = calc_apparent_power(70.24, 176.64)*1.05
-                switch["current_rating"][3] = calc_apparent_power(160.24, 130.24)*1.05
+                switch["current_rating"][1] = calc_apparent_power(140.33, 140.55)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(70.24, 176.64)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(160.24, 130.24)*rating_margin
             elseif switch["name"] == "671700"
-                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*rating_margin
             elseif switch["name"] == "700701"
-                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*rating_margin
             elseif switch["name"] == "701702"
-                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*1.05
-                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*1.05
+                switch["current_rating"][1] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][2] = calc_apparent_power(0.0, 0.0)*rating_margin
+                switch["current_rating"][3] = calc_apparent_power(0.0, 0.0)*rating_margin
             end
         end
-    elseif case == "ieee_13_aw_edit/motivation_d.dss"
+       # Match each switchable branch's c_rating_a to its paired switch's
+       # current_rating (by source_id) — same pattern as the 6-bus case.
+       # Non-switchable branches keep PMD's parsed default.
+       for (_, switch) in math["switch"]
+            for (_, branch) in math["branch"]
+                if branch["source_id"] == switch["source_id"]
+                    branch["c_rating_a"][:] .= switch["current_rating"]
+                end
+            end
+       end
+    elseif endswith(case, "ieee_13_aw_edit/motivation_d.dss") || endswith(case, "ieee_13_aw_edit\\motivation_d.dss")
        for (i,switch) in math["switch"]
             switch["dispatchable"] = 1
             if switch["name"] == "632633"
