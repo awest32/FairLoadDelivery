@@ -20,7 +20,7 @@ const PMD = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
-# Unified 10pt Arial font defaults for every figure in this script.
+# Unified 9pt font defaults for every figure in this script.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 # ============================================================
@@ -40,7 +40,11 @@ LS_PERCENT = 0.8
 # Phase-level variation at unbalanced 3-phase buses (e.g. 634a/b/c, L1/L2/L3)
 # arises from independent per-phase-load schedules; multi-phase loads whose pd
 # is balanced share one schedule across phases.
-const N_PERIODS = FairLoadDelivery.SCHEDULE_LENGTH   # 24
+# Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
+# the single-level multi-period MILP from T=24 to T=8 to keep solve times in
+# range comparable to the bilevel scripts.
+const SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+const N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful
 # schedules cap at ~1.10; bump this to drive more shedding, dial it down for
@@ -52,12 +56,12 @@ const PEAK_STRESS = 1.0
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.75, 1.1, N_PERIODS)]
 
 # TOU pricing: low overnight, peak in evening (h≈18)
-const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
-                            for h in 0:N_PERIODS-1]
+const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+                        for h in SELECTED_HOURS]
 
-# Representative subset (1-indexed period indices) for the busy plots:
-# overnight off-peak (h=3), morning ramp (h=8), evening peak (h=19)
- REP_PERIODS = [6, 11, 20]
+# Representative subset (1-indexed period indices into SELECTED_HOURS) for the
+# busy 3-period plots: trough (h=2), midday plateau (h=12), evening peak (h=18).
+REP_PERIODS = [1, 4, 6]
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 solve_min_max = pshed_type == "proportional" ?
@@ -106,7 +110,7 @@ eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
 # deterministically mapped to (schedule_idx ∈ 1:3, shift ∈ {-1,0,+1}); balanced
 # multi-phase loads share one schedule across phases, unbalanced ones rotate.
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    peak_stress = PEAK_STRESS)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS)
 
 # Quick sanity dump of the assignment (handy when comparing across cases).
 println("Load profile assignments for $case:")
@@ -231,10 +235,10 @@ load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by=x->parse(Int, x))]
 
 # FONT_KW kept for backwards compat with existing call sites, but now matches
-# the 10pt Arial defaults set in figure_defaults.jl so nothing in this script
+# the 9pt defaults set in figure_defaults.jl so nothing in this script
 # overrides the unified font sizes.
-const FONT_KW = (tickfontsize = 10, guidefontsize = 10,
-                 titlefontsize = 10, legendfontsize = 10)
+const FONT_KW = (tickfontsize = 9, guidefontsize = 9,
+                 titlefontsize = 9, legendfontsize = 9)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
     p = bar(load_labels, per_load_agg_vec,
@@ -248,7 +252,7 @@ function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str
     ymax = maximum(per_load_agg_vec)
     for (i, v) in enumerate(per_load_agg_vec)
         annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 10, "Arial", :center))
+            text("$(round(v, digits = 1))", 9, :center))
     end
     return p
 end

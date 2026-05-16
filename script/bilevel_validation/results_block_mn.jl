@@ -14,12 +14,16 @@
 
 using StatsPlots
 
-# Unified 10pt Arial font defaults for every figure produced here.
+# Unified 9pt font defaults for every figure produced here.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
-# Representative periods for grouped bar (override before include() to customize)
+# Representative periods for grouped bar (override before include() to customize).
+# Default picks 3 evenly-spaced indices into 1:N_PERIODS so it adapts to
+# downsampled runs (T=8 → [1, 4, 8]) as well as the full T=24 day.
 if !@isdefined(REP_PERIODS)
-    REP_PERIODS = [6, 11, 20]
+    REP_PERIODS = N_PERIODS <= 3 ?
+        collect(1:N_PERIODS) :
+        unique([1, max(1, N_PERIODS ÷ 2), N_PERIODS])
 end
 
 print_validation_header("Step 5: Load-shed heatmap + final result")
@@ -79,7 +83,7 @@ p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
     clims  = (0.0, 1.0),
     xrotation = 45,
     yticks = (1:N_PERIODS, period_labels),
-    colorbar_title = "served fraction (0 = off, 1 = on)",
+    colorbar = false,
 )
 display(p_heat)
 savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))

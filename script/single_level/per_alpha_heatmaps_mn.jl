@@ -16,7 +16,7 @@ using Statistics
 using LinearAlgebra
 using Dates
 
-# Unified 10pt Arial font defaults.
+# Unified 9pt font defaults.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 # ============================================================

@@ -22,7 +22,7 @@ using Dates
 # Shared fairness-function styling (FAIR_FUNC_COLORS / LABELS / MARKERS / LINESTYLES)
 include("../../src/implementation/visualization.jl")
 
-# Unified 10pt Arial font defaults.
+# Unified 9pt font defaults.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 # ============================================================

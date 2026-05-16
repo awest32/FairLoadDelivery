@@ -106,7 +106,7 @@ export load_summary_rows, append_load_summary!, load_shed_metrics
 export plot_fairness_efficiency_pareto, plot_loadshed_distribution_comparison
 export FAIR_FUNC_COLORS, FAIR_FUNC_LABELS, FAIR_FUNC_MARKERS
 export LOAD_SCHEDULES, N_SCHEDULES, SCHEDULE_LENGTH, SCHEDULE_SHIFTS
-export assign_load_profile, schedule_value, per_phase_scale_matrix
+export assign_load_profile, assign_profiles_by_bus, schedule_value, per_phase_scale_matrix
 export create_multinetwork_data_profiled, profile_assignment_table, aggregate_demand_fraction
 
 end #module FairLoadDelivery

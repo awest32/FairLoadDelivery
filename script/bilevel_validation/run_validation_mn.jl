@@ -46,11 +46,11 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch_meshed_good4integer"
+const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
 #const CASE = "motivation_c_good4integer"
-case = "more_meshed_6bus"#"13_bus"
+case = "more_meshed_6bus" #"13_bus"
 
-const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 LS_PERCENT = 0.8
 const ITERATIONS = 20
@@ -62,14 +62,24 @@ const N_BERNOULLI_SAMPLES = 2000
 # Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
 # Each load name is deterministically mapped to (schedule_idx, ±1h shift) so
 # loads peak at different periods — replaces the old uniform LOAD_SCALE_FACTORS.
-const N_PERIODS    = FairLoadDelivery.SCHEDULE_LENGTH   # 24
-const PEAK_STRESS  = 1.0                                # uniform multiplier over the paper schedules
-const CENTER_AT_NOMINAL = true                          # divide each schedule by its daily mean
-const PERIOD_HOURS = collect(0:N_PERIODS-1)
-const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
-                         for h in PERIOD_HOURS]
+#
+# SELECTED_HOURS downsamples the 24h day to a representative subset. The
+# DiffOpt forward Jacobian costs O((T·N)^2) per bilevel iter, so cutting T
+# from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
+# regimes: trough (2), morning ramp (5,8), midday plateau (12), pre-peak rise
+# (15), evening peak (18), descent (21), late-night start (23).
+const SELECTED_HOURS    = [2, 5, 8, 12, 15, 18, 21, 23]
+const N_PERIODS         = length(SELECTED_HOURS)
+const PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
+const CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
+const PERIOD_HOURS      = SELECTED_HOURS
+const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+                           for h in PERIOD_HOURS]
+# Override results_block_mn.jl default — pick trough/plateau/peak indices into
+# SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
+REP_PERIODS = [1, 4, 6]   # → hours 2, 12, 18
 
-switch_rating = [Inf, Inf, Inf]# sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
+switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
 # Solvers
 ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -93,7 +103,7 @@ eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCE
 # System aggregate scale per period — used by results_block_mn.jl print rows and
 # by downstream plotting. Per-load shape now comes from the H&A schedules.
 LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
-    center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
+    hours = SELECTED_HOURS, center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
 
 validation_results = Dict{String,Any}(
     "case"             => CASE,
@@ -110,7 +120,7 @@ validation_results = Dict{String,Any}(
 @info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, agg_scales=$LOAD_SCALE_FACTORS, peak_stress=$PEAK_STRESS, λ=$PEAK_TIME_COSTS"
 
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    peak_stress = PEAK_STRESS, center_at_nominal = CENTER_AT_NOMINAL)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS, center_at_nominal = CENTER_AT_NOMINAL)
 
 println("Load profile assignments for $CASE:")
 for row in FairLoadDelivery.profile_assignment_table(math)
@@ -210,7 +220,15 @@ validation_results["bilevel"] = Dict(
 # ============================================================
 print_validation_header("Step 3: Final relaxed multi-period MLD with updated weights")
 mn_relaxed_final = FairLoadDelivery.solve_mn_mc_mld_shed_implicit_diff(mn_new, ipopt_solver)
-@info "relaxed multi-period termination: $(mn_relaxed_final["termination_status"])"
+relaxed_term = mn_relaxed_final["termination_status"]
+relaxed_ok = relaxed_term in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
+@info "relaxed multi-period termination: $relaxed_term (converged=$relaxed_ok)"
+validation_results["step3"] = Dict(
+    "termination_status" => string(relaxed_term),
+    "converged"          => relaxed_ok,
+)
+
+if relaxed_ok
 
 # ============================================================
 # STEP 4: PER-PERIOD RANDOM ROUNDING + AC FEASIBILITY
@@ -346,3 +364,17 @@ JLD2.jldsave(jld_path;
 println("Saved bilevel run data → $jld_path")
 
 println("\nMulti-period validation complete.")
+
+else  # !relaxed_ok — Step 3 did not converge
+    @warn "[$FAIR_FUNC/$pshed_type] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6 (rounding, plots, JLD2 save) to avoid building outputs on a non-converged relaxation."
+    abort_path = joinpath(save_dir, "step3_aborted.txt")
+    open(abort_path, "w") do io
+        println(io, "Step 3 relaxed multi-period MLD did not converge.")
+        println(io, "termination_status      = $relaxed_term")
+        println(io, "bilevel completed_iters = $(length(all_pshed_lower))")
+        println(io, "bilevel last_status     = $last_status")
+        println(io, "Steps 4–6 skipped (rounding, results block, JLD2 save).")
+    end
+    println("Wrote $abort_path")
+    println("\nMulti-period validation halted at Step 3.")
+end

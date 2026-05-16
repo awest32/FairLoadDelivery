@@ -47,7 +47,7 @@ const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 case = "more_meshed_6bus"#"13_bus"
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "palma"  # simplest fairness function for testing
+const FAIR_FUNC = "min_max"  # simplest fairness function for testing
 pshed_type = "absolute"  # "absolute" or "proportional" — only used when FAIR_FUNC=="min_max"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000

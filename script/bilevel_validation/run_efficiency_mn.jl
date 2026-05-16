@@ -26,7 +26,7 @@ using JLD2
 using Plots
 using Printf
 
-# Unified 10pt Arial font defaults for every figure in this script.
+# Unified 9pt font defaults for every figure in this script.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 const PMD = PowerModelsDistribution
@@ -36,25 +36,32 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE      = "motivation_c_good4integer"
-case            = "13_bus"
-const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+#const CASE      = "motivation_c_good4integer"
+const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+case            = "more_meshed_6bus" #"13_bus"
+#"../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT      = 0.8
 const FAIR_FUNC = "efficiency"
 pshed_type      = "absolute"
 
-const N_PERIODS    = FairLoadDelivery.SCHEDULE_LENGTH   # 24
-const PEAK_STRESS  = 1.0
+# Downsampled hours-of-day (0-indexed) covering trough → peak → descent. See
+# run_validation_mn.jl for rationale; T=8 keeps DiffOpt forward-mode tractable
+# vs the full 24h day.
+const SELECTED_HOURS    = [2, 5, 8, 12, 15, 18, 21, 23]
+const N_PERIODS         = length(SELECTED_HOURS)
+const PEAK_STRESS       = 1.0
 # When true, each schedule is divided by its own daily mean before applying
 # peak_stress — so the daily-average per-load scale equals PEAK_STRESS exactly
 # (1.4× nominal here) and the nameplate pd is the daily mean, matching the
 # single-period reference.
 const CENTER_AT_NOMINAL = true
-const PERIOD_HOURS = collect(0:N_PERIODS-1)
-const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
-                         for h in PERIOD_HOURS]
+const PERIOD_HOURS      = SELECTED_HOURS
+const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+                           for h in PERIOD_HOURS]
+REP_PERIODS = [1, 4, 6]   # → hours 2, 12, 18 (trough/plateau/peak)
 
-switch_rating  = [Inf, Inf, Inf]
+switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver   = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver  = Gurobi.Optimizer
 
@@ -73,10 +80,10 @@ eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCE
     switch_rating = switch_rating)
 
 LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
-    center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
+    hours = SELECTED_HOURS, center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
 
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    peak_stress = PEAK_STRESS, center_at_nominal = CENTER_AT_NOMINAL)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS, center_at_nominal = CENTER_AT_NOMINAL)
 nw_ids_sorted = sort(collect(keys(mn_data["nw"])), by = x -> parse(Int, x))
 mn_new = mn_data   # alias kept so results_block_mn.jl sees the expected name
 
@@ -97,7 +104,11 @@ end
 print_validation_header("Step 1b: Load profile + assignment figures")
 
 function _scaled_schedule(sched_idx::Int, shift::Int)
-    raw = [FairLoadDelivery.schedule_value(sched_idx, shift, t) for t in 1:N_PERIODS]
+    # schedule_value takes 1-indexed position; SELECTED_HOURS is 0-indexed hour-of-day.
+    # Bug pre-downsample: used `t in 1:N_PERIODS` which read schedule positions 1..8
+    # (hours 0..7) and plotted them against PERIOD_HOURS, making the profiles appear
+    # to peak at the rightmost sample.
+    raw = [FairLoadDelivery.schedule_value(sched_idx, shift, h + 1) for h in SELECTED_HOURS]
     norm = CENTER_AT_NOMINAL ? FairLoadDelivery.SCHEDULE_MEANS[sched_idx] : 1.0
     return raw .* (PEAK_STRESS / norm)
 end
@@ -123,29 +134,31 @@ savefig(p_costs, joinpath(save_dir, "peak_time_costs_$case.svg"))
 display(p_costs)
 println("Saved peak-time-cost plot → ", joinpath(save_dir, "peak_time_costs_$case.svg"))
 
-# Per-load schedule overlay (each load uses its assigned (sched, shift)).
+# Per-phase schedule overlay — each (load, phase) uses its bus-aware (sched, shift).
+n_phase_lines = sum(length(r.phases) for r in assignment_rows)
 p_per_load = plot(xlabel = "hour", ylabel = "load scale (× nominal pd)",
-    title = "Per-load profile after assignment ($(length(assignment_rows)) loads)",
+    title = "Per-phase profile after assignment ($n_phase_lines phases)",
     legend = false, lw = 1)
-for row in assignment_rows
-    plot!(p_per_load, PERIOD_HOURS, _scaled_schedule(row.sched, row.shift))
+for row in assignment_rows, (sched_idx, shift) in row.phases
+    plot!(p_per_load, PERIOD_HOURS, _scaled_schedule(sched_idx, shift))
 end
 hline!(p_per_load, [1.0], linestyle = :dash, color = :gray)
 savefig(p_per_load, joinpath(save_dir, "load_profile_per_load_$case.svg"))
 display(p_per_load)
 println("Saved per-load profile plot → ", joinpath(save_dir, "load_profile_per_load_$case.svg"))
 
-# Assignment table rendered as a plot (sorted by load name).
-sorted_rows = sort(assignment_rows; by = r -> r.name)
-table_strs = [@sprintf("%-8s  sched %d  shift %+d  n_ph=%d  balanced=%s",
-                       r.name, r.sched, r.shift, r.n_phases, r.balanced)
+# Assignment table rendered as a plot (sorted by bus then load name).
+sorted_rows = sort(assignment_rows; by = r -> (r.bus, r.name))
+_phases_str(phases) = join(("(s$s,sh$(sh ≥ 0 ? "+$sh" : "$sh"))" for (s, sh) in phases), ",")
+table_strs = [@sprintf("%-8s  bus %s  phases=%s  n_ph=%d  balanced=%s",
+                       r.name, r.bus, _phases_str(r.phases), r.n_phases, r.balanced)
               for r in sorted_rows]
 p_table = plot(framestyle = :none, legend = false,
     title = "Load → (schedule, shift) assignment",
     xlims = (0, 1), ylims = (0, length(table_strs) + 1))
 for (i, str) in enumerate(table_strs)
     annotate!(p_table, 0.02, length(table_strs) + 1 - i,
-              text(str, 10, "Arial", :left))
+              text(str, 9, :left))
 end
 savefig(p_table, joinpath(save_dir, "load_profile_assignments_$case.svg"))
 display(p_table)

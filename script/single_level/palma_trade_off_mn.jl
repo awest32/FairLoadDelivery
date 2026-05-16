@@ -68,7 +68,7 @@ const PMD  = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
-# Unified 10pt Arial font defaults for every figure in this script.
+# Unified 9pt font defaults for every figure in this script.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 # ============================================================
@@ -89,15 +89,18 @@ pshed_type = "absolute"  # only absolute supported in this script
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
 # is implicit in the reported load-shed values, so no aggregate-scale label is
 # carried in plots or CSVs.
-const N_PERIODS = FairLoadDelivery.SCHEDULE_LENGTH   # 24
+# Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
+# results stay comparable across fair-funcs.
+const SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+const N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
 const PEAK_STRESS = 1.0
 # OLD uniform-scalar profile (commented for reference / quick A/B):
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
-const PEAK_TIME_COSTS    = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
-                            for h in 0:N_PERIODS-1]
- REP_PERIODS = [6, 11, 20]   # off-peak, mid-day, evening peak
+const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+                        for h in SELECTED_HOURS]
+REP_PERIODS = [1, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
@@ -143,7 +146,7 @@ eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
 # mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
 
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    peak_stress = PEAK_STRESS)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS)
 
 println("Load profile assignments for $case:")
 for row in FairLoadDelivery.profile_assignment_table(math)
@@ -519,10 +522,10 @@ load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by = x -> parse(Int, x))]
 
 # FONT_KW kept for backwards compat with existing call sites, but now matches
-# the 10pt Arial defaults set in figure_defaults.jl so nothing in this script
+# the 9pt defaults set in figure_defaults.jl so nothing in this script
 # overrides the unified font sizes.
-const FONT_KW = (tickfontsize = 10, guidefontsize = 10,
-                 titlefontsize = 10, legendfontsize = 10)
+const FONT_KW = (tickfontsize = 9, guidefontsize = 9,
+                 titlefontsize = 9, legendfontsize = 9)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
     p = bar(load_labels, per_load_agg_vec,
@@ -537,7 +540,7 @@ function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str
     for (i, v) in enumerate(per_load_agg_vec)
         isfinite(v) || continue
         annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 10, "Arial", :center))
+            text("$(round(v, digits = 1))", 9, :center))
     end
     return p
 end

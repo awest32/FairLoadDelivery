@@ -8,15 +8,19 @@ Implements the load-schedule diversification strategy from:
     IEEE PECI 2023.
 
 The paper assigns each load one of three 24-hour schedules (Fig. 2 / Table I),
-with a per-load ±1-hour time shift for additional diversity. Per-phase nameplate
-pd already differs across phases for separately-defined per-phase loads (e.g.
-634a/634b/634c, L1/L2/L3), so per-phase profile variation at a bus emerges
-naturally from name-deterministic per-load assignment, without artificially
-unbalancing 3-phase loads whose pd is balanced in the source data.
+with a per-load ±1-hour time shift for additional diversity. We layer a
+bus-aware step on top: `assign_profiles_by_bus` guarantees that no two phases
+served at the same bus share the same `(schedule, shift)` pair. Allowed at any
+bus: same schedule + different shifts, different schedules + same shift, or
+different schedules + different shifts.
 
-For multi-phase loads whose pd vector IS unbalanced (e.g. a hand-edited
-.dss with [120, 90, 60] on a 3-phase load), each phase is rotated to a
-different (schedule, shift) so the per-phase profile diverges across the day.
+- Balanced multi-phase loads: keep the load's hashed schedule, rotate the shift
+  across phases so per-phase profiles diverge in time.
+- Unbalanced multi-phase loads (pd entries differ across phases, e.g. a
+  hand-edited [120, 90, 60] 3-phase load): rotate both schedule and shift.
+- Collisions with other loads at the same bus: resolved by bumping the shift
+  first (preserving the schedule when possible) and the schedule only if every
+  shift on that schedule is already taken.
 =#
 
 using PowerModelsDistribution
@@ -61,16 +65,94 @@ function schedule_value(sched_idx::Int, shift::Int, t::Int)
 end
 
 """
-    per_phase_scale_matrix(load_dict, n_periods; peak_stress=1.0, center_at_nominal=false)
+Walk (schedule, shift) starting at `(init_sched, init_shift)` and return the
+first pair not already in `used`. Bumps shift first (preserving schedule when
+possible), then bumps schedule. Falls back to the initial pair if every one of
+the `N_SCHEDULES * length(SCHEDULE_SHIFTS)` combinations is taken.
+"""
+function _next_free_profile(init_sched::Int, init_shift::Int,
+                            used::AbstractSet{Tuple{Int,Int}})
+    init_shift_idx = findfirst(==(init_shift), SCHEDULE_SHIFTS) - 1
+    for sched_off in 0:(N_SCHEDULES - 1)
+        s = mod(init_sched - 1 + sched_off, N_SCHEDULES) + 1
+        for shift_off in 0:(length(SCHEDULE_SHIFTS) - 1)
+            sh = SCHEDULE_SHIFTS[mod(init_shift_idx + shift_off, length(SCHEDULE_SHIFTS)) + 1]
+            (s, sh) in used || return (s, sh)
+        end
+    end
+    return (init_sched, init_shift)
+end
+
+"""
+    assign_profiles_by_bus(base_math; balance_tol=1e-6)
+        -> Dict{String, Vector{Tuple{Int,Int}}}
+
+Per-bus, per-phase `(schedule_idx, shift)` assignment such that no two phases
+served at the same bus share the same `(schedule, shift)` pair. Allowed at any
+bus: same schedule + different shifts, different schedules + same shift, or
+different schedules + different shifts.
+
+Initial pick per phase reuses the per-load hash from `assign_load_profile`
+(balanced multi-phase loads: keep the schedule, rotate the shift across phases;
+unbalanced multi-phase loads: rotate both). Collisions with other loads at the
+same bus are then resolved by `_next_free_profile`, preferring to bump shift
+before schedule.
+"""
+function assign_profiles_by_bus(base_math::Dict{String,Any};
+                                balance_tol::Float64 = 1e-6)
+    bus_to_lids = Dict{Int, Vector{String}}()
+    for (lid, load) in base_math["load"]
+        push!(get!(bus_to_lids, load["load_bus"], String[]), lid)
+    end
+
+    assignment = Dict{String, Vector{Tuple{Int,Int}}}()
+    for bus in sort(collect(keys(bus_to_lids)))
+        used = Set{Tuple{Int,Int}}()
+        for lid in sort(bus_to_lids[bus])
+            load     = base_math["load"][lid]
+            pd       = load["pd"]
+            n_phases = length(pd)
+
+            base_sched, base_shift = assign_load_profile(load["name"])
+            shift_idx0 = findfirst(==(base_shift), SCHEDULE_SHIFTS) - 1
+
+            is_balanced = n_phases == 1 ||
+                all(abs(pd[p] - pd[1]) ≤ balance_tol * max(abs(pd[1]), 1.0) for p in 1:n_phases)
+
+            phases = Vector{Tuple{Int,Int}}(undef, n_phases)
+            for p in 1:n_phases
+                init_sched = is_balanced ? base_sched :
+                    mod(base_sched - 1 + (p - 1), N_SCHEDULES) + 1
+                init_shift = SCHEDULE_SHIFTS[mod(shift_idx0 + (p - 1), length(SCHEDULE_SHIFTS)) + 1]
+                phases[p]  = _next_free_profile(init_sched, init_shift, used)
+                push!(used, phases[p])
+            end
+            assignment[lid] = phases
+        end
+    end
+    return assignment
+end
+
+"""
+    per_phase_scale_matrix(load_dict, n_periods; hours=0:SCHEDULE_LENGTH-1,
+                           phase_profile=nothing, peak_stress=1.0,
+                           center_at_nominal=false)
         -> Matrix{Float64} (n_phases × n_periods)
 
 Per-phase, per-period scale factor for one math-model load dict.
 
-- single-phase / balanced multi-phase: all phases share the load's primary
-  (schedule, shift) profile;
-- unbalanced multi-phase (pd entries differ across phases): each phase is
-  rotated to (schedule_idx + p - 1, shift + p - 1) so the per-phase profiles
-  diverge across the day.
+`hours` is a 0-indexed selection of hours-of-day in `0:SCHEDULE_LENGTH-1` and
+defines which periods are sampled (default = the full 24-hour day). Pass a
+shorter `hours` (e.g. `[2, 8, 12, 15, 18, 21]`) to downsample. `n_periods` must
+equal `length(hours)` — kept as a positional arg so call sites stay explicit
+about the per-period array length downstream.
+
+Pass `phase_profile` (from `assign_profiles_by_bus`) for bus-aware assignment
+where phases at the same bus are guaranteed to differ in `(schedule, shift)`.
+If omitted, falls back to a per-load-only rotation: balanced multi-phase loads
+keep the load's schedule and rotate shift across phases; unbalanced multi-phase
+loads rotate both. The fallback diversifies within a load but cannot detect
+collisions with other loads at the same bus — prefer the bus-aware path.
 
 `peak_stress` scales every schedule value uniformly. When `center_at_nominal`
 is false (default), the raw paper schedules are used — their daily mean is
@@ -82,55 +164,71 @@ average scale equals `peak_stress` exactly (and the nameplate pd is the daily
 to the single-period nominal load.
 """
 function per_phase_scale_matrix(load_dict::Dict{String,Any}, n_periods::Int;
+                                hours::AbstractVector{Int} = 0:SCHEDULE_LENGTH-1,
                                 balance_tol::Float64 = 1e-6,
                                 peak_stress::Float64 = 1.0,
-                                center_at_nominal::Bool = false)
-    @assert n_periods == SCHEDULE_LENGTH "n_periods must equal $SCHEDULE_LENGTH (paper schedules are hourly over 24h)"
+                                center_at_nominal::Bool = false,
+                                phase_profile::Union{Nothing,Vector{Tuple{Int,Int}}} = nothing)
+    @assert length(hours) == n_periods "length(hours) ($(length(hours))) must equal n_periods ($n_periods)"
+    @assert all(0 <= h < SCHEDULE_LENGTH for h in hours) "hours must be 0-indexed in 0:$(SCHEDULE_LENGTH-1)"
 
-    name     = load_dict["name"]
     pd       = load_dict["pd"]
     n_phases = length(pd)
 
-    sched_id, shift = assign_load_profile(name)
+    profile = phase_profile === nothing ?
+        _per_load_phase_profile(load_dict; balance_tol=balance_tol) :
+        phase_profile
+    @assert length(profile) == n_phases "phase_profile length ($(length(profile))) must equal n_phases ($n_phases)"
+
     M = zeros(n_phases, n_periods)
-
-    is_balanced = n_phases == 1 ||
-        all(abs(pd[p] - pd[1]) ≤ balance_tol * max(abs(pd[1]), 1.0) for p in 1:n_phases)
-
-    if is_balanced
-        norm = center_at_nominal ? SCHEDULE_MEANS[sched_id] : 1.0
-        for t in 1:n_periods
-            v = peak_stress * schedule_value(sched_id, shift, t) / norm
-            for p in 1:n_phases
-                M[p, t] = v
-            end
-        end
-    else
-        shift_idx0 = findfirst(==(shift), SCHEDULE_SHIFTS) - 1
-        for p in 1:n_phases
-            p_sched = mod(sched_id - 1 + (p - 1), N_SCHEDULES) + 1
-            p_shift = SCHEDULE_SHIFTS[mod(shift_idx0 + (p - 1), length(SCHEDULE_SHIFTS)) + 1]
-            norm = center_at_nominal ? SCHEDULE_MEANS[p_sched] : 1.0
-            for t in 1:n_periods
-                M[p, t] = peak_stress * schedule_value(p_sched, p_shift, t) / norm
-            end
+    for p in 1:n_phases
+        p_sched, p_shift = profile[p]
+        norm = center_at_nominal ? SCHEDULE_MEANS[p_sched] : 1.0
+        for (t, h) in enumerate(hours)
+            # schedule_value expects 1-indexed t; `hours` is 0-indexed hour-of-day.
+            M[p, t] = peak_stress * schedule_value(p_sched, p_shift, h + 1) / norm
         end
     end
-
     return M
 end
 
+"Fallback per-load phase profile when no bus-aware assignment is provided."
+function _per_load_phase_profile(load_dict::Dict{String,Any};
+                                 balance_tol::Float64 = 1e-6)
+    pd       = load_dict["pd"]
+    n_phases = length(pd)
+    base_sched, base_shift = assign_load_profile(load_dict["name"])
+    shift_idx0 = findfirst(==(base_shift), SCHEDULE_SHIFTS) - 1
+    is_balanced = n_phases == 1 ||
+        all(abs(pd[p] - pd[1]) ≤ balance_tol * max(abs(pd[1]), 1.0) for p in 1:n_phases)
+
+    profile = Vector{Tuple{Int,Int}}(undef, n_phases)
+    for p in 1:n_phases
+        p_sched = is_balanced ? base_sched :
+            mod(base_sched - 1 + (p - 1), N_SCHEDULES) + 1
+        p_shift = SCHEDULE_SHIFTS[mod(shift_idx0 + (p - 1), length(SCHEDULE_SHIFTS)) + 1]
+        profile[p] = (p_sched, p_shift)
+    end
+    return profile
+end
+
 """
-    create_multinetwork_data_profiled(base_math, n_periods) -> mn_data
+    create_multinetwork_data_profiled(base_math, n_periods;
+                                       hours=0:SCHEDULE_LENGTH-1, ...) -> mn_data
 
 Build a PMD multinetwork data dict where each load's `pd`/`qd` is scaled
-per-phase, per-period using `per_phase_scale_matrix(load, n_periods)`.
+per-phase, per-period using `per_phase_scale_matrix(load, n_periods; hours)`.
+
+`hours` (0-indexed in `0:SCHEDULE_LENGTH-1`) selects which hours-of-day appear
+as periods. Default = the full 24-hour day; pass a shorter vector (e.g.
+`[2, 8, 12, 15, 18, 21]`) to downsample. `n_periods` must match `length(hours)`.
 
 Drop-in replacement for the uniform-scalar `create_multinetwork_data` in the
 single-level `_mn.jl` scripts: each period still has a full deep-copied math
 dict, but loads no longer share a single scalar scale.
 """
 function create_multinetwork_data_profiled(base_math::Dict{String,Any}, n_periods::Int;
+                                            hours::AbstractVector{Int} = 0:SCHEDULE_LENGTH-1,
                                             peak_stress::Float64 = 1.0,
                                             center_at_nominal::Bool = false)
     mn_data = Dict{String,Any}(
@@ -143,12 +241,14 @@ function create_multinetwork_data_profiled(base_math::Dict{String,Any}, n_period
         haskey(base_math, key) && (mn_data[key] = deepcopy(base_math[key]))
     end
 
+    phase_profiles = assign_profiles_by_bus(base_math)
     load_scales = Dict{String,Matrix{Float64}}()
     base_pd     = Dict{String,Vector{Float64}}()
     base_qd     = Dict{String,Vector{Float64}}()
     for (lid, load) in base_math["load"]
         load_scales[lid] = per_phase_scale_matrix(load, n_periods;
-            peak_stress=peak_stress, center_at_nominal=center_at_nominal)
+            hours=hours, peak_stress=peak_stress, center_at_nominal=center_at_nominal,
+            phase_profile=phase_profiles[lid])
         base_pd[lid]     = copy(load["pd"])
         base_qd[lid]     = copy(load["qd"])
     end
@@ -169,20 +269,28 @@ function create_multinetwork_data_profiled(base_math::Dict{String,Any}, n_period
 end
 
 """
-    aggregate_demand_fraction(base_math, n_periods) -> Vector{Float64}
+    aggregate_demand_fraction(base_math, n_periods;
+                               hours=0:SCHEDULE_LENGTH-1, ...) -> Vector{Float64}
 
 System-level aggregate scale at each period, weighted by nameplate per-phase
 pd. Equals `sum_load_phase(pd_p * scale_p,t) / sum_load_phase(pd_p)` — a
 scalar replacement for the old uniform `LOAD_SCALE_FACTORS[t]`, useful for
 labeling per-period plots when individual loads now follow distinct schedules.
+
+`hours` (0-indexed in `0:SCHEDULE_LENGTH-1`) selects which hours-of-day are
+sampled; default = full 24-hour day. `n_periods` must match `length(hours)`.
 """
 function aggregate_demand_fraction(base_math::Dict{String,Any}, n_periods::Int;
+                                   hours::AbstractVector{Int} = 0:SCHEDULE_LENGTH-1,
                                    center_at_nominal::Bool = false)
+    phase_profiles = assign_profiles_by_bus(base_math)
     total_pd = 0.0
     weighted_t = zeros(n_periods)
-    for (_, load) in base_math["load"]
-        scales = per_phase_scale_matrix(load, n_periods; center_at_nominal=center_at_nominal)
-        pd     = load["pd"]
+    for (lid, load) in base_math["load"]
+        scales = per_phase_scale_matrix(load, n_periods;
+            hours=hours, center_at_nominal=center_at_nominal,
+            phase_profile=phase_profiles[lid])
+        pd = load["pd"]
         for p in 1:length(pd)
             total_pd += pd[p]
             for t in 1:n_periods
@@ -196,21 +304,22 @@ end
 """
     profile_assignment_table(base_math) -> Vector of NamedTuples
 
-Diagnostic: returns the (load_name, n_phases, balanced, sched_idx, shift) for
-each load. Handy for sanity-checking which loads got which schedule before
-running an expensive sweep.
+Diagnostic: returns the post-collision-resolution
+`(load_name, bus, n_phases, balanced, phases::Vector{(sched, shift)})` for
+each load. Use it to sanity-check the bus-aware assignment — phases sharing a
+bus should never share a `(sched, shift)` pair.
 """
 function profile_assignment_table(base_math::Dict{String,Any})
+    phase_profiles = assign_profiles_by_bus(base_math)
     rows = NamedTuple[]
-    for (_, load) in base_math["load"]
+    for (lid, load) in base_math["load"]
         name = load["name"]
         pd   = load["pd"]
         n_ph = length(pd)
         is_balanced = n_ph == 1 ||
             all(abs(pd[p] - pd[1]) ≤ 1e-6 * max(abs(pd[1]), 1.0) for p in 1:n_ph)
-        sched_id, shift = assign_load_profile(name)
-        push!(rows, (name=name, n_phases=n_ph, balanced=is_balanced,
-                     sched=sched_id, shift=shift))
+        push!(rows, (name=name, bus=load["load_bus"], n_phases=n_ph,
+                     balanced=is_balanced, phases=phase_profiles[lid]))
     end
-    return sort(rows; by = r -> r.name)
+    return sort(rows; by = r -> (r.bus, r.name))
 end
