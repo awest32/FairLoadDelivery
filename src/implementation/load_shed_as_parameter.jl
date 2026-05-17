@@ -311,7 +311,7 @@ function palma_ratio_minimization(
         set_optimizer_attribute(model, "DualReductions", 0)
         set_optimizer_attribute(model, "MIPGap", 1e-4)   # Relaxed gap (was 1e-6)
         set_optimizer_attribute(model, "NonConvex", 2)   # Allow non-convex QP
-        set_optimizer_attribute(model, "TimeLimit", 60 * 20)  # 20 minutes per iteration
+        set_optimizer_attribute(model, "TimeLimit", 60 * 15)  # 15 minutes per iteration
         set_optimizer_attribute(model, "MIPFocus", 1)    # Focus on finding feasible solutions
         set_optimizer_attribute(model, "NumericFocus", 2) # High numerical care (3 was needed only when bounds were wrong)
         if !silent
@@ -484,6 +484,9 @@ function palma_ratio_minimization(
 
     has_solution = (status in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]) && has_values(model)
     if has_solution
+        if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
+            @warn "[Palma] Solver hit $status with an incumbent — returning suboptimal solution (solve_time=$(round(solve_time, digits=2))s)"
+        end
         Δw_val = value.(Δw)
         weights_new = weights_prev .+ Δw_val
 
@@ -505,6 +508,31 @@ function palma_ratio_minimization(
 
         return (
             weights_new = weights_new,
+            pshed_new = pshed_new_val,
+            delta_w = Δw_val,
+            palma_ratio = actual_palma,
+            status = status,
+            solve_time = solve_time,
+            permutation = a_vals,
+            sorted_values = sorted_val
+        )
+    elseif status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
+        # Hit the limit with no incumbent — return no-progress so the bilevel
+        # can decide whether to continue rather than crashing mid-run.
+        @warn "[Palma] Solver hit $status with NO incumbent — returning no-progress (Δw=0, weights unchanged) (solve_time=$(round(solve_time, digits=2))s)"
+        Δw_val = zeros(m)
+        pshed_new_val = copy(pshed_prev)
+        pserved_new_val = pd .- pshed_new_val
+        actual_palma = palma_ratio(pserved_new_val)
+        # Identity permutation per period as a placeholder
+        a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
+        sorted_val = Float64[]
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            append!(sorted_val, sort(pserved_new_val[offset+1:offset+n]))
+        end
+        return (
+            weights_new = copy(weights_prev),
             pshed_new = pshed_new_val,
             delta_w = Δw_val,
             palma_ratio = actual_palma,

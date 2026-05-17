@@ -100,7 +100,7 @@ const PEAK_STRESS = 1.0
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [1, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
+REP_PERIODS = [2, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).

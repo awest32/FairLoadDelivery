@@ -61,7 +61,7 @@ const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), di
 
 # Representative subset (1-indexed period indices into SELECTED_HOURS) for the
 # busy 3-period plots: trough (h=2), midday plateau (h=12), evening peak (h=18).
-REP_PERIODS = [1, 4, 6]
+REP_PERIODS = [2, 4, 6]
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 solve_min_max = pshed_type == "proportional" ?

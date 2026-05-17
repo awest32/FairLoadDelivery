@@ -54,7 +54,7 @@ const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "min_max"
+const FAIR_FUNC = "palma"
 pshed_type = "absolute"  # "absolute" or "proportional"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
@@ -66,9 +66,9 @@ const N_BERNOULLI_SAMPLES = 2000
 # SELECTED_HOURS downsamples the 24h day to a representative subset. The
 # DiffOpt forward Jacobian costs O((T·N)^2) per bilevel iter, so cutting T
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
-# regimes: trough (2), morning ramp (5,8), midday plateau (12), pre-peak rise
-# (15), evening peak (18), descent (21), late-night start (23).
-const SELECTED_HOURS    = [2, 5, 8, 12, 15, 18, 21, 23]
+# regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
+# (15), evening peak (18), descent (20), late-night start (22).
+const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
 const N_PERIODS         = length(SELECTED_HOURS)
 const PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
 const CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
@@ -77,7 +77,7 @@ const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), 
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [1, 4, 6]   # → hours 2, 12, 18
+REP_PERIODS = [2, 4, 6]   # → hours 2, 12, 18
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -154,6 +154,28 @@ for k in 1:ITERATIONS
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
+        # Solve multinetwork integer MLD first to fix switch topology per period,
+        # then run DiffOpt lower level on the topology-fixed multinetwork. Mirrors
+        # the single-period warm-start at run_validation.jl:220-225.
+        #
+        # Skipped for Palma: with switch topology fixed, pshed becomes near-binary
+        # ({0, pd} per load) and bottom-40%-of-served can sum to zero in some
+        # periods, leaving the Charnes-Cooper constraint σ[t]*bot_sum_t==1 with no
+        # feasible σ — Gurobi then hits TimeLimit with no incumbent.
+        if FAIR_FUNC != "palma"
+            mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
+                peak_time_costs=PEAK_TIME_COSTS)
+            int_term = mld_int_mn["termination_status"]
+            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term"
+            if int_term ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
+                error("integer MLD did not converge (status=$int_term)")
+            end
+            for nw_id in nw_ids_sorted
+                mn_new["nw"][nw_id] = update_network(
+                    mld_int_mn["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
+            end
+        end
+
         dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
             lower_level_soln_mn(mn_new, fair_weights, k)
     catch err
@@ -187,9 +209,12 @@ for k in 1:ITERATIONS
     end
     last_status = status
     @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
-    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL]
+    if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
         @warn "upper-level not converged at iter $k — stopping"
         break
+    end
+    if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level hit $status — using suboptimal incumbent"
     end
 
     # Push T*N weights back into mn_new per period

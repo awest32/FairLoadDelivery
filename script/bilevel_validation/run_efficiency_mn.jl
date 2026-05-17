@@ -59,7 +59,7 @@ const CENTER_AT_NOMINAL = true
 const PERIOD_HOURS      = SELECTED_HOURS
 const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [1, 4, 6]   # → hours 2, 12, 18 (trough/plateau/peak)
+REP_PERIODS = [2, 4, 6]   # → hours 2, 12, 18 (trough/plateau/peak)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver   = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
