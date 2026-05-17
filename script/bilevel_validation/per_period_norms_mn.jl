@@ -24,6 +24,11 @@ include("../../src/implementation/visualization.jl")
 
 # Unified 9pt font defaults.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # set to a case name before include, or provide via ARGS
+FAIR_FUNC = "efficiency"  # set to a fairness function name before include, or provide via ARGS
+pshed_type = "absolute"  # set to "absolute"
+
+ #"bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2"  # set to a JLD2 path before include, or provide via ARGS
 
 # ============================================================
 # RESOLVE INPUT JLD2 PATH
@@ -40,15 +45,15 @@ function _find_latest_jld2(case::String, fair_func::String, pshed_type::String)
                     "bilevel_mn_$(case)_$(fair_func)_$(pshed_type).jld2")
 end
 
-jld_path = if @isdefined(BILEVEL_MN_JLD2)
-    BILEVEL_MN_JLD2
-elseif length(ARGS) == 1
-    ARGS[1]
-elseif length(ARGS) == 3
-    _find_latest_jld2(ARGS[1], ARGS[2], ARGS[3])
-else
-    error("Provide a JLD2 path, or (case fair_func pshed_type), or set BILEVEL_MN_JLD2 before include.")
-end
+# jld_path = if @isdefined(BILEVEL_MN_JLD2)
+#     BILEVEL_MN_JLD2
+# if length(ARGS) == 1
+#     ARGS[1]
+# elseif length(ARGS) == 3
+    jld_path = _find_latest_jld2(CASE, FAIR_FUNC, pshed_type)
+#else
+#    error("Provide a JLD2 path, or (case fair_func pshed_type), or set BILEVEL_MN_JLD2 before include.")
+#end
 isfile(jld_path) || error("JLD2 file not found: $jld_path")
 
 println("Loading bilevel run data → $jld_path")
@@ -98,28 +103,30 @@ ff_marker = get(FAIR_FUNC_MARKERS, FAIR_FUNC, :circle)
 ff_label  = get(FAIR_FUNC_LABELS,  FAIR_FUNC, FAIR_FUNC)
 ff_ls     = get(FAIR_FUNC_LINESTYLES, FAIR_FUNC, :solid)
 
+const FONT_KW = (tickfontsize = 20, guidefontsize = 20,
+                 titlefontsize = 20, legendfontsize = 20)
+
 p_l1 = plot(periods_axis, l1_per_t,
-    marker = ff_marker, lw = 2, color = ff_color, linestyle = ff_ls, legend = false,
-    xlabel = "period", ylabel = "L1 norm of pshed (kW)",
-    title  = "L1 — total shed")
+    marker = :circle, lw = 2, lc = :grey, mc = ff_color, linestyle = :solid, legend = false,
+    xlabel = "hour", ylabel = "L1 norm of pshed (kW)";
+    FONT_KW...)
 p_l2 = plot(periods_axis, l2_per_t,
-    marker = ff_marker, lw = 2, color = ff_color, linestyle = ff_ls, legend = false,
-    xlabel = "period", ylabel = "L2 norm of pshed (kW)",
-    title  = "L2")
+    marker = :circle, lw = 2, lc = :grey, mc = ff_color, linestyle = :solid, legend = false,
+    xlabel = "hour ", ylabel = "L2 norm of pshed (kW)";
+    FONT_KW...)
 p_linf = plot(periods_axis, linf_per_t,
-    marker = ff_marker, lw = 2, color = ff_color, linestyle = ff_ls, legend = false,
-    xlabel = "period", ylabel = "L∞ norm of pshed (kW)",
-    title  = "L∞ — max shed")
+    marker = :circle, lw = 2, lc = :grey, mc = ff_color, linestyle = :solid, legend = false,
+    xlabel = "hour ", ylabel = "L∞ norm of pshed (kW)";
+    FONT_KW...)
 p_cov = plot(periods_axis, cov_per_t,
-    marker = ff_marker, lw = 2, color = ff_color, linestyle = ff_ls, legend = false,
-    xlabel = "period", ylabel = "CoV (stdev/mean)",
-    title  = "Coefficient of variation")
+    marker = :circle, lw = 2, lc = :grey, mc = ff_color, linestyle = :solid, legend = false,
+    xlabel = "hour ", ylabel = "CoV (stdev/mean)";
+    FONT_KW...)
 
 fig = plot(p_l1, p_l2, p_linf, p_cov,
-    layout = (2, 2), size = (1400, 1000),
-    plot_title = "Per-period pshed norms + CoV — $ff_label  ($CASE / $pshed_type)",
-    left_margin = 12Plots.mm, right_margin = 6Plots.mm,
-    top_margin = 8Plots.mm, bottom_margin = 12Plots.mm)
+    layout = (1, 4), size = (1800, 600),
+    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
+    top_margin = 4Plots.mm, bottom_margin = 18Plots.mm)
 display(fig)
 out_path = joinpath(save_dir, "per_period_norms_cov_$(CASE)_$(FAIR_FUNC)_$(pshed_type).svg")
 savefig(fig, out_path)

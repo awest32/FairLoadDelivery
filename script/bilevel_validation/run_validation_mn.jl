@@ -46,12 +46,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-#const CASE = "motivation_c_good4integer"
-case = "more_meshed_6bus" #"13_bus"
+#const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+const CASE = "motivation_c_good4integer"
+case = "13_bus"
 
-const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-#const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+#const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
+const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 LS_PERCENT = 0.8
 const ITERATIONS = 20
 const FAIR_FUNC = "palma"
@@ -373,8 +373,13 @@ using JLD2
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
     pshed_matrix         = pshed_matrix,
+    pd_ref_matrix        = pd_ref_matrix,
     load_labels          = load_labels,
     period_labels        = period_labels,
+    bus_labels           = bus_labels,
+    bus_pd_matrix        = bus_pd_matrix,
+    bus_pshed_matrix     = bus_pshed_matrix,
+    bus_status_matrix    = bus_status_matrix,
     LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
     PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
     CASE                 = CASE,

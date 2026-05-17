@@ -15571,732 +15571,879 @@
 ┌ Debug: message: repl/getvariables done
 │   time = 17789916744
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
-   and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: [Palma] Jacobian conditioning: max=21.53, min_nz=3.549e-10, ratio=6.068e10
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:273
-┌ Info: [Palma] Starting point feasible: all pshed_prev ∈ [ε, pd] (±1.0e-5)
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:300
-┌ Info: [Palma] Per-period sort: 8 period(s), 9 loads/period, 72 weights, 648 binaries
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:339
-┌ Info: [Palma] Solver status: TIME_LIMIT (solve_time=900.25s)
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:479
-┌ Debug: message: repl/getvariables
-│   time = 17789618110
-└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
-┌ Debug: message: repl/getvariables done
-│   time = 17789618112
-└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619291
+│   time = 17789935389
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619291
+│   time = 17789935389
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619317
+│   time = 17789935389
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619317
+│   time = 17789935389
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619320
+│   time = 17789935681
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619320
+│   time = 17789935681
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619322
+│   time = 17789935689
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619322
+│   time = 17789935689
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619326
+│   time = 17789935703
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619326
+│   time = 17789935703
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619353
+│   time = 17789935705
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619353
+│   time = 17789935705
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619365
+│   time = 17789935713
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619365
+│   time = 17789935713
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619373
+│   time = 17789935733
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619373
+│   time = 17789935733
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619378
+│   time = 17789935741
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619378
+│   time = 17789935741
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619383
+│   time = 17789935745
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619383
+│   time = 17789935745
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619387
+│   time = 17789935762
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619387
+│   time = 17789935762
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619395
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619395
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619397
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619397
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619398
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619398
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619411
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619411
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619417
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619417
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619418
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619418
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619421
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619421
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619429
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619429
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619442
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619442
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619451
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619451
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619458
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619458
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619464
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619464
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619469
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619469
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619473
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619473
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619477
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619477
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619480
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619480
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619488
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619488
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619642
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619642
+│   time = 17789935765
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789619670
+│   time = 17789935766
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789619670
+│   time = 17789935766
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/isModuleLoaded
-│   time = 17789622244
+│   time = 17789935766
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/isModuleLoaded done
-│   time = 17789622244
+│   time = 17789935766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935780
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935780
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935789
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935789
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935808
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935808
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
 ┌ Debug: message: repl/runcode
-│   time = 17789622695
+│   time = 17789935892
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/runcode done
-│   time = 17789622695
+│   time = 17789935892
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
-┌ Info: Logging to results/2026-05-16/bilevel_validation_mn/case6_unbalanced_switch_more_meshed_good4integer/palma_absolute\run_validation_mn.log
+┌ Info: Logging to results/2026-05-17/bilevel_validation_mn/motivation_c_good4integer/palma_absolute\run_validation_mn.log
 └ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:93
-┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'motivation_c_good4integer.dss'
 └ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
-┌ Info: Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+┌ Info: Command 'calcv' on line 155 in 'motivation_c_good4integer.dss' is not supported, skipping.
 └ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
-┌ Info: Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+┌ Info: Command 'solve' on line 173 in 'motivation_c_good4integer.dss' is not supported, skipping.
 └ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
-┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
-┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
-└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
-┌ Info: N_PERIODS=8, hours=[4, 6, 8, 12, 15, 18, 20, 22], agg_scales=[0.8387202438113252, 0.9676482934843788, 1.0757845717168208, 1.1501794143778719, 1.1118984910387417, 1.0722361959025872, 0.9842055523687825, 0.8989053063178417], peak_stress=1.0, λ=[5.0, 5.0, 5.01, 6.4, 17.17, 30.0, 23.15, 11.95]
+┌ Info: Command 'show' on line 177 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 178 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 179 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 180 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 181 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'addbusmarker' on line 186 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'plot' on line 187 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'plot' on line 188 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'clearbusmarkers' on line 189 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: N_PERIODS=8, hours=[4, 6, 8, 12, 15, 18, 20, 22], agg_scales=[0.8191110004975437, 0.96617001495346, 1.0079954441340762, 1.0267612463030686, 1.0790400617587135, 1.24949212222518, 1.1550925412309383, 0.9581321466610027], peak_stress=1.0, λ=[5.0, 5.0, 5.01, 6.4, 17.17, 30.0, 23.15, 11.95]
 └ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:120
-┌ Info: Built multinetwork with 8 periods, 9 loads per period (profiled)
+┌ Info: Built multinetwork with 8 periods, 16 loads per period (profiled)
 └ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:131
 ┌ Warning: Assignment to `n_loads` in soft scope is ambiguous because a global variable by the same name exists: `n_loads` will be treated as a new local. Disambiguate by using `local n_loads` to suppress this warning or `global n_loads` to assign to the existing global variable.
 └ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:185
 ┌ Info: Iteration 1: Solving multiperiod lower-level MLD with initial parameter values from ref
 └ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:241
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: [Palma] Jacobian conditioning: max=18.4, min_nz=9.708e-13, ratio=1.895e13
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:273
-┌ Info: [Palma] Starting point feasible: all pshed_prev ∈ [ε, pd] (±1.0e-5)
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:300
-┌ Info: [Palma] Per-period sort: 8 period(s), 9 loads/period, 72 weights, 648 binaries
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:339
-┌ Info: [Palma] Solver status: OPTIMAL (solve_time=49.43s)
-└ @ Main c:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:479
-┌ Info: [palma/absolute] iter 1 upper-level status = OPTIMAL
-└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:211
-┌ Info: Iteration 2: Solving multiperiod lower-level MLD with 72 per-period weights
-└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:243
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
-┌ Info: Inertia correction needed. 
-│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
-│             and negative values for the Jacobian of the constraints.
-└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Warning: [palma/absolute] iter 1 lower-level failed (ErrorException("Trying to compute the forward differentiation on a model with termination status ITERATION_LIMIT")) — stopping bilevel, falling back to last converged weights
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:182
+┌ Debug: pm model build time: 0.3470001220703125
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 210.9079999923706
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: relaxed multi-period termination: ITERATION_LIMIT (converged=false)
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:250
+┌ Warning: [palma/absolute] Step 3 final relaxed multi-period MLD did not converge (status ITERATION_LIMIT). Skipping Steps 4–6 (rounding, plots, JLD2 save) to avoid building outputs on a non-converged relaxation.
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:394
+┌ Debug: message: repl/getvariables
+│   time = 17789940164
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17789940167
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259313
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259313
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259474
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259474
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259486
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259486
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259488
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259488
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259573
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259573
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259575
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259575
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259645
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259645
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259660
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259660
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259663
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259663
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260245
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260245
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260432
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260432
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260598
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260598
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260673
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260673
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260675
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260675
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17790261311
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17790261311
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17790261317
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17790261318
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261471
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261787
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261787
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261797
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261797
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261801
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261803
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261803
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261837
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261837
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261866
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261866
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261871
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261871
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261881
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261881
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261891
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261891
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261895
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261895
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261897
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261897
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261906
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261906
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261909
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261909
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261914
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261914
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261924
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261924
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261944
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261944
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261956
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261956
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261974
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261974
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261984
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261984
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261991
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261991
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262019
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262019
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262020
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262020
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262047
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262047
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262071
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262071
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262075
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262075
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262079
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262079
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262083
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262083
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262088
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262088
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262089
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262089
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262097
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262097
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262109
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262109
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262121
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262121
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262147
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262147
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262185
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262185
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262223
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262223
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262235
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262235
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17790262362
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17790262362
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17790262364
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17790262366
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
 ┌ Info: Inertia correction needed. 
 │             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
 │             and negative values for the Jacobian of the constraints.
@@ -22126,4 +22273,876 @@
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
 ┌ Debug: message: repl/getvariables done
 │   time = 17789916744
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935681
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935681
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935689
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935689
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935703
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935703
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935705
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935705
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935713
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935713
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935733
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935733
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935741
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935741
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935745
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935745
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935762
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935762
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935765
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935780
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935780
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935789
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935789
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17789935808
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17789935808
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17789935892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17789935892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Info: Logging to results/2026-05-17/bilevel_validation_mn/motivation_c_good4integer/palma_absolute\run_validation_mn.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:93
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'motivation_c_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcv' on line 155 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 173 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 177 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 178 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 179 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 180 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'show' on line 181 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'addbusmarker' on line 186 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'plot' on line 187 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'plot' on line 188 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'clearbusmarkers' on line 189 in 'motivation_c_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: N_PERIODS=8, hours=[4, 6, 8, 12, 15, 18, 20, 22], agg_scales=[0.8191110004975437, 0.96617001495346, 1.0079954441340762, 1.0267612463030686, 1.0790400617587135, 1.24949212222518, 1.1550925412309383, 0.9581321466610027], peak_stress=1.0, λ=[5.0, 5.0, 5.01, 6.4, 17.17, 30.0, 23.15, 11.95]
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:120
+┌ Info: Built multinetwork with 8 periods, 16 loads per period (profiled)
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:131
+┌ Warning: Assignment to `n_loads` in soft scope is ambiguous because a global variable by the same name exists: `n_loads` will be treated as a new local. Disambiguate by using `local n_loads` to suppress this warning or `global n_loads` to assign to the existing global variable.
+└ @ nothing c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:185
+┌ Info: Iteration 1: Solving multiperiod lower-level MLD with initial parameter values from ref
+└ @ FairLoadDelivery c:\Users\awest\github\FairLoadDelivery\src\implementation\lower_level_mld.jl:241
+┌ Warning: [palma/absolute] iter 1 lower-level failed (ErrorException("Trying to compute the forward differentiation on a model with termination status ITERATION_LIMIT")) — stopping bilevel, falling back to last converged weights
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:182
+┌ Debug: pm model build time: 0.3470001220703125
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 210.9079999923706
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: relaxed multi-period termination: ITERATION_LIMIT (converged=false)
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:250
+┌ Warning: [palma/absolute] Step 3 final relaxed multi-period MLD did not converge (status ITERATION_LIMIT). Skipping Steps 4–6 (rounding, plots, JLD2 save) to avoid building outputs on a non-converged relaxation.
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:394
+┌ Debug: message: repl/getvariables
+│   time = 17789940164
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17789940167
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259313
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259313
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259474
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259474
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259486
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259486
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259488
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259488
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259573
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259573
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259575
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259575
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259645
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259645
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259660
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259660
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790259663
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790259663
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260245
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260245
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260432
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260432
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260598
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260598
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260673
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260673
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260675
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260675
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790260946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790260946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17790261311
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17790261311
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17790261317
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17790261318
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261470
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261471
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261787
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261787
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261790
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261791
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261793
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261794
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261797
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261797
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261798
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261800
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261801
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261802
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261803
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261803
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261837
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261837
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261866
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261866
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261871
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261871
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261881
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261881
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261891
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261891
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261895
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261895
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261897
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261897
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261906
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261906
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261909
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261909
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261914
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261914
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261924
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261924
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261944
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261944
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261946
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261956
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261956
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261974
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261974
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261984
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261984
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790261991
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790261991
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262019
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262019
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262020
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262020
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262047
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262047
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262071
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262071
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262075
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262075
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262079
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262079
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262083
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262083
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262088
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262088
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262089
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262089
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262097
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262097
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262109
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262109
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262121
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262121
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262147
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262147
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262185
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262185
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262223
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262223
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17790262235
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17790262235
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/runcode
+│   time = 17790262362
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/runcode done
+│   time = 17790262362
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193
+┌ Debug: message: repl/getvariables
+│   time = 17790262364
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:177
+┌ Debug: message: repl/getvariables done
+│   time = 17790262366
 └ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.209.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:193

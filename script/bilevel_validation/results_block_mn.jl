@@ -13,6 +13,7 @@
 """
 
 using StatsPlots
+using FairLoadDelivery
 
 # Unified 9pt font defaults for every figure produced here.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
@@ -57,12 +58,14 @@ bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in all_bus_ids]
 bus_col = Dict(bid => k for (k, bid) in enumerate(all_bus_ids))
 load_to_bus_col = [bus_col[math_ref["load"][lid]["load_bus"]] for lid in ref_load_ids]
 
+pd_ref_matrix    = zeros(N_PERIODS, length(ref_load_ids))
 bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
 bus_pd_matrix    = zeros(N_PERIODS, length(all_bus_ids))
 for (t, nw_id) in enumerate(nw_ids_sorted)
     nw_data = mn_new["nw"][nw_id]
     for (j, lid) in enumerate(ref_load_ids)
         pd_total = sum(nw_data["load"][lid]["pd"])
+        pd_ref_matrix[t, j] = pd_total
         bus_pd_matrix[t, load_to_bus_col[j]] += pd_total
         v = pshed_matrix[t, j]
         bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(v) ? 0.0 : v
@@ -79,7 +82,7 @@ end
 p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
     xlabel = "Bus",
     ylabel = "Period",
-    color  = :grays,
+    color  = cgrad(["#2A6F6B", "#E5EFEA"]),  # muted teal (shed) → pale sage (served)
     clims  = (0.0, 1.0),
     xrotation = 45,
     yticks = (1:N_PERIODS, period_labels),
@@ -110,7 +113,7 @@ if !isempty(rep_valid)
         linecolor = :black,
     )
     display(p_grouped)
-    savefig(p_grouped, joinpath(save_dir, "loadshed_grouped_$(pshed_type)_$case.png"))
+    savefig(p_grouped, joinpath(save_dir, "loadshed_grouped_$(pshed_type)_$case.svg"))
 end
 
 valid_mask = .!isnan.(pshed_matrix)
