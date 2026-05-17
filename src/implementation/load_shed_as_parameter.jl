@@ -864,11 +864,16 @@ end
         dpshed_dw::Matrix{Float64},
         pshed_prev::Vector{Float64},
         weights_prev::Vector{Float64},
-        pd::Vector{Float64}
-    ) -> (pshed_new, weights_new, σ)
+        pd::Vector{Float64};
+        use_weak_cc::Bool = false,
+        ...
+    ) -> (pshed_new, weights_new, status)
 
 Drop-in replacement for lin_palma_w_grad_input from palma_relaxation.jl.
-Returns the same tuple format for compatibility.
+Defaults to the formal-CC MILP formulation
+(`palma_ratio_minimization_formal_cc`). Pass `use_weak_cc=true` to fall back to
+the original weak-CC MIQCP (NonConvex=2) — useful for A/B comparison and as a
+safety valve if the formal CC misbehaves on a particular instance.
 """
 function lin_palma_reformulated(
     dpshed_dw::Matrix{Float64},
@@ -879,19 +884,33 @@ function lin_palma_reformulated(
     weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],
     n_loads::Int = 0,
-    weight_budget::Float64 = Inf
+    weight_budget::Float64 = Inf,
+    use_weak_cc::Bool = false,
 )
-    result = palma_ratio_minimization(
-        dpshed_dw, pshed_prev, weights_prev, pd;
-        trust_radius = 0.5,
-        w_bounds = (1.0, 10.0),
-        relax_binary = false,  # Binary required; McCormick relaxation needs testing
-        critical_ids = critical_ids,
-        weight_ids = weight_ids,
-        peak_time_costs = peak_time_costs,
-        n_loads = n_loads,
-        weight_budget = weight_budget
-    )
+    result = if use_weak_cc
+        palma_ratio_minimization(
+            dpshed_dw, pshed_prev, weights_prev, pd;
+            trust_radius    = 0.5,
+            w_bounds        = (1.0, 10.0),
+            relax_binary    = false,
+            critical_ids    = critical_ids,
+            weight_ids      = weight_ids,
+            peak_time_costs = peak_time_costs,
+            n_loads         = n_loads,
+            weight_budget   = weight_budget,
+        )
+    else
+        palma_ratio_minimization_formal_cc(
+            dpshed_dw, pshed_prev, weights_prev, pd;
+            trust_radius    = 0.5,
+            w_bounds        = (1.0, 10.0),
+            critical_ids    = critical_ids,
+            weight_ids      = weight_ids,
+            peak_time_costs = peak_time_costs,
+            n_loads         = n_loads,
+            weight_budget   = weight_budget,
+        )
+    end
 
     # Compute σ from result (for compatibility). σ is the Charnes-Cooper scaling
     # 1/bot_sum, where bot_sum is now the bottom-40% of SERVED (pd − pshed).
