@@ -547,6 +547,315 @@ function palma_ratio_minimization(
 end
 
 #=============================================================================
+ Formal Charnes-Cooper variant (MILP, no bilinearity)
+=============================================================================#
+
+"""
+    palma_ratio_minimization_formal_cc(
+        dpshed_dw, pshed_prev, weights_prev, pd; ...
+    )
+
+Formal-CC reformulation of [`palma_ratio_minimization`](@ref). The weak-CC
+version multiplies σ in at only two places, leaving `σ·u` bilinear terms that
+force Gurobi `NonConvex=2`. The formal CC rescales **every** original decision
+variable by σ (`z = σ·y`) — the resulting model is a pure MILP:
+
+  * `Δw → Δw_z = σ_t · Δw`
+  * `u   → u_z = σ_t · u  =  a · pserved_z` (McCormick on binary × bounded cont.)
+  * `pserved_new → pserved_z = σ_t · pserved_new` (linear expression in Δw_z and σ)
+  * `σ_t · bot_sum = 1`        → `Σ_{i∈bot40,j} u_z[t][i,j] = 1` (linear)
+  * `min σ_t · top_sum`        → `min Σ_{i∈top10,j} u_z[t][i,j]` (linear)
+  * every RHS constant `g` becomes `g · σ_t` under rescaling (trust region,
+    weight bounds, weight budget, pshed bounds).
+
+Requires the Jacobian to be **block-diagonal in periods**: `J[j,k] = 0` whenever
+`t(j) ≠ t(k)`. The lower-level multinetwork MLD is fully separable across
+periods (see `build_mn_mc_mld_shedding_implicit_diff`), so this holds by
+construction; a runtime guard logs a warning if off-block magnitudes exceed
+`block_tol`.
+
+Recovery of original-space variables:
+    Δw[k]       = Δw_z[k] / σ_{t(k)}
+    pshed_new   = pshed_prev + J · Δw
+    weights_new = weights_prev + Δw
+
+σ-bounds: McCormick on `a · pserved_z` needs a finite upper bound on
+`pserved_z`. We bound `σ_t ∈ [σ_min, σ_max]` where `σ_max` defaults to
+`10 / bot40_sum(pd − pshed_prev)_t` (~10× the previous-iter σ) so the big-M is
+data-driven and tight rather than artificial.
+"""
+function palma_ratio_minimization_formal_cc(
+    dpshed_dw::Matrix{Float64},
+    pshed_prev::Vector{Float64},
+    weights_prev::Vector{Float64},
+    pd::Vector{Float64};
+    trust_radius::Float64 = 0.5,
+    w_bounds::Tuple{Float64, Float64} = (1.0, 10.0),
+    solver = get_default_solver(),
+    silent::Bool = true,
+    critical_ids::Vector{Int} = Int[],
+    weight_ids::Vector{Int} = Int[],
+    peak_time_costs::Vector{Float64} = Float64[],
+    n_loads::Int = 0,
+    weight_budget::Float64 = Inf,
+    sigma_max_scale::Float64 = 10.0,     # σ_max_t = sigma_max_scale / bot40_sum_prev_t
+    sigma_min::Float64 = 1e-8,
+    block_tol::Float64 = 1e-6,           # warning threshold on off-block Jacobian entries
+)
+    m = length(pshed_prev)
+    w_min, w_max = w_bounds
+    ε = 1e-8
+
+    n_per_period = n_loads > 0 ? n_loads : m
+    @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
+    n_periods = m ÷ n_per_period
+    n = n_per_period
+
+    # Same input preconditioning as the weak-CC version --------------------------
+    for j in 1:m
+        lid_idx = ((j - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
+        if load_id in critical_ids
+            pshed_prev[j] = max(pshed_prev[j], 0.0)
+        end
+    end
+
+    @assert length(weights_prev) == m
+    @assert size(dpshed_dw) == (m, m)
+    @assert length(pd) == m
+    @assert all(pd .>= 0)
+
+    feas_tol = 1e-5
+    for j in 1:m
+        if pshed_prev[j] > pd[j] && (pshed_prev[j] - pd[j]) <= feas_tol
+            pshed_prev[j] = pd[j]
+        end
+        if pshed_prev[j] < ε && (ε - pshed_prev[j]) <= feas_tol
+            pshed_prev[j] = ε
+        end
+    end
+
+    # Block-diagonal Jacobian guard ---------------------------------------------
+    n_off_block_diag = 0
+    max_off_block_diag = 0.0
+    for j in 1:m, k in 1:m
+        tj = ((j - 1) ÷ n) + 1
+        tk = ((k - 1) ÷ n) + 1
+        if tj != tk
+            v = abs(dpshed_dw[j, k])
+            v > max_off_block_diag && (max_off_block_diag = v)
+            v > block_tol && (n_off_block_diag += 1)
+        end
+    end
+    if n_off_block_diag > 0
+        @warn "[Palma formal CC] Jacobian off-block-diagonal entries exceed $block_tol: $n_off_block_diag entries, max=$max_off_block_diag. Formal CC assumes block-diagonality — solution may be inexact."
+    else
+        @info "[Palma formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
+    end
+
+    # Per-period σ bounds derived from previous-iter bot_sum --------------------
+    top_10_idx, bottom_40_idx = compute_palma_indices(n)
+    σ_max = zeros(n_periods)
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        pserved_prev_t = sort([max(pd[offset + i] - pshed_prev[offset + i], 0.0) for i in 1:n])
+        bot_sum_prev = sum(pserved_prev_t[i] for i in bottom_40_idx)
+        # Default: 10x previous σ; if bot_sum_prev is degenerate, fall back to a safe ceiling.
+        σ_max[t] = bot_sum_prev > 1e-6 ? sigma_max_scale / bot_sum_prev : 1e6
+    end
+
+    λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
+    @assert length(λ) == n_periods
+
+    @info "[Palma formal CC] T=$n_periods, N=$n, m=$m, σ_max range=[$(round(minimum(σ_max), sigdigits=3)), $(round(maximum(σ_max), sigdigits=3))]"
+
+    # Build the MILP ------------------------------------------------------------
+    model = JuMP.Model(solver)
+    silent && set_silent(model)
+
+    if GUROBI_AVAILABLE && solver == Gurobi.Optimizer
+        set_optimizer_attribute(model, "MIPGap",       1e-4)
+        set_optimizer_attribute(model, "TimeLimit",    60 * 15)
+        set_optimizer_attribute(model, "MIPFocus",     1)
+        set_optimizer_attribute(model, "NumericFocus", 2)
+        # NB: NonConvex=2 NOT needed — formal CC is a MILP.
+        if !silent
+            set_optimizer_attribute(model, "OutputFlag", 1)
+        end
+    end
+
+    # σ_t ∈ [σ_min, σ_max[t]]
+    @variable(model, σ[t = 1:n_periods])
+    for t in 1:n_periods
+        JuMP.set_lower_bound(σ[t], sigma_min)
+        JuMP.set_upper_bound(σ[t], σ_max[t])
+    end
+
+    # Binary permutation matrices — unchanged from weak CC
+    a = Any[]
+    for t in 1:n_periods
+        push!(a, @variable(model, [1:n, 1:n], Bin, base_name = "a_$t"))
+    end
+
+    # Rescaled weight changes
+    @variable(model, Δw_z[1:m])
+
+    # Rescaled pserved (linear expression). By block-diagonality, only k with
+    # t(k) == t(j) contributes — we still sum over all k since J[j,k] ≈ 0 off-block.
+    @expression(model, pserved_z[j = 1:m],
+        σ[((j - 1) ÷ n) + 1] * (pd[j] - pshed_prev[j])
+        - sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
+    )
+
+    # Rescaled u: u_z[t][i,j] = a[t][i,j] · pserved_z[offset+j] via McCormick
+    u_z = Any[]
+    for t in 1:n_periods
+        push!(u_z, @variable(model, [1:n, 1:n], lower_bound = 0, base_name = "u_z_$t"))
+    end
+
+    for t in 1:n_periods
+        offset = (t - 1) * n
+        # Doubly stochastic on the binary a (unchanged)
+        for i in 1:n
+            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)
+        end
+        for j in 1:n
+            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
+        end
+
+        # McCormick for u_z = a · pserved_z with bound pserved_z ≤ pd[gj] · σ_max[t]
+        for i in 1:n, j in 1:n
+            gj = offset + j
+            P_max = pd[gj] * σ_max[t]
+            @constraint(model, u_z[t][i, j] >= pserved_z[gj] + a[t][i, j] * P_max - P_max)
+            @constraint(model, u_z[t][i, j] <= a[t][i, j] * P_max)
+            @constraint(model, u_z[t][i, j] <= pserved_z[gj])
+        end
+
+        # Ascending sort on rescaled sorted values (ordering preserved by σ > 0)
+        sorted_z_t = @expression(model, [i = 1:n], sum(u_z[t][i, j] for j in 1:n))
+        for k in 1:(n - 1)
+            @constraint(model, sorted_z_t[k] <= sorted_z_t[k + 1])
+        end
+
+        # Formal-CC denominator normalization (LINEAR): Σ_{i∈bot40,j} u_z[t][i,j] = 1
+        @constraint(model, sum(u_z[t][i, j] for i in bottom_40_idx, j in 1:n) == 1)
+    end
+
+    # Rescaled trust region
+    for j in 1:m
+        t = ((j - 1) ÷ n) + 1
+        @constraint(model, Δw_z[j] >= -trust_radius * σ[t])
+        @constraint(model, Δw_z[j] <=  trust_radius * σ[t])
+    end
+
+    # Rescaled weight bounds
+    for j in 1:m
+        lid_idx = ((j - 1) % n_per_period) + 1
+        load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
+        t = ((j - 1) ÷ n) + 1
+        if load_id in critical_ids
+            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= 100.0 * σ[t])
+        else
+            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] >= w_min * σ[t])
+            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= w_max * σ[t])
+        end
+    end
+
+    # Rescaled per-period weight budget
+    if isfinite(weight_budget)
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            sum_prev = sum(weights_prev[offset + i] for i in 1:n)
+            @constraint(model,
+                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ[t])
+        end
+    end
+
+    # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇔ pserved ∈ [0, pd-ε] ⇒
+    #     pserved_z ∈ [0, (pd-ε)·σ_t]
+    for j in 1:m
+        t = ((j - 1) ÷ n) + 1
+        @constraint(model, pserved_z[j] >= 0)
+        @constraint(model, pserved_z[j] <= (pd[j] - ε) * σ[t])
+    end
+
+    # Linear objective: min Σ_t λ_t · Σ_{i∈top10,j} u_z[t][i,j]
+    @objective(model, Min,
+        sum(λ[t] * sum(u_z[t][i, j] for i in top_10_idx, j in 1:n)
+            for t in 1:n_periods))
+
+    solve_time = @elapsed optimize!(model)
+    status = termination_status(model)
+    @info "[Palma formal CC] Solver status: $status (solve_time=$(round(solve_time, digits=2))s)"
+
+    has_solution = (status in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL,
+                               MOI.ALMOST_LOCALLY_SOLVED, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]) && has_values(model)
+
+    if has_solution
+        if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
+            @warn "[Palma formal CC] Solver hit $status with an incumbent — returning suboptimal solution"
+        end
+
+        σ_val   = value.(σ)
+        Δw_z_val = value.(Δw_z)
+        Δw_val   = similar(Δw_z_val)
+        for k in 1:m
+            t = ((k - 1) ÷ n) + 1
+            Δw_val[k] = Δw_z_val[k] / σ_val[t]
+        end
+
+        weights_new     = weights_prev .+ Δw_val
+        pshed_new_val   = pshed_prev   .+ dpshed_dw * Δw_val
+        pserved_new_val = pd           .- pshed_new_val
+
+        a_vals = [value.(a[t]) for t in 1:n_periods]
+        sorted_val = Float64[]
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            append!(sorted_val, a_vals[t] * pserved_new_val[offset+1:offset+n])
+        end
+
+        actual_palma = palma_ratio(pserved_new_val)
+
+        return (
+            weights_new   = weights_new,
+            pshed_new     = pshed_new_val,
+            delta_w       = Δw_val,
+            palma_ratio   = actual_palma,
+            status        = status,
+            solve_time    = solve_time,
+            permutation   = a_vals,
+            sorted_values = sorted_val,
+        )
+    elseif status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
+        @warn "[Palma formal CC] Solver hit $status with NO incumbent — returning no-progress"
+        Δw_val = zeros(m)
+        pshed_new_val = copy(pshed_prev)
+        pserved_new_val = pd .- pshed_new_val
+        actual_palma = palma_ratio(pserved_new_val)
+        a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
+        sorted_val = Float64[]
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            append!(sorted_val, sort(pserved_new_val[offset+1:offset+n]))
+        end
+        return (
+            weights_new   = copy(weights_prev),
+            pshed_new     = pshed_new_val,
+            delta_w       = Δw_val,
+            palma_ratio   = actual_palma,
+            status        = status,
+            solve_time    = solve_time,
+            permutation   = a_vals,
+            sorted_values = sorted_val,
+        )
+    else
+        error("[Palma formal CC] Solver failed with status: $status (solve_time=$(round(solve_time, digits=2))s)")
+    end
+end
+
+#=============================================================================
  Simplified Interface (matches existing lin_palma_w_grad_input signature)
 =============================================================================#
 
