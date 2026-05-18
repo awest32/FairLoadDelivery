@@ -1,26 +1,25 @@
 """
-    Multiperiod Bilevel FLDP Validation Runner — motivation_c / formal-CC indicator variant
-    ======================================================================================
+    Multiperiod Bilevel FLDP Validation Runner — motivation_c (defense final)
+    =========================================================================
 
-    Sibling of run_validation_mn.jl, tailored for the 13-bus motivation_c case
-    with the formal-CC Palma upper-level using indicator constraints (commit
-    874dba3 replaced σ_max + McCormick with native JuMP/Gurobi indicators, so σ
-    has no upper bound — matches formal CC math).
+    Sibling of run_validation_mn.jl, tailored for the 13-bus motivation_c case.
+    Supports both Palma (weak-CC MIQCP or formal-CC indicator MILP) and min_max
+    upper-level objectives; toggle FAIR_FUNC via environment variable.
 
-    Purpose: validate that the indicator-constraint formal CC works end-to-end
-    on the dissertation case at T=8, where the prior McCormick formulation
-    stalled at do-nothing. Earlier weak-CC run (USE_WEAK_CC=true) is preserved
-    in results/.../motivation_c_good4integer_weakcc/ for side-by-side comparison.
+    T=8. T·N²=2048 binaries for the Palma upper-level. Toggle USE_WEAK_CC to
+    pick between weak-CC bilinear MIQCP and formal-CC indicator MILP.
 
-    T=8 here. T·N²=2048 binaries. Toggle USE_WEAK_CC at the top to flip back
-    to the bilinear MIQCP variant.
-
-    Expected wall time: ~100-150 min (20 iters × 5-min Gurobi TimeLimit per iter
-    via the time_limit=60*5 kwarg below). Indicator-constraint formal CC may
-    finish well under TimeLimit on most iters, since the LP relaxation is tight.
+    Expected wall time:
+      - min_max: <1 hr (Ipopt upper-level QP, integer warm-start each iter)
+      - palma: ~3.5 hr (20 iters × 10-min Gurobi TimeLimit per upper-level
+        solve; prior weak-CC runs hit TimeLimit on every iter)
 
     Usage:
+        # default = palma
         julia --project=. script/bilevel_validation/run_validation_mn_motivation_c.jl
+
+        # min_max:
+        \$env:FAIR_FUNC = "min_max"; julia --project=. script/bilevel_validation/run_validation_mn_motivation_c.jl
 """
 
 using Revise
@@ -56,7 +55,10 @@ case = "13_bus"
 const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 const LS_PERCENT = 0.8
 const ITERATIONS = 20
-const FAIR_FUNC = "palma"
+# Allow FAIR_FUNC to be overridden by env var so the same script can run both
+# "palma" and "min_max" defense cases without re-editing the source.
+const FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")
+@assert FAIR_FUNC in ("palma", "min_max") "FAIR_FUNC=\"$FAIR_FUNC\" not supported here; use \"palma\" or \"min_max\""
 pshed_type = "absolute"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
@@ -64,8 +66,11 @@ const N_BERNOULLI_SAMPLES = 2000
 # T=8 — full subsample matching run_validation_mn.jl's default.
 # Hours span trough / morning ramp / midday plateau / pre-peak / evening peak / descent.
 const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
-# Toggle formulation: false = formal CC with indicator constraints (commit 874dba3).
-const USE_WEAK_CC       = false
+# Defense final: weak-CC bilinear MIQCP (matches prior reference run).
+const USE_WEAK_CC       = true
+# Per-iter Gurobi TimeLimit for Palma upper-level (seconds). 10 min × 20 iters
+# ≈ 3.5 hr worst case; prior 5-min run shed all sheddable loads at TimeLimit.
+const PALMA_TIME_LIMIT  = 60 * 10
 const N_PERIODS         = length(SELECTED_HOURS)
 const PEAK_STRESS       = 1.0
 const CENTER_AT_NOMINAL = true
@@ -82,14 +87,16 @@ gurobi_solver = Gurobi.Optimizer
 
 # Tag the save dir so this run lives separately from formal-CC runs of the
 # same case (avoids clobbering the JLD2 in any future motivation_c formal-CC
-# experiment).
+# experiment). For min_max, USE_WEAK_CC is irrelevant (no Palma reformulation),
+# but we still tag the dir with "weakcc" so a paired weak-CC palma/min_max
+# defense run lives in the same parent dir.
 const VARIANT_TAG = USE_WEAK_CC ? "weakcc" : "formalcc"
 save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_$(VARIANT_TAG)/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
 global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
-@info "Logging to $log_file ($VARIANT_TAG Palma variant)"
+@info "Logging to $log_file (FAIR_FUNC=$FAIR_FUNC, VARIANT_TAG=$VARIANT_TAG, PALMA_TIME_LIMIT=$PALMA_TIME_LIMIT)"
 
 # ============================================================
 # STEP 1: NETWORK + MULTINETWORK SETUP
@@ -112,7 +119,7 @@ validation_results = Dict{String,Any}(
     "peak_stress"      => PEAK_STRESS,
     "peak_time_costs"  => PEAK_TIME_COSTS,
     "pshed_type"       => pshed_type,
-    "palma_variant"    => USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator",
+    "palma_variant"    => FAIR_FUNC == "palma" ? (USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator") : "n/a",
 )
 
 @info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, agg_scales=$LOAD_SCALE_FACTORS, peak_stress=$PEAK_STRESS, λ=$PEAK_TIME_COSTS"
@@ -129,9 +136,9 @@ n_loads_per_period = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
 @info "Built multinetwork with $N_PERIODS periods, $n_loads_per_period loads per period (profiled)"
 
 # ============================================================
-# STEP 2: BILEVEL ITERATIONS (multi-period, weak-CC Palma)
+# STEP 2: BILEVEL ITERATIONS (multi-period)
 # ============================================================
-print_validation_header("Step 2: Bilevel Iterations ($FAIR_FUNC weak-CC, $pshed_type, $ITERATIONS iters)")
+print_validation_header("Step 2: Bilevel Iterations ($FAIR_FUNC, $pshed_type, $ITERATIONS iters)")
 
 mn_new = deepcopy(mn_data)
 
@@ -151,7 +158,24 @@ for k in 1:ITERATIONS
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
-        # Palma path: skip integer warm-start (per [[project_palma_skip_integer_warmstart]])
+        # Mirror run_validation_mn.jl: integer warm-start for non-Palma objectives
+        # to fix switch topology per period, then DiffOpt lower level. Skipped
+        # for Palma per [[project_palma_skip_integer_warmstart]] — topology-fix
+        # collapses pshed to {0,pd} and breaks Charnes-Cooper σ*bot=1.
+        if FAIR_FUNC != "palma"
+            mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
+                peak_time_costs=PEAK_TIME_COSTS)
+            int_term = mld_int_mn["termination_status"]
+            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term"
+            if int_term ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
+                error("integer MLD did not converge (status=$int_term)")
+            end
+            for nw_id in nw_ids_sorted
+                mn_new["nw"][nw_id] = update_network(
+                    mld_int_mn["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
+            end
+        end
+
         dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
             lower_level_soln_mn(mn_new, fair_weights, k)
     catch err
@@ -162,25 +186,36 @@ for k in 1:ITERATIONS
 
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
-    # Divergences from run_validation_mn.jl:
-    #   use_weak_cc=USE_WEAK_CC (controlled at top of script; false → formal-CC
-    #                            indicator-constraint variant)
-    #   time_limit=60*5         → cap each upper-level solve at 5 min instead of 15.
-    pshed_new, fair_weight_vals, status = lin_palma_reformulated(
-        dpshed, pshed_val, weight_vals, pd_all;
-        critical_ids=critical_id, weight_ids=weight_ids,
-        peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-        use_weak_cc=USE_WEAK_CC,
-        time_limit=60*5)
+    local pshed_new, fair_weight_vals, status
+    try
+        if FAIR_FUNC == "palma"
+            # Defense final: weak-CC MIQCP with 10-min Gurobi TimeLimit per iter.
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+                dpshed, pshed_val, weight_vals, pd_all;
+                critical_ids=critical_id, weight_ids=weight_ids,
+                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                use_weak_cc=USE_WEAK_CC,
+                time_limit=PALMA_TIME_LIMIT)
+        else  # "min_max"
+            pshed_new, fair_weight_vals, status = min_max_load_shed(
+                dpshed, pshed_val, weight_vals;
+                critical_ids=critical_id, weight_ids=weight_ids,
+                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                pd=pd_all, pshed_type=pshed_type)
+        end
+    catch err
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level FAILED ($err) — stopping bilevel, keeping iter $(k-1) weights"
+        break
+    end
 
     last_status = status
-    @info "[$FAIR_FUNC/$pshed_type weak-CC] iter $k upper-level status = $status"
+    @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
         @warn "upper-level not converged at iter $k — stopping"
         break
     end
     if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
-        @warn "[$FAIR_FUNC/$pshed_type weak-CC] iter $k upper-level hit $status — using suboptimal incumbent"
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level hit $status — using suboptimal incumbent"
     end
 
     for (t, nw_id) in enumerate(nw_ids_sorted)
@@ -342,14 +377,14 @@ JLD2.jldsave(jld_path;
     period_max           = period_max,
     rounded_objectives   = rounded_objectives,
     relaxed_mn_objective = mn_relaxed_final["objective"],
-    palma_variant        = USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator",
+    palma_variant        = FAIR_FUNC == "palma" ? (USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator") : "n/a",
 )
 println("Saved bilevel run data → $jld_path")
 
-println("\nMulti-period validation complete (motivation_c / weak-CC).")
+println("\nMulti-period validation complete (motivation_c / $FAIR_FUNC / $VARIANT_TAG).")
 
 else
-    @warn "[$FAIR_FUNC/$pshed_type weak-CC] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6."
+    @warn "[$FAIR_FUNC/$pshed_type] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6."
     abort_path = joinpath(save_dir, "step3_aborted.txt")
     open(abort_path, "w") do io
         println(io, "Step 3 relaxed multi-period MLD did not converge.")

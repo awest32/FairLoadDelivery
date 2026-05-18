@@ -1,0 +1,13 @@
+[Mon, May 18, 2026  1:55:45 PM] Starting per_period_norms_mn...
+Loading bilevel run data → C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\../../results\2026-05-18\bilevel_validation_mn\motivation_c_good4integer_weakcc\palma_absolute\bilevel_mn_motivation_c_good4integer_weakcc_palma_absolute.jld2
+Per-period norms+CoV figure → C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\../../results\2026-05-18\bilevel_validation_mn\motivation_c_good4integer_weakcc\palma_absolute\per_period_norms_cov_motivation_c_good4integer_palma_absolute.svg
+
+  Per-period norm/CoV summary:
+    t   L1            L2            L∞            CoV
+    1   2203.4611     731.9813      421.4696      0.9037
+    2   2662.5723     882.9341      495.8466      0.9
+    3   2704.5256     889.7005      508.2428      0.8833
+    4   2860.9673     945.6984      529.7718      0.8934
+    5   3355.7238     1133.9306     698.9427      0.9392
+    6   2563.7045     871.0463      507.5125      0.9505
+[Mon, May 18, 2026  1:56:23 PM] per_period_norms_mn finished with exit code 0
