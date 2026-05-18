@@ -237,6 +237,7 @@ function palma_ratio_minimization(
     critical_ids::Vector{Int} = Int[],
     weight_ids::Vector{Int} = Int[],
     peak_time_costs::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
+    time_limit::Real = 60 * 15,  # Gurobi TimeLimit per upper-level solve (seconds)
     n_loads::Int = 0,  # Number of loads per period (0 = infer from weights_prev length)
     weight_budget::Float64 = Inf  # Per-period upper bound on Σ_i weights_{t,i}; Inf = no constraint
 )
@@ -311,7 +312,7 @@ function palma_ratio_minimization(
         set_optimizer_attribute(model, "DualReductions", 0)
         set_optimizer_attribute(model, "MIPGap", 1e-4)   # Relaxed gap (was 1e-6)
         set_optimizer_attribute(model, "NonConvex", 2)   # Allow non-convex QP
-        set_optimizer_attribute(model, "TimeLimit", 60 * 15)  # 15 minutes per iteration
+        set_optimizer_attribute(model, "TimeLimit", time_limit)
         set_optimizer_attribute(model, "MIPFocus", 1)    # Focus on finding feasible solutions
         set_optimizer_attribute(model, "NumericFocus", 2) # High numerical care (3 was needed only when bounds were wrong)
         if !silent
@@ -611,6 +612,7 @@ function palma_ratio_minimization_formal_cc(
                                          # bilevel-scaling limit, not a formulation gap.
     sigma_min::Float64 = 1e-8,
     block_tol::Float64 = 1e-6,           # warning threshold on off-block Jacobian entries
+    time_limit::Real = 60 * 15,          # Gurobi TimeLimit per upper-level solve (seconds)
 )
     m = length(pshed_prev)
     w_min, w_max = w_bounds
@@ -685,7 +687,7 @@ function palma_ratio_minimization_formal_cc(
 
     if GUROBI_AVAILABLE && solver == Gurobi.Optimizer
         set_optimizer_attribute(model, "MIPGap",       1e-4)
-        set_optimizer_attribute(model, "TimeLimit",    60 * 15)
+        set_optimizer_attribute(model, "TimeLimit",    time_limit)
         set_optimizer_attribute(model, "MIPFocus",     1)
         set_optimizer_attribute(model, "NumericFocus", 2)
         # NB: NonConvex=2 NOT needed — formal CC is a MILP.
@@ -896,6 +898,7 @@ function lin_palma_reformulated(
     n_loads::Int = 0,
     weight_budget::Float64 = Inf,
     use_weak_cc::Bool = false,
+    time_limit::Real = 60 * 15,  # Gurobi TimeLimit per upper-level solve (seconds)
 )
     result = if use_weak_cc
         palma_ratio_minimization(
@@ -908,6 +911,7 @@ function lin_palma_reformulated(
             peak_time_costs = peak_time_costs,
             n_loads         = n_loads,
             weight_budget   = weight_budget,
+            time_limit      = time_limit,
         )
     else
         palma_ratio_minimization_formal_cc(
@@ -919,6 +923,7 @@ function lin_palma_reformulated(
             peak_time_costs = peak_time_costs,
             n_loads         = n_loads,
             weight_budget   = weight_budget,
+            time_limit      = time_limit,
         )
     end
 

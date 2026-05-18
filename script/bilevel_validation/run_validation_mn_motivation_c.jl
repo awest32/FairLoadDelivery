@@ -1,22 +1,24 @@
 """
-    Multiperiod Bilevel FLDP Validation Runner
+    Multiperiod Bilevel FLDP Validation Runner — motivation_c / weak-CC variant
+    ==========================================================================
 
-    Multi-period analogue of run_validation.jl. Runs the bilevel FLDP loop
-    on a multinetwork (T periods, diurnal load + TOU profiles) and validates:
-      1. Label consistency across stages (per period)
-      2. Voltage limits (per period AC PF)
-      3. Switch ampacity (per period AC PF)
-      4. AC feasibility (per period)
+    Sibling of run_validation_mn.jl, tailored for the 13-bus motivation_c case
+    with the weak-CC Palma upper-level (use_weak_cc=true). Rationale:
+    - case6_more_meshed (N=9): formal CC default wins (commit 69cbecc + memory).
+    - motivation_c (N=16): formal CC stalls at do-nothing per upper-level iter;
+      weak CC's bilinear MIQCP finds non-trivial TimeLimit incumbents that
+      actually push the bilevel forward. See [[project_palma_implementation_milp]].
 
-    Differences vs single-period:
-      - Lower level uses lower_level_soln_mn (T*N pshed, T*N weights, T*N x T*N Jacobian)
-      - Upper level (min_max_load_shed) is fed peak_time_costs and per-period pd
-      - Random rounding is performed PER PERIOD (each period's relaxed switch
-        states are independently rounded to a feasible radial topology)
-      - AC PF + voltage/ampacity checks run PER PERIOD on each rounded topology
+    T=8 here (not T=24): T·N²=2048 binaries is already at Gurobi's per-iter
+    TimeLimit threshold; T=24 (6144 binaries) is intractable per earlier tests.
+
+    Expected wall time: ~100 min (20 iters × 5-min weak-CC TimeLimit per iter
+    via the time_limit=60*5 kwarg below). Default Gurobi TimeLimit in the palma
+    functions is 15 min; we cap shorter here to keep dissertation-case turnaround
+    practical, accepting somewhat-less-improved per-iter incumbents.
 
     Usage:
-        julia --project=. script/bilevel_validation/run_validation_mn.jl
+        julia --project=. script/bilevel_validation/run_validation_mn_motivation_c.jl
 """
 
 using Revise
@@ -46,38 +48,27 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
- CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-#const CASE = "motivation_c_good4integer"
-case = "6_bus"
+const CASE = "motivation_c_good4integer"
+case = "13_bus"
 
-const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-#const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
 const LS_PERCENT = 0.8
 const ITERATIONS = 20
 const FAIR_FUNC = "palma"
-pshed_type = "absolute"  # "absolute" or "proportional"
+pshed_type = "absolute"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 
-# Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
-# Each load name is deterministically mapped to (schedule_idx, ±1h shift) so
-# loads peak at different periods — replaces the old uniform LOAD_SCALE_FACTORS.
-#
-# SELECTED_HOURS downsamples the 24h day to a representative subset. The
-# DiffOpt forward Jacobian costs O((T·N)^2) per bilevel iter, so cutting T
-# from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
-# regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
-# (15), evening peak (18), descent (20), late-night start (22).
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
- N_PERIODS         = length(SELECTED_HOURS)
-const PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
-const CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
+# T=8 (NOT 24) — at N=16 the binary count is already T·N²=2048, near Gurobi's
+# per-iter TimeLimit threshold. T=24 (6144 binaries) is intractable.
+const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
+const N_PERIODS         = length(SELECTED_HOURS)
+const PEAK_STRESS       = 1.0
+const CENTER_AT_NOMINAL = true
 const PERIOD_HOURS      = SELECTED_HOURS
- PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-# Override results_block_mn.jl default — pick trough/plateau/peak indices into
-# SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [6, 11, 20]   # → hours 5, 10, 19 in 0..23 indexing
+REP_PERIODS = [2, 4, 6]   # → hours 6, 12, 18 (morning ramp / midday / evening peak)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -85,12 +76,15 @@ switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
 
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
+# Tag the save dir so this run lives separately from formal-CC runs of the
+# same case (avoids clobbering the JLD2 in any future motivation_c formal-CC
+# experiment).
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_weakcc/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
 global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
-@info "Logging to $log_file"
+@info "Logging to $log_file (weak-CC Palma variant)"
 
 # ============================================================
 # STEP 1: NETWORK + MULTINETWORK SETUP
@@ -100,8 +94,6 @@ print_validation_header("Step 1: Network + Multinetwork Setup")
 eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT;
     switch_rating=switch_rating)
 
-# System aggregate scale per period — used by results_block_mn.jl print rows and
-# by downstream plotting. Per-load shape now comes from the H&A schedules.
 LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
     hours = SELECTED_HOURS, center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
 
@@ -115,6 +107,7 @@ validation_results = Dict{String,Any}(
     "peak_stress"      => PEAK_STRESS,
     "peak_time_costs"  => PEAK_TIME_COSTS,
     "pshed_type"       => pshed_type,
+    "palma_variant"    => "weak_cc",
 )
 
 @info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, agg_scales=$LOAD_SCALE_FACTORS, peak_stress=$PEAK_STRESS, λ=$PEAK_TIME_COSTS"
@@ -131,15 +124,14 @@ n_loads_per_period = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
 @info "Built multinetwork with $N_PERIODS periods, $n_loads_per_period loads per period (profiled)"
 
 # ============================================================
-# STEP 2: BILEVEL ITERATIONS (multi-period)
+# STEP 2: BILEVEL ITERATIONS (multi-period, weak-CC Palma)
 # ============================================================
-print_validation_header("Step 2: Bilevel Iterations ($FAIR_FUNC, $pshed_type, $ITERATIONS iters)")
+print_validation_header("Step 2: Bilevel Iterations ($FAIR_FUNC weak-CC, $pshed_type, $ITERATIONS iters)")
 
 mn_new = deepcopy(mn_data)
 
-# Initial weights: read from base math (per-load) and replicate across periods later via lower_level_soln_mn
 fair_weights_init = Float64[load["weight"] for (_, load) in math["load"]]
-fair_weights = copy(fair_weights_init)  # gets replaced after iter 1 by per-period (T*N) values
+fair_weights = copy(fair_weights_init)
 
 iteration_label_consistent = true
 all_pshed_lower = Float64[]
@@ -154,70 +146,40 @@ for k in 1:ITERATIONS
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
-        # Solve multinetwork integer MLD first to fix switch topology per period,
-        # then run DiffOpt lower level on the topology-fixed multinetwork. Mirrors
-        # the single-period warm-start at run_validation.jl:220-225.
-        #
-        # Skipped for Palma: with switch topology fixed, pshed becomes near-binary
-        # ({0, pd} per load) and bottom-40%-of-served can sum to zero in some
-        # periods, leaving the Charnes-Cooper constraint σ[t]*bot_sum_t==1 with no
-        # feasible σ — Gurobi then hits TimeLimit with no incumbent.
-        if FAIR_FUNC != "palma"
-            mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
-                peak_time_costs=PEAK_TIME_COSTS)
-            int_term = mld_int_mn["termination_status"]
-            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term"
-            if int_term ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
-                error("integer MLD did not converge (status=$int_term)")
-            end
-            for nw_id in nw_ids_sorted
-                mn_new["nw"][nw_id] = update_network(
-                    mld_int_mn["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
-            end
-        end
-
+        # Palma path: skip integer warm-start (per [[project_palma_skip_integer_warmstart]])
         dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
             lower_level_soln_mn(mn_new, fair_weights, k)
     catch err
-        @warn "[$FAIR_FUNC/$pshed_type] iter $k lower-level failed ($err) — stopping bilevel, falling back to last converged weights"
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k lower-level failed ($err) — stopping bilevel"
         break
     end
     n_loads = length(weight_ids)
 
-    # Per-load pd reference matching pshed ordering (across all periods)
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
-    # Upper-level fairness step (multi-period, peak-cost weighted)
-    if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals, status = min_max_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-            pd=pd_all, pshed_type=pshed_type)
-    elseif FAIR_FUNC == "palma"
-        pshed_new, fair_weight_vals, status = lin_palma_reformulated(
-            dpshed, pshed_val, weight_vals, pd_all;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals, status = efficient_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    else
-        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
-    end
+    # Divergences from run_validation_mn.jl:
+    #   use_weak_cc=true  → weak CC's bilinear MIQCP finds non-trivial TimeLimit
+    #                       incumbents on motivation_c (formal CC stalls at do-nothing)
+    #   time_limit=60*5   → cap each upper-level solve at 5 min instead of 15 min,
+    #                       cutting total bilevel time from ~5h to ~100 min at the
+    #                       cost of slightly worse per-iter incumbents
+    pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+        dpshed, pshed_val, weight_vals, pd_all;
+        critical_ids=critical_id, weight_ids=weight_ids,
+        peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+        use_weak_cc=true,
+        time_limit=60*5)
+
     last_status = status
-    @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
+    @info "[$FAIR_FUNC/$pshed_type weak-CC] iter $k upper-level status = $status"
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
         @warn "upper-level not converged at iter $k — stopping"
         break
     end
     if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
-        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level hit $status — using suboptimal incumbent"
+        @warn "[$FAIR_FUNC/$pshed_type weak-CC] iter $k upper-level hit $status — using suboptimal incumbent"
     end
 
-    # Push T*N weights back into mn_new per period
     for (t, nw_id) in enumerate(nw_ids_sorted)
         offset = (t - 1) * n_loads
         for (j, lid) in enumerate(weight_ids)
@@ -261,30 +223,26 @@ if relaxed_ok
 print_validation_header("Step 4: Per-period rounding + AC feasibility")
 
 per_period_results = Dict{String,Any}()
-mn_rounded = Dict{String,Dict{String,Any}}()  # rounded math per nw_id
-mn_rounded_solutions = Dict{String,Dict{String,Any}}()  # rounded MLD solution per nw_id (for plotting)
+mn_rounded = Dict{String,Dict{String,Any}}()
+mn_rounded_solutions = Dict{String,Dict{String,Any}}()
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, scale=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t])) -----")
     period_checks = Dict{String,Any}()
 
-    # Single-period math dict for this period (already scaled)
     math_t = deepcopy(mn_new["nw"][nw_id])
 
-    # Build a single-period implicit-diff model to get the ref needed for rounding helpers
     imp_diff_model_t = instantiate_mc_model(
         math_t, LinDist3FlowPowerModel,
         build_mc_mld_shedding_implicit_diff;
         ref_extensions=[FairLoadDelivery.ref_add_rounded_load_blocks!])
     ref_t = imp_diff_model_t.ref[:it][:pmd][:nw][0]
 
-    # Pull this period's relaxed switch & block states from the multi-period solution
     relaxed_t = mn_relaxed_final["solution"]["nw"][nw_id]
     switch_states = Dict(parse(Int, sid) => sw["state"]   for (sid, sw)  in relaxed_t["switch"])
     block_status  = Dict(parse(Int, bid) => bl["status"] for (bid, bl)  in relaxed_t["block"])
 
-    # Bernoulli rounding → radial-feasible candidate
-    rng = 100 + t  # different seed per period
+    rng = 100 + t
     bernoulli_samples = generate_bernoulli_samples(switch_states, N_BERNOULLI_SAMPLES, rng)
     index, sw_radial, block_ids, bl_radial, load_ids, load_status, _ =
         FairLoadDelivery.radiality_check(ref_t, switch_states, block_status, bernoulli_samples)
@@ -298,10 +256,8 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     period_checks["radiality_found"] = Dict("passed" => true, "details" => ["sample index $index"])
     print_check_result("Period $t: radial topology found", true, "sample $index")
 
-    # Apply rounded switch states to this period's math
     math_t_rounded = update_network(math_t, sw_radial, ref_t)
 
-    # Solve rounded integer single-period MLD for this period
     mld_rounded_t = FairLoadDelivery.solve_mc_mld_shed_random_round_integer(math_t_rounded, gurobi_solver)
     rounded_term  = mld_rounded_t["termination_status"]
     rounded_ok    = (rounded_term == MOI.OPTIMAL || rounded_term == MOI.LOCALLY_SOLVED || rounded_term == MOI.ALMOST_LOCALLY_SOLVED)
@@ -312,7 +268,6 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
         continue
     end
 
-    # Voltage + ampacity on the rounded MLD solution
     v_passed_r, v_violations_r, v_summary_r = check_voltage_limits_relaxed(mld_rounded_t, math_t_rounded)
     period_checks["voltage_limits_rounded"] = Dict("passed" => v_passed_r, "details" => [string(v) for v in v_violations_r])
     print_check_result("Period $t: voltage limits (rounded)", v_passed_r, "$(v_summary_r["violations"]) violations / $(v_summary_r["checked"]) checked")
@@ -321,7 +276,6 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     period_checks["current_limits_rounded"] = Dict("passed" => c_passed_r, "details" => [string(v) for v in c_violations_r])
     print_check_result("Period $t: switch ampacity (rounded)", c_passed_r, "$(c_summary_r["violations"]) violations")
 
-    # Build AC dispatch network and run AC PF
     math_ac_t = ac_network_update(math_t_rounded, ref_t; mld_solution=mld_rounded_t)
     ac_result_t = PowerModelsDistribution.solve_mc_pf(math_ac_t, IVRUPowerModel, ipopt_solver)
     ac_term_t   = ac_result_t["termination_status"]
@@ -358,19 +312,14 @@ validation_results["per_period"] = per_period_results
 
 # ============================================================
 # STEP 5: LOAD-SHED HEATMAP + FINAL RESULT + REPORT
-# (extracted so it can be re-run standalone in REPL — builds pshed_matrix,
-# load_labels, period_labels, period_total, period_max, rounded_objectives)
 # ============================================================
 include("results_block_mn.jl")
 
 # ============================================================
 # STEP 6: PERSIST PER-RUN DATA FOR STANDALONE PLOTTING
-# Filename pins (CASE, FAIR_FUNC, pshed_type) so each fair_func × case run
-# lands in its own JLD2 and downstream plot scripts can target them by key.
-# Reuses pshed_matrix / load_labels / etc. built by results_block_mn.jl.
 # ============================================================
 using JLD2
-jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
+jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_weakcc_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
     pshed_matrix         = pshed_matrix,
     pd_ref_matrix        = pd_ref_matrix,
@@ -390,20 +339,21 @@ JLD2.jldsave(jld_path;
     period_max           = period_max,
     rounded_objectives   = rounded_objectives,
     relaxed_mn_objective = mn_relaxed_final["objective"],
+    palma_variant        = "weak_cc",
 )
 println("Saved bilevel run data → $jld_path")
 
-println("\nMulti-period validation complete.")
+println("\nMulti-period validation complete (motivation_c / weak-CC).")
 
-else  # !relaxed_ok — Step 3 did not converge
-    @warn "[$FAIR_FUNC/$pshed_type] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6 (rounding, plots, JLD2 save) to avoid building outputs on a non-converged relaxation."
+else
+    @warn "[$FAIR_FUNC/$pshed_type weak-CC] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6."
     abort_path = joinpath(save_dir, "step3_aborted.txt")
     open(abort_path, "w") do io
         println(io, "Step 3 relaxed multi-period MLD did not converge.")
         println(io, "termination_status      = $relaxed_term")
         println(io, "bilevel completed_iters = $(length(all_pshed_lower))")
         println(io, "bilevel last_status     = $last_status")
-        println(io, "Steps 4–6 skipped (rounding, results block, JLD2 save).")
+        println(io, "Steps 4–6 skipped.")
     end
     println("Wrote $abort_path")
     println("\nMulti-period validation halted at Step 3.")
