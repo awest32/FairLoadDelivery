@@ -260,8 +260,24 @@
     Registers per-period pshed in model dictionary for Jacobian computation.
     """
     function build_mn_mc_mld_shedding_implicit_diff(pm::_PMD.AbstractUBFModels)
-        # Replace model with DiffOpt-wrapped optimizer for implicit differentiation
-        pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(Ipopt.Optimizer))
+        # Replace model with DiffOpt-wrapped optimizer for implicit differentiation.
+        # Pass Ipopt options at construction (not via set_optimizer_attribute after,
+        # which DiffOpt's wrapper rejects for unknown raw attrs). max_iter default
+        # (3000) is too low for motivation_c at T=8 — DiffOpt errors out if the
+        # primal hits ITERATION_LIMIT.
+        # Ipopt defaults (max_iter=3000, acceptable_tol=1e-6) aren't enough for
+        # motivation_c at T=8 — DiffOpt errors out if the primal hits
+        # ITERATION_LIMIT. Bump max_iter and add "acceptable" tolerance so Ipopt
+        # returns ALMOST_OPTIMAL (which our gating treats as OK) when it's near a
+        # KKT point but slow to satisfy the strict tol. lower_level_mld.jl
+        # already returns a zero Jacobian + @warn on non-KKT termination as a
+        # final safety net.
+        ipopt_factory = JuMP.optimizer_with_attributes(Ipopt.Optimizer,
+            "max_iter"        => 30_000,
+            "acceptable_tol"  => 1e-4,
+            "acceptable_iter" => 50,
+            "print_level"     => 0)
+        pm.model = JuMP.Model(() -> DiffOpt.diff_optimizer(ipopt_factory))
 
         nw_ids = sort(collect(_PMD.nw_ids(pm)))
         first_nw = nw_ids[1]

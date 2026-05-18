@@ -181,22 +181,33 @@ function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vec
     # Solve once — perturbations only affect differentiation direction, not the optimal solution
     optimize!(model)
 
-    # Build Jacobian column by column: (T*N) x (T*N)
+    # Build Jacobian column by column: (T*N) x (T*N).
+    # DiffOpt.forward_differentiate! errors on non-KKT termination statuses
+    # (ITERATION_LIMIT in particular), so only compute the Jacobian when the
+    # primal converged. When it didn't, return zeros + warn — downstream
+    # callers (parity tests, bilevel iters with safety nets) can decide
+    # whether the zero-Jacobian incumbent is still useful.
     jacobian = zeros(n_pshed_total, n_weights_total)
-    for j in 1:n_weights_total
-        DiffOpt.empty_input_sensitivities!(model)
+    primal_status = termination_status(model)
+    if primal_status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED,
+                          MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
+        for j in 1:n_weights_total
+            DiffOpt.empty_input_sensitivities!(model)
 
-        # Perturb ONLY weight j (standard basis vector e_j across all periods)
-        for (idx, (n, key, param)) in enumerate(all_weight_params)
-            perturbation = (idx == j) ? 1.0 : 0.0
-            DiffOpt.set_forward_parameter(model, param, perturbation)
+            # Perturb ONLY weight j (standard basis vector e_j across all periods)
+            for (idx, (n, key, param)) in enumerate(all_weight_params)
+                perturbation = (idx == j) ? 1.0 : 0.0
+                DiffOpt.set_forward_parameter(model, param, perturbation)
+            end
+
+            DiffOpt.forward_differentiate!(model)
+
+            for (i, var) in enumerate(all_pshed_vars)
+                jacobian[i, j] = DiffOpt.get_forward_variable(model, var)
+            end
         end
-
-        DiffOpt.forward_differentiate!(model)
-
-        for (i, var) in enumerate(all_pshed_vars)
-            jacobian[i, j] = DiffOpt.get_forward_variable(model, var)
-        end
+    else
+        @warn "[diff_forward_full_jacobian_mn] primal terminated $primal_status — skipping DiffOpt forward differentiation, returning ZERO Jacobian and using the current incumbent pshed values. Upper-level Δw will be unconstrained by lower-level sensitivities."
     end
 
     # Collect pshed values (flattened across periods)

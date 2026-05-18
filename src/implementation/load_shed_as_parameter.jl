@@ -598,7 +598,17 @@ function palma_ratio_minimization_formal_cc(
     peak_time_costs::Vector{Float64} = Float64[],
     n_loads::Int = 0,
     weight_budget::Float64 = Inf,
-    sigma_max_scale::Float64 = 10.0,     # σ_max_t = sigma_max_scale / bot40_sum_prev_t
+    sigma_max_scale::Float64 = 10.0,     # σ_max_t = sigma_max_scale / bot40_sum_prev_t.
+                                         # Empirically: 10 gives ~2.3× speedup on case6 T=8
+                                         # (formal vs weak). Larger values widen the
+                                         # feasible region for degenerate inputs (many
+                                         # near-fully-shed loads, e.g. motivation_c) but
+                                         # weaken the LP relaxation enough that Gurobi
+                                         # can't find an improving incumbent within the
+                                         # TimeLimit. On motivation_c N=16 T=8, NEITHER
+                                         # weak CC nor formal CC reaches OPTIMAL within
+                                         # 15 min regardless of this knob — that's a
+                                         # bilevel-scaling limit, not a formulation gap.
     sigma_min::Float64 = 1e-8,
     block_tol::Float64 = 1e-6,           # warning threshold on off-block Jacobian entries
 )
