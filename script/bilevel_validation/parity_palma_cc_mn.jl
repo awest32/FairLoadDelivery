@@ -36,18 +36,21 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # Switch between cases by changing CASE. case6 is fast (N=9 → quick runs);
 # motivation_c is the dissertation case (N=16 → represents the real workload).
-CASE = "motivation_c"   # "case6_more_meshed" | "motivation_c"
+CASE = "case6_more_meshed"   # "case6_more_meshed" | "motivation_c"
 const CASE_FILE  = CASE == "motivation_c" ?
     joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss") :
     joinpath(@__DIR__, "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss")
 const LS_PERCENT = 0.8
-SELECTED_HOURS   = [4, 6, 8, 12, 15, 18, 20, 22]
+# T=24 full diurnal cycle. T=8 default from run_validation_mn.jl was
+# [4, 6, 8, 12, 15, 18, 20, 22]; switch back if needed.
+SELECTED_HOURS   = collect(0:23)
 N_PERIODS        = length(SELECTED_HOURS)
 const PEAK_STRESS       = 1.0
 const CENTER_AT_NOMINAL = true
  PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                           for h in SELECTED_HOURS]
 
+# Need to update for the 13 bus version, current version is for the 6-bus case.
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)]) * LS_PERCENT
 
 # ============================================================
