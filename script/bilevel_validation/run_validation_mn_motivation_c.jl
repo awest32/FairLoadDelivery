@@ -9,8 +9,8 @@
       weak CC's bilinear MIQCP finds non-trivial TimeLimit incumbents that
       actually push the bilevel forward. See [[project_palma_implementation_milp]].
 
-    T=8 here (not T=24): T·N²=2048 binaries is already at Gurobi's per-iter
-    TimeLimit threshold; T=24 (6144 binaries) is intractable per earlier tests.
+    T=6 here (reduced from 8 for faster turnaround). T·N²=1536 binaries
+    vs 2048 at T=8 vs 6144 at T=24 (intractable per earlier tests).
 
     Expected wall time: ~100 min (20 iters × 5-min weak-CC TimeLimit per iter
     via the time_limit=60*5 kwarg below). Default Gurobi TimeLimit in the palma
@@ -59,16 +59,17 @@ pshed_type = "absolute"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 
-# T=8 (NOT 24) — at N=16 the binary count is already T·N²=2048, near Gurobi's
-# per-iter TimeLimit threshold. T=24 (6144 binaries) is intractable.
-const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
+# T=6 — reduced from 8 for faster turnaround at N=16. Hours chosen to keep
+# representative coverage: trough / morning / midday / pre-peak / peak / descent.
+# At T=6 N=16, T·N²=1536 binaries (vs 2048 at T=8, 6144 at T=24).
+const SELECTED_HOURS    = [4, 8, 12, 15, 18, 22]
 const N_PERIODS         = length(SELECTED_HOURS)
 const PEAK_STRESS       = 1.0
 const CENTER_AT_NOMINAL = true
 const PERIOD_HOURS      = SELECTED_HOURS
 const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [2, 4, 6]   # → hours 6, 12, 18 (morning ramp / midday / evening peak)
+REP_PERIODS = [1, 3, 5]   # → hours 4, 12, 18 (trough / midday / evening peak) in T=6 indexing
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 

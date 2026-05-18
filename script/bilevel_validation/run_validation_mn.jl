@@ -187,25 +187,34 @@ for k in 1:ITERATIONS
     # Per-load pd reference matching pshed ordering (across all periods)
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
-    # Upper-level fairness step (multi-period, peak-cost weighted)
-    if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals, status = min_max_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-            pd=pd_all, pshed_type=pshed_type)
-    elseif FAIR_FUNC == "palma"
-        pshed_new, fair_weight_vals, status = lin_palma_reformulated(
-            dpshed, pshed_val, weight_vals, pd_all;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals, status = efficient_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    else
-        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+    # Upper-level fairness step (multi-period, peak-cost weighted).
+    # Wrapped in try/catch so an upper-level error (e.g. formal-CC INFEASIBLE
+    # after the bilevel pushes pserved_prev into a σ_max-degenerate corner)
+    # doesn't crash the whole bilevel — fall back to previous weights and stop.
+    local pshed_new, fair_weight_vals, status
+    try
+        if FAIR_FUNC == "min_max"
+            pshed_new, fair_weight_vals, status = min_max_load_shed(
+                dpshed, pshed_val, weight_vals;
+                critical_ids=critical_id, weight_ids=weight_ids,
+                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                pd=pd_all, pshed_type=pshed_type)
+        elseif FAIR_FUNC == "palma"
+            pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+                dpshed, pshed_val, weight_vals, pd_all;
+                critical_ids=critical_id, weight_ids=weight_ids,
+                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
+        elseif FAIR_FUNC == "efficiency"
+            pshed_new, fair_weight_vals, status = efficient_load_shed(
+                dpshed, pshed_val, weight_vals;
+                critical_ids=critical_id, weight_ids=weight_ids,
+                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
+        else
+            error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+        end
+    catch err
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level FAILED ($err) — stopping bilevel, keeping iter $(k-1) weights"
+        break
     end
     last_status = status
     @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"

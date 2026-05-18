@@ -562,7 +562,8 @@ force Gurobi `NonConvex=2`. The formal CC rescales **every** original decision
 variable by σ (`z = σ·y`) — the resulting model is a pure MILP:
 
   * `Δw → Δw_z = σ_t · Δw`
-  * `u   → u_z = σ_t · u  =  a · pserved_z` (McCormick on binary × bounded cont.)
+  * `u   → u_z = σ_t · u  =  a · pserved_z` (binary × continuous, via indicator
+    constraints — see implementation comment for details)
   * `pserved_new → pserved_z = σ_t · pserved_new` (linear expression in Δw_z and σ)
   * `σ_t · bot_sum = 1`        → `Σ_{i∈bot40,j} u_z[t][i,j] = 1` (linear)
   * `min σ_t · top_sum`        → `min Σ_{i∈top10,j} u_z[t][i,j]` (linear)
@@ -580,10 +581,14 @@ Recovery of original-space variables:
     pshed_new   = pshed_prev + J · Δw
     weights_new = weights_prev + Δw
 
-σ-bounds: McCormick on `a · pserved_z` needs a finite upper bound on
-`pserved_z`. We bound `σ_t ∈ [σ_min, σ_max]` where `σ_max` defaults to
-`10 / bot40_sum(pd − pshed_prev)_t` (~10× the previous-iter σ) so the big-M is
-data-driven and tight rather than artificial.
+σ-bounds: `σ_t ≥ σ_min > 0` (a small positive lower bound for numerical safety)
+and **no upper bound** — matches the formal CC math, where σ = 1/bot_sum can grow
+arbitrarily large as bot_sum approaches zero. Earlier versions imposed
+`σ_max = 10 / bot40_sum_prev_t` to support a McCormick big-M envelope on
+`a · pserved_z`; that heuristic created an artificial INFEASIBLE failure mode
+once bilevel iterations pushed bot_sum_prev to zero. Indicator constraints
+remove the need for any upper bound. The `sigma_max_scale` kwarg is retained
+for backward compatibility but is ignored.
 """
 function palma_ratio_minimization_formal_cc(
     dpshed_dw::Matrix{Float64},
@@ -599,17 +604,13 @@ function palma_ratio_minimization_formal_cc(
     peak_time_costs::Vector{Float64} = Float64[],
     n_loads::Int = 0,
     weight_budget::Float64 = Inf,
-    sigma_max_scale::Float64 = 10.0,     # σ_max_t = sigma_max_scale / bot40_sum_prev_t.
-                                         # Empirically: 10 gives ~2.3× speedup on case6 T=8
-                                         # (formal vs weak). Larger values widen the
-                                         # feasible region for degenerate inputs (many
-                                         # near-fully-shed loads, e.g. motivation_c) but
-                                         # weaken the LP relaxation enough that Gurobi
-                                         # can't find an improving incumbent within the
-                                         # TimeLimit. On motivation_c N=16 T=8, NEITHER
-                                         # weak CC nor formal CC reaches OPTIMAL within
-                                         # 15 min regardless of this knob — that's a
-                                         # bilevel-scaling limit, not a formulation gap.
+    sigma_max_scale::Float64 = 10.0,     # IGNORED — kept for backward compatibility.
+                                         # Previous versions used this to set
+                                         # σ_max = sigma_max_scale / bot40_sum_prev_t as
+                                         # a McCormick big-M. The current implementation
+                                         # uses indicator constraints (no Big-M, no
+                                         # upper bound on σ), so this parameter has no
+                                         # effect on the solve.
     sigma_min::Float64 = 1e-8,
     block_tol::Float64 = 1e-6,           # warning threshold on off-block Jacobian entries
     time_limit::Real = 60 * 15,          # Gurobi TimeLimit per upper-level solve (seconds)
@@ -665,21 +666,21 @@ function palma_ratio_minimization_formal_cc(
         @info "[Palma formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
     end
 
-    # Per-period σ bounds derived from previous-iter bot_sum --------------------
+    # Palma sort indices ---------------------------------------------------------
+    # Formal CC has NO upper bound on σ_t (mathematically σ_t = 1/bot_sum can grow
+    # unboundedly as bot_sum → 0 — that's how the CC normalization absorbs ratios
+    # that approach infinity). Earlier versions of this function imposed a
+    # σ_max = 10/bot_sum_prev heuristic to support McCormick big-M envelopes on
+    # `u_z = a · pserved_z`; that heuristic created an artificial INFEASIBLE
+    # failure mode when bilevel iterations pushed bot_sum_prev toward 0. The
+    # current implementation uses indicator constraints (see below) instead of
+    # McCormick, so no σ_max is needed.
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
-    σ_max = zeros(n_periods)
-    for t in 1:n_periods
-        offset = (t - 1) * n
-        pserved_prev_t = sort([max(pd[offset + i] - pshed_prev[offset + i], 0.0) for i in 1:n])
-        bot_sum_prev = sum(pserved_prev_t[i] for i in bottom_40_idx)
-        # Default: 10x previous σ; if bot_sum_prev is degenerate, fall back to a safe ceiling.
-        σ_max[t] = bot_sum_prev > 1e-6 ? sigma_max_scale / bot_sum_prev : 1e6
-    end
 
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods
 
-    @info "[Palma formal CC] T=$n_periods, N=$n, m=$m, σ_max range=[$(round(minimum(σ_max), sigdigits=3)), $(round(maximum(σ_max), sigdigits=3))]"
+    @info "[Palma formal CC] T=$n_periods, N=$n, m=$m (indicator-constraint form, σ unbounded above)"
 
     # Build the MILP ------------------------------------------------------------
     model = JuMP.Model(solver)
@@ -696,11 +697,10 @@ function palma_ratio_minimization_formal_cc(
         end
     end
 
-    # σ_t ∈ [σ_min, σ_max[t]]
+    # σ_t ≥ σ_min > 0 (no upper bound — matches formal CC math)
     @variable(model, σ[t = 1:n_periods])
     for t in 1:n_periods
         JuMP.set_lower_bound(σ[t], sigma_min)
-        JuMP.set_upper_bound(σ[t], σ_max[t])
     end
 
     # Binary permutation matrices — unchanged from weak CC
@@ -719,7 +719,7 @@ function palma_ratio_minimization_formal_cc(
         - sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
     )
 
-    # Rescaled u: u_z[t][i,j] = a[t][i,j] · pserved_z[offset+j] via McCormick
+    # Rescaled u: u_z[t][i,j] = a[t][i,j] · pserved_z[offset+j] via indicator constraints
     u_z = Any[]
     for t in 1:n_periods
         push!(u_z, @variable(model, [1:n, 1:n], lower_bound = 0, base_name = "u_z_$t"))
@@ -735,13 +735,38 @@ function palma_ratio_minimization_formal_cc(
             @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
         end
 
-        # McCormick for u_z = a · pserved_z with bound pserved_z ≤ pd[gj] · σ_max[t]
+        # ---------------------------------------------------------------------
+        # Indicator constraints for u_z[t][i,j] = a[t][i,j] · pserved_z[offset+j]
+        # ---------------------------------------------------------------------
+        # An "indicator constraint" enforces a linear constraint conditionally
+        # on a binary indicator. JuMP / Gurobi natively support them via the
+        # `binary => {linear_constraint}` syntax (read as "if binary, then linear
+        # constraint must hold"). Gurobi handles the disjunction inside its
+        # branching tree using SOS1-style logic — no Big-M is added to the model.
+        #
+        # We encode the bilinear product `u_z = a · pserved_z` (with a∈{0,1},
+        # pserved_z ≥ 0) as two indicator constraints per (i,j):
+        #     a[t][i,j] == 1  →  u_z[t][i,j] == pserved_z[offset+j]
+        #     a[t][i,j] == 0  →  u_z[t][i,j] == 0
+        # When a=1, u_z takes pserved_z's value; when a=0, u_z is forced to 0.
+        # The doubly-stochastic constraint guarantees exactly one i per column
+        # has a=1, so `sorted_z_t[i] = sum_j u_z[t][i,j]` picks out a single
+        # pserved_z value — the load assigned to sort-position i.
+        #
+        # Why this is better than the prior McCormick formulation:
+        #   - McCormick required a finite upper bound on pserved_z, i.e. a
+        #     finite σ_max[t]. The chosen σ_max heuristic was too tight in some
+        #     bilevel iters (INFEASIBLE) and too loose in others (LP relaxation
+        #     too weak → Gurobi stuck at do-nothing incumbent).
+        #   - Indicator constraints add no Big-M and need no upper bound on
+        #     σ_t. The formulation matches the formal CC math exactly.
+        #   - LP relaxation tends to be tighter because Gurobi treats the
+        #     disjunction directly instead of through a loose linear envelope.
+        # ---------------------------------------------------------------------
         for i in 1:n, j in 1:n
             gj = offset + j
-            P_max = pd[gj] * σ_max[t]
-            @constraint(model, u_z[t][i, j] >= pserved_z[gj] + a[t][i, j] * P_max - P_max)
-            @constraint(model, u_z[t][i, j] <= a[t][i, j] * P_max)
-            @constraint(model, u_z[t][i, j] <= pserved_z[gj])
+            @constraint(model, a[t][i, j] => {u_z[t][i, j] == pserved_z[gj]})
+            @constraint(model, !a[t][i, j] => {u_z[t][i, j] == 0})
         end
 
         # Ascending sort on rescaled sorted values (ordering preserved by σ > 0)
@@ -914,17 +939,40 @@ function lin_palma_reformulated(
             time_limit      = time_limit,
         )
     else
-        palma_ratio_minimization_formal_cc(
-            dpshed_dw, pshed_prev, weights_prev, pd;
-            trust_radius    = 0.5,
-            w_bounds        = (1.0, 10.0),
-            critical_ids    = critical_ids,
-            weight_ids      = weight_ids,
-            peak_time_costs = peak_time_costs,
-            n_loads         = n_loads,
-            weight_budget   = weight_budget,
-            time_limit      = time_limit,
-        )
+        # Try formal CC; on INFEASIBLE (typically the σ_max-vs-degenerate-bot40
+        # trap after several bilevel iters) auto-fall-back to weak CC so the
+        # bilevel loop survives instead of crashing.
+        try
+            palma_ratio_minimization_formal_cc(
+                dpshed_dw, pshed_prev, weights_prev, pd;
+                trust_radius    = 0.5,
+                w_bounds        = (1.0, 10.0),
+                critical_ids    = critical_ids,
+                weight_ids      = weight_ids,
+                peak_time_costs = peak_time_costs,
+                n_loads         = n_loads,
+                weight_budget   = weight_budget,
+                time_limit      = time_limit,
+            )
+        catch err
+            if occursin("INFEASIBLE", string(err))
+                @warn "[Palma] formal CC returned INFEASIBLE — falling back to weak CC for this iter"
+                palma_ratio_minimization(
+                    dpshed_dw, pshed_prev, weights_prev, pd;
+                    trust_radius    = 0.5,
+                    w_bounds        = (1.0, 10.0),
+                    relax_binary    = false,
+                    critical_ids    = critical_ids,
+                    weight_ids      = weight_ids,
+                    peak_time_costs = peak_time_costs,
+                    n_loads         = n_loads,
+                    weight_budget   = weight_budget,
+                    time_limit      = time_limit,
+                )
+            else
+                rethrow(err)
+            end
+        end
     end
 
     # Compute σ from result (for compatibility). σ is the Charnes-Cooper scaling
