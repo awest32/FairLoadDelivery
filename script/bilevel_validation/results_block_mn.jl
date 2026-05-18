@@ -72,6 +72,10 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     end
 end
 
+# Bus-level z_demand (= served indicator): 1.0 = served, 0.0 = shed.
+# The block constraint forces all loads at a bus to share shed status, so
+# bus_status_matrix takes binary values when the rounded MLD solution
+# respects integrality. Equivalent to z_demand for any load at the bus.
 bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
 for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     if bus_pd_matrix[t, b] > 1e-9
@@ -79,29 +83,14 @@ for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     end
 end
 
-# Heatmap at LOAD level (matches grouped-bar granularity). On unbalanced 3-phase
-# networks like the 13-bus, bus-level aggregation hides per-phase / per-load
-# shed because a bus can host both fully-shed and fully-served loads — the
-# weighted mean looks moderate even when individual loads are heavily shed.
-# Shed fraction ∈ [0, 1]: 0 = served, 1 = fully shed. Gradient: light (no shed)
-# → dark (full shed) so cell darkness scales monotonically with shed magnitude.
-load_shed_frac_matrix = fill(0.0, N_PERIODS, length(ref_load_ids))
-for t in 1:N_PERIODS, j in 1:length(ref_load_ids)
-    v = pshed_matrix[t, j]
-    pd_v = pd_ref_matrix[t, j]
-    load_shed_frac_matrix[t, j] = (isnan(v) || pd_v <= 1e-9) ? 0.0 :
-                                  clamp(v / pd_v, 0.0, 1.0)
-end
-
-p_heat = heatmap(load_labels, period_labels, load_shed_frac_matrix,
-    xlabel = "Load",
+p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
+    xlabel = "Bus",
     ylabel = "Period",
-    color  = cgrad(["#E5EFEA", "#2A6F6B"]),  # pale sage (no shed) → muted teal (full shed)
+    color  = cgrad(["#2A6F6B", "#E5EFEA"]),  # muted teal (shed) → pale sage (served)
     clims  = (0.0, 1.0),
     xrotation = 45,
     yticks = (1:N_PERIODS, period_labels),
-    colorbar = true,
-    colorbar_title = "shed fraction",
+    colorbar = false,
 )
 display(p_heat)
 savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))
