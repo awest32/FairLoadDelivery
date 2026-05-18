@@ -86,7 +86,7 @@ end
 p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
     xlabel = "Bus",
     ylabel = "Period",
-    color  = cgrad(["#2A6F6B", "#E5EFEA"]),  # muted teal (shed) → pale sage (served)
+    color  = cgrad(["#E5EFEA", "#2A6F6B"]),  # pale sage (shed) → muted teal (served)
     clims  = (0.0, 1.0),
     xrotation = 45,
     yticks = (1:N_PERIODS, period_labels),
