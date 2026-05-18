@@ -50,7 +50,9 @@ const CENTER_AT_NOMINAL = true
  PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                           for h in SELECTED_HOURS]
 
-# Need to update for the 13 bus version, current version is for the 6-bus case.
+# switch_rating is a no-op for motivation_c_good4integer (setup_network uses
+# hardcoded per-switch ratings derived from ACPF probe, rating_margin=5.0).
+# For case6_more_meshed it IS used. Same value works as a default for both.
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)]) * LS_PERCENT
 
 # ============================================================
