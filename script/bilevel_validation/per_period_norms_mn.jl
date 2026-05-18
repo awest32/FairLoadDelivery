@@ -24,8 +24,8 @@ include("../../src/implementation/visualization.jl")
 
 # Unified 9pt font defaults.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
-CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # set to a case name before include, or provide via ARGS
-FAIR_FUNC = "efficiency"  # set to a fairness function name before include, or provide via ARGS
+CASE = "motivation_c_good4integer_weakcc"  # set to a case name before include, or provide via ARGS
+FAIR_FUNC = "palma"  # set to a fairness function name before include, or provide via ARGS
 pshed_type = "absolute"  # set to "absolute"
 
  #"bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2"  # set to a JLD2 path before include, or provide via ARGS

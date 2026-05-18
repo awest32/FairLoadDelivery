@@ -1,21 +1,23 @@
 """
-    Multiperiod Bilevel FLDP Validation Runner — motivation_c / weak-CC variant
-    ==========================================================================
+    Multiperiod Bilevel FLDP Validation Runner — motivation_c / formal-CC indicator variant
+    ======================================================================================
 
     Sibling of run_validation_mn.jl, tailored for the 13-bus motivation_c case
-    with the weak-CC Palma upper-level (use_weak_cc=true). Rationale:
-    - case6_more_meshed (N=9): formal CC default wins (commit 69cbecc + memory).
-    - motivation_c (N=16): formal CC stalls at do-nothing per upper-level iter;
-      weak CC's bilinear MIQCP finds non-trivial TimeLimit incumbents that
-      actually push the bilevel forward. See [[project_palma_implementation_milp]].
+    with the formal-CC Palma upper-level using indicator constraints (commit
+    874dba3 replaced σ_max + McCormick with native JuMP/Gurobi indicators, so σ
+    has no upper bound — matches formal CC math).
 
-    T=6 here (reduced from 8 for faster turnaround). T·N²=1536 binaries
-    vs 2048 at T=8 vs 6144 at T=24 (intractable per earlier tests).
+    Purpose: validate that the indicator-constraint formal CC works end-to-end
+    on the dissertation case at T=8, where the prior McCormick formulation
+    stalled at do-nothing. Earlier weak-CC run (USE_WEAK_CC=true) is preserved
+    in results/.../motivation_c_good4integer_weakcc/ for side-by-side comparison.
 
-    Expected wall time: ~100 min (20 iters × 5-min weak-CC TimeLimit per iter
-    via the time_limit=60*5 kwarg below). Default Gurobi TimeLimit in the palma
-    functions is 15 min; we cap shorter here to keep dissertation-case turnaround
-    practical, accepting somewhat-less-improved per-iter incumbents.
+    T=8 here. T·N²=2048 binaries. Toggle USE_WEAK_CC at the top to flip back
+    to the bilinear MIQCP variant.
+
+    Expected wall time: ~100-150 min (20 iters × 5-min Gurobi TimeLimit per iter
+    via the time_limit=60*5 kwarg below). Indicator-constraint formal CC may
+    finish well under TimeLimit on most iters, since the LP relaxation is tight.
 
     Usage:
         julia --project=. script/bilevel_validation/run_validation_mn_motivation_c.jl
@@ -59,17 +61,18 @@ pshed_type = "absolute"
 const N_ROUNDS = 1
 const N_BERNOULLI_SAMPLES = 2000
 
-# T=6 — reduced from 8 for faster turnaround at N=16. Hours chosen to keep
-# representative coverage: trough / morning / midday / pre-peak / peak / descent.
-# At T=6 N=16, T·N²=1536 binaries (vs 2048 at T=8, 6144 at T=24).
-const SELECTED_HOURS    = [4, 8, 12, 15, 18, 22]
+# T=8 — full subsample matching run_validation_mn.jl's default.
+# Hours span trough / morning ramp / midday plateau / pre-peak / evening peak / descent.
+const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
+# Toggle formulation: false = formal CC with indicator constraints (commit 874dba3).
+const USE_WEAK_CC       = false
 const N_PERIODS         = length(SELECTED_HOURS)
 const PEAK_STRESS       = 1.0
 const CENTER_AT_NOMINAL = true
 const PERIOD_HOURS      = SELECTED_HOURS
 const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [1, 3, 5]   # → hours 4, 12, 18 (trough / midday / evening peak) in T=6 indexing
+REP_PERIODS = [2, 4, 6]   # → hours 6, 12, 18 (morning ramp / midday / evening peak) in T=8 indexing
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -80,12 +83,13 @@ gurobi_solver = Gurobi.Optimizer
 # Tag the save dir so this run lives separately from formal-CC runs of the
 # same case (avoids clobbering the JLD2 in any future motivation_c formal-CC
 # experiment).
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_weakcc/$(FAIR_FUNC)_$(pshed_type)"
+const VARIANT_TAG = USE_WEAK_CC ? "weakcc" : "formalcc"
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_$(VARIANT_TAG)/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
 global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
-@info "Logging to $log_file (weak-CC Palma variant)"
+@info "Logging to $log_file ($VARIANT_TAG Palma variant)"
 
 # ============================================================
 # STEP 1: NETWORK + MULTINETWORK SETUP
@@ -108,7 +112,7 @@ validation_results = Dict{String,Any}(
     "peak_stress"      => PEAK_STRESS,
     "peak_time_costs"  => PEAK_TIME_COSTS,
     "pshed_type"       => pshed_type,
-    "palma_variant"    => "weak_cc",
+    "palma_variant"    => USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator",
 )
 
 @info "N_PERIODS=$N_PERIODS, hours=$PERIOD_HOURS, agg_scales=$LOAD_SCALE_FACTORS, peak_stress=$PEAK_STRESS, λ=$PEAK_TIME_COSTS"
@@ -159,16 +163,14 @@ for k in 1:ITERATIONS
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
     # Divergences from run_validation_mn.jl:
-    #   use_weak_cc=true  → weak CC's bilinear MIQCP finds non-trivial TimeLimit
-    #                       incumbents on motivation_c (formal CC stalls at do-nothing)
-    #   time_limit=60*5   → cap each upper-level solve at 5 min instead of 15 min,
-    #                       cutting total bilevel time from ~5h to ~100 min at the
-    #                       cost of slightly worse per-iter incumbents
+    #   use_weak_cc=USE_WEAK_CC (controlled at top of script; false → formal-CC
+    #                            indicator-constraint variant)
+    #   time_limit=60*5         → cap each upper-level solve at 5 min instead of 15.
     pshed_new, fair_weight_vals, status = lin_palma_reformulated(
         dpshed, pshed_val, weight_vals, pd_all;
         critical_ids=critical_id, weight_ids=weight_ids,
         peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-        use_weak_cc=true,
+        use_weak_cc=USE_WEAK_CC,
         time_limit=60*5)
 
     last_status = status
@@ -320,7 +322,7 @@ include("results_block_mn.jl")
 # STEP 6: PERSIST PER-RUN DATA FOR STANDALONE PLOTTING
 # ============================================================
 using JLD2
-jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_weakcc_$(FAIR_FUNC)_$(pshed_type).jld2")
+jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(VARIANT_TAG)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
     pshed_matrix         = pshed_matrix,
     pd_ref_matrix        = pd_ref_matrix,
@@ -340,7 +342,7 @@ JLD2.jldsave(jld_path;
     period_max           = period_max,
     rounded_objectives   = rounded_objectives,
     relaxed_mn_objective = mn_relaxed_final["objective"],
-    palma_variant        = "weak_cc",
+    palma_variant        = USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator",
 )
 println("Saved bilevel run data → $jld_path")
 
