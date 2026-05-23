@@ -33,14 +33,15 @@ using Distributions
 using DiffOpt
 using JuMP
 import MathOptInterface
-const MOI = MathOptInterface
+MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
 using Dates
 using Logging, LoggingExtras
+using Printf
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 include("validation_utils.jl")
 include("../../src/implementation/other_fair_funcs.jl")
@@ -49,33 +50,40 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASE = "motivation_c_good4integer"
+CASE = "motivation_c_good4integer"
 case = "13_bus"
 
-const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
-const LS_PERCENT = 0.8
-const ITERATIONS = 20
+CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+LS_PERCENT = 0.8
+# 2026-05-19 defense run: cut to 5 after two prior min_max attempts (killed at
+# iters 12 and 9) showed Σ pshed convergence by iter ~5, with iters 6+ alternating
+# Δ=0 (no upper-level weight movement) and DiffOpt inertia-correction slowdowns
+# pushing per-iter wall time from ~15 min to ~3 hr. Iters 11+ hit DiffOpt's
+# zero-Jacobian fallback (load_shed_as_parameter.jl:519-545). 5 captures the
+# meaningful bilevel convergence; the trajectory log from the killed iters10
+# min_max run documents what happens beyond iter 5.
+ITERATIONS = 5
 # Allow FAIR_FUNC to be overridden by env var so the same script can run both
 # "palma" and "min_max" defense cases without re-editing the source.
-const FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")
+FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")
 @assert FAIR_FUNC in ("palma", "min_max") "FAIR_FUNC=\"$FAIR_FUNC\" not supported here; use \"palma\" or \"min_max\""
 pshed_type = "absolute"
-const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+N_ROUNDS = 1
+N_BERNOULLI_SAMPLES = 2000
 
 # T=8 — full subsample matching run_validation_mn.jl's default.
 # Hours span trough / morning ramp / midday plateau / pre-peak / evening peak / descent.
-const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
+SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
 # Defense final: weak-CC bilinear MIQCP (matches prior reference run).
-const USE_WEAK_CC       = true
+USE_WEAK_CC       = true
 # Per-iter Gurobi TimeLimit for Palma upper-level (seconds). 10 min × 20 iters
 # ≈ 3.5 hr worst case; prior 5-min run shed all sheddable loads at TimeLimit.
-const PALMA_TIME_LIMIT  = 60 * 10
-const N_PERIODS         = length(SELECTED_HOURS)
-const PEAK_STRESS       = 1.0
-const CENTER_AT_NOMINAL = true
-const PERIOD_HOURS      = SELECTED_HOURS
-const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+PALMA_TIME_LIMIT  = 60 * 10
+N_PERIODS         = length(SELECTED_HOURS)
+PEAK_STRESS       = 1.0
+CENTER_AT_NOMINAL = true
+PERIOD_HOURS      = SELECTED_HOURS
+PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
 REP_PERIODS = [2, 4, 6]   # → hours 6, 12, 18 (morning ramp / midday / evening peak) in T=8 indexing
 
@@ -90,7 +98,7 @@ gurobi_solver = Gurobi.Optimizer
 # experiment). For min_max, USE_WEAK_CC is irrelevant (no Palma reformulation),
 # but we still tag the dir with "weakcc" so a paired weak-CC palma/min_max
 # defense run lives in the same parent dir.
-const VARIANT_TAG = USE_WEAK_CC ? "weakcc" : "formalcc"
+VARIANT_TAG = USE_WEAK_CC ? "weakcc" : "formalcc"
 save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_$(VARIANT_TAG)/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
@@ -151,10 +159,13 @@ all_pshed_upper = Float64[]
 last_status = MOI.OPTIMIZE_NOT_CALLED
 final_weight_ids = Int[]
 final_pshed_nw_ids = Tuple[]
+iter_timings = Dict{Symbol,Any}[]
 
 for k in 1:ITERATIONS
     global fair_weights, iteration_label_consistent, last_status, final_weight_ids, final_pshed_nw_ids
     println("\n  --- Iteration $k ---")
+
+    timing = Dict{Symbol,Any}(:iter => k)
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
@@ -163,10 +174,11 @@ for k in 1:ITERATIONS
         # for Palma per [[project_palma_skip_integer_warmstart]] — topology-fix
         # collapses pshed to {0,pd} and breaks Charnes-Cooper σ*bot=1.
         if FAIR_FUNC != "palma"
-            mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
+            t_int = @elapsed mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
                 peak_time_costs=PEAK_TIME_COSTS)
+            timing[:integer_warmstart_s] = t_int
             int_term = mld_int_mn["termination_status"]
-            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term"
+            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term (t=$(round(t_int,digits=1))s)"
             if int_term ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
                 error("integer MLD did not converge (status=$int_term)")
             end
@@ -174,12 +186,19 @@ for k in 1:ITERATIONS
                 mn_new["nw"][nw_id] = update_network(
                     mld_int_mn["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
             end
+        else
+            timing[:integer_warmstart_s] = 0.0
         end
 
-        dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
-            lower_level_soln_mn(mn_new, fair_weights, k)
+        lower_timings = Dict{Symbol,Any}()
+        t_lower = @elapsed (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
+            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings))
+        timing[:lower_level_total_s] = t_lower
+        merge!(timing, Dict(Symbol("lower_$(k2)") => v for (k2, v) in lower_timings))
     catch err
         @warn "[$FAIR_FUNC/$pshed_type] iter $k lower-level failed ($err) — stopping bilevel"
+        timing[:fail_phase] = "lower_level"
+        push!(iter_timings, timing)
         break
     end
     n_loads = length(weight_ids)
@@ -187,24 +206,31 @@ for k in 1:ITERATIONS
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
     local pshed_new, fair_weight_vals, status
+    upper_timings = Dict{Symbol,Any}()
     try
-        if FAIR_FUNC == "palma"
-            # Defense final: weak-CC MIQCP with 10-min Gurobi TimeLimit per iter.
-            pshed_new, fair_weight_vals, status = lin_palma_reformulated(
-                dpshed, pshed_val, weight_vals, pd_all;
-                critical_ids=critical_id, weight_ids=weight_ids,
-                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-                use_weak_cc=USE_WEAK_CC,
-                time_limit=PALMA_TIME_LIMIT)
-        else  # "min_max"
-            pshed_new, fair_weight_vals, status = min_max_load_shed(
-                dpshed, pshed_val, weight_vals;
-                critical_ids=critical_id, weight_ids=weight_ids,
-                peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-                pd=pd_all, pshed_type=pshed_type)
+        t_upper = @elapsed begin
+            if FAIR_FUNC == "palma"
+                # Defense final: weak-CC MIQCP with 10-min Gurobi TimeLimit per iter.
+                pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+                    dpshed, pshed_val, weight_vals, pd_all;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    use_weak_cc=USE_WEAK_CC,
+                    time_limit=PALMA_TIME_LIMIT, timings=upper_timings)
+            else  # "min_max"
+                pshed_new, fair_weight_vals, status = min_max_load_shed(
+                    dpshed, pshed_val, weight_vals;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    pd=pd_all, pshed_type=pshed_type, timings=upper_timings)
+            end
         end
+        timing[:upper_level_total_s] = t_upper
+        merge!(timing, Dict(Symbol("upper_$(k2)") => v for (k2, v) in upper_timings))
     catch err
         @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level FAILED ($err) — stopping bilevel, keeping iter $(k-1) weights"
+        timing[:fail_phase] = "upper_level"
+        push!(iter_timings, timing)
         break
     end
 
@@ -231,6 +257,19 @@ for k in 1:ITERATIONS
     push!(all_pshed_lower, sum(pshed_val))
     push!(all_pshed_upper, sum(pshed_new))
     println("    Σ pshed (lower) = $(round(sum(pshed_val), digits=3))   Σ pshed (upper) = $(round(sum(pshed_new), digits=3))")
+
+    timing[:total_iter_s] = get(timing, :integer_warmstart_s, 0.0) +
+                            get(timing, :lower_level_total_s, 0.0) +
+                            get(timing, :upper_level_total_s, 0.0)
+    push!(iter_timings, timing)
+    @info @sprintf("[%s/%s] iter %d timings: int=%.1fs lower=%.1fs (primal=%.1fs jac=%.1fs) upper=%.1fs total=%.1fs",
+        FAIR_FUNC, pshed_type, k,
+        get(timing, :integer_warmstart_s, 0.0),
+        get(timing, :lower_level_total_s, 0.0),
+        get(timing, :lower_primal_solve_s, 0.0),
+        get(timing, :lower_jacobian_loop_s, 0.0),
+        get(timing, :upper_level_total_s, 0.0),
+        timing[:total_iter_s])
 end
 
 validation_results["bilevel"] = Dict(
@@ -357,6 +396,12 @@ include("results_block_mn.jl")
 # STEP 6: PERSIST PER-RUN DATA FOR STANDALONE PLOTTING
 # ============================================================
 using JLD2
+# Backfill iter_timings if running Step 6 in isolation against a pre-instrumentation
+# session (variable only gets initialized inside the bilevel loop in Step 2).
+if !@isdefined(iter_timings)
+    @warn "iter_timings not defined — saving empty Vector. (Re-run the full script to capture per-iter timings.)"
+    iter_timings = Dict{Symbol,Any}[]
+end
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(VARIANT_TAG)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
     pshed_matrix         = pshed_matrix,
@@ -378,8 +423,22 @@ JLD2.jldsave(jld_path;
     rounded_objectives   = rounded_objectives,
     relaxed_mn_objective = mn_relaxed_final["objective"],
     palma_variant        = FAIR_FUNC == "palma" ? (USE_WEAK_CC ? "weak_cc" : "formal_cc_indicator") : "n/a",
+    iter_timings         = iter_timings,
 )
 println("Saved bilevel run data → $jld_path")
+
+if !isempty(iter_timings)
+    println("\nPer-iter timings (seconds):")
+    @printf "  %3s %10s %10s %10s %10s %10s\n" "k" "int" "lower" "primal" "jac_loop" "upper"
+    for t in iter_timings
+        @printf "  %3d %10.2f %10.2f %10.2f %10.2f %10.2f\n" t[:iter] get(t, :integer_warmstart_s, 0.0) get(t, :lower_level_total_s, 0.0) get(t, :lower_primal_solve_s, 0.0) get(t, :lower_jacobian_loop_s, 0.0) get(t, :upper_level_total_s, 0.0)
+    end
+    tot_int   = sum(get(t, :integer_warmstart_s, 0.0)  for t in iter_timings)
+    tot_lower = sum(get(t, :lower_level_total_s, 0.0)  for t in iter_timings)
+    tot_upper = sum(get(t, :upper_level_total_s, 0.0)  for t in iter_timings)
+    @printf "  ----------------------------------------------------------------\n"
+    @printf "  %3s %10.2f %10.2f %10s %10s %10.2f   total=%.1fs\n" "Σ" tot_int tot_lower "" "" tot_upper (tot_int+tot_lower+tot_upper)
+end
 
 println("\nMulti-period validation complete (motivation_c / $FAIR_FUNC / $VARIANT_TAG).")
 

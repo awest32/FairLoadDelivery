@@ -17,7 +17,7 @@ using PowerModelsDistribution, PowerModels
 using Ipopt, Gurobi, HiGHS
 using JuMP
 import MathOptInterface
-const MOI = MathOptInterface
+MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
@@ -27,7 +27,7 @@ using Statistics
 using DiffOpt
 using JLD2
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 include("../bilevel_validation/validation_utils.jl")
 include("../../src/implementation/other_fair_funcs.jl")
@@ -36,26 +36,26 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["case6_unbalanced_switch_good4integer"]
-const FAIR_FUNCS = ["min_max"]#, "min_max", "equality_min", "proportional", "jain", "palma"]
-const LS_PERCENT = 0.8
-const WARMSTART_ITERATIONS = 0  # Fixed warm-up phase; set to 0 to disable
-const ITERATIONS = 20           # Main iterations after warm-start
-const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
-const SWITCH_RATING = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
+CASES = ["case6_unbalanced_switch_good4integer"]
+FAIR_FUNCS = ["min_max"]#, "min_max", "equality_min", "proportional", "jain", "palma"]
+LS_PERCENT = 0.8
+WARMSTART_ITERATIONS = 0  # Fixed warm-up phase; set to 0 to disable
+ITERATIONS = 20           # Main iterations after warm-start
+N_ROUNDS = 1
+N_BERNOULLI_SAMPLES = 2000
+SWITCH_RATING = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
-const SOURCE_PU = 1.03
-const N_PERIODS = 2
+SOURCE_PU = 1.03
+N_PERIODS = 2
 
 
 # Gaussian load profile: peak at hour 14 (1pm), σ=4 hours
 # Base load 1.0, peak load 2.0
-const LOAD_SCALE_FACTORS = [1.0,1.0]#[round(0.8 + 1.0 * exp(-((t - N_PERIODS/2)^2) / (2 * 4^2)), digits=3) for t in 0:N_PERIODS-1]
+LOAD_SCALE_FACTORS = [1.0,1.0]#[round(0.8 + 1.0 * exp(-((t - N_PERIODS/2)^2) / (2 * 4^2)), digits=3) for t in 0:N_PERIODS-1]
 
 # Gaussian cost profile: peak at hour 14 (2pm), σ=3 hours
 # Base cost 8 ¢/kWh, peak cost 30 ¢/kWh
-const PEAK_TIME_COSTS = [1.0,1.0]#[round(8 + 22 * exp(-((t - N_PERIODS/2)^2) / (2 * 3^2)), digits=2) for t in 0:N_PERIODS-1]
+PEAK_TIME_COSTS = [1.0,1.0]#[round(8 + 22 * exp(-((t - N_PERIODS/2)^2) / (2 * 3^2)), digits=2) for t in 0:N_PERIODS-1]
 
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_multiperiod"

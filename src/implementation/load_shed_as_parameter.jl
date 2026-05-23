@@ -924,7 +924,9 @@ function lin_palma_reformulated(
     weight_budget::Float64 = Inf,
     use_weak_cc::Bool = false,
     time_limit::Real = 60 * 15,  # Gurobi TimeLimit per upper-level solve (seconds)
+    timings::Union{Dict,Nothing} = nothing,
 )
+    formulation_used = use_weak_cc ? "weak_cc_miqcp" : "formal_cc_milp"
     result = if use_weak_cc
         palma_ratio_minimization(
             dpshed_dw, pshed_prev, weights_prev, pd;
@@ -957,6 +959,7 @@ function lin_palma_reformulated(
         catch err
             if occursin("INFEASIBLE", string(err))
                 @warn "[Palma] formal CC returned INFEASIBLE — falling back to weak CC for this iter"
+                formulation_used = "formal_cc_infeasible_then_weak_cc"
                 palma_ratio_minimization(
                     dpshed_dw, pshed_prev, weights_prev, pd;
                     trust_radius    = 0.5,
@@ -983,6 +986,12 @@ function lin_palma_reformulated(
     sorted_pserved = sort(pserved_new)
     denom = sum(sorted_pserved[i] for i in bottom_40_idx)
     σ = denom > 0 ? 1.0 / denom : 1e-8
+
+    if timings !== nothing
+        timings[:solve_time_s] = result.solve_time
+        timings[:formulation]  = formulation_used
+        timings[:status]       = string(result.status)
+    end
 
     return result.pshed_new, result.weights_new, result.status
 end

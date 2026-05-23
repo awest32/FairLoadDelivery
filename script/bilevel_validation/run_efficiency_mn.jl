@@ -37,29 +37,31 @@ include("validation_utils.jl")
 # CONFIGURATION
 # ============================================================
 #const CASE      = "motivation_c_good4integer"
-const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"
 case            = "more_meshed_6bus" #"13_bus"
 #"../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT      = 0.8
-const FAIR_FUNC = "efficiency"
+FAIR_FUNC = "efficiency"
 pshed_type      = "absolute"
 
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. See
 # run_validation_mn.jl for rationale; T=8 keeps DiffOpt forward-mode tractable
 # vs the full 24h day.
-const SELECTED_HOURS    = [2, 5, 8, 12, 15, 18, 21, 23]
-const N_PERIODS         = length(SELECTED_HOURS)
-const PEAK_STRESS       = 1.0
+
+SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+N_PERIODS         = length(SELECTED_HOURS)
+
+PEAK_STRESS       = 1.0
 # When true, each schedule is divided by its own daily mean before applying
 # peak_stress — so the daily-average per-load scale equals PEAK_STRESS exactly
 # (1.4× nominal here) and the nameplate pd is the daily mean, matching the
 # single-period reference.
-const CENTER_AT_NOMINAL = true
-const PERIOD_HOURS      = SELECTED_HOURS
-const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+CENTER_AT_NOMINAL = true
+PERIOD_HOURS      = SELECTED_HOURS
+PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [2, 4, 6]   # → hours 2, 12, 18 (trough/plateau/peak)
+REP_PERIODS = [6, 11, 20]   # → hours 2, 12, 18 (trough/plateau/peak)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver   = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)

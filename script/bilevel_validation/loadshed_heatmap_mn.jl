@@ -36,7 +36,7 @@ pshed_type = "absolute"
 # BACKFILL_CONFIG — only used if the JLD2 predates the bus-data schema.
 # Match these to the run_validation_mn.jl settings used to produce the JLD2.
 # ============================================================
-const BACKFILL_CONFIG = Dict(
+BACKFILL_CONFIG = Dict(
     "case6_unbalanced_switch_more_meshed_good4integer" => (
         case_file        = joinpath(@__DIR__, "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"),
         ls_percent       = 0.8,
@@ -97,9 +97,30 @@ else
     eng, math, lbs, critical_id = FairLoadDelivery.setup_network(
         cfg.case_file, cfg.ls_percent; switch_rating = cfg.switch_rating)
 
+    # Pick selected_hours that match the saved N_PERIODS. cfg.selected_hours is
+    # an OK default but newer runs use T=24 (collect(0:23)). Fall back to a
+    # sensible default by N_PERIODS so old + new JLD2s both backfill.
+    selected_hours_eff = if length(cfg.selected_hours) == N_PERIODS
+        cfg.selected_hours
+    elseif N_PERIODS == 24
+        collect(0:23)
+    elseif N_PERIODS == 8
+        [4, 6, 8, 12, 15, 18, 20, 22]
+    elseif N_PERIODS == 3
+        [6, 12, 18]
+    else
+        error("BACKFILL_CONFIG[$CASE].selected_hours has length $(length(cfg.selected_hours)) " *
+              "but JLD2 reports N_PERIODS=$N_PERIODS. No automatic mapping available — " *
+              "edit BACKFILL_CONFIG[$CASE].selected_hours to match the original run.")
+    end
+    if selected_hours_eff !== cfg.selected_hours
+        @info "Backfill: using N_PERIODS-derived selected_hours=$selected_hours_eff " *
+              "(BACKFILL_CONFIG had $(cfg.selected_hours))"
+    end
+
     mn_data = FairLoadDelivery.create_multinetwork_data_profiled(
         math, N_PERIODS;
-        hours = cfg.selected_hours,
+        hours = selected_hours_eff,
         peak_stress = cfg.peak_stress,
         center_at_nominal = cfg.center_at_nominal)
 
@@ -193,6 +214,6 @@ p_heat = heatmap(bus_index_labels, period_labels, bus_status_binary,
     legendfontsize = 12,
 )
 display(p_heat)
-out_path = joinpath(save_dir, "loadshed_heatmap_replot_$(pshed_type)_$(CASE).svg")
+out_path = joinpath(save_dir, "loadshed_heatmap_replot_$(pshed_type)_$(CASE)_$(FAIR_FUNC).svg")
 savefig(p_heat, out_path)
 println("Per-bus heatmap → $out_path")

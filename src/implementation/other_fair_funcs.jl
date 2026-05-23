@@ -94,7 +94,7 @@ end
 # pshed_type ∈ ("absolute", "proportional"):
 #   - "absolute": max_shed ≥ λ[t] · pshed_new[i]
 #   - "proportional": max_shed ≥ λ[t] · pshed_new[i] / pd[i]  (requires pd; loads with pd==0 skipped)
-function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, pd::Vector{Float64}=Float64[],reg::Float64=1e-4, alpha::Float64=1.0, weight_budget::Float64=Inf, pshed_type::String="absolute")
+function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, pd::Vector{Float64}=Float64[],reg::Float64=1e-4, alpha::Float64=1.0, weight_budget::Float64=Inf, pshed_type::String="absolute", timings::Union{Dict,Nothing}=nothing)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -149,10 +149,15 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
 
     @objective(model, Min, max_shed)
     JuMP.set_silent(model)
-    optimize!(model)
+    solve_time = @elapsed optimize!(model)
     status = termination_status(model)
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
         @warn "[min_max_load_shed] Solver did not converge: $status"
+    end
+    if timings !== nothing
+        timings[:solve_time_s] = solve_time
+        timings[:formulation]  = "min_max_lp"
+        timings[:status]       = string(status)
     end
     return value.(pshed_new), value.(weights_new), status
 end
@@ -234,7 +239,7 @@ end
 
 # Function to compute complete efficiency (alpha fairness) of load shed
 # With peak_time_costs (peak charges): min Σ_t λ[t] * Σ_i pshed_t[i]
-function efficient_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64};critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0)
+function efficient_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64};critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, timings::Union{Dict,Nothing}=nothing)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
     n_per_period = n_loads > 0 ? n_loads : m
@@ -263,10 +268,15 @@ function efficient_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Floa
 
     @objective(model, Min, sum(λ[t] * sum(pshed_new[(t-1)*n + i] for i in 1:n) for t in 1:n_periods))
     JuMP.set_silent(model)
-    optimize!(model)
+    solve_time = @elapsed optimize!(model)
     status = termination_status(model)
     if status ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED]
         @warn "[efficient_load_shed] Solver did not converge: $status"
+    end
+    if timings !== nothing
+        timings[:solve_time_s] = solve_time
+        timings[:formulation]  = "efficiency_lp"
+        timings[:status]       = string(status)
     end
     return value.(pshed_new), value.(weights_new), status
 end

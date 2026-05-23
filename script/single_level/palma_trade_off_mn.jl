@@ -63,8 +63,8 @@ using CSV
 using Dates
 import MathOptInterface as MOI
 
-const _PMD = PowerModelsDistribution
-const PMD  = PowerModelsDistribution
+_PMD = PowerModelsDistribution
+PMD  = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
@@ -91,14 +91,14 @@ pshed_type = "absolute"  # only absolute supported in this script
 # carried in plots or CSVs.
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
-const SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
-const N_PERIODS      = length(SELECTED_HOURS)
+SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
-const PEAK_STRESS = 1.0
+PEAK_STRESS = 1.0
 # OLD uniform-scalar profile (commented for reference / quick A/B):
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
-const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
 REP_PERIODS = [2, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
 
@@ -524,7 +524,7 @@ load_labels = [ref_nw0["load"][lid]["name"]
 # FONT_KW kept for backwards compat with existing call sites, but now matches
 # the 9pt defaults set in figure_defaults.jl so nothing in this script
 # overrides the unified font sizes.
-const FONT_KW = (tickfontsize = 9, guidefontsize = 9,
+FONT_KW = (tickfontsize = 9, guidefontsize = 9,
                  titlefontsize = 9, legendfontsize = 9)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)

@@ -11,11 +11,11 @@
 # ============================================================
 # CONSTANTS
 # ============================================================
-const V_MIN = 0.9
-const V_MAX = 1.1
-const V_MIN_SQ = V_MIN^2  # 0.81
-const V_MAX_SQ = V_MAX^2  # 1.21
-const TOLERANCE = 1e-6
+v_min = 0.9
+v_max = 1.1
+v_min_SQ = v_min^2  # 0.81
+v_max_SQ = v_max^2  # 1.21
+tolerance = 1e-6
 # ============================================================
 # VOLTAGE LIMIT CHECKS
 # ============================================================
@@ -50,10 +50,10 @@ function check_voltage_limits_relaxed(result::Dict, math::Dict)
                     continue
                 end
                 n_checked += 1
-                if w_scalar < V_MIN_SQ - TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=phase, w=w_scalar, type="undervoltage", limit=V_MIN_SQ))
-                elseif w_scalar > V_MAX_SQ + TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=phase, w=w_scalar, type="overvoltage", limit=V_MAX_SQ))
+                if w_scalar < v_min_SQ - tolerance
+                    push!(violations, (bus_id=bus_id, phase=phase, w=w_scalar, type="undervoltage", limit=v_min_SQ))
+                elseif w_scalar > v_max_SQ + tolerance
+                    push!(violations, (bus_id=bus_id, phase=phase, w=w_scalar, type="overvoltage", limit=v_max_SQ))
                 end
             end
         elseif w_vals isa AbstractArray
@@ -64,10 +64,10 @@ function check_voltage_limits_relaxed(result::Dict, math::Dict)
                     continue
                 end
                 n_checked += 1
-                if w_scalar < V_MIN_SQ - TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=idx, w=w_scalar, type="undervoltage", limit=V_MIN_SQ))
-                elseif w_scalar > V_MAX_SQ + TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=idx, w=w_scalar, type="overvoltage", limit=V_MAX_SQ))
+                if w_scalar < v_min_SQ - tolerance
+                    push!(violations, (bus_id=bus_id, phase=idx, w=w_scalar, type="undervoltage", limit=v_min_SQ))
+                elseif w_scalar > v_max_SQ + tolerance
+                    push!(violations, (bus_id=bus_id, phase=idx, w=w_scalar, type="overvoltage", limit=v_max_SQ))
                 end
             end
         else
@@ -77,10 +77,10 @@ function check_voltage_limits_relaxed(result::Dict, math::Dict)
                 continue
             end
             n_checked += 1
-            if w_scalar < V_MIN_SQ
-                push!(violations, (bus_id=bus_id, phase="all", w=w_scalar, type="undervoltage", limit=V_MIN_SQ-TOLERANCE))
-            elseif w_scalar > V_MAX_SQ
-                push!(violations, (bus_id=bus_id, phase="all", w=w_scalar, type="overvoltage", limit=V_MAX_SQ+TOLERANCE))
+            if w_scalar < v_min_SQ
+                push!(violations, (bus_id=bus_id, phase="all", w=w_scalar, type="undervoltage", limit=v_min_SQ-tolerance))
+            elseif w_scalar > v_max_SQ
+                push!(violations, (bus_id=bus_id, phase="all", w=w_scalar, type="overvoltage", limit=v_max_SQ+tolerance))
             end
         end
     end
@@ -122,10 +122,10 @@ function check_voltage_limits_ac(result::Dict, math::Dict)
                     continue
                 end
                 n_checked += 1
-                if v_sq < V_MIN_SQ - TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=idx, v_sq=v_sq, v_mag=sqrt(v_sq), type="undervoltage", limit=V_MIN_SQ))
-                elseif v_sq > V_MAX_SQ + TOLERANCE
-                    push!(violations, (bus_id=bus_id, phase=idx, v_sq=v_sq, v_mag=sqrt(v_sq), type="overvoltage", limit=V_MAX_SQ))
+                if v_sq < v_min_SQ - tolerance
+                    push!(violations, (bus_id=bus_id, phase=idx, v_sq=v_sq, v_mag=sqrt(v_sq), type="undervoltage", limit=v_min_SQ))
+                elseif v_sq > v_max_SQ + tolerance
+                    push!(violations, (bus_id=bus_id, phase=idx, v_sq=v_sq, v_mag=sqrt(v_sq), type="overvoltage", limit=v_max_SQ))
                 end
             end
         end

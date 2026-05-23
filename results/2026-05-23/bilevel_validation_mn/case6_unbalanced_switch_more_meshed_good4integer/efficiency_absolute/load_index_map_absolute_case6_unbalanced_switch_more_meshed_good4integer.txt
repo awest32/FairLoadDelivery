@@ -1,0 +1,11 @@
+# Load index → original load name mapping for case6_unbalanced_switch_more_meshed_good4integer / efficiency / absolute
+# index	name
+1	l7
+2	l6
+3	l8
+4	l2
+5	l4
+6	l5
+7	l3
+8	l9
+9	l1

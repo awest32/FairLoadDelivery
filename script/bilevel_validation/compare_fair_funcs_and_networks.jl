@@ -5,7 +5,7 @@ using PowerModelsDistribution, PowerModels
 using Ipopt, Gurobi, HiGHS
 using JuMP
 import MathOptInterface
-const MOI = MathOptInterface
+MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
@@ -26,14 +26,14 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-const CASES = ["motivation_c"]#["ieee123_aw_mod"]
-const FAIR_FUNCS = ["efficiency",  "min_max","palma", "jain", "equality_min", "proportional"]#min_max throws error for motivation_c
-const LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
-const ITERATIONS = 20 
-const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000#000
-const SOURCE_PU = 1.03
-const critical_buses = []# ["611c"]
+CASES = ["motivation_c"]#["ieee123_aw_mod"]
+FAIR_FUNCS = ["efficiency",  "min_max","palma", "jain", "equality_min", "proportional"]#min_max throws error for motivation_c
+LS_PERCENT = 0.8 #20% load shed, 80% generation capacity
+ITERATIONS = 20 
+N_ROUNDS = 1
+N_BERNOULLI_SAMPLES = 2000#000
+SOURCE_PU = 1.03
+critical_buses = []# ["611c"]
 # Save results
 save_dir = "results/$(Dates.today())/bilevel_comparisons_single_period"
 mkpath(save_dir)

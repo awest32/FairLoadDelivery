@@ -1,0 +1,5 @@
+case,fair_func,pshed_type,metric,value
+case6_unbalanced_switch_more_meshed_good4integer,efficiency,absolute,L1,565.6830942905832
+case6_unbalanced_switch_more_meshed_good4integer,efficiency,absolute,L2,344.82856636723443
+case6_unbalanced_switch_more_meshed_good4integer,efficiency,absolute,Linf,249.71246006961297
+case6_unbalanced_switch_more_meshed_good4integer,efficiency,absolute,CoV,1.035575405287177

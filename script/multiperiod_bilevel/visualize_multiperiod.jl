@@ -18,7 +18,7 @@ using JLD2
 using Dates
 using Colors
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 # ============================================================
 # LOCATE RESULTS

@@ -116,7 +116,7 @@ nm in norms_per_alpha]
 # ----------------------------------------------------------------------------
 load_labels = [load_data["name"] for (id, load_data) in sort(ref[:load])]
 
-const FONT_KW = (tickfontsize = 16, guidefontsize = 22,
+FONT_KW = (tickfontsize = 16, guidefontsize = 22,
                  titlefontsize = 18, legendfontsize = 16)
 
 function build_dist_plot(pshed_per_load, title_str)

@@ -16,7 +16,7 @@ using DataFrames
 using CSV
 using Dates
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
@@ -43,20 +43,20 @@ LS_PERCENT = 0.8
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-const SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
-const N_PERIODS      = length(SELECTED_HOURS)
+SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful
 # schedules cap at ~1.10; bump this to drive more shedding, dial it down for
 # less stress.
-const PEAK_STRESS = 1.0
+PEAK_STRESS = 1.0
 
 # OLD: uniform linear-ramp scalar applied to every load/phase identically.
 # Kept (commented) for reference / quick A/B against the per-load profiles.
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.75, 1.1, N_PERIODS)]
 
 # TOU pricing: low overnight, peak in evening (h≈18)
-const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
 
 # Representative subset (1-indexed period indices into SELECTED_HOURS) for the
@@ -237,7 +237,7 @@ load_labels = [ref_nw0["load"][lid]["name"]
 # FONT_KW kept for backwards compat with existing call sites, but now matches
 # the 9pt defaults set in figure_defaults.jl so nothing in this script
 # overrides the unified font sizes.
-const FONT_KW = (tickfontsize = 9, guidefontsize = 9,
+FONT_KW = (tickfontsize = 9, guidefontsize = 9,
                  titlefontsize = 9, legendfontsize = 9)
 
 function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)

@@ -24,8 +24,8 @@ include("../../src/implementation/visualization.jl")
 
 # Unified 9pt font defaults.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
-CASE = "motivation_c_good4integer_weakcc"  # set to a case name before include, or provide via ARGS
-FAIR_FUNC = "palma"  # set to a fairness function name before include, or provide via ARGS
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"#motivation_c_good4integer_weakcc"  # set to a case name before include, or provide via ARGS
+FAIR_FUNC = "efficiency"  # set to a fairness function name before include, or provide via ARGS
 pshed_type = "absolute"  # set to "absolute"
 
  #"bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2"  # set to a JLD2 path before include, or provide via ARGS
@@ -103,7 +103,7 @@ ff_marker = get(FAIR_FUNC_MARKERS, FAIR_FUNC, :circle)
 ff_label  = get(FAIR_FUNC_LABELS,  FAIR_FUNC, FAIR_FUNC)
 ff_ls     = get(FAIR_FUNC_LINESTYLES, FAIR_FUNC, :solid)
 
-const FONT_KW = (tickfontsize = 20, guidefontsize = 20,
+FONT_KW = (tickfontsize = 20, guidefontsize = 20,
                  titlefontsize = 20, legendfontsize = 20)
 
 p_l1 = plot(periods_axis, l1_per_t,

@@ -23,18 +23,18 @@ import MathOptInterface as MOI
 using LinearAlgebra
 using Printf
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 include("../../src/implementation/load_shed_as_parameter.jl")
 
 # ============================================================
 # CONFIGURATION — keep tiny for fast turnaround
 # ============================================================
-const CASE_FILE  = joinpath(@__DIR__, "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss")
-const LS_PERCENT = 0.8
+CASE_FILE  = joinpath(@__DIR__, "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss")
+LS_PERCENT = 0.8
 N_PERIODS  = 1
-const HOURS      = [12]              # noon
-const PEAK_COSTS = [1.0]             # uniform single-period
+HOURS      = [12]              # noon
+PEAK_COSTS = [1.0]             # uniform single-period
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)]) * LS_PERCENT
 

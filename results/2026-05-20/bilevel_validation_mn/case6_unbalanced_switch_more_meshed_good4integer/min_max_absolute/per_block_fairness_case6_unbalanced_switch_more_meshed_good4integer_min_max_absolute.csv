@@ -1,0 +1,5 @@
+case,fair_func,pshed_type,metric,value
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,L1,1224.127880347197
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,L2,634.0285482158737
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,Linf,456.00000000000006
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,CoV,0.6531893877530606

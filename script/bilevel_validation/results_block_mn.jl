@@ -15,8 +15,17 @@
 using StatsPlots
 using FairLoadDelivery
 
-# Unified 9pt font defaults for every figure produced here.
+# Unified 9pt font defaults, then bump up — matches per_block_fairness_mn.jl
+# and per_period_norms_mn.jl so all bilevel-validation aggregate plots share a
+# single visual scale (legible when scaled down in the paper). Include must
+# come first so the bump survives.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
+default(
+    guidefontsize  = 20,
+    tickfontsize   = 18,
+    titlefontsize  = 22,
+    legendfontsize = 16,
+)
 
 # Representative periods for grouped bar (override before include() to customize).
 # Default picks 3 evenly-spaced indices into 1:N_PERIODS so it adapts to
@@ -165,7 +174,7 @@ validation_results["final"] = Dict(
     "relaxed_mn_objective"   => mn_relaxed_final["objective"],
 )
 
-report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type)_$case.txt")
+report_path = joinpath(save_dir, "validation_report_mn_$(FAIR_FUNC)_$(pshed_type)_$case.txt")
 generate_summary_report(validation_results, report_path)
 println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))")
 println("Report → $report_path")
