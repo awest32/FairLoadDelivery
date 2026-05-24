@@ -1,4 +1,5 @@
 # Load index → original load name mapping for more_meshed_6_bus / palma / absolute
+# α slice: target=0.75, realized=0.8
 # index	name
 1	l7
 2	l6

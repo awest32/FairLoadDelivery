@@ -33,21 +33,26 @@ using DataFrames
 using CSV
 using Printf
 
-_PMD = PowerModelsDistribution
+const _PMD = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
 # ============================================================
-# CONFIGURATION — set these to target a saved run
+# CONFIGURATION — set these to target a saved run.
+# ENV overrides ("POSTHOC_CASE", "POSTHOC_FAIR_FUNC", "POSTHOC_HOURS")
+# allow looping over all 3 variants from an outer driver without re-editing.
 # ============================================================
-CASE       = "case6_unbalanced_switch_more_meshed_good4integer"
-FAIR_FUNC  = "palma"      # "min_max", "palma", or "efficiency"
+CASE       = get(ENV, "POSTHOC_CASE",      "case6_unbalanced_switch_more_meshed_good4integer")
+FAIR_FUNC  = get(ENV, "POSTHOC_FAIR_FUNC", "palma")    # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"
 
 # Multinetwork profile config — must match what run_validation_mn.jl used at
 # the time the JLD2 was written, so pd_ref_matrix reconstructs identically.
-SELECTED_HOURS     = collect(0:23)
+# POSTHOC_HOURS is parsed as a comma-separated list of integer hours.
+SELECTED_HOURS     = haskey(ENV, "POSTHOC_HOURS") ?
+                        parse.(Int, split(ENV["POSTHOC_HOURS"], ",")) :
+                        collect(0:23)
 PEAK_STRESS        = 1.0
 CENTER_AT_NOMINAL  = true
 
@@ -55,8 +60,9 @@ CENTER_AT_NOMINAL  = true
 # substation block (id 1 or 2) carries no load and gets dropped automatically,
 # but among load-bearing blocks the table/plot/metrics use this order. Setting
 # to 3:7 for the 6-bus case skips the (empty) source block and gives a fixed
-# left-to-right layout that matches the case's bus numbering.
-BLOCK_ORDER = collect(3:7)
+# left-to-right layout that matches the case's bus numbering. Widened to 2:20
+# for 13-bus motivation_c — out-of-range entries warn and are filtered out.
+BLOCK_ORDER = startswith(CASE, "motivation_c") ? collect(2:20) : collect(3:7)
 
 # Resolve the .dss file the same way run_validation_mn.jl does (6-bus vs
 # 13-bus motivation_c live in different subdirs). LS_PERCENT + switch_rating

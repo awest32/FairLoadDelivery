@@ -22,14 +22,17 @@ using Dates
 
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
 
-CASE       = "case6_unbalanced_switch_more_meshed_good4integer"
-FAIR_FUNC  = "min_max"
+CASE       = get(ENV, "POSTHOC_CASE",      "case6_unbalanced_switch_more_meshed_good4integer")
+FAIR_FUNC  = get(ENV, "POSTHOC_FAIR_FUNC", "min_max")
 pshed_type = "absolute"
 
 # Representative periods (1-indexed into the saved run's N_PERIODS). Pick
 # trough / plateau / peak indices to span the day. For case6 T=24 with
-# SELECTED_HOURS = 0:23, [6, 11, 20] → hours 5, 10, 19.
-REP_PERIODS = [6, 11, 20]
+# SELECTED_HOURS = 0:23, [6, 11, 20] → hours 5, 10, 19. For the 13-bus
+# motivation_c T=2 short-period run we show both periods.
+REP_PERIODS = haskey(ENV, "POSTHOC_REP_PERIODS") ?
+                  parse.(Int, split(ENV["POSTHOC_REP_PERIODS"], ",")) :
+                  (startswith(CASE, "motivation_c") ? [1, 2] : [6, 11, 20])
 
 function _find_latest_jld2(case::String, fair_func::String, pshed_type::String)
     base = joinpath(@__DIR__, "../../results")

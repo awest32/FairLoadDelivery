@@ -20,6 +20,7 @@ using FairLoadDelivery
 # single visual scale (legible when scaled down in the paper). Include must
 # come first so the bump survives.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
+include(joinpath(@__DIR__, "../block_display.jl"))
 default(
     guidefontsize  = 20,
     tickfontsize   = 18,
@@ -40,7 +41,7 @@ print_validation_header("Step 5: Load-shed heatmap + final result")
 
 ref_load_ids = sort(collect(keys(mn_new["nw"][nw_ids_sorted[1]]["load"])), by=x->parse(Int, x))
 load_labels  = [mn_new["nw"][nw_ids_sorted[1]]["load"][lid]["name"] for lid in ref_load_ids]
-period_labels = ["t=$t" for t in 1:N_PERIODS]
+period_labels = [string(t) for t in 1:N_PERIODS]
 
 pshed_matrix = fill(NaN, N_PERIODS, length(ref_load_ids))
 for (t, nw_id) in enumerate(nw_ids_sorted)
@@ -92,12 +93,62 @@ for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     end
 end
 
-p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
-    xlabel = "Bus",
-    ylabel = "Period",
+# Re-aggregate to paper-aligned blocks if this case has a mapping defined in
+# script/block_display.jl. Otherwise render bus-level (each bus = its own
+# pseudo-block) so the figure semantics stay consistent across cases.
+display_info = resolve_block_display_from_buses(CASE, bus_labels)
+
+if display_info !== nothing
+    display_blocks, bus2block = display_info
+    @assert all(>(0), bus2block) "case $CASE block_display mapping does not cover every bus in bus_labels " *
+        "(uncovered: $(bus_labels[bus2block .== 0])). Fix BLOCK_DISPLAY in block_display.jl."
+    n_blocks_h = length(display_blocks)
+    block_tick_labels_h = [string(num) for (num, _) in display_blocks]
+    block_index_names_h = [label    for (_, label) in display_blocks]
+    block_order_descr_h = "paper-aligned (script/block_display.jl)"
+
+    block_pd_h    = zeros(N_PERIODS, n_blocks_h)
+    block_pshed_h = zeros(N_PERIODS, n_blocks_h)
+    for t in 1:N_PERIODS, b in 1:length(bus_labels)
+        col = bus2block[b]
+        col == 0 && continue
+        block_pd_h[t, col]    += bus_pd_matrix[t, b]
+        block_pshed_h[t, col] += bus_pshed_matrix[t, b]
+    end
+    status_matrix_h = fill(NaN, N_PERIODS, n_blocks_h)
+    for t in 1:N_PERIODS, b in 1:n_blocks_h
+        block_pd_h[t, b] > 1e-9 || continue
+        status_matrix_h[t, b] = 1.0 - block_pshed_h[t, b] / block_pd_h[t, b]
+    end
+else
+    n_blocks_h = length(bus_labels)
+    block_tick_labels_h = string.(1:n_blocks_h)
+    block_index_names_h = bus_labels
+    block_order_descr_h = "bus-level fallback (no block_display mapping for case $CASE)"
+    status_matrix_h = bus_status_matrix
+end
+
+println("\nBlock index → name mapping:")
+for (i, name) in enumerate(block_index_names_h)
+    println("  $(block_tick_labels_h[i])\t→\t$name")
+end
+map_path_h = joinpath(save_dir, "block_index_map_$(pshed_type)_$case.txt")
+open(map_path_h, "w") do io
+    println(io, "# Block index → name mapping for $(CASE) / $(FAIR_FUNC) / $(pshed_type)")
+    println(io, "# Block order: $(block_order_descr_h)")
+    println(io, "# index\tname")
+    for (i, name) in enumerate(block_index_names_h)
+        println(io, "$(block_tick_labels_h[i])\t$name")
+    end
+end
+println("Block index map → $map_path_h")
+
+p_heat = heatmap(block_tick_labels_h, period_labels, status_matrix_h,
+    xlabel = "Load Block",
+    ylabel = "Time Period",
     color  = cgrad(["#E5EFEA", "#2A6F6B"]),  # pale sage (shed) → muted teal (served)
     clims  = (0.0, 1.0),
-    xrotation = 45,
+    xrotation = 0,
     yticks = (1:N_PERIODS, period_labels),
     colorbar = false,
 )

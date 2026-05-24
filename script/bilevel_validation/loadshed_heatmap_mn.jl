@@ -27,9 +27,10 @@ using Plots
 using Dates
 
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
+include(joinpath(@__DIR__, "../block_display.jl"))
 
-CASE       = "case6_unbalanced_switch_more_meshed_good4integer"
-FAIR_FUNC  = "efficiency"
+CASE       = get(ENV, "POSTHOC_CASE",      "case6_unbalanced_switch_more_meshed_good4integer")
+FAIR_FUNC  = get(ENV, "POSTHOC_FAIR_FUNC", "efficiency")
 pshed_type = "absolute"
 
 # ============================================================
@@ -83,6 +84,11 @@ if haskey(saved, "bus_status_matrix") && haskey(saved, "bus_labels")
     println("Using saved bus-level matrices (new JLD2 schema).")
     bus_labels        = saved["bus_labels"]
     bus_status_matrix = saved["bus_status_matrix"]
+    # Also pull the pre-binarized pd/pshed matrices when present — needed to
+    # cleanly aggregate up to multi-bus blocks (binarized status doesn't
+    # aggregate trivially).
+    bus_pd_matrix    = get(saved, "bus_pd_matrix",    nothing)
+    bus_pshed_matrix = get(saved, "bus_pshed_matrix", nothing)
 else
     println("Old JLD2 schema — backfilling bus data via setup_network + create_multinetwork_data_profiled.")
     haskey(BACKFILL_CONFIG, CASE) ||
@@ -167,37 +173,81 @@ else
     end
 end
 
-period_labels = ["t=$t" for t in 1:N_PERIODS]
+period_labels = [string(t) for t in 1:N_PERIODS]
+
+# Apply per-case paper-aligned block ordering when one is defined for this
+# case. Requires the pre-binarized bus_pd_matrix / bus_pshed_matrix (so we
+# can re-aggregate to multi-bus blocks correctly); without those, fall back
+# to bus-level rendering using the saved/backfilled bus_status_matrix.
+display_info = resolve_block_display_from_buses(CASE, bus_labels)
+have_pd_pshed = (@isdefined(bus_pd_matrix)) && (bus_pd_matrix !== nothing) &&
+                (@isdefined(bus_pshed_matrix)) && (bus_pshed_matrix !== nothing)
+
+block_tick_labels = String[]
+block_index_names = String[]
+block_order_descr = ""
+
+if display_info !== nothing && have_pd_pshed
+    display_blocks, bus2block = display_info
+    @assert all(>(0), bus2block) "case $CASE block_display mapping does not cover every bus in bus_labels " *
+        "(uncovered: $(bus_labels[bus2block .== 0])). Fix BLOCK_DISPLAY in block_display.jl."
+    n_blocks = length(display_blocks)
+    block_tick_labels = [string(num) for (num, _) in display_blocks]
+    block_index_names = [label    for (_, label) in display_blocks]
+    block_order_descr = "paper-aligned (script/block_display.jl)"
+
+    block_pd    = zeros(N_PERIODS, n_blocks)
+    block_pshed = zeros(N_PERIODS, n_blocks)
+    for t in 1:N_PERIODS, b in 1:length(bus_labels)
+        col = bus2block[b]
+        col == 0 && continue
+        block_pd[t, col]    += bus_pd_matrix[t, b]
+        block_pshed[t, col] += bus_pshed_matrix[t, b]
+    end
+    status_matrix = fill(NaN, N_PERIODS, n_blocks)
+    for t in 1:N_PERIODS, b in 1:n_blocks
+        block_pd[t, b] > 1e-9 || continue
+        status_matrix[t, b] = 1.0 - block_pshed[t, b] / block_pd[t, b]
+    end
+else
+    if display_info !== nothing && !have_pd_pshed
+        @info "case $CASE has a block_display mapping but the JLD2 lacks bus_pd_matrix / " *
+              "bus_pshed_matrix — re-run run_validation_mn.jl to get block-level aggregation. " *
+              "Falling back to bus-level rendering for now."
+    end
+    n_blocks = length(bus_labels)
+    block_tick_labels = string.(1:n_blocks)
+    block_index_names = bus_labels
+    block_order_descr = "bus-level fallback (no block_display mapping for case $CASE, or JLD2 missing bus_pd_matrix/bus_pshed_matrix)"
+    status_matrix = bus_status_matrix
+end
 
 # Force binary (served = 1, any shed = 0) so the heatmap renders strictly two
-# colors. Buses with multiple loads where only some are shed otherwise show
-# intermediate gradient shades; for the load-block representation, any shed
-# on a bus = the block is off.
-bus_status_binary = map(bus_status_matrix) do v
+# colors. With the block constraint, all loads in a block share shed status,
+# so partial values only arise from fp rounding noise (binarizer guards).
+status_binary = map(status_matrix) do v
     isnan(v) && return NaN
     v >= 1.0 - 1e-9 ? 1.0 : 0.0
 end
 
-# Number buses 1..N in stable order and persist the mapping back to their
-# original names so plots can be cross-referenced.
-bus_index_labels = string.(1:length(bus_labels))
-println("\nBus index → name mapping:")
-for (i, name) in enumerate(bus_labels)
-    println("  $i\t→\t$name")
+println("\nBlock index → name mapping:")
+for (i, name) in enumerate(block_index_names)
+    println("  $(block_tick_labels[i])\t→\t$name")
 end
-map_path = joinpath(save_dir, "bus_index_map_$(pshed_type)_$(CASE).txt")
+map_path = joinpath(save_dir, "block_index_map_$(pshed_type)_$(CASE).txt")
 open(map_path, "w") do io
-    println(io, "# Bus index → original bus name mapping for $(CASE) / $(FAIR_FUNC) / $(pshed_type)")
+    println(io, "# Block index → name mapping for $(CASE) / $(FAIR_FUNC) / $(pshed_type)")
+    println(io, "# Block order: $(block_order_descr)")
     println(io, "# index\tname")
-    for (i, name) in enumerate(bus_labels)
-        println(io, "$i\t$name")
+    for (i, name) in enumerate(block_index_names)
+        println(io, "$(block_tick_labels[i])\t$name")
     end
 end
-println("Bus index map → $map_path")
+println("Block index map → $map_path")
 
-p_heat = heatmap(bus_index_labels, period_labels, bus_status_binary,
-    xlabel = "Bus",
-    ylabel = "Period",
+p_heat = heatmap(block_tick_labels, period_labels, status_binary,
+    xlabel = "Load Block",
+    ylabel = "Time Period",
     color  = cgrad(["#E5EFEA", "#2A6F6B"]),  # pale sage (shed) → muted teal (served)
     clims  = (0.0, 1.0),
     xrotation = 0,
@@ -216,4 +266,4 @@ p_heat = heatmap(bus_index_labels, period_labels, bus_status_binary,
 display(p_heat)
 out_path = joinpath(save_dir, "loadshed_heatmap_replot_$(pshed_type)_$(CASE)_$(FAIR_FUNC).svg")
 savefig(p_heat, out_path)
-println("Per-bus heatmap → $out_path")
+println("Per-block heatmap → $out_path")

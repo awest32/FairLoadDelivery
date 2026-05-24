@@ -95,6 +95,12 @@ N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
 PEAK_STRESS = 1.0
+# When true, each schedule is first divided by its own daily mean so the
+# daily-average per-load scale equals PEAK_STRESS exactly and the nameplate pd
+# is the daily mean (peaks reach ~1.15× nominal at the daily max). Matches the
+# bilevel run_efficiency_mn.jl / run_validation_mn.jl convention so trade-off
+# vs bilevel results are on the same demand axis.
+CENTER_AT_NOMINAL = true
 # OLD uniform-scalar profile (commented for reference / quick A/B):
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
@@ -145,7 +151,15 @@ eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
 # mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
 
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS,
+    center_at_nominal = CENTER_AT_NOMINAL)
+
+# Pure-diagnostic per-period aggregate demand fraction (not consumed by the
+# MIP). Saved to the JLD2 below so plot/log annotations can label periods
+# with their effective aggregate scale, matching the bilevel scripts.
+LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
+    hours = SELECTED_HOURS, center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
+@info "LOAD_SCALE_FACTORS (agg_scales per period): $(round.(LOAD_SCALE_FACTORS, digits=3))"
 
 println("Load profile assignments for $case:")
 for row in FairLoadDelivery.profile_assignment_table(math)
@@ -635,9 +649,8 @@ using JLD2
 math_ref = mn_data["nw"][nw_ids_sorted[1]]
 bus_name_map = FairLoadDelivery.build_bus_name_maps(math_ref)
 ref_load_ids = sort(collect(keys(math_ref["load"])), by = x -> parse(Int, x))
-load_bus_names = [get(bus_name_map, math_ref["load"][lid]["load_bus"],
-                      "bus_$(math_ref["load"][lid]["load_bus"])")
-                  for lid in ref_load_ids]
+load_bus_ids   = [math_ref["load"][lid]["load_bus"] for lid in ref_load_ids]
+load_bus_names = [get(bus_name_map, bid, "bus_$bid") for bid in load_bus_ids]
 
 per_load_period_pd = zeros(n_loads, N_PERIODS)
 for (t, nw_id) in enumerate(nw_ids_sorted)
@@ -657,10 +670,13 @@ JLD2.jldsave(jld_path;
     max_shed             = max_shed,              # alpha × period
     palma_ratio_log      = palma_ratio_log,
     load_labels          = load_labels,
+    load_bus_ids         = load_bus_ids,
     load_bus_names       = load_bus_names,
+    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
     PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
     N_PERIODS            = N_PERIODS,
     PEAK_STRESS          = PEAK_STRESS,
+    CENTER_AT_NOMINAL    = CENTER_AT_NOMINAL,
     case                 = case,
     pshed_type           = pshed_type,
     fair_func            = "palma",

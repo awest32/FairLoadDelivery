@@ -36,20 +36,19 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-#const CASE      = "motivation_c_good4integer"
-CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-case            = "more_meshed_6bus" #"13_bus"
-#"../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+CASE = "motivation_c_good4integer"
+case            = "motivation_c_13bus"
+CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT      = 0.8
 FAIR_FUNC = "efficiency"
 pshed_type      = "absolute"
 
-# Downsampled hours-of-day (0-indexed) covering trough → peak → descent. See
-# run_validation_mn.jl for rationale; T=8 keeps DiffOpt forward-mode tractable
-# vs the full 24h day.
+# 2026-05-24 short-period defense follow-up for motivation_c (13-bus).
+# T=2: midday plateau + evening peak so peak_time_cost differentiation is
+# maximal. Bump to [12, 18, 22] (T=3, peak in middle) if the 2-period run is
+# fast.
 
-SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+SELECTED_HOURS    = [12, 18]
 N_PERIODS         = length(SELECTED_HOURS)
 
 PEAK_STRESS       = 1.0
@@ -61,7 +60,7 @@ CENTER_AT_NOMINAL = true
 PERIOD_HOURS      = SELECTED_HOURS
 PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [6, 11, 20]   # → hours 2, 12, 18 (trough/plateau/peak)
+REP_PERIODS = collect(1:N_PERIODS)   # show all periods on the grouped bar
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver   = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)

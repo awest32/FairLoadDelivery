@@ -1,0 +1,9 @@
+# Bus index → original bus name mapping for more_meshed_6_bus / min_max / absolute
+# α slice: target=0.75, realized=0.7368421052631579
+# Bus order: sort by integer bus_id ascending (matches loadshed_heatmap_mn.jl)
+# index	name
+1	loadbuse
+2	loadbusa
+3	loadbusb
+4	loadbusc
+5	loadbusd

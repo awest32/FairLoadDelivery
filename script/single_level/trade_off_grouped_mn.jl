@@ -1,13 +1,10 @@
 """
-    Standalone period × load served-fraction heatmap from a saved single-level
+    Standalone per-load grouped-bar replot from a saved single-level
     multi-period trade-off JLD2.
 
-    Sibling of trade_off_grouped_mn.jl — same loader (handles both min_max
-    and palma trade-off JLD2s via FAIR_FUNC switch), same α-nearest-to-target
-    behavior, same load-index labeling. The only difference is the figure:
-    binarized served-fraction heatmap with the muted teal palette used by
-    loadshed_heatmap_mn.jl so this trade-off view lives on the same visual
-    scale as the bilevel heatmap.
+    Sibling of loadshed_grouped_mn.jl, but instead of reading a bilevel-mn
+    run keyed by (CASE, FAIR_FUNC, pshed_type), this script reads an α-sweep
+    saved by one of the single-level trade-off scripts:
 
       * min_max_trade_off_mn.jl →
             results/<date>/trade_off_mn/trade_off_mn_<case>_<pshed_type>.jld2
@@ -15,15 +12,22 @@
             results/<date>/palma_trade_off_mn/palma_sweep_mn_<case>_<pshed_type>.jld2
 
     Both share the same on-disk schema (alphas, per_load_period_shed,
-    per_load_period_pd, load_labels, N_PERIODS, case, pshed_type, fair_func),
-    so this loader handles either by branching on FAIR_FUNC.
+    load_labels, N_PERIODS, case, pshed_type, fair_func), so this loader
+    handles either by branching on FAIR_FUNC.
 
-    Override CASE / FAIR_FUNC / pshed_type / ALPHA_TARGET at the top before
-    include.
+    The α-sweep stores shed for every (α, load, period) triple. This script
+    picks the single α-slice nearest ALPHA_TARGET (configurable), then renders
+    a grouped bar of pshed (kW) per load over REP_PERIODS — matching the
+    bilevel grouped-bar's font/margins/save-path conventions so the trade-off
+    and bilevel views live on a single visual scale.
+
+    Override CASE / FAIR_FUNC / pshed_type / ALPHA_TARGET / REP_PERIODS at the
+    top before include.
 """
 
 using JLD2
 using Plots
+using StatsPlots
 using Dates
 
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
@@ -35,9 +39,17 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 #   palma_trade_off_mn.jl   → case = "more_meshed_6_bus"  (with underscore)
 # Set CASE to whichever matches the JLD2 you want to plot.
 CASE         = "more_meshed_6_bus"
-FAIR_FUNC    = "palma"     # "min_max" or "palma"
+FAIR_FUNC    = "efficiency"     # "min_max" or "palma"
 pshed_type   = "absolute"
 ALPHA_TARGET = 0.75
+
+# Representative periods (1-indexed into the saved sweep's N_PERIODS). Pick
+# trough / plateau / peak indices to span the day.
+# `nothing` → auto-pick based on N_PERIODS after the JLD2 is loaded:
+#   T=8  → [2, 4, 6]   (matches palma_trade_off_mn.jl / min_max_trade_off_mn.jl)
+#   T=24 → [6, 11, 20] (matches run_validation_mn.jl bilevel default)
+# Override here to pin a specific subset.
+REP_PERIODS = nothing
 
 function _find_latest_trade_off_jld2(case::String, fair_func::String,
                                      pshed_type::String)
@@ -46,12 +58,15 @@ function _find_latest_trade_off_jld2(case::String, fair_func::String,
 
     subdir, fname = if fair_func == "min_max"
         ("trade_off_mn",
-         "trade_off_mn_$(case)_$(pshed_type).jld2")
+         "min_max_trade_off_mn_$(case)_$(pshed_type).jld2")
     elseif fair_func == "palma"
         ("palma_trade_off_mn",
          "palma_sweep_mn_$(case)_$(pshed_type).jld2")
+    elseif fair_func == "efficiency"
+        ("trade_off_mn",
+         "efficiency_trade_off_mn_$(case)_$(pshed_type).jld2")
     else
-        error("Unsupported FAIR_FUNC=$fair_func (expected \"min_max\" or \"palma\")")
+        error("Unsupported FAIR_FUNC=$fair_func (expected \"min_max\", \"palma\", or \"efficiency\")")
     end
 
     dates = sort(filter(d -> isfile(joinpath(base, d, subdir, fname)),
@@ -73,8 +88,7 @@ FAIR_FUNC            = get(saved, "fair_func", FAIR_FUNC)   # older JLD2s pre-da
 pshed_type           = get(saved, "pshed_type", pshed_type)
 N_PERIODS            = saved["N_PERIODS"]
 alphas               = saved["alphas"]
-per_load_period_shed = saved["per_load_period_shed"]   # α × load × period
-per_load_period_pd   = saved["per_load_period_pd"]     # load × period
+per_load_period_shed = saved["per_load_period_shed"]  # α × load × period
 load_labels          = saved["load_labels"]
 save_dir             = dirname(jld_path)
 
@@ -90,29 +104,43 @@ println("α target = $(ALPHA_TARGET); nearest saved α = $(alpha_actual) " *
 shed_matrix = per_load_period_shed[idx_alpha, :, :]   # n_loads × N_PERIODS
 n_loads = size(shed_matrix, 1)
 @assert length(load_labels) == n_loads "load_labels length ($(length(load_labels))) ≠ shed_matrix rows ($n_loads)"
-@assert size(per_load_period_pd) == (n_loads, N_PERIODS) "per_load_period_pd has wrong shape"
 
-# Served fraction: 1 - pshed/pd per (load, period). NaN where pd≈0.
-# Then binarize at 1-1e-9 to match loadshed_heatmap_mn.jl: served=1.0,
-# any shed=0.0. The integer trade-off MILP returns {0, pd} per load so
-# binarization is exact; the threshold guards against fp rounding noise.
-served_fraction = fill(NaN, n_loads, N_PERIODS)
-for j in 1:n_loads, t in 1:N_PERIODS
-    pd = per_load_period_pd[j, t]
-    pd > 1e-9 || continue
-    s  = shed_matrix[j, t]
-    served_fraction[j, t] = isnan(s) ? NaN : 1.0 - s / pd
+# Resolve REP_PERIODS — either honor an explicit override or pick a sensible
+# default that's in-range for this sweep's N_PERIODS.
+rep_periods_resolved = if REP_PERIODS === nothing
+    if N_PERIODS == 24
+        [6, 11, 20]
+    elseif N_PERIODS == 8
+        [2, 4, 6]
+    elseif N_PERIODS == 3
+        collect(1:3)
+    else
+        unique([1, max(1, N_PERIODS ÷ 2), N_PERIODS])
+    end
+else
+    REP_PERIODS
 end
-served_binary = map(served_fraction) do v
-    isnan(v) && return NaN
-    v >= 1.0 - 1e-9 ? 1.0 : 0.0
-end
-# Heatmap wants (period × load) — rows = y (period), cols = x (load).
-served_binary_pt = permutedims(served_binary)   # N_PERIODS × n_loads
+println("REP_PERIODS = $rep_periods_resolved (N_PERIODS=$N_PERIODS)")
 
-# Number loads 1..n and persist the mapping. Same convention as
-# loadshed_heatmap_mn.jl and trade_off_grouped_mn.jl so all three replots
-# share one load-index map per case.
+rep_valid = filter(t -> 1 <= t <= N_PERIODS, rep_periods_resolved)
+if length(rep_valid) != length(rep_periods_resolved)
+    @warn "Dropped out-of-range REP_PERIODS entries; using $rep_valid (of $rep_periods_resolved) for N_PERIODS=$N_PERIODS"
+end
+isempty(rep_valid) && error("REP_PERIODS=$rep_periods_resolved has no valid entries for N_PERIODS=$N_PERIODS")
+
+# Build (n_loads × |rep|) matrix of pshed (kW), NaN → 0 so missing periods
+# show as empty bars rather than gaps.
+rep_matrix = zeros(n_loads, length(rep_valid))
+for (k, t) in enumerate(rep_valid)
+    for j in 1:n_loads
+        v = shed_matrix[j, t]
+        rep_matrix[j, k] = isnan(v) ? 0.0 : v
+    end
+end
+
+# Match loadshed_grouped_mn.jl: number loads 1..n and persist the original
+# names so the bar chart can be cross-referenced. Avoids cramming long load
+# strings (e.g. `L9`, `loadbusC.1.2.3.0`) into the x-axis.
 load_index_labels = string.(1:n_loads)
 println("\nLoad index → name mapping:")
 for (i, name) in enumerate(load_labels)
@@ -121,7 +149,6 @@ end
 map_path = joinpath(save_dir, "load_index_map_$(pshed_type)_$(CASE).txt")
 open(map_path, "w") do io
     println(io, "# Load index → original load name mapping for $(CASE) / $(FAIR_FUNC) / $(pshed_type)")
-    println(io, "# α slice: target=$(ALPHA_TARGET), realized=$(alpha_actual)")
     println(io, "# index\tname")
     for (i, name) in enumerate(load_labels)
         println(io, "$i\t$name")
@@ -129,16 +156,16 @@ open(map_path, "w") do io
 end
 println("Load index map → $map_path")
 
-period_labels = ["t=$t" for t in 1:N_PERIODS]
+rep_labels = reshape(["t=$t" for t in rep_valid], 1, length(rep_valid))
 
-p_heat = heatmap(load_index_labels, period_labels, served_binary_pt;
+p_grouped = groupedbar(load_index_labels, rep_matrix;
+    bar_position = :dodge,
+    labels = rep_labels,
     xlabel = "Load",
-    ylabel = "Period",
-    color  = cgrad(["#E5EFEA", "#2A6F6B"]),   # pale sage (shed) → muted teal (served)
-    clims  = (0.0, 1.0),
+    ylabel = "Load shed (kW)",
+    legend = :topright,
+    linecolor = :match,   # outline matches fill — no heavy black border
     xrotation = 0,
-    yticks = (1:N_PERIODS, period_labels),
-    colorbar = false,
     size = (700, 500),
     left_margin = 5Plots.mm,
     right_margin = 5Plots.mm,
@@ -149,10 +176,10 @@ p_heat = heatmap(load_index_labels, period_labels, served_binary_pt;
     titlefontsize = 12,
     legendfontsize = 12,
 )
-display(p_heat)
+display(p_grouped)
 
 alpha_tag = replace(string(round(alpha_actual; digits = 3)), "." => "p")
 out_path = joinpath(save_dir,
-    "trade_off_heatmap_$(pshed_type)_$(CASE)_$(FAIR_FUNC)_alpha$(alpha_tag).svg")
-savefig(p_heat, out_path)
-println("Per-load heatmap (α=$(alpha_actual)) → $out_path")
+    "trade_off_grouped_$(pshed_type)_$(CASE)_$(FAIR_FUNC)_alpha$(alpha_tag).svg")
+savefig(p_grouped, out_path)
+println("Per-load grouped bar (α=$(alpha_actual)) → $out_path")

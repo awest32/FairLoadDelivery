@@ -33,7 +33,7 @@ using Distributions
 using DiffOpt
 using JuMP
 import MathOptInterface
-MOI = MathOptInterface
+const MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DataFrames
 using CSV
@@ -71,9 +71,10 @@ pshed_type = "absolute"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
 
-# T=8 — full subsample matching run_validation_mn.jl's default.
-# Hours span trough / morning ramp / midday plateau / pre-peak / evening peak / descent.
-SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
+# T=2 quick-look — midday plateau + evening peak. The 2nd period IS the peak
+# so peak_time_cost differentiation is maximal across the pair. Use [12, 18, 22]
+# (3 periods, peak in middle) if T=2 runs quickly.
+SELECTED_HOURS    = [12, 18]
 # Defense final: weak-CC bilinear MIQCP (matches prior reference run).
 USE_WEAK_CC       = true
 # Per-iter Gurobi TimeLimit for Palma upper-level (seconds). 10 min × 20 iters
@@ -85,7 +86,7 @@ CENTER_AT_NOMINAL = true
 PERIOD_HOURS      = SELECTED_HOURS
 PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [2, 4, 6]   # → hours 6, 12, 18 (morning ramp / midday / evening peak) in T=8 indexing
+REP_PERIODS = collect(1:N_PERIODS)   # show all periods on the grouped bar (T=2 or T=3)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -93,13 +94,13 @@ switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 gurobi_solver = Gurobi.Optimizer
 
-# Tag the save dir so this run lives separately from formal-CC runs of the
-# same case (avoids clobbering the JLD2 in any future motivation_c formal-CC
-# experiment). For min_max, USE_WEAK_CC is irrelevant (no Palma reformulation),
-# but we still tag the dir with "weakcc" so a paired weak-CC palma/min_max
-# defense run lives in the same parent dir.
+# 2026-05-24 short-period defense follow-up: drop variant suffix from the dir
+# layout so post-hoc scripts (per_block_fairness_mn, loadshed_heatmap_mn,
+# loadshed_grouped_mn) find the JLD2 via their default <case>/<fair>_<pshed>/
+# lookup — matches the bus-case convention. Retain VARIANT_TAG for the
+# in-JLD2 "palma_variant" label only.
 VARIANT_TAG = USE_WEAK_CC ? "weakcc" : "formalcc"
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)_$(VARIANT_TAG)/$(FAIR_FUNC)_$(pshed_type)"
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$(CASE)/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
@@ -191,8 +192,15 @@ for k in 1:ITERATIONS
         end
 
         lower_timings = Dict{Symbol,Any}()
-        t_lower = @elapsed (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
-            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings))
+        # NOTE: `@elapsed (a, b, c = func())` interacts badly with `local`-declared
+        # tuple targets under this Julia (1.12.1) — the macro's let-scope holds
+        # the assignment, leaving the outer locals undefined and the next access
+        # triggers UndefVarError(:dpshed). Split the call out so the assignment
+        # lands in the outer scope.
+        _t_lower_start = time()
+        (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs) =
+            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings)
+        t_lower = time() - _t_lower_start
         timing[:lower_level_total_s] = t_lower
         merge!(timing, Dict(Symbol("lower_$(k2)") => v for (k2, v) in lower_timings))
     catch err
@@ -402,7 +410,7 @@ if !@isdefined(iter_timings)
     @warn "iter_timings not defined — saving empty Vector. (Re-run the full script to capture per-iter timings.)"
     iter_timings = Dict{Symbol,Any}[]
 end
-jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(VARIANT_TAG)_$(FAIR_FUNC)_$(pshed_type).jld2")
+jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
     pshed_matrix         = pshed_matrix,
     pd_ref_matrix        = pd_ref_matrix,
