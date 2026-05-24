@@ -1,0 +1,7 @@
+problem,fair_func,α,N_periods,L1,L2,Linf,CoV,pct_max,source
+single_level,efficiency,0.0,24,565.6830942905831,338.3537383170312,249.71246006961297,1.580301086154125,33.67161275539184,2026-05-24\trade_off_mn\efficiency_trade_off_mn_more_meshed_6_bus_absolute.jld2
+single_level,min_max,0.7368421052631579,24,583.7296555914304,313.4109635599781,219.80830639068276,1.3393170227977083,34.745812832823226,2026-05-24\trade_off_mn\min_max_trade_off_mn_more_meshed_6_bus_absolute.jld2
+single_level,palma,,,NaN,NaN,NaN,NaN,NaN,(missing)
+bilevel,efficiency,,24,565.6830942905831,338.3537383170312,249.71246006961297,1.580301086154125,33.67161275539184,2026-05-23\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\efficiency_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_efficiency_absolute.jld2
+bilevel,min_max,,24,1260.8908648816762,526.0770703287392,330.4792332268371,0.7984605099374574,75.05302767152833,2026-05-24\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\min_max_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_min_max_absolute.jld2
+bilevel,palma,,24,1164.8744380672342,478.29874376387653,288.0000000000001,0.7628937806453756,69.33776417066869,2026-05-23\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\palma_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_palma_absolute.jld2

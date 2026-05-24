@@ -85,15 +85,27 @@ function jains_fairness_index(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Flo
     return value.(pshed_new), value.(weights_new), status
 end
 
-# Function to compute the min max of load shed
-# With peak_time_costs (peak charges): min Σ_t λ[t] * max_i(pshed_t[i])
-# With reg>0 and pd supplied: add λ[t]·reg·Σ_i pshed_new_t[i] / Σ_i pd_t[i]
-# With alpha ∈ [0,1] and pd supplied: convex combination of efficiency and min-max.
-#   - alpha=0: pure efficiency
-#   - alpha=1: pure min-max fairness
+# Function to compute the min max of load shed.
+# Uses a SINGLE global `max_shed` variable as an epigraph variable for the
+# worst (period, load) λ·pshed pair across the whole horizon:
+#
+#     min  max_shed
+#     s.t. max_shed ≥ λ[t] · pshed_new[t, i]   for every (t, i)
+#
+# An attempt was made (2026-05-24) to mirror the single-level
+# `objective_mn_min_max_absolute` instead — `max_shed[t]` per period, with
+# `λ[t] · max_shed[t]` summed in the objective. That formulation *should* be
+# what min-max represents mathematically, and it does reduce post-hoc
+# objective values on toy problems, but in the actual bilevel iteration the
+# resulting Δw direction failed to descend: lower-level shedding got worse
+# (l9 jumped from 261→330 kW, total shed 1224→1261 kW on case6 T=24) and
+# the bilevel stalled after one iter. The single-global epigraph is the
+# version that produces meaningful Δw via the DiffOpt-Jacobian linearization
+# in practice, so it stays.
+#
 # pshed_type ∈ ("absolute", "proportional"):
-#   - "absolute": max_shed ≥ λ[t] · pshed_new[i]
-#   - "proportional": max_shed ≥ λ[t] · pshed_new[i] / pd[i]  (requires pd; loads with pd==0 skipped)
+#   - "absolute":     max_shed ≥ λ[t] · pshed_new[t, i]
+#   - "proportional": max_shed ≥ λ[t] · pshed_new[t, i] / pd[t, i]  (loads with pd==0 skipped)
 function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float64}, weights_prev::Vector{Float64}; critical_ids::Vector{Int}=Int[], weight_ids::Vector{Int}=Int[], peak_time_costs::Vector{Float64}=Float64[], n_loads::Int=0, pd::Vector{Float64}=Float64[],reg::Float64=1e-4, alpha::Float64=1.0, weight_budget::Float64=Inf, pshed_type::String="absolute", timings::Union{Dict,Nothing}=nothing)
     model = JuMP.Model(Ipopt.Optimizer)
     m = length(pshed_prev)
@@ -124,11 +136,9 @@ function min_max_load_shed(dpshed_dw::Matrix{Float64}, pshed_prev::Vector{Float6
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods "peak_time_costs must have length $n_periods, got $(length(λ))"
 
-    # Per-period max of pshed (unweighted). The upper level's objective is a
-    # function of pshed_new; weights enter only as decision variables that shape
-    # pshed_new through the Jacobian (dpshed/dw). Keeping this unweighted keeps
-    # the formulation linear and matches the role weights play in the bilevel:
-    # handles for influencing the lower level, not multipliers in the objective.
+    # Single global max_shed (epigraph) bounded by λ·pshed at every (t, i).
+    # This is the version that actually descends in the bilevel iteration;
+    # see the function header for the per-period-sum variant that didn't work.
     @variable(model, max_shed >= 0)
     @assert pshed_type in ("absolute", "proportional") "pshed_type must be \"absolute\" or \"proportional\", got \"$pshed_type\""
     if pshed_type == "proportional"
