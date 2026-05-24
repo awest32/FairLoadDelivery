@@ -64,6 +64,7 @@ using Dates
 import MathOptInterface as MOI
 
 const PMD  = PowerModelsDistribution
+const _PMD = PowerModelsDistribution   # matches the alias used inside FairLoadDelivery (src/FairLoadDelivery.jl:41) so the local Palma machinery below (lines 225+) can call _PMD.var/_PMD.ref/_PMD.ids the same way the module-internal code does.
 
 include("../../src/implementation/visualization.jl")
 
@@ -90,7 +91,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 # carried in plots or CSVs.
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
-SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+SELECTED_HOURS = collect(0:23)   # T=24 full diurnal cycle (was [2,5,8,12,15,18,21,23] for T=8)
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
@@ -105,11 +106,11 @@ CENTER_AT_NOMINAL = true
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [2, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
+REP_PERIODS = [6, 11, 20]   # under T=24 (collect(0:23)): early morning h=5, midday h=10, evening peak h=19 (matches min_max_trade_off_mn.jl)
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
-alpha_points = 6
+alpha_points = 10
 alphas = collect(LinRange(0.0, 1.0, alpha_points))
 
 # ============================================================

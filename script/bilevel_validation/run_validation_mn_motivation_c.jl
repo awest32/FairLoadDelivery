@@ -74,7 +74,7 @@ N_BERNOULLI_SAMPLES = 2000
 # T=2 quick-look — midday plateau + evening peak. The 2nd period IS the peak
 # so peak_time_cost differentiation is maximal across the pair. Use [12, 18, 22]
 # (3 periods, peak in middle) if T=2 runs quickly.
-SELECTED_HOURS    = [12, 18]
+SELECTED_HOURS    = [4, 8, 18]   # T=3: two off-peak (λ≈5 at h=4,8) + one evening peak (λ≈30 at h=18). Prior: [12, 18] for T=2.
 # Defense final: weak-CC bilinear MIQCP (matches prior reference run).
 USE_WEAK_CC       = true
 # Per-iter Gurobi TimeLimit for Palma upper-level (seconds). 10 min × 20 iters

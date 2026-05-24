@@ -26,9 +26,9 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
-#case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case = "more_meshed_6_bus"#"13_bus"   # spelling normalized to match palma_trade_off_mn.jl (was "more_meshed_6bus")
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case = "13_bus"#"more_meshed_6_bus"   # 13-bus motivation_c run (T=3, [4,8,18]); flip back to "more_meshed_6_bus" + 6-bus dss for case6 runs.
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -51,7 +51,7 @@ end
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+SELECTED_HOURS    = [4, 8, 18]   # 13-bus motivation_c: T=3, two off-peak (λ≈5 at h=4,8) + one evening peak (λ≈30 at h=18). Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful

@@ -70,7 +70,7 @@ PSHED_TYPE = "absolute"
 # fair_funcs to plot. "efficiency" is excluded — the trade-off pipeline only
 # produces a single α=0 point there (no Pareto curve), and the bilevel
 # efficiency result matches it exactly.
-FAIR_FUNCS = ["min_max"]
+FAIR_FUNCS = ["min_max", "palma"]
 
 @assert haskey(CASE_TAGS, CASE_KEY) "Unknown CASE_KEY=$CASE_KEY"
 tags = CASE_TAGS[CASE_KEY]

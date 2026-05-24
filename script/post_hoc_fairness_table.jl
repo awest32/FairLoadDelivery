@@ -60,7 +60,7 @@ PSHED_TYPE = "absolute"
 # α slice for trade-off rows. Same convention as trade_off_heatmap_mn.jl —
 # 0.75 lets readers cross-reference the heatmap directly. Efficiency JLD2s
 # only contain α=0 anyway, so the lookup is harmless there.
-TRADE_OFF_ALPHA_TARGET = 0.75
+TRADE_OFF_ALPHA_TARGET = 0.9
 # Skip rows for which no JLD2 is found (silent). When false, missing rows are
 # reported with NaN entries so the user sees what's missing.
 SKIP_MISSING = false
