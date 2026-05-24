@@ -16,7 +16,7 @@ using DataFrames
 using CSV
 using Dates
 
-PMD = PowerModelsDistribution
+const PMD = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
@@ -28,7 +28,7 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case = "more_meshed_6bus"#"13_bus"
+case = "more_meshed_6_bus"#"13_bus"   # spelling normalized to match palma_trade_off_mn.jl (was "more_meshed_6bus")
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -43,7 +43,7 @@ LS_PERCENT = 0.8
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
+SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful
@@ -347,5 +347,6 @@ JLD2.jldsave(jld_path;
     PEAK_STRESS          = PEAK_STRESS,
     case                 = case,
     pshed_type           = pshed_type,
+    fair_func            = "min_max",
 )
 println("Saved trade-off sweep data → $jld_path")

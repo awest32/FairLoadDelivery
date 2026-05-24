@@ -63,8 +63,7 @@ using CSV
 using Dates
 import MathOptInterface as MOI
 
-_PMD = PowerModelsDistribution
-PMD  = PowerModelsDistribution
+const PMD  = PowerModelsDistribution
 
 include("../../src/implementation/visualization.jl")
 
@@ -393,6 +392,9 @@ per_load_dist_a0 = fill(NaN, n_loads, N_PERIODS)
 per_load_dist_a1 = fill(NaN, n_loads, N_PERIODS)
 # Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
 per_load_agg     = fill(NaN, alpha_points, n_loads)
+# Full (α × load × period) tensor — needed by the trade-off heatmap /
+# grouped-bar replot scripts. Matches min_max_trade_off_mn.jl's JLD2 schema.
+per_load_period_shed = fill(NaN, alpha_points, n_loads, N_PERIODS)
 
 for (idx, alpha) in enumerate(alphas)
     set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
@@ -415,6 +417,7 @@ for (idx, alpha) in enumerate(alphas)
                            for lid in palma.load_ids]
         total_shed[idx, t] = sum(per_load_shed_t)
         max_shed[idx, t]   = maximum(per_load_shed_t)
+        per_load_period_shed[idx, :, t] .= per_load_shed_t
         if idx == 1
             per_load_dist_a0[:, t] .= per_load_shed_t
         elseif idx == alpha_points
@@ -621,5 +624,47 @@ agg_rows = DataFrame(alpha = alphas,
     cost_weighted_max  = weighted_max,
     palma_ratio        = palma_ratio_log)
 CSV.write(joinpath(output_dir, "palma_sweep_mn_aggregate_$(pshed_type).csv"), agg_rows)
+
+# ============================================================
+# PERSIST SWEEP DATA FOR STANDALONE VISUALIZATION SCRIPTS
+# Same schema as min_max_trade_off_mn.jl's trade_off_mn_*.jld2 so
+# trade_off_heatmap_mn.jl and trade_off_grouped_mn.jl can target either
+# fair_func with one loader. Saved as palma_sweep_mn_<case>_<pshed_type>.jld2.
+# ============================================================
+using JLD2
+math_ref = mn_data["nw"][nw_ids_sorted[1]]
+bus_name_map = FairLoadDelivery.build_bus_name_maps(math_ref)
+ref_load_ids = sort(collect(keys(math_ref["load"])), by = x -> parse(Int, x))
+load_bus_names = [get(bus_name_map, math_ref["load"][lid]["load_bus"],
+                      "bus_$(math_ref["load"][lid]["load_bus"])")
+                  for lid in ref_load_ids]
+
+per_load_period_pd = zeros(n_loads, N_PERIODS)
+for (t, nw_id) in enumerate(nw_ids_sorted)
+    nw_data = mn_data["nw"][nw_id]
+    for (j, lid) in enumerate(ref_load_ids)
+        per_load_period_pd[j, t] = sum(nw_data["load"][lid]["pd"])
+    end
+end
+
+jld_path = joinpath(output_dir, "palma_sweep_mn_$(case)_$(pshed_type).jld2")
+JLD2.jldsave(jld_path;
+    alphas               = alphas,
+    per_load_period_shed = per_load_period_shed,  # alpha × load × period
+    per_load_period_pd   = per_load_period_pd,    # load × period
+    per_load_agg         = per_load_agg,          # alpha × load (sum over periods)
+    total_shed           = total_shed,            # alpha × period
+    max_shed             = max_shed,              # alpha × period
+    palma_ratio_log      = palma_ratio_log,
+    load_labels          = load_labels,
+    load_bus_names       = load_bus_names,
+    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
+    N_PERIODS            = N_PERIODS,
+    PEAK_STRESS          = PEAK_STRESS,
+    case                 = case,
+    pshed_type           = pshed_type,
+    fair_func            = "palma",
+)
+println("Saved trade-off sweep data → $jld_path")
 
 println("Done. Results written to: ", output_dir)
