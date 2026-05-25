@@ -1,0 +1,5 @@
+Step 3 relaxed multi-period MLD did not converge.
+termination_status      = ITERATION_LIMIT
+bilevel completed_iters = 20
+bilevel last_status     = LOCALLY_SOLVED
+Steps 4–6 skipped (rounding, results block, JLD2 save).

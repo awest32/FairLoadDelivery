@@ -47,12 +47,12 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
- CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-#const CASE = "motivation_c_good4integer"
-case = "6_bus"
-
-CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-#const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+# CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+ CASE = "motivation_c_good4integer"
+case = "13_bus"#"6_bus"
+critical_load = ["611"]
+#CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
+CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
 FAIR_FUNC = "min_max"  # "min_max", "palma", or "efficiency"
@@ -69,7 +69,9 @@ N_BERNOULLI_SAMPLES = 2000
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+# SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ SELECTED_HOURS    = [4, 18, 8]
+
  N_PERIODS         = length(SELECTED_HOURS)
 PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
 CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
@@ -83,7 +85,16 @@ REP_PERIODS = [6, 11, 20]   # → hours 5, 10, 19 in 0..23 indexing
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
 # Solvers
-ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+# max_iter=30000 + acceptable_tol/iter mirror build_mn_mc_mld_shedding_implicit_diff
+# (src/prob/mld.jl:275-279). Needed for motivation_c 13bus: Step 3's final relaxed
+# solve and post-iteration AC PFs operate on weights deep into the descent, where
+# the NLP becomes brittle. Default Ipopt max_iter=3000 → ITERATION_LIMIT after ~700s
+# → Steps 4-6 (rounding/AC/JLD2) get skipped on a non-converged relaxation.
+ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer,
+    "max_iter"        => 30_000,
+    "acceptable_tol"  => 1e-4,
+    "acceptable_iter" => 50,
+    "print_level"     => 0)
 gurobi_solver = Gurobi.Optimizer
 
 save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
@@ -99,7 +110,7 @@ global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
 print_validation_header("Step 1: Network + Multinetwork Setup")
 
 eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT;
-    switch_rating=switch_rating)
+    switch_rating=switch_rating, critical_load=critical_load)
 
 # System aggregate scale per period — used by results_block_mn.jl print rows and
 # by downstream plotting. Per-load shape now comes from the H&A schedules.
@@ -184,8 +195,15 @@ for k in 1:ITERATIONS
         end
 
         lower_timings = Dict{Symbol,Any}()
-        t_lower = @elapsed (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
-            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings))
+        # NOTE: `@elapsed (a, b, c = func())` interacts badly with `local`-declared
+        # tuple targets under Julia 1.12.1 — the macro's let-scope holds the
+        # assignment, leaving the outer locals undefined and the next access
+        # triggers UndefVarError(:dpshed). Split the call out so the assignment
+        # lands in the outer scope.
+        _t_lower_start = time()
+        (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs) =
+            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings)
+        t_lower = time() - _t_lower_start
         timing[:lower_level_total_s] = t_lower
         merge!(timing, Dict(Symbol("lower_$(k2)") => v for (k2, v) in lower_timings))
     catch err

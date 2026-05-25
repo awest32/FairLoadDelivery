@@ -1,0 +1,14 @@
+# Block index → name mapping for 13_bus / palma / absolute
+# α slice: target=0.75, realized=0.7777777777777778
+# Block order: sort by integer bus_id ascending (matches loadshed_heatmap_mn.jl) — no block_display mapping for case 13_bus
+# index	name
+1	671
+2	634
+3	652
+4	675
+5	700
+6	611
+7	645
+8	692
+9	670
+10	646

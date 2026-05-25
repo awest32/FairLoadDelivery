@@ -48,7 +48,7 @@ pshed_type      = "absolute"
 # maximal. Bump to [12, 18, 22] (T=3, peak in middle) if the 2-period run is
 # fast.
 
-SELECTED_HOURS    = [12, 18]
+SELECTED_HOURS    = [4, 18, 8]
 N_PERIODS         = length(SELECTED_HOURS)
 
 PEAK_STRESS       = 1.0

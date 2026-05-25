@@ -175,27 +175,67 @@ end
 # ============================================================
 # PLOT BUILDERS
 # ============================================================
-const _PARETO_FONT = (tickfontsize = 10, guidefontsize = 11,
-                      titlefontsize = 12, legendfontsize = 9)
+const _PARETO_FONT = (tickfontsize = 25, guidefontsize = 29,
+                      titlefontsize = 32, legendfontsize = 23,
+                      fontfamily = "Computer Modern")
+
+const _SWEEP_COLOR = RGB(0.20, 0.40, 0.85)   # blue
 
 function _pareto_panel(total_shed::AbstractVector, norm_vec::AbstractVector,
                        alphas::AbstractVector, ylab::AbstractString,
                        bilevel_x::Real, bilevel_y::Real;
-                       show_bilevel_label::Bool = false)
+                       show_legend::Bool = false)
+    xs_all = vcat(collect(total_shed), bilevel_x)
+    ys_all = vcat(collect(norm_vec),  bilevel_y)
+    xpad   = 0.20 * (maximum(xs_all) - minimum(xs_all) + eps())
+    ypad   = 0.28 * (maximum(ys_all) - minimum(ys_all) + eps())
+    xlim   = (minimum(xs_all) - xpad, maximum(xs_all) + xpad)
+    ylim   = (minimum(ys_all) - ypad, maximum(ys_all) + ypad)
+
+    xticks_vec = collect(range(xlim[1], xlim[2]; length = 4))
+
     p = plot(total_shed, norm_vec;
-        seriestype = :line, lc = :grey,
-        marker = :circle, marker_z = alphas, color = :cividis,
-        clims = (0.0, 1.0), colorbar = false,
-        markersize = 5, lw = 1.5,
+        seriestype = :line,
+        marker = :rect, markersize = 12,
+        color = _SWEEP_COLOR, lc = _SWEEP_COLOR, lw = 3.5,
+        markerstrokecolor = _SWEEP_COLOR, markerstrokewidth = 1.0,
+        label = "Single-level",
         xlabel = "total load shed (kW)", ylabel = ylab,
-        legend = false, _PARETO_FONT...)
+        xlims = xlim, ylims = ylim,
+        xticks = (xticks_vec, [string(round(Int, x)) for x in xticks_vec]),
+        xrotation = 30,
+        grid = true, gridalpha = 0.5, gridstyle = :dot, gridlinewidth = 0.5,
+        framestyle = :box,
+        background_color = :white, foreground_color = :black,
+        legend = show_legend ? :topleft : false,
+        _PARETO_FONT...)
+
     scatter!(p, [bilevel_x], [bilevel_y];
-        marker = :star5, markersize = 14, color = :firebrick,
-        markerstrokecolor = :black, markerstrokewidth = 1.2)
-    if show_bilevel_label
-        annotate!(p, bilevel_x, bilevel_y,
-            text("  bilevel", 9, :left, :firebrick))
+        marker = :star5, markersize = 28, color = :black,
+        markerstrokecolor = :black, markerstrokewidth = 1.0,
+        label = "Bi-level")
+
+    # β-style endpoint labels (α minimum and maximum), placed where
+    # they're least likely to collide with the curve.
+    if length(alphas) ≥ 2
+        i_lo = argmin(alphas)
+        i_hi = argmax(alphas)
+        # If α=0 sits above α=1 on the y-axis (e.g. CoV), put the α=0 label
+        # above its point and the α=1 label below; otherwise vice-versa.
+        inverted = norm_vec[i_lo] > norm_vec[i_hi]
+        hi_valign = inverted ? :top    : :bottom
+        # α=0 label: shifted right of the marker so it clears any cluster.
+        dx = 0.07 * (maximum(xs_all) - minimum(xs_all))
+        dy = 0.04 * (maximum(ys_all) - minimum(ys_all))
+        hi_dy = hi_valign == :top ? -dy : dy
+        annotate!(p, total_shed[i_lo] + dx, norm_vec[i_lo],
+            text("α=$(round(alphas[i_lo]; digits=2))", 20, :left, :vcenter,
+                 _SWEEP_COLOR))
+        annotate!(p, total_shed[i_hi], norm_vec[i_hi] + hi_dy,
+            text("α=$(round(alphas[i_hi]; digits=2))", 20, :hcenter, hi_valign,
+                 _SWEEP_COLOR))
     end
+
     return p
 end
 
@@ -203,37 +243,33 @@ function build_figure(fair_func::String,
                       trade_off::NamedTuple, bilevel::NamedTuple,
                       out_path::String)
     p_l1   = _pareto_panel(trade_off.total_shed, trade_off.L1,
-        trade_off.alphas, "L1 norm of shed (kW)",
-        bilevel.total_shed, bilevel.L1; show_bilevel_label = true)
+        trade_off.alphas, raw"$\ell_1$ norm of load shed (kW)",
+        bilevel.total_shed, bilevel.L1; show_legend = true)
     p_l2   = _pareto_panel(trade_off.total_shed, trade_off.L2,
-        trade_off.alphas, "L2 norm of shed (kW)",
+        trade_off.alphas, raw"$\ell_2$ norm of load shed (kW)",
         bilevel.total_shed, bilevel.L2)
     p_linf = _pareto_panel(trade_off.total_shed, trade_off.Linf,
-        trade_off.alphas, "L∞ norm of shed (kW)",
+        trade_off.alphas, raw"$\ell_\infty$ norm of load shed (kW)",
         bilevel.total_shed, bilevel.Linf)
     p_cov  = _pareto_panel(trade_off.total_shed, trade_off.CoV,
-        trade_off.alphas, "CoV (stdev / mean)",
+        trade_off.alphas, "CoV of load shed (unitless)",
         bilevel.total_shed, bilevel.CoV)
-
-    p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
-        color = :cividis, colorbar = false,
-        xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-        ylabel = "α (single-level)", title = "", framestyle = :box,
-        _PARETO_FONT...)
 
     pt = trade_off.n_periods == bilevel.n_periods ?
         " (T=$(trade_off.n_periods))" :
         " (single-level T=$(trade_off.n_periods), bilevel T=$(bilevel.n_periods))"
 
-    fig = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
-        layout = @layout([a b c d e{0.02w}]),
-        size = (2300, 600),
-        plot_title = "Pareto: single-level α-sweep vs bilevel — $fair_func / $(CASE_KEY)$pt",
-        plot_titlefontsize = 13,
-        left_margin = 14Plots.mm, right_margin = 6Plots.mm,
-        top_margin = 10Plots.mm, bottom_margin = 14Plots.mm)
+    fig = plot(p_l1, p_l2, p_linf, p_cov;
+        layout = (1, 4),
+        size = (2800, 720),
+        #plot_title = "Pareto: single-level α-sweep vs bilevel — $fair_func / $(CASE_KEY)$pt",
+        plot_titlefontsize = 26,
+        left_margin = 24Plots.mm, right_margin = 14Plots.mm,
+        top_margin = 12Plots.mm, bottom_margin = 32Plots.mm)
 
     savefig(fig, out_path)
+    pdf_path = replace(out_path, r"\.svg$"i => ".pdf")
+    savefig(fig, pdf_path)
     return fig
 end
 

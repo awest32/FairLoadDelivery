@@ -74,9 +74,9 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
-#case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case ="more_meshed_6_bus" #"13_bus"
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
+case = "13_bus" #"more_meshed_6_bus"   # 13-bus motivation_c run (T=3, [4,8,18]); flip back to "more_meshed_6_bus" + 6-bus dss for case6 runs.
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
@@ -91,7 +91,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 # carried in plots or CSVs.
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
-SELECTED_HOURS = collect(0:23)   # T=24 full diurnal cycle (was [2,5,8,12,15,18,21,23] for T=8)
+SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
@@ -106,7 +106,7 @@ CENTER_AT_NOMINAL = true
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [6, 11, 20]   # under T=24 (collect(0:23)): early morning h=5, midday h=10, evening peak h=19 (matches min_max_trade_off_mn.jl)
+REP_PERIODS = [1, 2, 3]   # T=3 with [4, 8, 18] — plot all periods. Was [6, 11, 20] for T=24.
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).

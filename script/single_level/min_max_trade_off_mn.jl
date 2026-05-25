@@ -33,7 +33,7 @@ dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
-fair_func = "efficiency"  # "efficiency" or "min_max"
+fair_func = "min_max"  # "efficiency" or "min_max"
 alpha_end = 1
 if fair_func == "efficiency"
     alpha_end = 0
@@ -51,7 +51,7 @@ end
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS    = [4, 8, 18]   # 13-bus motivation_c: T=3, two off-peak (λ≈5 at h=4,8) + one evening peak (λ≈30 at h=18). Was collect(0:23) for case6 T=24.
+SELECTED_HOURS    = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate and the network is forced to shed. Paper-faithful
@@ -76,8 +76,8 @@ PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2
                         for h in SELECTED_HOURS]
 
 # Representative subset (1-indexed period indices into SELECTED_HOURS) for the
-# busy 3-period plots: trough (h=2), midday plateau (h=12), evening peak (h=18).
-REP_PERIODS = [6, 11, 20]
+# busy 3-period plots. For T=3 with [4, 8, 18] there are only 3 periods, so plot all.
+REP_PERIODS = [1, 2, 3]   # was [6, 11, 20] for T=24 (h=5/h=10/h=19 of the 24-hr day)
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 # Solver selection.

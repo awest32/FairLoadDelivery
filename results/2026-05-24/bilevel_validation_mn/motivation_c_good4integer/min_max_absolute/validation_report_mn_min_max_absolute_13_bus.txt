@@ -4,7 +4,7 @@
 ======================================================================
   Case: motivation_c_good4integer
   Fairness Function: min_max
-  Iterations: 5
+  Iterations: 20
 
   TOTALS: 0 checks, 0 passed, 0 failed
 ======================================================================

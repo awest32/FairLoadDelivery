@@ -53,7 +53,8 @@ include(joinpath(@__DIR__, "../block_display.jl"))
 #   palma_trade_off_mn.jl   → case = "more_meshed_6_bus"  (with underscore)
 # Set CASE to whichever matches the JLD2 you want to plot.
 CASE         = "more_meshed_6_bus"
-FAIR_FUNC    = "efficiency"     # "min_max" or "palma"
+#CASE         = "13_bus"
+FAIR_FUNC    = "palma"     # "min_max" or "palma"
 pshed_type   = "absolute"
 ALPHA_TARGET = 0.75
 
