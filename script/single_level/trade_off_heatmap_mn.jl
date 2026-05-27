@@ -56,7 +56,7 @@ CASE         = "more_meshed_6_bus"
 #CASE         = "13_bus"
 FAIR_FUNC    = "palma"     # "min_max" or "palma"
 pshed_type   = "absolute"
-ALPHA_TARGET = 0.75
+ALPHA_TARGET = 0.9
 
 function _find_latest_trade_off_jld2(case::String, fair_func::String,
                                      pshed_type::String)

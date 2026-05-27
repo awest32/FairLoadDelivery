@@ -1,0 +1,8 @@
+# Block index → name mapping for case6_unbalanced_switch_more_meshed_good4integer / min_max / absolute
+# Block order: paper-aligned (script/block_display.jl)
+# index	name
+1	d
+2	a
+4	b
+5	c
+6	e

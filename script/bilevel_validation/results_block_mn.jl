@@ -37,7 +37,7 @@ if !@isdefined(REP_PERIODS)
         unique([1, max(1, N_PERIODS ÷ 2), N_PERIODS])
 end
 
-print_validation_header("Step 5: Load-shed heatmap + final result")
+#print_validation_header("Step 5: Load-shed heatmap + final result")
 
 ref_load_ids = sort(collect(keys(mn_new["nw"][nw_ids_sorted[1]]["load"])), by=x->parse(Int, x))
 load_labels  = [mn_new["nw"][nw_ids_sorted[1]]["load"][lid]["name"] for lid in ref_load_ids]

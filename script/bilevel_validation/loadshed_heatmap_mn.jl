@@ -30,7 +30,7 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 include(joinpath(@__DIR__, "../block_display.jl"))
 
 CASE       = get(ENV, "POSTHOC_CASE",      "case6_unbalanced_switch_more_meshed_good4integer")
-FAIR_FUNC  = get(ENV, "POSTHOC_FAIR_FUNC", "efficiency")
+FAIR_FUNC  = get(ENV, "POSTHOC_FAIR_FUNC", "min_max")
 pshed_type = "absolute"
 
 # ============================================================

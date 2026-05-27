@@ -30,13 +30,17 @@
 
     What this script produces
     -------------------------
-      * One figure per fair_func ∈ {min_max, palma}.
-      * Four Pareto panels: total_shed (x) vs {L1, L2, L∞, CoV} (y).
-        - Single-level α-sweep: line + markers, color-coded by α
-          (cividis colormap, 0 → 1).
-        - Bilevel point: big ★ in firebrick, with a small label.
-      * SVG output at
-        results/<today>/post_hoc_fairness/pareto_<fair_func>_<case>_<pshed>.svg
+      * Three figures per fair_func ∈ {min_max, palma}, all with
+        total_shed on the x-axis:
+          1. Headline single-panel: y = post-hoc palma ratio (palma) or
+             y = L∞ (min_max). Filename suffix `_headline`.
+          2. CoV single-panel: y = CoV. Filename suffix `_cov`.
+          3. 4-up summary: [L1, L∞, palma, CoV]. L2 dropped, post-hoc
+             palma added. No suffix.
+      * Single-level α-sweep is a line + markers; bi-level (when
+        SHOW_BILEVEL=true) is a single ★ overlay.
+      * SVG + PDF outputs at
+        results/<today>/post_hoc_fairness/pareto_<fair_func>_<case>_<pshed>[_suffix].svg
 
     Usage
     -----
@@ -71,6 +75,10 @@ PSHED_TYPE = "absolute"
 # produces a single α=0 point there (no Pareto curve), and the bilevel
 # efficiency result matches it exactly.
 FAIR_FUNCS = ["min_max", "palma"]
+# When false, skip loading the bilevel JLD2 and omit the ★ overlay so the
+# output is the trade-off Pareto front alone. Filename gets a `_no_bilevel`
+# suffix so it doesn't overwrite the bilevel-comparison version.
+SHOW_BILEVEL = true
 
 @assert haskey(CASE_TAGS, CASE_KEY) "Unknown CASE_KEY=$CASE_KEY"
 tags = CASE_TAGS[CASE_KEY]
@@ -123,16 +131,47 @@ end
 # ============================================================
 # NORMS
 # ============================================================
+"""
+Palma ratio on a non-negative per-load vector. Mirrors
+`src/implementation/other_fair_funcs.jl::palma_ratio` (top-10% / bottom-40%
+of sorted entries), but guards against an all-zero bottom 40% — returns NaN
+instead of Inf so the curve has a gap rather than an off-scale spike.
+"""
+function _palma_ratio_safe(x::AbstractVector{<:Real})
+    n = length(x)
+    n < 3 && return NaN              # need ≥1 in bottom 40% and top 10%
+    sorted_x = sort(collect(x))
+    top10 = sum(sorted_x[ceil(Int, 0.9n):end])
+    bot40 = sum(sorted_x[1:floor(Int, 0.4n)])
+    return bot40 > 1e-9 ? top10 / bot40 : NaN
+end
+
+"""
+Norms on per-load shed (L1, L2, L∞, CoV) plus the post-hoc Palma ratio on
+**shed**. Note: the single-level palma problem and bilevel palma upper
+level both *optimize* served-Palma (top10/bot40 of pd-pshed). We instead
+report shed-Palma post-hoc because:
+  * served-Palma becomes NaN as soon as ≥3 of 9 loads are fully shed
+    (bot40 of served = 0), which happens both at single-level α=1 and at
+    the bilevel's concentrated-shed operating point — flattening the very
+    contrast we want to show.
+  * shed-Palma directly answers "how unevenly was the shedding distributed
+    across loads?" — which is the fairness question the paper asks.
+The tradeoff is that shed-Palma is NaN at low single-level α (almost no
+loads shed → bot40 of shed = 0); those α points drop from the curve.
+"""
 function shed_norms(v::AbstractVector{<:Real})
     finite = filter(isfinite, v)
-    isempty(finite) && return (L1 = NaN, L2 = NaN, Linf = NaN, CoV = NaN)
+    isempty(finite) && return (L1 = NaN, L2 = NaN, Linf = NaN,
+                               CoV = NaN, Palma = NaN)
     m = mean(finite)
     s = length(finite) > 1 ? std(finite) : 0.0
     return (
-        L1   = norm(finite, 1),
-        L2   = norm(finite, 2),
-        Linf = norm(finite, Inf),
-        CoV  = m > 1e-9 ? s / m : NaN,
+        L1    = norm(finite, 1),
+        L2    = norm(finite, 2),
+        Linf  = norm(finite, Inf),
+        CoV   = m > 1e-9 ? s / m : NaN,
+        Palma = _palma_ratio_safe(finite),
     )
 end
 
@@ -144,17 +183,19 @@ function load_trade_off_curve(path::String)
     per_load_agg = saved["per_load_agg"]   # alpha × load
     alphas       = saved["alphas"]
     n_α          = length(alphas)
-    L1   = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α); CoV = zeros(n_α)
+    L1    = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α)
+    CoV   = zeros(n_α); Palma = zeros(n_α)
     for i in 1:n_α
         nm = shed_norms(collect(per_load_agg[i, :]))
-        L1[i] = nm.L1; L2[i] = nm.L2; Linf[i] = nm.Linf; CoV[i] = nm.CoV
+        L1[i] = nm.L1; L2[i] = nm.L2; Linf[i] = nm.Linf
+        CoV[i] = nm.CoV; Palma[i] = nm.Palma
     end
     # x-axis is total shed (= L1 for non-negative vectors). Identical to L1
     # here, but kept as a separate vector to mirror the existing convention
     # in min_max_trade_off_mn.jl / palma_trade_off_mn.jl.
     total_shed = L1
     return (alphas = alphas, total_shed = total_shed,
-            L1 = L1, L2 = L2, Linf = Linf, CoV = CoV,
+            L1 = L1, L2 = L2, Linf = Linf, CoV = CoV, Palma = Palma,
             n_periods = saved["N_PERIODS"], source = path)
 end
 
@@ -168,7 +209,7 @@ function load_bilevel_point(path::String)
     end
     nm = shed_norms(v)
     return (total_shed = nm.L1, L1 = nm.L1, L2 = nm.L2,
-            Linf = nm.Linf, CoV = nm.CoV,
+            Linf = nm.Linf, CoV = nm.CoV, Palma = nm.Palma,
             n_periods = saved["N_PERIODS"], source = path)
 end
 
@@ -183,10 +224,23 @@ const _SWEEP_COLOR = RGB(0.20, 0.40, 0.85)   # blue
 
 function _pareto_panel(total_shed::AbstractVector, norm_vec::AbstractVector,
                        alphas::AbstractVector, ylab::AbstractString,
-                       bilevel_x::Real, bilevel_y::Real;
-                       show_legend::Bool = false)
-    xs_all = vcat(collect(total_shed), bilevel_x)
-    ys_all = vcat(collect(norm_vec),  bilevel_y)
+                       bilevel_x::Union{Real,Nothing},
+                       bilevel_y::Union{Real,Nothing};
+                       show_legend::Bool = false,
+                       legend_position::Symbol = :topleft)
+    # Drop α points where the y-value is NaN (e.g. post-hoc Palma at α=0
+    # when most loads aren't shed → bottom-40% sum is 0).
+    mask        = .!isnan.(norm_vec)
+    total_shed  = collect(total_shed)[mask]
+    norm_vec    = collect(norm_vec)[mask]
+    alphas      = collect(alphas)[mask]
+    isempty(total_shed) && error("All trade-off points dropped for y=$ylab — nothing to plot.")
+    bx_finite   = bilevel_x !== nothing && isfinite(bilevel_x)
+    by_finite   = bilevel_y !== nothing && isfinite(bilevel_y)
+    has_bilevel = bx_finite && by_finite
+
+    xs_all = has_bilevel ? vcat(total_shed, bilevel_x) : total_shed
+    ys_all = has_bilevel ? vcat(norm_vec,  bilevel_y) : norm_vec
     xpad   = 0.20 * (maximum(xs_all) - minimum(xs_all) + eps())
     ypad   = 0.28 * (maximum(ys_all) - minimum(ys_all) + eps())
     xlim   = (minimum(xs_all) - xpad, maximum(xs_all) + xpad)
@@ -207,13 +261,15 @@ function _pareto_panel(total_shed::AbstractVector, norm_vec::AbstractVector,
         grid = true, gridalpha = 0.5, gridstyle = :dot, gridlinewidth = 0.5,
         framestyle = :box,
         background_color = :white, foreground_color = :black,
-        legend = show_legend ? :topleft : false,
+        legend = show_legend ? legend_position : false,
         _PARETO_FONT...)
 
-    scatter!(p, [bilevel_x], [bilevel_y];
-        marker = :star5, markersize = 28, color = :black,
-        markerstrokecolor = :black, markerstrokewidth = 1.0,
-        label = "Bi-level")
+    if bilevel_x !== nothing && bilevel_y !== nothing
+        scatter!(p, [bilevel_x], [bilevel_y];
+            marker = :star5, markersize = 28, color = :black,
+            markerstrokecolor = :black, markerstrokewidth = 1.0,
+            label = "Bi-level")
+    end
 
     # β-style endpoint labels (α minimum and maximum), placed where
     # they're least likely to collide with the curve.
@@ -229,37 +285,41 @@ function _pareto_panel(total_shed::AbstractVector, norm_vec::AbstractVector,
         dy = 0.04 * (maximum(ys_all) - minimum(ys_all))
         hi_dy = hi_valign == :top ? -dy : dy
         annotate!(p, total_shed[i_lo] + dx, norm_vec[i_lo],
-            text("α=$(round(alphas[i_lo]; digits=2))", 20, :left, :vcenter,
-                 _SWEEP_COLOR))
+            Plots.text("α=$(round(alphas[i_lo]; digits=2))",
+                       20, :left, :vcenter, _SWEEP_COLOR))
         annotate!(p, total_shed[i_hi], norm_vec[i_hi] + hi_dy,
-            text("α=$(round(alphas[i_hi]; digits=2))", 20, :hcenter, hi_valign,
-                 _SWEEP_COLOR))
+            Plots.text("α=$(round(alphas[i_hi]; digits=2))",
+                       20, :hcenter, hi_valign, _SWEEP_COLOR))
     end
 
     return p
 end
 
 function build_figure(fair_func::String,
-                      trade_off::NamedTuple, bilevel::NamedTuple,
+                      trade_off::NamedTuple,
+                      bilevel::Union{NamedTuple,Nothing},
                       out_path::String)
-    p_l1   = _pareto_panel(trade_off.total_shed, trade_off.L1,
+    bx(field) = bilevel === nothing ? nothing : getfield(bilevel, field)
+    p_l1    = _pareto_panel(trade_off.total_shed, trade_off.L1,
         trade_off.alphas, raw"$\ell_1$ norm of load shed (kW)",
-        bilevel.total_shed, bilevel.L1; show_legend = true)
-    p_l2   = _pareto_panel(trade_off.total_shed, trade_off.L2,
-        trade_off.alphas, raw"$\ell_2$ norm of load shed (kW)",
-        bilevel.total_shed, bilevel.L2)
-    p_linf = _pareto_panel(trade_off.total_shed, trade_off.Linf,
+        bx(:total_shed), bx(:L1); show_legend = true)
+    p_linf  = _pareto_panel(trade_off.total_shed, trade_off.Linf,
         trade_off.alphas, raw"$\ell_\infty$ norm of load shed (kW)",
-        bilevel.total_shed, bilevel.Linf)
-    p_cov  = _pareto_panel(trade_off.total_shed, trade_off.CoV,
+        bx(:total_shed), bx(:Linf))
+    p_palma = _pareto_panel(trade_off.total_shed, trade_off.Palma,
+        trade_off.alphas, "Palma ratio of load shed (unitless)",
+        bx(:total_shed), bx(:Palma))
+    p_cov   = _pareto_panel(trade_off.total_shed, trade_off.CoV,
         trade_off.alphas, "CoV of load shed (unitless)",
-        bilevel.total_shed, bilevel.CoV)
+        bx(:total_shed), bx(:CoV))
 
-    pt = trade_off.n_periods == bilevel.n_periods ?
+    pt = bilevel === nothing ?
         " (T=$(trade_off.n_periods))" :
-        " (single-level T=$(trade_off.n_periods), bilevel T=$(bilevel.n_periods))"
+        (trade_off.n_periods == bilevel.n_periods ?
+            " (T=$(trade_off.n_periods))" :
+            " (single-level T=$(trade_off.n_periods), bilevel T=$(bilevel.n_periods))")
 
-    fig = plot(p_l1, p_l2, p_linf, p_cov;
+    fig = plot(p_l1, p_linf, p_palma, p_cov;
         layout = (1, 4),
         size = (2800, 720),
         #plot_title = "Pareto: single-level α-sweep vs bilevel — $fair_func / $(CASE_KEY)$pt",
@@ -273,6 +333,62 @@ function build_figure(fair_func::String,
     return fig
 end
 
+"""
+Headline single-panel: post-hoc Palma ratio (for `palma`) or L∞ (for `min_max`)
+vs total load shed — the fair-func-specific metric shown on its own.
+"""
+function build_headline_figure(fair_func::String,
+                               trade_off::NamedTuple,
+                               bilevel::Union{NamedTuple,Nothing},
+                               out_path::String)
+    bx(field) = bilevel === nothing ? nothing : getfield(bilevel, field)
+    if fair_func == "palma"
+        # Palma curve descends left-to-right (high at low α, ≈1.5 at α=1) and
+        # the bilevel ★ sits in the upper-left quadrant — put the legend
+        # top-right so it doesn't overlap the data.
+        panel = _pareto_panel(trade_off.total_shed, trade_off.Palma,
+            trade_off.alphas, "Palma ratio of load shed (unitless)",
+            bx(:total_shed), bx(:Palma);
+            show_legend = true, legend_position = :topright)
+    elseif fair_func == "min_max"
+        panel = _pareto_panel(trade_off.total_shed, trade_off.Linf,
+            trade_off.alphas, "min-max of load shed (kW)",
+            bx(:total_shed), bx(:Linf); show_legend = true)
+    else
+        error("build_headline_figure: unsupported fair_func=$fair_func")
+    end
+    fig = plot(panel;
+        size = (900, 760),
+        left_margin = 26Plots.mm, right_margin = 16Plots.mm,
+        top_margin = 12Plots.mm, bottom_margin = 32Plots.mm)
+    savefig(fig, out_path)
+    savefig(fig, replace(out_path, r"\.svg$"i => ".pdf"))
+    return fig
+end
+
+"""
+Standalone CoV-vs-total-shed panel, separate from the 4-up summary. CoV
+descends left-to-right for both fair_funcs (more shed → more evenly spread),
+so the legend goes top-right for either sweep.
+"""
+function build_cov_figure(fair_func::String,
+                          trade_off::NamedTuple,
+                          bilevel::Union{NamedTuple,Nothing},
+                          out_path::String)
+    bx(field) = bilevel === nothing ? nothing : getfield(bilevel, field)
+    panel = _pareto_panel(trade_off.total_shed, trade_off.CoV,
+        trade_off.alphas, "CoV of load shed (unitless)",
+        bx(:total_shed), bx(:CoV);
+        show_legend = true, legend_position = :topright)
+    fig = plot(panel;
+        size = (900, 760),
+        left_margin = 26Plots.mm, right_margin = 16Plots.mm,
+        top_margin = 12Plots.mm, bottom_margin = 32Plots.mm)
+    savefig(fig, out_path)
+    savefig(fig, replace(out_path, r"\.svg$"i => ".pdf"))
+    return fig
+end
+
 # ============================================================
 # RUN
 # ============================================================
@@ -283,50 +399,63 @@ mkpath(out_dir)
 for fair_func in FAIR_FUNCS
     println("\n=== $fair_func ===")
     to_path = _trade_off_jld2(fair_func)
-    bi_path = _bilevel_jld2(fair_func)
+    bi_path = SHOW_BILEVEL ? _bilevel_jld2(fair_func) : nothing
 
     if to_path === nothing
         @warn "[$fair_func] no single-level trade-off JLD2 found — skipping Pareto plot"
         continue
     end
-    if bi_path === nothing
+    if SHOW_BILEVEL && bi_path === nothing
         @warn "[$fair_func] no bilevel JLD2 found — skipping Pareto plot"
         continue
     end
 
     println("  single-level: $(relpath(to_path, RESULTS_ROOT))")
-    println("  bilevel:      $(relpath(bi_path, RESULTS_ROOT))")
+    SHOW_BILEVEL && println("  bilevel:      $(relpath(bi_path, RESULTS_ROOT))")
 
     to = load_trade_off_curve(to_path)
-    bi = load_bilevel_point(bi_path)
+    bi = SHOW_BILEVEL ? load_bilevel_point(bi_path) : nothing
 
-    if to.n_periods != bi.n_periods
+    if SHOW_BILEVEL && to.n_periods != bi.n_periods
         @warn "T mismatch for $fair_func: single-level=$(to.n_periods) " *
               "vs bilevel=$(bi.n_periods). Pareto comparison is across " *
               "different demand profiles — interpret with care."
     end
 
-    out_path = joinpath(out_dir,
-        "pareto_$(fair_func)_$(CASE_KEY)_$(PSHED_TYPE).svg")
-    fig = build_figure(fair_func, to, bi, out_path)
-    display(fig)
-    println("  → $out_path")
+    suffix = SHOW_BILEVEL ? "" : "_no_bilevel"
+    base = "pareto_$(fair_func)_$(CASE_KEY)_$(PSHED_TYPE)$(suffix)"
+    summary_path  = joinpath(out_dir, "$(base).svg")
+    headline_path = joinpath(out_dir, "$(base)_headline.svg")
+    cov_path      = joinpath(out_dir, "$(base)_cov.svg")
 
-    bx = bi.total_shed
-    dominates = bi.L2 < minimum(to.L2) && bi.Linf < minimum(to.Linf) &&
-                bi.CoV < minimum(to.CoV) && bi.L1 < minimum(to.L1)
-    dominated = bi.L2 > maximum(to.L2) || bi.Linf > maximum(to.Linf) ||
-                bi.CoV > maximum(to.CoV)
-    println("  bilevel coords: total=$(round(bx, digits=2))  " *
-            "L2=$(round(bi.L2, digits=2))  " *
-            "L∞=$(round(bi.Linf, digits=2))  " *
-            "CoV=$(round(bi.CoV, digits=3))")
-    if dominates
-        println("  ★ bilevel sits below the single-level frontier on every norm — genuine win.")
-    elseif dominated
-        println("  ★ bilevel is Pareto-dominated on at least one norm — scalability is the only remaining argument.")
-    else
-        println("  ★ bilevel sits within the single-level α-range — partial trade-off, no clean dominance.")
+    fig_summary  = build_figure(fair_func, to, bi, summary_path)
+    fig_headline = build_headline_figure(fair_func, to, bi, headline_path)
+    fig_cov      = build_cov_figure(fair_func, to, bi, cov_path)
+    display(fig_summary)
+    println("  → $summary_path")
+    println("  → $headline_path")
+    println("  → $cov_path")
+
+    if SHOW_BILEVEL
+        dominates = bi.Palma < minimum(filter(isfinite, to.Palma)) &&
+                    bi.Linf  < minimum(to.Linf) &&
+                    bi.CoV   < minimum(to.CoV)  &&
+                    bi.L1    < minimum(to.L1)
+        dominated = bi.Linf > maximum(to.Linf) ||
+                    bi.CoV  > maximum(to.CoV) ||
+                    (isfinite(bi.Palma) &&
+                     bi.Palma > maximum(filter(isfinite, to.Palma)))
+        println("  bilevel coords: total=$(round(bi.total_shed, digits=2))  " *
+                "L∞=$(round(bi.Linf, digits=2))  " *
+                "Palma=$(isnan(bi.Palma) ? "NaN" : string(round(bi.Palma, digits=3)))  " *
+                "CoV=$(round(bi.CoV, digits=3))")
+        if dominates
+            println("  ★ bilevel sits below the single-level frontier on every metric — genuine win.")
+        elseif dominated
+            println("  ★ bilevel is Pareto-dominated on at least one metric — scalability is the only remaining argument.")
+        else
+            println("  ★ bilevel sits within the single-level α-range — partial trade-off, no clean dominance.")
+        end
     end
 end
 

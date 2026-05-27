@@ -47,15 +47,15 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-# CASE = "case6_unbalanced_switch_more_meshed_good4integer"
- CASE = "motivation_c_good4integer"
-case = "13_bus"#"6_bus"
-critical_load = ["611"]
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+ #CASE = "motivation_c_good4integer"
+case = "6_bus" #"13_bus"#"6_bus"
+#critical_load = ["611"]
 #CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
-FAIR_FUNC = "min_max"  # "min_max", "palma", or "efficiency"
+FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -69,7 +69,7 @@ N_BERNOULLI_SAMPLES = 2000
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
-# SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
  SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
