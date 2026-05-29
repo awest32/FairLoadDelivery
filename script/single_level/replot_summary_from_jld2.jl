@@ -1,0 +1,201 @@
+"""
+    Replot the trade-off summary figure (fig1) from a saved sweep JLD2.
+
+    Use when only the summary-figure code changed (titles, shared y-axis,
+    Pareto-curve panel, etc.) and re-sweeping the trade-off MIPs would be
+    a waste of solver time — every variable fig1 reads is already in the
+    JLD2 (per_load_agg, max_shed, palma_ratio_log, alphas, load_labels).
+
+    Overwrites summary_integer_*.svg in the same directory as each input.
+
+    Usage:
+        julia --project=. script/single_level/replot_summary_from_jld2.jl
+"""
+
+using JLD2
+using Plots
+using Statistics
+using LinearAlgebra
+
+include(joinpath(@__DIR__, "..", "figure_defaults.jl"))
+
+font_kw = (tickfontsize = 22, guidefontsize = 22,
+           titlefontsize = 26, legendfontsize = 14,
+           fontfamily = "Computer Modern")
+const ANNOT_PT = 14
+
+# Hard-coded sweep files to refresh. Add more here as new sweeps land.
+results_root = joinpath(@__DIR__, "..", "..", "results")
+const TARGETS = [
+    joinpath(results_root, "2026-05-28", "palma_trade_off_mn",
+             "palma_sweep_mn_more_meshed_6_bus_absolute.jld2"),
+    joinpath(results_root, "2026-05-28", "palma_relaxed_trade_off_mn",
+             "palma_sweep_mn_more_meshed_6_bus_absolute.jld2"),
+    joinpath(results_root, "2026-05-28", "trade_off_mn",
+             "min_max_trade_off_mn_more_meshed_6_bus_absolute.jld2"),
+    joinpath(results_root, "2026-05-28", "trade_off_mn",
+             "min_max_relaxed_trade_off_mn_more_meshed_6_bus_absolute.jld2"),
+    joinpath(results_root, "2026-05-28", "trade_off_mn",
+             "efficiency_relaxed_trade_off_mn_more_meshed_6_bus_absolute.jld2"),
+]
+
+# Classify by fair_func — drives which Pareto y-axis goes in the third panel.
+# Palma sweeps render Palma-ratio-vs-total-shed (matches the post_hoc panel
+# but with only the trade-off curve, no bilevel markers). Min-max and
+# efficiency sweeps render max-per-load-shed-vs-total-shed.
+_is_palma(ff::AbstractString) = startswith(ff, "palma")
+
+function build_dist_plot_agg(load_labels, per_load_agg_vec; ylim_max)
+    p = bar(load_labels, per_load_agg_vec,
+        xlabel = "load",
+        ylabel = "aggregate load shed (kW)",
+        legend = false,
+        color  = :steelblue,
+        linecolor = :black,
+        ylims = (0.0, ylim_max * 1.10);
+        font_kw...)
+    for (i, v) in enumerate(per_load_agg_vec)
+        isfinite(v) || continue
+        annotate!(p, i, v + ylim_max * 0.02,
+            text("$(round(v, digits = 1))", ANNOT_PT, :center))
+    end
+    return p
+end
+
+function replot_one(path::String)
+    isfile(path) || (@warn "missing $path"; return)
+    d = JLD2.load(path)
+    per_load_agg = d["per_load_agg"]
+    alphas       = d["alphas"]
+    load_labels  = d["load_labels"]
+    fair_func    = d["fair_func"]
+    case         = d["case"]
+    pshed_type   = d["pshed_type"]
+
+    agg_total_shed = [sum(per_load_agg[i, :]) for i in 1:size(per_load_agg, 1)]
+
+    ymax_shared = max(
+        maximum(filter(isfinite, per_load_agg[1, :]);   init = 0.0),
+        maximum(filter(isfinite, per_load_agg[end, :]); init = 0.0))
+
+    p_dist_a0 = build_dist_plot_agg(load_labels, per_load_agg[1, :];   ylim_max = ymax_shared)
+    p_dist_a1 = build_dist_plot_agg(load_labels, per_load_agg[end, :]; ylim_max = ymax_shared)
+
+    # Pareto curve: steelblue dots (matching the bar charts), 14pt markers,
+    # α=0 / α=1 endpoints annotated in the same style as the bar-chart value
+    # labels. Branches by fair_func: palma uses Palma ratio on y;
+    # min_max/efficiency uses max per-load shed.
+    function _annotate_alpha_endpoints!(p, xs, ys, αs)
+        yrange = maximum(ys) - minimum(ys)
+        yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
+        annotate!(p, xs[1],   ys[1]   + yoff,
+            text("ν=$(round(αs[1],   digits=2))", ANNOT_PT, :center))
+        annotate!(p, xs[end], ys[end] + yoff,
+            text("ν=$(round(αs[end], digits=2))", ANNOT_PT, :center))
+    end
+
+    p_pareto = if _is_palma(fair_func)
+        palma_ratio_log = d["palma_ratio_log"]
+        finite_palma = findall(isfinite, palma_ratio_log)
+        xs = agg_total_shed[finite_palma]
+        ys = palma_ratio_log[finite_palma]
+        αs = alphas[finite_palma]
+        p = plot(xs, ys,
+            seriestype = :line, lc = :grey,
+            marker = :circle, markersize = 14, color = :steelblue,
+            markerstrokecolor = :steelblue,
+            xlabel = "total load shed (kW)",
+            ylabel = "Palma ratio of shed (unitless)",
+            legend = false; font_kw...)
+        _annotate_alpha_endpoints!(p, xs, ys, αs)
+        p
+    else
+        agg_max_shed = [maximum(per_load_agg[i, :]) for i in 1:size(per_load_agg, 1)]
+        p = plot(agg_total_shed, agg_max_shed,
+            seriestype = :line, lc = :grey,
+            marker = :circle, markersize = 14, color = :steelblue,
+            markerstrokecolor = :steelblue,
+            xlabel = "total load shed (kW)",
+            ylabel = "max per-load shed (kW)",
+            legend = false; font_kw...)
+        _annotate_alpha_endpoints!(p, agg_total_shed, agg_max_shed, alphas)
+        p
+    end
+
+    # Per-panel filename suffix matches the trade-off scripts' conventions:
+    #   * Palma: folder name encodes relaxed/integer; the suffix is just
+    #     $(kind)_$(pshed_type) with kind detected from the folder.
+    #   * Min-max / efficiency: folder is shared, so the suffix carries
+    #     fair_func (which itself includes "_relaxed" when applicable).
+    suffix = if _is_palma(fair_func)
+        kind = occursin("palma_relaxed_trade_off_mn", dirname(path)) ?
+            "relaxed" : "integer"
+        "$(kind)_$(pshed_type)"
+    else
+        "$(pshed_type)_$(case)_$(fair_func)"
+    end
+
+    for (name, p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+        fig = plot(p; size = (900, 760),
+            left_margin = 7Plots.mm, right_margin = 6Plots.mm,
+            top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
+        out_path = joinpath(dirname(path), "summary_single_$(name)_$(suffix).svg")
+        savefig(fig, out_path)
+        println("  → $out_path")
+    end
+
+    # ------------------------------------------------------------------
+    # pareto_norms_*.svg — 4-up L1/L2/L∞/CoV vs aggregate total shed,
+    # α encoded as cividis marker color with a colorbar in a thin 5th
+    # panel. Rebuilt from per_load_agg so a font/style change here
+    # doesn't require a full sweep re-run.
+    # Filename matches the trade-off scripts:
+    #   * Palma: pareto_norms_$(kind)_$(pshed_type).svg
+    #   * Min-max / efficiency: pareto_norms_integer_$(pshed_type)_$(case)_$(fair_func).svg
+    # ------------------------------------------------------------------
+    l1_vec   = zeros(size(per_load_agg, 1))
+    l2_vec   = zeros(size(per_load_agg, 1))
+    linf_vec = zeros(size(per_load_agg, 1))
+    cov_vec  = zeros(size(per_load_agg, 1))
+    for i in 1:size(per_load_agg, 1)
+        v = filter(isfinite, per_load_agg[i, :])
+        l1_vec[i]   = norm(v, 1)
+        l2_vec[i]   = norm(v, 2)
+        linf_vec[i] = norm(v, Inf)
+        m = isempty(v) ? 0.0 : mean(v)
+        s = length(v) > 1 ? std(v) : 0.0
+        cov_vec[i]  = m > 1e-9 ? s / m : NaN
+    end
+
+    function pareto_norm_panel(y, ylab)
+        plot(agg_total_shed, y,
+            seriestype = :line, lc = :grey,
+            marker = :circle, marker_z = alphas, color = :cividis,
+            clims = (0.0, 1.0), colorbar = false,
+            xlabel = "total load shed (kW)", ylabel = ylab,
+            legend = false; font_kw...)
+    end
+    p_l1   = pareto_norm_panel(l1_vec,   "L1 norm of shed (kW)")
+    p_l2   = pareto_norm_panel(l2_vec,   "L2 norm of shed (kW)")
+    p_linf = pareto_norm_panel(linf_vec, "L∞ norm of shed (kW)")
+    p_cov  = pareto_norm_panel(cov_vec,  "CoV (stdev/mean)")
+    p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
+        color = :cividis, colorbar = false,
+        xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
+        ylabel = "ν", title = "", framestyle = :box, font_kw...)
+    fig_norms = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
+        layout = @layout([a b c d e{0.02w}]),
+        size = (2200, 600),
+        left_margin = 7Plots.mm, right_margin = 6Plots.mm,
+        top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
+    norms_name = _is_palma(fair_func) ?
+        "pareto_norms_$(suffix).svg" :
+        "pareto_norms_integer_$(suffix).svg"
+    norms_path = joinpath(dirname(path), norms_name)
+    savefig(fig_norms, norms_path)
+    println("  → $norms_path")
+end
+
+for t in TARGETS
+    replot_one(t)
+end

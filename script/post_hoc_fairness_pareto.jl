@@ -204,8 +204,8 @@ end
 # ============================================================
 # PLOT BUILDERS
 # ============================================================
-const _PARETO_FONT = (tickfontsize = 25, guidefontsize = 29,
-                      titlefontsize = 32, legendfontsize = 20,
+const _PARETO_FONT = (tickfontsize = 22, guidefontsize = 22,
+                      titlefontsize = 26, legendfontsize = 14,
                       fontfamily = "Computer Modern")
 
 """
@@ -231,7 +231,9 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
                        ylab::AbstractString;
                        show_legend::Bool = false,
                        legend_position::Symbol = :topleft,
-                       zoom::Bool = false)
+                       zoom::Bool = false,
+                       bilevel_alpha::Real = 1.0,
+                       bilevel_label_suffix::AbstractString = "")
     # Collect xs/ys across both sweeps and bilevel points for axis limits.
     xs_all = Float64[]; ys_all = Float64[]
     sweep_data = Dict{String,Tuple{Vector{Float64},Vector{Float64},Vector{Float64}}}()
@@ -294,6 +296,26 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
             label = st.label)
     end
 
+    # α value annotations on each sweep's endpoints (first and last surviving
+    # α point after NaN filtering). When a sweep has only two finite α points
+    # — e.g. integer Palma where bus 6 stays energized for most α and most
+    # post-hoc Palma values are NaN — both points are the endpoints and both
+    # get labeled. Offset 4% of the y-range above the marker so the label
+    # sits clear of the line.
+    let yrange = ylim[2] - ylim[1]
+        yoff = 0.04 * (yrange == 0 ? 1.0 : yrange)
+        for st in SWEEP_STYLES
+            haskey(sweep_data, st.key) || continue
+            xs, ys, αs = sweep_data[st.key]
+            isempty(xs) && continue
+            idx = length(xs) == 1 ? [1] : [1, length(xs)]
+            for i in idx
+                annotate!(p, xs[i], ys[i] + yoff,
+                    text("ν=$(round(αs[i], digits=2))", 14, :center, st.color))
+            end
+        end
+    end
+
     for bs in BILEVEL_STYLES
         haskey(bilevels, bs.key) || continue
         bi = bilevels[bs.key]
@@ -302,22 +324,29 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
         scatter!(p, [bx], [by];
             marker = bs.marker, markersize = 26, color = bs.color,
             markerstrokecolor = :black, markerstrokewidth = 1.5,
-            label = bs.label)
+            alpha = bilevel_alpha,
+            label = bs.label * bilevel_label_suffix)
     end
 
     return p
 end
 
 function build_summary_figure(sweeps::Dict, bilevels::Dict, out_path::String;
-                              zoom::Bool = false)
+                              zoom::Bool = false,
+                              bilevel_alpha::Real = 1.0,
+                              bilevel_label_suffix::AbstractString = "")
     p_l1    = _pareto_panel(sweeps, bilevels, :L1,
-        raw"$\ell_1$ norm of load shed (kW)"; show_legend = true, zoom = zoom)
+        raw"$\ell_1$ norm of load shed (kW)"; show_legend = true, zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_linf  = _pareto_panel(sweeps, bilevels, :Linf,
-        raw"$\ell_\infty$ norm of load shed (kW)"; zoom = zoom)
+        raw"$\ell_\infty$ norm of load shed (kW)"; zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_palma = _pareto_panel(sweeps, bilevels, :Palma,
-        "Palma ratio of load shed (unitless)"; zoom = zoom)
+        "Palma ratio of load shed (unitless)"; zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_cov   = _pareto_panel(sweeps, bilevels, :CoV,
-        "CoV of load shed (unitless)"; zoom = zoom)
+        "CoV of load shed (unitless)"; zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     fig = plot(p_l1, p_linf, p_palma, p_cov;
         layout = (1, 4),
         size = (2800, 720),
@@ -330,28 +359,36 @@ function build_summary_figure(sweeps::Dict, bilevels::Dict, out_path::String;
 end
 
 function build_palma_figure(sweeps::Dict, bilevels::Dict, out_path::String;
-                               zoom::Bool = false)
+                               zoom::Bool = false,
+                               legend_position::Symbol = :topright,
+                               bilevel_alpha::Real = 1.0,
+                               bilevel_label_suffix::AbstractString = "")
     panel = _pareto_panel(sweeps, bilevels, :Palma,
         "Palma ratio of load shed (unitless)";
-        show_legend = true, legend_position = :topright, zoom = zoom)
+        show_legend = true, legend_position = legend_position, zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     fig = plot(panel;
         size = (900, 760),
-        left_margin = 26Plots.mm, right_margin = 16Plots.mm,
-        top_margin = 12Plots.mm, bottom_margin = 32Plots.mm)
+        left_margin = 13Plots.mm, right_margin = 16Plots.mm,
+        top_margin = 12Plots.mm, bottom_margin = 10Plots.mm)
     savefig(fig, out_path)
     savefig(fig, replace(out_path, r"\.svg$"i => ".pdf"))
     return fig
 end
 
 function build_cov_figure(sweeps::Dict, bilevels::Dict, out_path::String;
-                          zoom::Bool = false)
+                          zoom::Bool = false,
+                          legend_position::Symbol = :topright,
+                          bilevel_alpha::Real = 1.0,
+                          bilevel_label_suffix::AbstractString = "")
     panel = _pareto_panel(sweeps, bilevels, :CoV,
         "CoV of load shed (unitless)";
-        show_legend = true, legend_position = :topright, zoom = zoom)
+        show_legend = true, legend_position = legend_position, zoom = zoom,
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     fig = plot(panel;
         size = (900, 760),
-        left_margin = 26Plots.mm, right_margin = 16Plots.mm,
-        top_margin = 12Plots.mm, bottom_margin = 32Plots.mm)
+        left_margin = 13Plots.mm, right_margin = 16Plots.mm,
+        top_margin = 12Plots.mm, bottom_margin = 10Plots.mm)
     savefig(fig, out_path)
     savefig(fig, replace(out_path, r"\.svg$"i => ".pdf"))
     return fig
@@ -457,15 +494,35 @@ function _render_variant(variant_tag::String, want_relaxed::Bool)
     palma_zoom_path = joinpath(out_dir, "$(base)_palma_zoom.svg")
     cov_zoom_path      = joinpath(out_dir, "$(base)_cov_zoom.svg")
 
-    fig_summary  = build_summary_figure(sweeps_subset, bilevels_subset, summary_path)
-    build_palma_figure(sweeps_subset, bilevels_subset, palma_path)
-    build_cov_figure(sweeps_subset, bilevels_subset, cov_path)
+    # Relaxed sweeps + markers sit near the low end of total_shed, leaving
+    # the right side of the panel free; integer sits near the high end with
+    # the left free. Anchor the legend opposite the data cluster.
+    # Bilevel stars use a lighter alpha on relaxed figures so they match the
+    # lighter blue/red of the relaxed sweep lines. Legend entries get an
+    # explicit "(integer)" / "(relaxed)" suffix so a reader looking at both
+    # figure sets can tell them apart.
+    legpos = want_relaxed ? :topleft : :topright
+    bi_α   = want_relaxed ? 0.5 : 1.0
+    bi_lbl = want_relaxed ? " (relaxed)" : " (integer)"
+    fig_summary  = build_summary_figure(sweeps_subset, bilevels_subset, summary_path;
+        bilevel_alpha = bi_α, bilevel_label_suffix = bi_lbl)
+    build_palma_figure(sweeps_subset, bilevels_subset, palma_path;
+        legend_position = legpos, bilevel_alpha = bi_α,
+        bilevel_label_suffix = bi_lbl)
+    build_cov_figure(sweeps_subset, bilevels_subset, cov_path;
+        legend_position = legpos, bilevel_alpha = bi_α,
+        bilevel_label_suffix = bi_lbl)
     # Zoomed variants — same data, axes framed around the bilevel stars.
     # Skip if no bilevel markers (no anchor to zoom to).
     if !isempty(bilevels_subset)
-        build_summary_figure(sweeps_subset, bilevels_subset, summary_zoom_path; zoom = true)
-        build_palma_figure(sweeps_subset, bilevels_subset, palma_zoom_path; zoom = true)
-        build_cov_figure(sweeps_subset, bilevels_subset, cov_zoom_path; zoom = true)
+        build_summary_figure(sweeps_subset, bilevels_subset, summary_zoom_path;
+            zoom = true, bilevel_alpha = bi_α, bilevel_label_suffix = bi_lbl)
+        build_palma_figure(sweeps_subset, bilevels_subset, palma_zoom_path;
+            zoom = true, legend_position = legpos, bilevel_alpha = bi_α,
+            bilevel_label_suffix = bi_lbl)
+        build_cov_figure(sweeps_subset, bilevels_subset, cov_zoom_path;
+            zoom = true, legend_position = legpos, bilevel_alpha = bi_α,
+            bilevel_label_suffix = bi_lbl)
     end
 
     println("\n[$variant_tag] figures written to:")

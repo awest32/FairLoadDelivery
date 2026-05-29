@@ -93,7 +93,7 @@ for a in 1:n_alphas
     p = heatmap(unique_buses, period_labels, bus_status_alpha[a, :, :],
         color  = :grays,
         clims  = (0.0, 1.0),
-        title  = "α = $(round(alphas[a], digits=3))",
+        title  = "ν = $(round(alphas[a], digits=3))",
         xlabel = "Bus",
         ylabel = "Period",
         xrotation = 45,

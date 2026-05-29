@@ -280,48 +280,70 @@ ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by=x->parse(Int, x))]
 
-# FONT_KW kept for backwards compat with existing call sites, but now matches
-# the 9pt defaults set in figure_defaults.jl so nothing in this script
-# overrides the unified font sizes.
-FONT_KW = (tickfontsize = 9, guidefontsize = 9,
-                 titlefontsize = 9, legendfontsize = 9)
+# FONT_KW now mirrors post_hoc_fairness_pareto.jl's _PARETO_FONT so the
+# single-panel summary figures share their typographic scale with the
+# paper-ready Pareto plots.
+FONT_KW = (tickfontsize = 22, guidefontsize = 22,
+           titlefontsize = 26, legendfontsize = 14,
+           fontfamily = "Computer Modern")
+const ANNOT_PT = 14  # bar-top / pareto-endpoint annotation size
 
-function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
+function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}; ylim_max::Real)
     p = bar(load_labels, per_load_agg_vec,
         xlabel = "load",
         ylabel = "aggregate load shed (kW)",
-        title  = title_str,
         legend = false,
         color  = :steelblue,
-        linecolor = :black;
+        linecolor = :black,
+        ylims = (0.0, ylim_max * 1.10);
         FONT_KW...)
-    ymax = maximum(per_load_agg_vec)
     for (i, v) in enumerate(per_load_agg_vec)
-        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 9, :center))
+        annotate!(p, i, v + ylim_max * 0.02,
+            text("$(round(v, digits = 1))", ANNOT_PT, :center))
     end
     return p
 end
 
-p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :],
-    "alpha = 0 (efficiency) — aggregate over periods")
-p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :],
-    "alpha = 1 (fairness) — aggregate over periods")
+# Share the y-axis between α=0 and α=1 bars so the visual comparison reflects
+# absolute magnitudes; pick the larger of the two so neither chart is clipped.
+ymax_shared = max(
+    maximum(filter(isfinite, per_load_agg[1, :]);   init = 0.0),
+    maximum(filter(isfinite, per_load_agg[end, :]); init = 0.0))
 
-p_metrics = plot(alphas, agg_total_shed, label = "total shed (kW)",
-    lw = 2, marker = :circle,
-    xlabel = "alpha", ylabel = "aggregate load shed (kW)",
-    title  = "Aggregate total + max per-load shed vs alpha";
+p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :];   ylim_max = ymax_shared)
+p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :]; ylim_max = ymax_shared)
+
+# Pareto curve: aggregate total shed (x) vs max per-load shed (y).
+# Dots match the steelblue of the bar charts and are enlarged to 14pt
+# (3.5× the default 4pt); α encoding moved off the markers and onto a
+# top axis below so the visual palette stays consistent across panels.
+p_pareto = plot(agg_total_shed, agg_max_shed,
+    seriestype = :line, lc = :grey,
+    marker = :circle, markersize = 14, color = :steelblue,
+    markerstrokecolor = :steelblue,
+    xlabel = "total load shed (kW)",
+    ylabel = "max per-load shed (kW)",
+    legend = false;
     FONT_KW...)
-plot!(p_metrics, alphas, agg_max_shed, label = "max per-load shed (kW)",
-    lw = 2, marker = :square)
+# Annotate the α=0 and α=1 endpoints (5% of the y-range above the marker)
+# in the same style as the bar-chart value labels.
+let yrange = maximum(agg_max_shed) - minimum(agg_max_shed)
+    yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
+    annotate!(p_pareto, agg_total_shed[1],   agg_max_shed[1]   + yoff,
+        text("ν=$(round(alphas[1],   digits=2))", ANNOT_PT, :center))
+    annotate!(p_pareto, agg_total_shed[end], agg_max_shed[end] + yoff,
+        text("ν=$(round(alphas[end], digits=2))", ANNOT_PT, :center))
+end
 
-fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
-    layout = (1, 3), size = (1900, 600),
-    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
-    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
-savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type)_$(case)_$(fair_func).svg"))
-display(fig1)
+# Save each panel as its own figure (was a single 3-panel fig1).
+for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+    _fig = plot(_p; size = (900, 760),
+        left_margin = 7Plots.mm, right_margin = 6Plots.mm,
+        top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
+    savefig(_fig, joinpath(output_dir,
+        "summary_single_$(_name)_$(pshed_type)_$(case)_$(fair_func).svg"))
+    _name == "pareto" && display(_fig)
+end
 
 # ============================================================
 # FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
@@ -345,7 +367,7 @@ p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
 p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
     color = :cividis, colorbar = false,
     xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "alpha", title = "", framestyle = :box)
+    ylabel = "ν", title = "", framestyle = :box)
 
 fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     layout = @layout([a b c d e{0.02w}]),

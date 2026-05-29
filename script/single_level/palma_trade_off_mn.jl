@@ -174,8 +174,10 @@ n_loads           = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
 
 if relaxed
     rel = "_relaxed"
+    kind = "relaxed"
 else
     rel = ""
+    kind = "integer"
 end
 output_dir = joinpath(@__DIR__, "../../results/$date/palma$(rel)_trade_off_mn")
 isdir(output_dir) || mkpath(output_dir)
@@ -482,7 +484,7 @@ for (k, t) in enumerate(REP_PERIODS)
             marker = period_markers[mod1(k, length(period_markers))], lw = 2,
             line_z = alphas)
 end
-savefig(p3d, joinpath(output_dir, "pareto3d_integer_$(pshed_type).svg"))
+savefig(p3d, joinpath(output_dir, "pareto3d_$(kind)_$(pshed_type).svg"))
 display(p3d)
 
 # ============================================================
@@ -503,7 +505,7 @@ for t in 1:N_PERIODS
           title  = "t=$t  λ=$(PEAK_TIME_COSTS[t])",
           colorbar = false, legend = false)
 end
-savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type).svg"))
+savefig(panel, joinpath(output_dir, "pareto_per_period_$(kind)_$(pshed_type).svg"))
 display(panel)
 
 # Cost-weighted aggregates retained for CSV export only (no plot).
@@ -546,56 +548,77 @@ ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by = x -> parse(Int, x))]
 
-# FONT_KW kept for backwards compat with existing call sites, but now matches
-# the 9pt defaults set in figure_defaults.jl so nothing in this script
-# overrides the unified font sizes.
-FONT_KW = (tickfontsize = 9, guidefontsize = 9,
-                 titlefontsize = 9, legendfontsize = 9)
+# FONT_KW now mirrors post_hoc_fairness_pareto.jl's _PARETO_FONT so the
+# single-panel summary figures share their typographic scale with the
+# paper-ready Pareto plots.
+FONT_KW = (tickfontsize = 22, guidefontsize = 22,
+           titlefontsize = 26, legendfontsize = 14,
+           fontfamily = "Computer Modern")
+const ANNOT_PT = 14  # bar-top / pareto-endpoint annotation size
 
-function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
+function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}; ylim_max::Real)
     p = bar(load_labels, per_load_agg_vec,
         xlabel = "load",
         ylabel = "aggregate load shed (kW)",
-        title  = title_str,
         legend = false,
         color  = :steelblue,
-        linecolor = :black;
+        linecolor = :black,
+        ylims = (0.0, ylim_max * 1.10);
         FONT_KW...)
-    ymax = maximum(filter(isfinite, per_load_agg_vec); init = 0.0)
     for (i, v) in enumerate(per_load_agg_vec)
         isfinite(v) || continue
-        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 9, :center))
+        annotate!(p, i, v + ylim_max * 0.02,
+            text("$(round(v, digits = 1))", ANNOT_PT, :center))
     end
     return p
 end
 
-p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :],
-    "alpha = 0 (efficiency) — aggregate over periods")
-p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :],
-    "alpha = 1 (Palma) — aggregate over periods")
+# Share the y-axis between α=0 and α=1 bars so the visual comparison reflects
+# absolute magnitudes; pick the larger of the two so neither chart is clipped.
+ymax_shared = max(
+    maximum(filter(isfinite, per_load_agg[1, :]);   init = 0.0),
+    maximum(filter(isfinite, per_load_agg[end, :]); init = 0.0))
 
-# Total shed (left axis) + served-Palma (right axis, finite entries only).
-p_metrics = plot(alphas, agg_total_shed, label = "total shed (kW)",
-    lw = 2, marker = :circle, color = :steelblue,
-    xlabel = "alpha", ylabel = "aggregate load shed (kW)",
-    title  = "Aggregate total shed + served-Palma vs alpha", legend = :topleft;
-    FONT_KW...)
+p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :];   ylim_max = ymax_shared)
+p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :]; ylim_max = ymax_shared)
+
+# Pareto curve: aggregate total shed (x) vs Palma ratio of shed (y).
+# Dots match the steelblue of the bar charts and are enlarged to 14pt
+# (3.5× the default); α encoding lives on the top axis below. Drops NaN
+# Palma entries (low-α points where bot40 = 0 — same guard as
+# post_hoc_fairness_pareto.jl).
 finite_palma = findall(isfinite, palma_ratio_log)
-if !isempty(finite_palma)
-    plot!(twinx(p_metrics), alphas[finite_palma], palma_ratio_log[finite_palma],
-        label = "Palma (top10/bot40 served)", lw = 2, marker = :diamond,
-        ls = :dash, color = :darkorange,
-        ylabel = "aggregate Palma (served-day)", legend = :topright;
-        FONT_KW...)
+p_pareto = plot(agg_total_shed[finite_palma], palma_ratio_log[finite_palma],
+    seriestype = :line, lc = :grey,
+    marker = :circle, markersize = 14, color = :steelblue,
+    markerstrokecolor = :steelblue,
+    xlabel = "total load shed (kW)",
+    ylabel = "Palma ratio of shed (unitless)",
+    legend = false;
+    FONT_KW...)
+# Annotate the α=0 / α=1 endpoints (5% of the y-range above the marker)
+# using the filtered finite-Palma α values. Same style as the bar-chart
+# value labels.
+let _ts_e = agg_total_shed[finite_palma],
+    _ys_e = palma_ratio_log[finite_palma],
+    _αs_e = alphas[finite_palma]
+    yrange = maximum(_ys_e) - minimum(_ys_e)
+    yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
+    annotate!(p_pareto, _ts_e[1],   _ys_e[1]   + yoff,
+        text("ν=$(round(_αs_e[1],   digits=2))", ANNOT_PT, :center))
+    annotate!(p_pareto, _ts_e[end], _ys_e[end] + yoff,
+        text("ν=$(round(_αs_e[end], digits=2))", ANNOT_PT, :center))
 end
 
-fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
-    layout = (1, 3), size = (1900, 600),
-    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
-    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
-savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type).svg"))
-display(fig1)
+# Save each panel as its own figure (was a single 3-panel fig1).
+for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+    _fig = plot(_p; size = (900, 760),
+        left_margin = 7Plots.mm, right_margin = 6Plots.mm,
+        top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
+    savefig(_fig, joinpath(output_dir,
+        "summary_single_$(_name)_$(kind)_$(pshed_type).svg"))
+    _name == "pareto" && display(_fig)
+end
 
 # ============================================================
 # FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
@@ -619,14 +642,14 @@ p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
 p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
     color = :cividis, colorbar = false,
     xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "alpha", title = "", framestyle = :box)
+    ylabel = "ν", title = "", framestyle = :box)
 
 fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     layout = @layout([a b c d e{0.02w}]),
     size = (2200, 600),
     left_margin = 14Plots.mm, right_margin = 6Plots.mm,
     top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
-savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type).svg"))
+savefig(fig2, joinpath(output_dir, "pareto_norms_$(kind)_$(pshed_type).svg"))
 display(fig2)
 
 # ============================================================
