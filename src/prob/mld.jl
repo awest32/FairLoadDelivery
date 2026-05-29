@@ -2151,6 +2151,25 @@
         return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
             multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
     end
+     function build_mn_mc_mld_min_max(pm::_PMD.AbstractUBFModels;
+                                             peak_time_costs::Vector{<:Real}=Float64[],
+                                             alpha::Float64=1.0)
+        nw_ids = sort(collect(_PMD.nw_ids(pm)))
+        for n in nw_ids
+            _build_mn_period_fair!(pm, n; relax=true)
+        end
+        objective_mn_min_max_absolute(pm; peak_time_costs=peak_time_costs, alpha=alpha)
+    end
+
+    function solve_mn_mc_mld_min_max(data::Dict{String,<:Any}, solver;
+                                              peak_time_costs::Vector{<:Real}=Float64[],
+                                              alpha::Float64=1.0, kwargs...)
+        build_fn = (pm) -> build_mn_mc_mld_min_max(pm;
+            peak_time_costs=peak_time_costs, alpha=alpha)
+        return _PMD.solve_mc_model(data, _PMD.LinDist3FlowPowerModel, solver, build_fn;
+            multinetwork=true, ref_extensions=[ref_add_load_blocks!], kwargs...)
+    end
+
 
     """
     Multiperiod MLD with min-max-on-shed-FRACTION objective (INTEGER). Mirrors

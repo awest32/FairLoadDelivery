@@ -36,9 +36,14 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-CASE = "motivation_c_good4integer"
-case            = "motivation_c_13bus"
-CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
+# CASE = "motivation_c_good4integer"
+# case            = "motivation_c_13bus"
+# CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+ #CASE = "motivation_c_good4integer"
+case = "6_bus" #"13_bus"#"6_bus"
+#critical_load = ["611"]
+CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT      = 0.8
 FAIR_FUNC = "efficiency"
 pshed_type      = "absolute"
@@ -48,7 +53,9 @@ pshed_type      = "absolute"
 # maximal. Bump to [12, 18, 22] (T=3, peak in middle) if the 2-period run is
 # fast.
 
-SELECTED_HOURS    = [4, 18, 8]
+#SELECTED_HOURS    = [4, 18, 8]
+ SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+
 N_PERIODS         = length(SELECTED_HOURS)
 
 PEAK_STRESS       = 1.0
@@ -265,21 +272,46 @@ include("results_block_mn.jl")
 # ============================================================
 # STEP 5: PERSIST PER-RUN DATA (same schema as run_validation_mn.jl Step 6)
 # ============================================================
+# Efficiency runner has no bilevel loop, so "final weights" are just the
+# initial per-load weights, replicated per period to match the run_validation_mn.jl
+# layout (T*N flat vector indexed period-major). Saved so replot scripts can
+# read the same schema regardless of which fair_func produced the JLD2.
+_ref_load_ids = sort(collect(keys(mn_new["nw"][nw_ids_sorted[1]]["load"])),
+                     by = x -> parse(Int, x))
+_final_weight_ids = parse.(Int, _ref_load_ids)
+_init_weights = [mn_new["nw"][nw_ids_sorted[1]]["load"][lid]["weight"]
+                 for lid in _ref_load_ids]
+_final_fair_weights = repeat(_init_weights, N_PERIODS)
+
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
-    pshed_matrix         = pshed_matrix,
-    load_labels          = load_labels,
-    period_labels        = period_labels,
-    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
-    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
-    CASE                 = CASE,
-    FAIR_FUNC            = FAIR_FUNC,
-    pshed_type           = pshed_type,
-    N_PERIODS            = N_PERIODS,
-    period_total         = period_total,
-    period_max           = period_max,
-    rounded_objectives   = rounded_objectives,
-    relaxed_mn_objective = mn_relaxed_final["objective"],
+    pshed_matrix             = pshed_matrix,
+    pd_ref_matrix            = pd_ref_matrix,
+    load_labels              = load_labels,
+    period_labels            = period_labels,
+    bus_labels               = bus_labels,
+    bus_pd_matrix            = bus_pd_matrix,
+    bus_pshed_matrix         = bus_pshed_matrix,
+    bus_status_matrix        = bus_status_matrix,
+    relaxed_pshed_matrix     = relaxed_pshed_matrix,
+    relaxed_bus_pshed_matrix = relaxed_bus_pshed_matrix,
+    relaxed_bus_status_matrix = relaxed_bus_status_matrix,
+    final_fair_weights       = _final_fair_weights,
+    final_weight_ids         = _final_weight_ids,
+    LOAD_SCALE_FACTORS       = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS          = PEAK_TIME_COSTS,
+    SELECTED_HOURS           = SELECTED_HOURS,
+    PEAK_STRESS              = PEAK_STRESS,
+    CENTER_AT_NOMINAL        = CENTER_AT_NOMINAL,
+    LS_PERCENT               = LS_PERCENT,
+    CASE                     = CASE,
+    FAIR_FUNC                = FAIR_FUNC,
+    pshed_type               = pshed_type,
+    N_PERIODS                = N_PERIODS,
+    period_total             = period_total,
+    period_max               = period_max,
+    rounded_objectives       = rounded_objectives,
+    relaxed_mn_objective     = mn_relaxed_final["objective"],
 )
 println("Saved efficiency run data → $jld_path")
 

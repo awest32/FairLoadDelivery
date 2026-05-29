@@ -1,5 +1,5 @@
-# Block index → name mapping for more_meshed_6_bus / efficiency / absolute
-# α slice: target=0.75, realized=0.0
+# Block index → name mapping for more_meshed_6_bus / min_max / absolute
+# α slice: target=0.9, realized=0.8947368421052632
 # Block order: paper-aligned (script/block_display.jl)
 # index	name
 1	d

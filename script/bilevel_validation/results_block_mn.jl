@@ -55,6 +55,23 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     end
 end
 
+# Relaxed (pre-rounding) per-load pshed pulled directly from the Step 3
+# final relaxed multi-period MLD. Values are continuous in [0, pd] — the
+# DiffOpt LP relaxation does not force integrality of z_demand / z_block.
+relaxed_pshed_matrix = fill(NaN, N_PERIODS, length(ref_load_ids))
+if @isdefined(mn_relaxed_final) && haskey(mn_relaxed_final, "solution")
+    for (t, nw_id) in enumerate(nw_ids_sorted)
+        haskey(mn_relaxed_final["solution"]["nw"], nw_id) || continue
+        sol_t = mn_relaxed_final["solution"]["nw"][nw_id]
+        haskey(sol_t, "load") || continue
+        for (j, lid) in enumerate(ref_load_ids)
+            if haskey(sol_t["load"], lid) && haskey(sol_t["load"][lid], "pshed")
+                relaxed_pshed_matrix[t, j] = sum(sol_t["load"][lid]["pshed"])
+            end
+        end
+    end
+end
+
 # ---- Bus on/off status across load buses × ALL periods. Integer MLD fully
 # sheds or serves each load, so served_fraction lives in {0, 1} per
 # (period, bus). Restricted to buses that actually host a load.
@@ -68,9 +85,10 @@ bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in all_bus_ids]
 bus_col = Dict(bid => k for (k, bid) in enumerate(all_bus_ids))
 load_to_bus_col = [bus_col[math_ref["load"][lid]["load_bus"]] for lid in ref_load_ids]
 
-pd_ref_matrix    = zeros(N_PERIODS, length(ref_load_ids))
-bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
-bus_pd_matrix    = zeros(N_PERIODS, length(all_bus_ids))
+pd_ref_matrix          = zeros(N_PERIODS, length(ref_load_ids))
+bus_pshed_matrix       = zeros(N_PERIODS, length(all_bus_ids))
+bus_pd_matrix          = zeros(N_PERIODS, length(all_bus_ids))
+relaxed_bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
 for (t, nw_id) in enumerate(nw_ids_sorted)
     nw_data = mn_new["nw"][nw_id]
     for (j, lid) in enumerate(ref_load_ids)
@@ -79,6 +97,8 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
         bus_pd_matrix[t, load_to_bus_col[j]] += pd_total
         v = pshed_matrix[t, j]
         bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(v) ? 0.0 : v
+        vr = relaxed_pshed_matrix[t, j]
+        relaxed_bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(vr) ? 0.0 : vr
     end
 end
 
@@ -90,6 +110,17 @@ bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
 for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     if bus_pd_matrix[t, b] > 1e-9
         bus_status_matrix[t, b] = 1.0 - bus_pshed_matrix[t, b] / bus_pd_matrix[t, b]
+    end
+end
+
+# Relaxed served fraction lives in [0, 1] (continuous) — no binarization.
+relaxed_bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
+any_relaxed = any(!isnan, relaxed_pshed_matrix)
+if any_relaxed
+    for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
+        if bus_pd_matrix[t, b] > 1e-9
+            relaxed_bus_status_matrix[t, b] = 1.0 - relaxed_bus_pshed_matrix[t, b] / bus_pd_matrix[t, b]
+        end
     end
 end
 
@@ -154,6 +185,46 @@ p_heat = heatmap(block_tick_labels_h, period_labels, status_matrix_h,
 )
 display(p_heat)
 savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))
+
+# ---- Relaxed (pre-rounding) per-block heatmap. Same color scale and block
+# ordering as the rounded one; rendered with a continuous gradient + visible
+# colorbar because relaxed served fraction is fractional in [0, 1]. Skipped
+# silently if mn_relaxed_final wasn't in scope (e.g. legacy REPL re-run).
+if any_relaxed
+    if display_info !== nothing
+        relaxed_block_pd    = zeros(N_PERIODS, n_blocks_h)
+        relaxed_block_pshed = zeros(N_PERIODS, n_blocks_h)
+        for t in 1:N_PERIODS, b in 1:length(bus_labels)
+            col = bus2block[b]
+            col == 0 && continue
+            relaxed_block_pd[t, col]    += bus_pd_matrix[t, b]
+            relaxed_block_pshed[t, col] += relaxed_bus_pshed_matrix[t, b]
+        end
+        relaxed_status_matrix_h = fill(NaN, N_PERIODS, n_blocks_h)
+        for t in 1:N_PERIODS, b in 1:n_blocks_h
+            relaxed_block_pd[t, b] > 1e-9 || continue
+            relaxed_status_matrix_h[t, b] = 1.0 - relaxed_block_pshed[t, b] / relaxed_block_pd[t, b]
+        end
+    else
+        relaxed_status_matrix_h = relaxed_bus_status_matrix
+    end
+
+    p_heat_relaxed = heatmap(block_tick_labels_h, period_labels, relaxed_status_matrix_h,
+        xlabel = "Load Block",
+        ylabel = "Time Period",
+        color  = cgrad(["#E5EFEA", "#2A6F6B"]),
+        clims  = (0.0, 1.0),
+        xrotation = 0,
+        yticks = (1:N_PERIODS, period_labels),
+        colorbar = true,
+        colorbar_title = "served fraction",
+    )
+    display(p_heat_relaxed)
+    savefig(p_heat_relaxed, joinpath(save_dir, "loadshed_heatmap_relaxed_$(pshed_type)_$case.svg"))
+else
+    relaxed_status_matrix_h = nothing
+    @info "Skipping relaxed heatmap — mn_relaxed_final solution not present in scope."
+end
 
 # ---- Grouped bar over representative periods (matches min_max_trade_off_mn style) ----
 rep_valid = filter(t -> 1 <= t <= N_PERIODS, REP_PERIODS)

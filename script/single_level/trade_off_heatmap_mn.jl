@@ -54,7 +54,7 @@ include(joinpath(@__DIR__, "../block_display.jl"))
 # Set CASE to whichever matches the JLD2 you want to plot.
 CASE         = "more_meshed_6_bus"
 #CASE         = "13_bus"
-FAIR_FUNC    = "palma"     # "min_max" or "palma"
+FAIR_FUNC    = "min_max"     # "min_max" or "palma"
 pshed_type   = "absolute"
 ALPHA_TARGET = 0.9
 

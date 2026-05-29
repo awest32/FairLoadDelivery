@@ -51,11 +51,11 @@ CASE = "case6_unbalanced_switch_more_meshed_good4integer"
  #CASE = "motivation_c_good4integer"
 case = "6_bus" #"13_bus"#"6_bus"
 #critical_load = ["611"]
-#CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
+CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
+#CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
-FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
+FAIR_FUNC = "efficiciency"  # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -70,7 +70,7 @@ N_BERNOULLI_SAMPLES = 2000
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
  SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
- SELECTED_HOURS    = [4, 18, 8]
+ #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
 PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
@@ -110,7 +110,7 @@ global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
 print_validation_header("Step 1: Network + Multinetwork Setup")
 
 eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT;
-    switch_rating=switch_rating, critical_load=critical_load)
+    switch_rating=switch_rating)#, critical_load=critical_load
 
 # System aggregate scale per period — used by results_block_mn.jl print rows and
 # by downstream plotting. Per-load shape now comes from the H&A schedules.
@@ -446,25 +446,34 @@ if !@isdefined(iter_timings)
 end
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
-    pshed_matrix         = pshed_matrix,
-    pd_ref_matrix        = pd_ref_matrix,
-    load_labels          = load_labels,
-    period_labels        = period_labels,
-    bus_labels           = bus_labels,
-    bus_pd_matrix        = bus_pd_matrix,
-    bus_pshed_matrix     = bus_pshed_matrix,
-    bus_status_matrix    = bus_status_matrix,
-    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
-    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
-    CASE                 = CASE,
-    FAIR_FUNC            = FAIR_FUNC,
-    pshed_type           = pshed_type,
-    N_PERIODS            = N_PERIODS,
-    period_total         = period_total,
-    period_max           = period_max,
-    rounded_objectives   = rounded_objectives,
-    relaxed_mn_objective = mn_relaxed_final["objective"],
-    iter_timings         = iter_timings,
+    pshed_matrix             = pshed_matrix,
+    pd_ref_matrix            = pd_ref_matrix,
+    load_labels              = load_labels,
+    period_labels            = period_labels,
+    bus_labels               = bus_labels,
+    bus_pd_matrix            = bus_pd_matrix,
+    bus_pshed_matrix         = bus_pshed_matrix,
+    bus_status_matrix        = bus_status_matrix,
+    relaxed_pshed_matrix     = relaxed_pshed_matrix,
+    relaxed_bus_pshed_matrix = relaxed_bus_pshed_matrix,
+    relaxed_bus_status_matrix = relaxed_bus_status_matrix,
+    final_fair_weights       = fair_weights,
+    final_weight_ids         = final_weight_ids,
+    LOAD_SCALE_FACTORS       = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS          = PEAK_TIME_COSTS,
+    SELECTED_HOURS           = SELECTED_HOURS,
+    PEAK_STRESS              = PEAK_STRESS,
+    CENTER_AT_NOMINAL        = CENTER_AT_NOMINAL,
+    LS_PERCENT               = LS_PERCENT,
+    CASE                     = CASE,
+    FAIR_FUNC                = FAIR_FUNC,
+    pshed_type               = pshed_type,
+    N_PERIODS                = N_PERIODS,
+    period_total             = period_total,
+    period_max               = period_max,
+    rounded_objectives       = rounded_objectives,
+    relaxed_mn_objective     = mn_relaxed_final["objective"],
+    iter_timings             = iter_timings,
 )
 println("Saved bilevel run data → $jld_path")
 

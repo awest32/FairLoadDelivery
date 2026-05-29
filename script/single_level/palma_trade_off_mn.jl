@@ -83,7 +83,7 @@ case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
 pshed_type = "absolute"  # only absolute supported in this script
-
+relaxed = false
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 # Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
@@ -172,7 +172,12 @@ nw_ids_sorted     = sort(collect(keys(mn_data["nw"])), by = x -> parse(Int, x))
 nw_ids_int_sorted = parse.(Int, nw_ids_sorted)        # ints, matches PMD nw_ids
 n_loads           = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
 
-output_dir = joinpath(@__DIR__, "../../results/$date/palma_trade_off_mn")
+if relaxed
+    rel = "_relaxed"
+else
+    rel = ""
+end
+output_dir = joinpath(@__DIR__, "../../results/$date/palma$(rel)_trade_off_mn")
 isdir(output_dir) || mkpath(output_dir)
 
 # ============================================================
