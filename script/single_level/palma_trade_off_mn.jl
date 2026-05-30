@@ -74,9 +74,9 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case = "more_meshed_6_bus"#"13_bus" #"more_meshed_6_bus"   # 13-bus motivation_c run (T=3, [4,8,18]); flip back to "more_meshed_6_bus" + 6-bus dss for case6 runs.
+case = "more_meshed_bd_6_bus"   # BD variant; was "more_meshed_6_bus" for baseline
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
@@ -92,7 +92,7 @@ relaxed = false
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
 #SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
-SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
 
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
@@ -108,7 +108,7 @@ CENTER_AT_NOMINAL = true
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [6, 11, 20]   # T=3 with [4, 8, 18] — plot all periods. Was [6, 11, 20] for T=24.
+REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
@@ -419,6 +419,9 @@ per_load_agg     = fill(NaN, alpha_points, n_loads)
 # Full (α × load × period) tensor — needed by the trade-off heatmap /
 # grouped-bar replot scripts. Matches min_max_trade_off_mn.jl's JLD2 schema.
 per_load_period_shed = fill(NaN, alpha_points, n_loads, N_PERIODS)
+# Raw per-period solution dict per α — Dict("nw_id" => solution_nw) keyed by string.
+# `nothing` at non-feasible α points.
+solutions_per_alpha = Vector{Any}(nothing, alpha_points)
 
 for (idx, alpha) in enumerate(alphas)
     set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
@@ -466,6 +469,16 @@ for (idx, alpha) in enumerate(alphas)
             "model(σ·top) = $(round(σ_val * top_val, digits=4))   ",
             "[σ=$(round(σ_val, digits=6)), top_sum=$(round(top_val, digits=3)), bot_sum=$(round(bot_val, digits=3))]")
     flush(stdout)
+
+    # Capture full per-period solution dict (loads/blocks/switches/buses/branches
+    # with their PMD-standard fields) for JLD2 persistence. build_solution reads
+    # JuMP values off the already-optimized mld_mn.model — uses the sol_component_value
+    # hooks wired into the variable_mc_* constructors (see src/core/variable.jl).
+    try
+        solutions_per_alpha[idx] = FairLoadDelivery._IM.build_solution(mld_mn)
+    catch err
+        @warn "build_solution failed at alpha=$alpha — JLD2 will have nothing for this α ($err)"
+    end
 end
 
 # ============================================================
@@ -711,6 +724,16 @@ JLD2.jldsave(jld_path;
     case                 = case,
     pshed_type           = pshed_type,
     fair_func            = "palma",
+    # Per-α raw per-period solution dicts (loads/blocks/switches/buses/branches).
+    # Built via _IM.build_solution after each α's JuMP.optimize!; nothing where
+    # the α point was infeasible. See run_validation_mn.jl Step 6 for the
+    # downstream schema.
+    solutions_per_alpha  = solutions_per_alpha,
+    math_switch          = math["switch"],
+    math_branch          = math["branch"],
+    math_bus             = math["bus"],
+    math_load            = math["load"],
+    load_block_sets      = lbs,
 )
 println("Saved trade-off sweep data → $jld_path")
 

@@ -39,7 +39,8 @@ include("validation_utils.jl")
 # CASE = "motivation_c_good4integer"
 # case            = "motivation_c_13bus"
 # CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
-CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
+ #CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
  #CASE = "motivation_c_good4integer"
 case = "6_bus" #"13_bus"#"6_bus"
 #critical_load = ["611"]
@@ -54,7 +55,8 @@ pshed_type      = "absolute"
 # fast.
 
 #SELECTED_HOURS    = [4, 18, 8]
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+ SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
 
 N_PERIODS         = length(SELECTED_HOURS)
 
@@ -192,6 +194,7 @@ print_validation_header("Step 3: Per-period AC feasibility")
 
 mn_rounded_solutions = Dict{String,Dict{String,Any}}()
 per_period_results   = Dict{String,Any}()
+ac_solutions_by_nw   = Dict{String,Any}()
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, λ=$(PEAK_TIME_COSTS[t]), agg_scale=$(round(LOAD_SCALE_FACTORS[t], digits=3))) -----")
@@ -240,6 +243,11 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     ac_ok_t     = ac_term_t in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_LOCALLY_SOLVED)
     period_checks["ac_convergence"] = Dict("passed" => ac_ok_t, "details" => ["status: $ac_term_t"])
     print_check_result("Period $t: AC PF converged", ac_ok_t, "status: $ac_term_t")
+
+    ac_solutions_by_nw[nw_id] = Dict(
+        "solution"           => get(ac_result_t, "solution", Dict{String,Any}()),
+        "termination_status" => string(ac_term_t),
+    )
 
     if ac_ok_t && haskey(ac_result_t, "solution")
         v_passed_ac, v_violations_ac, v_summary_ac = check_voltage_limits_ac(ac_result_t, math_ac_t)
@@ -312,6 +320,16 @@ JLD2.jldsave(jld_path;
     period_max               = period_max,
     rounded_objectives       = rounded_objectives,
     relaxed_mn_objective     = mn_relaxed_final["objective"],
+    # Raw per-period solutions + static element metadata; see run_validation_mn.jl
+    # Step 6 for the schema.
+    mn_relaxed_solution_per_period = mn_integer["solution"]["nw"],
+    mn_rounded_solution_per_period = Dict(nw_id => v["solution"] for (nw_id, v) in mn_rounded_solutions),
+    mn_ac_solution_per_period      = ac_solutions_by_nw,
+    math_switch              = math["switch"],
+    math_branch              = math["branch"],
+    math_bus                 = math["bus"],
+    math_load                = math["load"],
+    load_block_sets          = lbs,
 )
 println("Saved efficiency run data → $jld_path")
 

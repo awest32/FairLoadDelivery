@@ -38,27 +38,41 @@ CASE_KEY   = "case6"
 PSHED_TYPE = "absolute"
 SHOW_BILEVEL = true
 
+# Manual bilevel-JLD2 overrides — keyed by BILEVEL_STYLES.key. Use when the
+# latest run on disk is wrong (e.g. T mismatch with the single-level sweeps,
+# bad convergence) and you want to pin a specific historical result instead.
+# Set to nothing / drop the key to fall back to `_bilevel_jld2`'s mtime pick.
+# Current pin: 5/30 palma was run at T=5 and lands left of the efficient
+# T=24 marker — use the 5/27 T=24 result until the T=24 palma rerun lands.
+const BILEVEL_OVERRIDES = Dict(
+    "palma" => joinpath(@__DIR__, "..", "results", "2026-05-27",
+        "bilevel_validation_mn",
+        "case6_unbalanced_switch_more_meshed_good4integer",
+        "palma_absolute",
+        "bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_palma_absolute.jld2"),
+)
+
 @assert haskey(CASE_TAGS, CASE_KEY) "Unknown CASE_KEY=$CASE_KEY"
 tags = CASE_TAGS[CASE_KEY]
 RESULTS_ROOT = joinpath(@__DIR__, "../results")
 
 # Sweeps to overlay as single-level lines and bilevel objectives to
-# overlay as scatter markers. Linestyle distinguishes fair-func
-# (palma vs min-max); color shade distinguishes integer (dark) vs
-# relaxed (light) so the four lines stay legible on one panel.
+# overlay as scatter markers. Linestyle distinguishes fair-func (palma
+# vs min-max). Integer and relaxed panels are rendered separately, so
+# each fair-func uses the same full-intensity color across both variants.
 const SWEEP_STYLES = [
     (key = "palma_integer",   label = "Single-level Palma (integer)",
      fair_func = "palma",   relaxed = false,
      linestyle = :solid, color = RGB(0.20, 0.40, 0.85)),
     (key = "palma_relaxed",   label = "Single-level Palma (relaxed)",
      fair_func = "palma",   relaxed = true,
-     linestyle = :solid, color = RGB(0.55, 0.70, 0.95)),
+     linestyle = :solid, color = RGB(0.20, 0.40, 0.85)),
     (key = "min_max_integer", label = "Single-level min-max (integer)",
      fair_func = "min_max", relaxed = false,
      linestyle = :dash,  color = RGB(0.85, 0.30, 0.20)),
     (key = "min_max_relaxed", label = "Single-level min-max (relaxed)",
      fair_func = "min_max", relaxed = true,
-     linestyle = :dash,  color = RGB(0.95, 0.65, 0.55)),
+     linestyle = :dash,  color = RGB(0.85, 0.30, 0.20)),
 ]
 
 const BILEVEL_STYLES = [
@@ -436,7 +450,13 @@ end
 
 if SHOW_BILEVEL
     for bs in BILEVEL_STYLES
-        path = _bilevel_jld2(bs.key)
+        override = get(BILEVEL_OVERRIDES, bs.key, nothing)
+        path = if override !== nothing && isfile(override)
+            println("  bilevel $(bs.key): OVERRIDE active → $(relpath(override, RESULTS_ROOT))")
+            override
+        else
+            _bilevel_jld2(bs.key)
+        end
         if path === nothing
             @warn "[$(bs.key)] no bilevel JLD2 found — skipping marker"
             continue
@@ -497,12 +517,10 @@ function _render_variant(variant_tag::String, want_relaxed::Bool)
     # Relaxed sweeps + markers sit near the low end of total_shed, leaving
     # the right side of the panel free; integer sits near the high end with
     # the left free. Anchor the legend opposite the data cluster.
-    # Bilevel stars use a lighter alpha on relaxed figures so they match the
-    # lighter blue/red of the relaxed sweep lines. Legend entries get an
-    # explicit "(integer)" / "(relaxed)" suffix so a reader looking at both
-    # figure sets can tell them apart.
+    # Legend entries get an explicit "(integer)" / "(relaxed)" suffix so a
+    # reader looking at both figure sets can tell them apart.
     legpos = want_relaxed ? :topleft : :topright
-    bi_α   = want_relaxed ? 0.5 : 1.0
+    bi_α   = 1.0
     bi_lbl = want_relaxed ? " (relaxed)" : " (integer)"
     fig_summary  = build_summary_figure(sweeps_subset, bilevels_subset, summary_path;
         bilevel_alpha = bi_α, bilevel_label_suffix = bi_lbl)

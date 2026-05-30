@@ -26,15 +26,15 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/pmonm_13_bus_mod.dss"
-case = "more_meshed_6_bus"   # 13-bus motivation_c run (T=3, [4,8,18]); flip back to "more_meshed_6_bus" + 6-bus dss for case6 runs.
+case = "more_meshed_bd_6_bus"   # BD variant adds QuadBD switch; was "more_meshed_6_bus" for baseline
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
-fair_func = "efficiency_relaxed"  # "efficiency" or "min_max"
+fair_func = "min_max_relaxed"  # "efficiency" or "min_max"
 alpha_end = 1
 if fair_func == "efficiency_relaxed"
     alpha_end = 0
@@ -52,7 +52,7 @@ end
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent (was collect(0:23) for T=24)
 
 #SELECTED_HOURS    = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)
@@ -80,7 +80,7 @@ PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2
 
 # Representative subset (1-indexed period indices into SELECTED_HOURS) for the
 # busy 3-period plots. For T=3 with [4, 8, 18] there are only 3 periods, so plot all.
-REP_PERIODS = [6, 11, 20]   # was [6, 11, 20] for T=24 (h=5/h=10/h=19 of the 24-hr day)
+REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 # Solver selection.
@@ -185,6 +185,10 @@ per_load_dist_a1 = zeros(n_loads, N_PERIODS)
 per_load_agg = zeros(alpha_points, n_loads)
 # Full per-(α, load, period) tensor — used for per-α distribution heatmaps.
 per_load_period_shed = zeros(alpha_points, n_loads, N_PERIODS)
+# Raw PMD per-period solution dict per α — Dict("nw_id" => solution_nw). Lets
+# downstream scripts read switch state, block status, load status, bus w/vm,
+# branch pf/qf, etc. without re-solving. nothing where the α point failed.
+solutions_per_alpha = Vector{Any}(nothing, alpha_points)
 
 for (idx, alpha) in enumerate(alphas)
     soln = solve_min_max(mn_data, Gurobi.Optimizer;
@@ -195,6 +199,7 @@ for (idx, alpha) in enumerate(alphas)
         @warn "non-optimal at alpha=$alpha"
         continue
     end
+    solutions_per_alpha[idx] = soln["solution"]["nw"]
     for (t, nw_id) in enumerate(nw_ids_sorted)
         loads_t = soln["solution"]["nw"][nw_id]["load"]
         sorted_load_ids = sort(collect(keys(loads_t)), by=x->parse(Int, x))
@@ -418,5 +423,13 @@ JLD2.jldsave(jld_path;
     case                 = case,
     pshed_type           = pshed_type,
     fair_func            = fair_func,
+    # Per-α raw per-period solution dicts (load/block/switch/branch/bus fields).
+    # Index 1..alpha_points; entries are Dict{String,Any} keyed by nw_id or nothing.
+    solutions_per_alpha  = solutions_per_alpha,
+    math_switch          = math["switch"],
+    math_branch          = math["branch"],
+    math_bus             = math["bus"],
+    math_load            = math["load"],
+    load_block_sets      = lbs,
 )
 println("Saved trade-off sweep data → $jld_path")

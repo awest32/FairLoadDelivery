@@ -401,6 +401,15 @@ JLD2.jldsave(jld_path;
     N_PERIODS                 = N_PERIODS,
     relaxed_mn_objective      = mn_relaxed_final["objective"],
     iter_timings              = iter_timings,
+    # Raw per-period relaxed solution dict (loads/blocks/switches/buses/branches).
+    # Downstream can read pshed/status/state/pf/qf/w from these and derive
+    # utilization via rating fields in the math_* snapshots below.
+    mn_relaxed_solution_per_period = mn_relaxed_final["solution"]["nw"],
+    math_switch              = math["switch"],
+    math_branch              = math["branch"],
+    math_bus                 = math["bus"],
+    math_load                = math["load"],
+    load_block_sets          = lbs,
 )
 println("Saved relaxed-only bilevel run data → $jld_path")
 

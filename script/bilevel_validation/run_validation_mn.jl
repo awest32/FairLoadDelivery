@@ -47,7 +47,8 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-CASE = "case6_unbalanced_switch_more_meshed_good4integer"
+CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
+ #CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
  #CASE = "motivation_c_good4integer"
 case = "6_bus" #"13_bus"#"6_bus"
 #critical_load = ["611"]
@@ -55,7 +56,7 @@ CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
-FAIR_FUNC = "efficiciency"  # "min_max", "palma", or "efficiency"
+FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -69,7 +70,8 @@ N_BERNOULLI_SAMPLES = 2000
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
  #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
@@ -80,7 +82,7 @@ PERIOD_HOURS      = SELECTED_HOURS
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [6, 11, 20]   # → hours 5, 10, 19 in 0..23 indexing
+REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -330,6 +332,7 @@ print_validation_header("Step 4: Per-period rounding + AC feasibility")
 per_period_results = Dict{String,Any}()
 mn_rounded = Dict{String,Dict{String,Any}}()  # rounded math per nw_id
 mn_rounded_solutions = Dict{String,Dict{String,Any}}()  # rounded MLD solution per nw_id (for plotting)
+ac_solutions_by_nw   = Dict{String,Any}()      # raw AC PF result per nw_id (for JLD2 persistence)
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, scale=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t])) -----")
@@ -395,6 +398,11 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     ac_ok_t     = (ac_term_t == MOI.OPTIMAL || ac_term_t == MOI.LOCALLY_SOLVED || ac_term_t == MOI.ALMOST_LOCALLY_SOLVED)
     period_checks["ac_convergence"] = Dict("passed" => ac_ok_t, "details" => ["status: $ac_term_t"])
     print_check_result("Period $t: AC PF converged", ac_ok_t, "status: $ac_term_t")
+
+    ac_solutions_by_nw[nw_id] = Dict(
+        "solution"           => get(ac_result_t, "solution", Dict{String,Any}()),
+        "termination_status" => string(ac_term_t),
+    )
 
     if ac_ok_t && haskey(ac_result_t, "solution")
         v_passed_ac, v_violations_ac, v_summary_ac = check_voltage_limits_ac(ac_result_t, math_ac_t)
@@ -474,6 +482,18 @@ JLD2.jldsave(jld_path;
     rounded_objectives       = rounded_objectives,
     relaxed_mn_objective     = mn_relaxed_final["objective"],
     iter_timings             = iter_timings,
+    # ---- Raw per-period solution dicts (load/block/switch/branch/bus fields). ----
+    # Downstream can read pshed/status/state/pf/qf/w/vr/vi from these directly and
+    # derive utilization via rating fields in the math_* snapshots below.
+    mn_relaxed_solution_per_period = mn_relaxed_final["solution"]["nw"],
+    mn_rounded_solution_per_period = Dict(nw_id => v["solution"] for (nw_id, v) in mn_rounded_solutions),
+    mn_ac_solution_per_period      = ac_solutions_by_nw,
+    # Static topology + rating metadata (identical across periods).
+    math_switch              = math["switch"],
+    math_branch              = math["branch"],
+    math_bus                 = math["bus"],
+    math_load                = math["load"],
+    load_block_sets          = lbs,
 )
 println("Saved bilevel run data → $jld_path")
 
