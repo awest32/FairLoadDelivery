@@ -1,0 +1,297 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{bm}
+
+\newcommand{\pshed}{p^{\mathrm{shed}}}
+\newcommand{\pserved}{p^{\mathrm{srv}}}
+\newcommand{\pprev}{\pshed^{(\mathrm{prev})}}
+\newcommand{\wprev}{w^{(\mathrm{prev})}}
+\newcommand{\Top}{\mathcal{T}}
+\newcommand{\Bot}{\mathcal{B}}
+
+\title{Charnes--Cooper Reformulation of the Palma-Ratio Upper Level}
+\author{FairLoadDelivery Package Documentation}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\section{Setup}
+
+At bilevel iteration $k$, the lower-level multi-period MLD returns the load-shed
+vector $\pprev \in \mathbb{R}^{m}$ and the Jacobian
+$J = \partial \pshed / \partial w \in \mathbb{R}^{m\times m}$ via implicit
+differentiation, where $m = T \cdot n$ stacks $n$ loads across $T$ periods. The
+upper level chooses a weight update $\Delta w \in \mathbb{R}^{m}$ and uses the
+first-order Taylor model
+\begin{equation}\label{eq:taylor}
+    \pshed(\Delta w) \;=\; \pprev + J\,\Delta w,
+    \qquad
+    \pserved(\Delta w) \;=\; \bm{p}^{d} - \pshed(\Delta w),
+\end{equation}
+subject to the trust region and weight box
+\begin{align}
+    |\Delta w_j| &\le \Delta, & j &= 1,\dots,m, \label{eq:trust}\\
+    w_{\min} \le \wprev_j + \Delta w_j &\le w_{\max}, & j &\notin \mathrm{crit},\label{eq:wbox}
+\end{align}
+with $\Delta = 0.5$, $(w_{\min}, w_{\max}) = (1, 10)$, and critical loads
+exempted from the upper bound.
+
+\paragraph{Palma ratio (served).}
+For a single period of $n$ loads with served vector $\pserved \in \mathbb{R}^{n}_{\ge 0}$,
+let $\pserved_{(1)} \le \pserved_{(2)} \le \dots \le \pserved_{(n)}$ denote the
+ascending order statistics, and define
+\begin{equation}\label{eq:palma}
+    \mathrm{Palma}(\pserved) \;=\;
+    \frac{\sum_{i \in \Top} \pserved_{(i)}}{\sum_{i \in \Bot} \pserved_{(i)}}
+    \;=\;
+    \frac{\text{top 10\% served}}{\text{bottom 40\% served}},
+\end{equation}
+where $\Top = \{n - n_{\mathrm{top}}+1, \dots, n\}$ with $n_{\mathrm{top}} = \max(1,\lceil 0.1 n\rceil)$
+and $\Bot = \{1,\dots, n_{\mathrm{bot}}\}$ with $n_{\mathrm{bot}} = \max(1,\lfloor 0.4 n\rfloor)$.
+
+\section{Linearizing the Sort}\label{sec:sort}
+
+Sorting is non-smooth, so we introduce a binary permutation matrix
+$a^{(t)} \in \{0,1\}^{n\times n}$ per period $t$, with the doubly-stochastic
+constraints
+\begin{equation}\label{eq:dstoch}
+    \sum_{j=1}^{n} a^{(t)}_{ij} = 1, \quad
+    \sum_{i=1}^{n} a^{(t)}_{ij} = 1, \qquad i,j = 1,\dots,n.
+\end{equation}
+The product $u^{(t)}_{ij} = a^{(t)}_{ij}\,\pserved^{(t)}_{j}$ is bilinear in a
+binary and a bounded-continuous variable. With
+$0 \le \pserved^{(t)}_{j} \le p^{d}_{j}$ and $a^{(t)}_{ij} \in \{0,1\}$, the
+exact McCormick envelope is
+\begin{align}
+    u^{(t)}_{ij} &\ge \pserved^{(t)}_{j} + a^{(t)}_{ij}\,p^{d}_{j} - p^{d}_{j}, \label{eq:mcc1}\\
+    u^{(t)}_{ij} &\le a^{(t)}_{ij}\,p^{d}_{j}, \label{eq:mcc2}\\
+    u^{(t)}_{ij} &\le \pserved^{(t)}_{j}, \label{eq:mcc3}\\
+    u^{(t)}_{ij} &\ge 0.
+\end{align}
+For binary $\times$ non-negative bounded continuous, \eqref{eq:mcc1}--\eqref{eq:mcc3}
+are tight at every binary realisation (they implement the disjunction exactly).
+The sorted vector and the Palma sums become
+\begin{equation}\label{eq:sorted}
+    \mathrm{sorted}^{(t)}_{i} \;=\; \sum_{j=1}^{n} u^{(t)}_{ij},
+    \qquad
+    \mathrm{sorted}^{(t)}_{k} \le \mathrm{sorted}^{(t)}_{k+1}, \quad k = 1,\dots,n-1,
+\end{equation}
+\begin{equation}\label{eq:sums}
+    \mathrm{top\_sum}^{(t)} \;=\; \sum_{i\in\Top} \mathrm{sorted}^{(t)}_{i},
+    \qquad
+    \mathrm{bot\_sum}^{(t)} \;=\; \sum_{i\in\Bot} \mathrm{sorted}^{(t)}_{i}.
+\end{equation}
+
+\section{Weak Charnes--Cooper (MIQCP)}\label{sec:weak}
+
+The Palma ratio in \eqref{eq:palma} is a linear-fractional functional of the
+sorted served vector. The classical Charnes--Cooper transformation
+\cite{CharnesCooper1962} introduces a scaling $\sigma > 0$ that normalises the
+denominator:
+\begin{equation}\label{eq:cc-norm}
+    \sigma^{(t)} \cdot \mathrm{bot\_sum}^{(t)} \;=\; 1,
+    \qquad \sigma^{(t)} \ge \sigma_{\min} > 0.
+\end{equation}
+Under \eqref{eq:cc-norm}, minimising the Palma ratio is equivalent to
+\begin{equation}\label{eq:weak-obj}
+    \min \quad \sum_{t=1}^{T} \lambda_{t}\,\sigma^{(t)}\,\mathrm{top\_sum}^{(t)}.
+\end{equation}
+We refer to this as the \emph{weak} Charnes--Cooper formulation because
+$\sigma$ is multiplied in at only two places (constraint \eqref{eq:cc-norm} and
+objective \eqref{eq:weak-obj}). The remaining decision variables ($\Delta w$,
+$a^{(t)}$, $u^{(t)}$) keep their original meaning. The full upper-level problem
+is
+\begin{align}
+    \min_{\Delta w,\,a,\,u,\,\sigma} \quad &
+        \sum_{t=1}^{T} \lambda_{t}\,\sigma^{(t)}\,\mathrm{top\_sum}^{(t)}
+        \label{eq:weak-full}\\
+    \text{s.t.} \quad &
+        \eqref{eq:taylor},\ \eqref{eq:trust},\ \eqref{eq:wbox},\nonumber\\
+        & \varepsilon \le \pshed_{j} \le p^{d}_{j}, \quad j = 1,\dots,m,\nonumber\\
+        & \eqref{eq:dstoch},\ \eqref{eq:mcc1}\text{--}\eqref{eq:mcc3},\ \eqref{eq:sorted},\ \eqref{eq:sums},\nonumber\\
+        & \sigma^{(t)}\,\mathrm{bot\_sum}^{(t)} = 1, \quad t = 1,\dots,T.\nonumber
+\end{align}
+The bilinear products $\sigma^{(t)}\,\mathrm{bot\_sum}^{(t)}$ and
+$\sigma^{(t)}\,\mathrm{top\_sum}^{(t)}$ make this a non-convex MIQCP. Gurobi
+solves it with \texttt{NonConvex=2}, but its LP relaxation is loose (Gurobi
+frequently gets stuck at the do-nothing incumbent) and runtime degrades sharply
+in $T\cdot n$.
+
+\section{Formal Charnes--Cooper (MILP)}\label{sec:formal}
+
+The standard Charnes--Cooper trick recovers an LP only when \emph{every}
+original variable that appears multiplicatively with the denominator is
+rescaled by $\sigma$. We apply this rescaling load-by-load, period-by-period.
+Let $t(j) = \lfloor (j-1)/n \rfloor + 1$ denote the period of global index $j$.
+For each period $t$ we introduce
+\begin{equation}\label{eq:rescale}
+    \Delta w^{z}_{j} \;=\; \sigma^{(t(j))}\,\Delta w_{j},
+    \qquad
+    \pserved^{z}_{j} \;=\; \sigma^{(t(j))}\,\pserved_{j},
+    \qquad
+    u^{z,(t)}_{ij} \;=\; \sigma^{(t)}\,u^{(t)}_{ij}.
+\end{equation}
+
+\subsection{Block-diagonality of the Jacobian}
+
+Because the multi-period lower-level MLD is fully separable across periods
+(weights, dispatch, and shed in period $t$ depend only on period-$t$ data),
+$J$ is block-diagonal with $n\times n$ blocks: $J_{jk} = 0$ whenever
+$t(j) \ne t(k)$. This is essential — it lets us rescale period $t(j)$'s
+weight perturbations by $\sigma^{(t(j))}$ without coupling to other periods'
+$\sigma$. A runtime guard (in \texttt{palma\_ratio\_minimization\_formal\_cc})
+checks $\max_{t(j)\ne t(k)} |J_{jk}|$ against a tolerance and warns if the
+assumption is violated.
+
+\subsection{Rescaled Taylor and sums}
+
+Multiplying \eqref{eq:taylor} by $\sigma^{(t(j))}$ and using block-diagonality,
+\begin{equation}\label{eq:taylor-z}
+    \pserved^{z}_{j}
+    \;=\; \sigma^{(t(j))}\bigl(p^{d}_{j} - \pprev_{j}\bigr)
+        - \sum_{k=1}^{m} J_{jk}\,\Delta w^{z}_{k}.
+\end{equation}
+The doubly-stochastic constraint \eqref{eq:dstoch} is unchanged (it's already
+linear in the binaries). The normalising equation \eqref{eq:cc-norm} becomes
+\begin{equation}\label{eq:cc-norm-z}
+    \sum_{i\in\Bot}\,\sum_{j=1}^{n} u^{z,(t)}_{ij} \;=\; 1, \qquad t = 1,\dots,T,
+\end{equation}
+and the objective \eqref{eq:weak-obj} becomes
+\begin{equation}\label{eq:formal-obj}
+    \min \quad
+    \sum_{t=1}^{T} \lambda_{t} \sum_{i\in\Top}\,\sum_{j=1}^{n} u^{z,(t)}_{ij}.
+\end{equation}
+Both are linear in the rescaled variables.
+
+\subsection{Rescaled box constraints}
+
+Multiplying every RHS constant by $\sigma^{(t)}$ preserves the constraint under
+the substitution \eqref{eq:rescale}. The trust region \eqref{eq:trust} becomes
+\begin{equation}\label{eq:trust-z}
+    -\Delta\,\sigma^{(t(j))} \;\le\; \Delta w^{z}_{j} \;\le\; \Delta\,\sigma^{(t(j))},
+\end{equation}
+the weight box \eqref{eq:wbox} becomes
+\begin{equation}\label{eq:wbox-z}
+    w_{\min}\,\sigma^{(t(j))} \;\le\; \wprev_{j}\,\sigma^{(t(j))} + \Delta w^{z}_{j} \;\le\; w_{\max}\,\sigma^{(t(j))},
+\end{equation}
+and the pshed bounds $\varepsilon \le \pshed_{j} \le p^{d}_{j}$ — equivalently
+$0 \le \pserved_{j} \le p^{d}_{j} - \varepsilon$ — become
+\begin{equation}\label{eq:pbox-z}
+    0 \;\le\; \pserved^{z}_{j} \;\le\; (p^{d}_{j} - \varepsilon)\,\sigma^{(t(j))}.
+\end{equation}
+All of \eqref{eq:trust-z}--\eqref{eq:pbox-z} are linear in
+$(\Delta w^{z}, \sigma)$.
+
+\subsection{The bilinear $u^{z} = a \cdot \pserved^{z}$ via indicator constraints}
+
+The only remaining bilinearity is the product $u^{z,(t)}_{ij} = a^{(t)}_{ij}\,\pserved^{z}_{t(\cdot),j}$.
+Because $a^{(t)}_{ij}$ is binary, the product can be encoded \emph{exactly} as
+a disjunction:
+\begin{align}
+    a^{(t)}_{ij} = 1 \;&\Longrightarrow\; u^{z,(t)}_{ij} = \pserved^{z}_{(t-1)n+j}, \label{eq:ind1}\\
+    a^{(t)}_{ij} = 0 \;&\Longrightarrow\; u^{z,(t)}_{ij} = 0, \label{eq:ind2}\\
+    u^{z,(t)}_{ij} &\ge 0.\nonumber
+\end{align}
+JuMP/Gurobi natively support indicator constraints of the form
+\texttt{a => \{lin\_constraint\}}; Gurobi enforces them through its branching
+tree (SOS1-style logic) without injecting any Big-M into the model. This is
+the second key step that makes the formal CC variant a clean MILP. The earlier
+McCormick implementation required a finite upper bound $\sigma_{\max}^{(t)}$ to
+bound $\pserved^{z}_{j} \le (p^{d}_{j} - \varepsilon)\,\sigma_{\max}^{(t)}$;
+choosing $\sigma_{\max}^{(t)} = 10 / \mathrm{bot\_sum}_{\mathrm{prev}}^{(t)}$
+created an artificial \texttt{INFEASIBLE} mode when bilevel iterations pushed
+$\mathrm{bot\_sum}_{\mathrm{prev}}^{(t)} \to 0$. Indicator constraints remove
+the need for any upper bound on $\sigma^{(t)}$, matching the formal CC math
+($\sigma^{(t)} = 1/\mathrm{bot\_sum}^{(t)}$ may grow unboundedly).
+
+\subsection{The full MILP}
+
+\begin{align}
+    \min_{\substack{\Delta w^{z},\,a,\\u^{z},\,\sigma}}
+    \quad &
+    \sum_{t=1}^{T} \lambda_{t} \sum_{i\in\Top}\,\sum_{j=1}^{n} u^{z,(t)}_{ij}
+    \label{eq:formal-full}\\
+    \text{s.t.}\quad
+    & \pserved^{z}_{j}
+        = \sigma^{(t(j))}(p^{d}_{j} - \pprev_{j}) - \sum_{k=1}^{m} J_{jk}\,\Delta w^{z}_{k},
+        & j &= 1,\dots,m,\nonumber\\
+    & 0 \le \pserved^{z}_{j} \le (p^{d}_{j} - \varepsilon)\,\sigma^{(t(j))},
+        & j &= 1,\dots,m,\nonumber\\
+    & \sum_{j=1}^{n} a^{(t)}_{ij} = 1,\quad \sum_{i=1}^{n} a^{(t)}_{ij} = 1,
+        & t,i,j,\nonumber\\
+    & a^{(t)}_{ij} = 1 \Rightarrow u^{z,(t)}_{ij} = \pserved^{z}_{(t-1)n + j},
+        & t,i,j,\nonumber\\
+    & a^{(t)}_{ij} = 0 \Rightarrow u^{z,(t)}_{ij} = 0,
+        & t,i,j,\nonumber\\
+    & \sum_{j=1}^{n} u^{z,(t)}_{kj} \le \sum_{j=1}^{n} u^{z,(t)}_{k+1,j},
+        & t,\, k &= 1,\dots,n-1,\nonumber\\
+    & \sum_{i\in\Bot}\,\sum_{j=1}^{n} u^{z,(t)}_{ij} = 1,
+        & t &= 1,\dots,T,\nonumber\\
+    & -\Delta\,\sigma^{(t(j))} \le \Delta w^{z}_{j} \le \Delta\,\sigma^{(t(j))},
+        & j &= 1,\dots,m,\nonumber\\
+    & w_{\min}\,\sigma^{(t(j))}
+        \le \wprev_{j}\,\sigma^{(t(j))} + \Delta w^{z}_{j}
+        \le w_{\max}\,\sigma^{(t(j))},
+        & j &\notin \mathrm{crit},\nonumber\\
+    & \sigma^{(t)} \ge \sigma_{\min} > 0,
+        & t &= 1,\dots,T,\nonumber\\
+    & a^{(t)}_{ij} \in \{0,1\},\quad u^{z,(t)}_{ij} \ge 0.\nonumber
+\end{align}
+Every relation is linear in $(\Delta w^{z}, \pserved^{z}, u^{z}, \sigma)$ aside
+from the binaries $a^{(t)}_{ij}$ and the indicators in \eqref{eq:ind1}--\eqref{eq:ind2},
+so the problem is a (pure) MILP under Gurobi's native indicator support.
+No \texttt{NonConvex=2} is needed.
+
+\subsection{Recovery of original-space variables}
+
+Given an optimal $(\Delta w^{z*}, \sigma^{*})$, the original-space weight
+update is
+\begin{equation}\label{eq:recover}
+    \Delta w_{j}^{*} \;=\; \frac{\Delta w^{z*}_{j}}{\sigma^{*(t(j))}},
+    \qquad
+    \pshed^{*} \;=\; \pprev + J\,\Delta w^{*},
+    \qquad
+    w^{*} \;=\; \wprev + \Delta w^{*}.
+\end{equation}
+$\sigma^{*(t)} \ge \sigma_{\min} > 0$ guarantees the division in
+\eqref{eq:recover} is well-defined. Because the rescaling \eqref{eq:rescale}
+preserves the feasible set of the original Palma problem (the rescaled
+constraints are scalar multiples by the positive $\sigma^{(t)}$ of the
+originals), $(w^{*}, \pshed^{*})$ is feasible and optimal for the
+weak-CC problem \eqref{eq:weak-full}.
+
+\section{Summary of the Two Variants}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{Weak CC \eqref{eq:weak-full}} & \textbf{Formal CC \eqref{eq:formal-full}} \\
+\midrule
+Class & MIQCP (non-convex) & MILP \\
+Bilinearities kept & $\sigma\cdot\mathrm{bot\_sum},\ \sigma\cdot\mathrm{top\_sum},\ a\cdot \pserved$ & none (indicators replace $a\cdot \pserved^{z}$) \\
+Gurobi setting & \texttt{NonConvex=2} & default (MILP) \\
+$\sigma$ upper bound & not needed (but LP-relax loose) & not needed (indicators, no Big-M) \\
+Rescaled variables & --- & $\Delta w,\ \pserved,\ u$ (i.e.\ multiplied by $\sigma$) \\
+Recovers original $\Delta w$ & directly & via $\Delta w = \Delta w^{z} / \sigma$ \\
+Block-diagonal $J$ required & no & yes (warned on violation) \\
+Speed (case6, $T{=}8$) & baseline & $\sim 2.3\times$ faster \\
+\bottomrule
+\end{tabular}
+\caption{Weak vs.\ formal Charnes--Cooper variants of the Palma upper level.
+The implementation defaults to formal CC; the weak-CC path is retained as a
+fallback via the \texttt{use\_weak\_cc=true} flag.}
+\end{table}
+
+\begin{thebibliography}{1}
+\bibitem{CharnesCooper1962}
+A.~Charnes and W.~W. Cooper.
+\newblock Programming with linear fractional functionals.
+\newblock {\em Naval Research Logistics Quarterly}, 9(3--4):181--186, 1962.
+\end{thebibliography}
+
+\end{document}

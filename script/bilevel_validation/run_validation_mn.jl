@@ -36,6 +36,7 @@ using DataFrames
 using CSV
 using Dates
 using Logging, LoggingExtras
+using Printf
 
 const PMD = PowerModelsDistribution
 
@@ -46,18 +47,19 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-#const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-const CASE = "motivation_c_good4integer"
-case = "13_bus"
-
-#const CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
-const CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
+ #CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
+ #CASE = "motivation_c_good4integer"
+case = "6_bus" #"13_bus"#"6_bus"
+#critical_load = ["611"]
+CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
+#CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
-const ITERATIONS = 20
-const FAIR_FUNC = "palma"
+ITERATIONS = 20
+FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
-const N_ROUNDS = 1
-const N_BERNOULLI_SAMPLES = 2000
+N_ROUNDS = 1
+N_BERNOULLI_SAMPLES = 2000
 
 # Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
 # Each load name is deterministically mapped to (schedule_idx, ±1h shift) so
@@ -68,21 +70,33 @@ const N_BERNOULLI_SAMPLES = 2000
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
-const SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]
-const N_PERIODS         = length(SELECTED_HOURS)
-const PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
-const CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
-const PERIOD_HOURS      = SELECTED_HOURS
-const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+ # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
+ SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+ #SELECTED_HOURS    = [4, 18, 8]
+
+ N_PERIODS         = length(SELECTED_HOURS)
+PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
+CENTER_AT_NOMINAL = true                           # divide each schedule by its daily mean
+PERIOD_HOURS      = SELECTED_HOURS
+ PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [2, 4, 6]   # → hours 2, 12, 18
+REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
 # Solvers
-ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
+# max_iter=30000 + acceptable_tol/iter mirror build_mn_mc_mld_shedding_implicit_diff
+# (src/prob/mld.jl:275-279). Needed for motivation_c 13bus: Step 3's final relaxed
+# solve and post-iteration AC PFs operate on weights deep into the descent, where
+# the NLP becomes brittle. Default Ipopt max_iter=3000 → ITERATION_LIMIT after ~700s
+# → Steps 4-6 (rounding/AC/JLD2) get skipped on a non-converged relaxation.
+ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer,
+    "max_iter"        => 30_000,
+    "acceptable_tol"  => 1e-4,
+    "acceptable_iter" => 50,
+    "print_level"     => 0)
 gurobi_solver = Gurobi.Optimizer
 
 save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
@@ -98,7 +112,7 @@ global_logger(TeeLogger(global_logger(), FileLogger(log_file)))
 print_validation_header("Step 1: Network + Multinetwork Setup")
 
 eng, math, lbs, critical_id = FairLoadDelivery.setup_network(CASE_FILE, LS_PERCENT;
-    switch_rating=switch_rating)
+    switch_rating=switch_rating)#, critical_load=critical_load
 
 # System aggregate scale per period — used by results_block_mn.jl print rows and
 # by downstream plotting. Per-load shape now comes from the H&A schedules.
@@ -144,6 +158,7 @@ fair_weights = copy(fair_weights_init)  # gets replaced after iter 1 by per-peri
 iteration_label_consistent = true
 all_pshed_lower = Float64[]
 all_pshed_upper = Float64[]
+iter_timings = Dict{Symbol,Any}[]   # one dict per completed bilevel iteration
 last_status = MOI.OPTIMIZE_NOT_CALLED
 final_weight_ids = Int[]
 final_pshed_nw_ids = Tuple[]
@@ -151,6 +166,8 @@ final_pshed_nw_ids = Tuple[]
 for k in 1:ITERATIONS
     global fair_weights, iteration_label_consistent, last_status, final_weight_ids, final_pshed_nw_ids
     println("\n  --- Iteration $k ---")
+
+    timing = Dict{Symbol,Any}(:iter => k)
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
@@ -163,10 +180,11 @@ for k in 1:ITERATIONS
         # periods, leaving the Charnes-Cooper constraint σ[t]*bot_sum_t==1 with no
         # feasible σ — Gurobi then hits TimeLimit with no incumbent.
         if FAIR_FUNC != "palma"
-            mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
+            t_int = @elapsed mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
                 peak_time_costs=PEAK_TIME_COSTS)
+            timing[:integer_warmstart_s] = t_int
             int_term = mld_int_mn["termination_status"]
-            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term"
+            @info "[$FAIR_FUNC/$pshed_type] iter $k integer MLD status = $int_term (t=$(round(t_int,digits=1))s)"
             if int_term ∉ [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
                 error("integer MLD did not converge (status=$int_term)")
             end
@@ -174,12 +192,26 @@ for k in 1:ITERATIONS
                 mn_new["nw"][nw_id] = update_network(
                     mld_int_mn["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
             end
+        else
+            timing[:integer_warmstart_s] = 0.0
         end
 
-        dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs =
-            lower_level_soln_mn(mn_new, fair_weights, k)
+        lower_timings = Dict{Symbol,Any}()
+        # NOTE: `@elapsed (a, b, c = func())` interacts badly with `local`-declared
+        # tuple targets under Julia 1.12.1 — the macro's let-scope holds the
+        # assignment, leaving the outer locals undefined and the next access
+        # triggers UndefVarError(:dpshed). Split the call out so the assignment
+        # lands in the outer scope.
+        _t_lower_start = time()
+        (dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs) =
+            lower_level_soln_mn(mn_new, fair_weights, k; timings=lower_timings)
+        t_lower = time() - _t_lower_start
+        timing[:lower_level_total_s] = t_lower
+        merge!(timing, Dict(Symbol("lower_$(k2)") => v for (k2, v) in lower_timings))
     catch err
         @warn "[$FAIR_FUNC/$pshed_type] iter $k lower-level failed ($err) — stopping bilevel, falling back to last converged weights"
+        timing[:fail_phase] = "lower_level"
+        push!(iter_timings, timing)
         break
     end
     n_loads = length(weight_ids)
@@ -187,25 +219,49 @@ for k in 1:ITERATIONS
     # Per-load pd reference matching pshed ordering (across all periods)
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
 
-    # Upper-level fairness step (multi-period, peak-cost weighted)
-    if FAIR_FUNC == "min_max"
-        pshed_new, fair_weight_vals, status = min_max_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-            pd=pd_all, pshed_type=pshed_type)
-    elseif FAIR_FUNC == "palma"
-        pshed_new, fair_weight_vals, status = lin_palma_reformulated(
-            dpshed, pshed_val, weight_vals, pd_all;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    elseif FAIR_FUNC == "efficiency"
-        pshed_new, fair_weight_vals, status = efficient_load_shed(
-            dpshed, pshed_val, weight_vals;
-            critical_ids=critical_id, weight_ids=weight_ids,
-            peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads)
-    else
-        error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+    # Upper-level fairness step (multi-period, peak-cost weighted).
+    # Wrapped in try/catch so an upper-level error (e.g. formal-CC INFEASIBLE
+    # after the bilevel pushes pserved_prev into a σ_max-degenerate corner)
+    # doesn't crash the whole bilevel — fall back to previous weights and stop.
+    local pshed_new, fair_weight_vals, status
+    upper_timings = Dict{Symbol,Any}()
+    try
+        t_upper = @elapsed begin
+            if FAIR_FUNC == "min_max"
+                pshed_new, fair_weight_vals, status = min_max_load_shed(
+                    dpshed, pshed_val, weight_vals;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    pd=pd_all, pshed_type=pshed_type, timings=upper_timings)
+            elseif FAIR_FUNC == "palma"
+                # 2026-05-19 defense: formal-CC (use_weak_cc=false default). Weak-CC
+                # failed on 6-bus T=24 with NO incumbent inside 10 min; formal-CC
+                # closes within ~25s/iter on this case per 2026-05-17 partial run.
+                # 10-min cap is generous headroom; on rare INFEASIBLE iters (iter 20
+                # hit this in the 2026-05-17 run) lin_palma_reformulated falls back
+                # to weak-CC for that iter only.
+                pshed_new, fair_weight_vals, status = lin_palma_reformulated(
+                    dpshed, pshed_val, weight_vals, pd_all;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    time_limit=60*10, timings=upper_timings)
+            elseif FAIR_FUNC == "efficiency"
+                pshed_new, fair_weight_vals, status = efficient_load_shed(
+                    dpshed, pshed_val, weight_vals;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    timings=upper_timings)
+            else
+                error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+            end
+        end
+        timing[:upper_level_total_s] = t_upper
+        merge!(timing, Dict(Symbol("upper_$(k2)") => v for (k2, v) in upper_timings))
+    catch err
+        @warn "[$FAIR_FUNC/$pshed_type] iter $k upper-level FAILED ($err) — stopping bilevel, keeping iter $(k-1) weights"
+        timing[:fail_phase] = "upper_level"
+        push!(iter_timings, timing)
+        break
     end
     last_status = status
     @info "[$FAIR_FUNC/$pshed_type] iter $k upper-level status = $status"
@@ -231,6 +287,19 @@ for k in 1:ITERATIONS
     push!(all_pshed_lower, sum(pshed_val))
     push!(all_pshed_upper, sum(pshed_new))
     println("    Σ pshed (lower) = $(round(sum(pshed_val), digits=3))   Σ pshed (upper) = $(round(sum(pshed_new), digits=3))")
+
+    timing[:total_iter_s] = get(timing, :integer_warmstart_s, 0.0) +
+                            get(timing, :lower_level_total_s, 0.0) +
+                            get(timing, :upper_level_total_s, 0.0)
+    push!(iter_timings, timing)
+    @info @sprintf("[%s/%s] iter %d timings: int=%.1fs lower=%.1fs (primal=%.1fs jac=%.1fs) upper=%.1fs total=%.1fs",
+        FAIR_FUNC, pshed_type, k,
+        get(timing, :integer_warmstart_s, 0.0),
+        get(timing, :lower_level_total_s, 0.0),
+        get(timing, :lower_primal_solve_s, 0.0),
+        get(timing, :lower_jacobian_loop_s, 0.0),
+        get(timing, :upper_level_total_s, 0.0),
+        timing[:total_iter_s])
 end
 
 validation_results["bilevel"] = Dict(
@@ -263,6 +332,7 @@ print_validation_header("Step 4: Per-period rounding + AC feasibility")
 per_period_results = Dict{String,Any}()
 mn_rounded = Dict{String,Dict{String,Any}}()  # rounded math per nw_id
 mn_rounded_solutions = Dict{String,Dict{String,Any}}()  # rounded MLD solution per nw_id (for plotting)
+ac_solutions_by_nw   = Dict{String,Any}()      # raw AC PF result per nw_id (for JLD2 persistence)
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, scale=$(LOAD_SCALE_FACTORS[t]), λ=$(PEAK_TIME_COSTS[t])) -----")
@@ -329,6 +399,11 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     period_checks["ac_convergence"] = Dict("passed" => ac_ok_t, "details" => ["status: $ac_term_t"])
     print_check_result("Period $t: AC PF converged", ac_ok_t, "status: $ac_term_t")
 
+    ac_solutions_by_nw[nw_id] = Dict(
+        "solution"           => get(ac_result_t, "solution", Dict{String,Any}()),
+        "termination_status" => string(ac_term_t),
+    )
+
     if ac_ok_t && haskey(ac_result_t, "solution")
         v_passed_ac, v_violations_ac, v_summary_ac = check_voltage_limits_ac(ac_result_t, math_ac_t)
         period_checks["voltage_limits_ac"] = Dict("passed" => v_passed_ac, "details" => [string(v) for v in v_violations_ac])
@@ -361,6 +436,7 @@ validation_results["per_period"] = per_period_results
 # (extracted so it can be re-run standalone in REPL — builds pshed_matrix,
 # load_labels, period_labels, period_total, period_max, rounded_objectives)
 # ============================================================
+
 include("results_block_mn.jl")
 
 # ============================================================
@@ -370,28 +446,69 @@ include("results_block_mn.jl")
 # Reuses pshed_matrix / load_labels / etc. built by results_block_mn.jl.
 # ============================================================
 using JLD2
+# Backfill iter_timings if running Step 6 in isolation against a pre-instrumentation
+# session (variable only gets initialized inside the bilevel loop in Step 2).
+if !@isdefined(iter_timings)
+    @warn "iter_timings not defined — saving empty Vector. (Re-run the full script to capture per-iter timings.)"
+    iter_timings = Dict{Symbol,Any}[]
+end
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
-    pshed_matrix         = pshed_matrix,
-    pd_ref_matrix        = pd_ref_matrix,
-    load_labels          = load_labels,
-    period_labels        = period_labels,
-    bus_labels           = bus_labels,
-    bus_pd_matrix        = bus_pd_matrix,
-    bus_pshed_matrix     = bus_pshed_matrix,
-    bus_status_matrix    = bus_status_matrix,
-    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
-    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
-    CASE                 = CASE,
-    FAIR_FUNC            = FAIR_FUNC,
-    pshed_type           = pshed_type,
-    N_PERIODS            = N_PERIODS,
-    period_total         = period_total,
-    period_max           = period_max,
-    rounded_objectives   = rounded_objectives,
-    relaxed_mn_objective = mn_relaxed_final["objective"],
+    pshed_matrix             = pshed_matrix,
+    pd_ref_matrix            = pd_ref_matrix,
+    load_labels              = load_labels,
+    period_labels            = period_labels,
+    bus_labels               = bus_labels,
+    bus_pd_matrix            = bus_pd_matrix,
+    bus_pshed_matrix         = bus_pshed_matrix,
+    bus_status_matrix        = bus_status_matrix,
+    relaxed_pshed_matrix     = relaxed_pshed_matrix,
+    relaxed_bus_pshed_matrix = relaxed_bus_pshed_matrix,
+    relaxed_bus_status_matrix = relaxed_bus_status_matrix,
+    final_fair_weights       = fair_weights,
+    final_weight_ids         = final_weight_ids,
+    LOAD_SCALE_FACTORS       = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS          = PEAK_TIME_COSTS,
+    SELECTED_HOURS           = SELECTED_HOURS,
+    PEAK_STRESS              = PEAK_STRESS,
+    CENTER_AT_NOMINAL        = CENTER_AT_NOMINAL,
+    LS_PERCENT               = LS_PERCENT,
+    CASE                     = CASE,
+    FAIR_FUNC                = FAIR_FUNC,
+    pshed_type               = pshed_type,
+    N_PERIODS                = N_PERIODS,
+    period_total             = period_total,
+    period_max               = period_max,
+    rounded_objectives       = rounded_objectives,
+    relaxed_mn_objective     = mn_relaxed_final["objective"],
+    iter_timings             = iter_timings,
+    # ---- Raw per-period solution dicts (load/block/switch/branch/bus fields). ----
+    # Downstream can read pshed/status/state/pf/qf/w/vr/vi from these directly and
+    # derive utilization via rating fields in the math_* snapshots below.
+    mn_relaxed_solution_per_period = mn_relaxed_final["solution"]["nw"],
+    mn_rounded_solution_per_period = Dict(nw_id => v["solution"] for (nw_id, v) in mn_rounded_solutions),
+    mn_ac_solution_per_period      = ac_solutions_by_nw,
+    # Static topology + rating metadata (identical across periods).
+    math_switch              = math["switch"],
+    math_branch              = math["branch"],
+    math_bus                 = math["bus"],
+    math_load                = math["load"],
+    load_block_sets          = lbs,
 )
 println("Saved bilevel run data → $jld_path")
+
+if !isempty(iter_timings)
+    println("\nPer-iter timings (seconds):")
+    @printf "  %3s %10s %10s %10s %10s %10s\n" "k" "int" "lower" "primal" "jac_loop" "upper"
+    for t in iter_timings
+        @printf "  %3d %10.2f %10.2f %10.2f %10.2f %10.2f\n" t[:iter] get(t, :integer_warmstart_s, 0.0) get(t, :lower_level_total_s, 0.0) get(t, :lower_primal_solve_s, 0.0) get(t, :lower_jacobian_loop_s, 0.0) get(t, :upper_level_total_s, 0.0)
+    end
+    tot_int   = sum(get(t, :integer_warmstart_s, 0.0)  for t in iter_timings)
+    tot_lower = sum(get(t, :lower_level_total_s, 0.0)  for t in iter_timings)
+    tot_upper = sum(get(t, :upper_level_total_s, 0.0)  for t in iter_timings)
+    @printf "  ----------------------------------------------------------------\n"
+    @printf "  %3s %10.2f %10.2f %10s %10s %10.2f   total=%.1fs\n" "Σ" tot_int tot_lower "" "" tot_upper (tot_int+tot_lower+tot_upper)
+end
 
 println("\nMulti-period validation complete.")
 

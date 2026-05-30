@@ -34,12 +34,12 @@ include(joinpath(@__DIR__, "rounding_algorithm_brute_force.jl"))
 outdir = joinpath(@__DIR__, "..", "results", string(Dates.today()), "brute_force_upper_level")
 mkpath(outdir)
 
-const TIE_TOL_REL = 1e-4
-const TIE_TOL_ABS = 1e-7
+TIE_TOL_REL = 1e-4
+TIE_TOL_ABS = 1e-7
 
-const FAIR_FUNCS = ["efficiency", "palma"]
+FAIR_FUNCS = ["efficiency", "palma"]
 
-const FAIR_DIRECTIONS = Dict(
+FAIR_DIRECTIONS = Dict(
     "efficient" => :min,
     "palma"     => :min,
 )

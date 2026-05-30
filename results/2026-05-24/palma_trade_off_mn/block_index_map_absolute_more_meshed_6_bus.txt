@@ -1,0 +1,9 @@
+# Block index → name mapping for more_meshed_6_bus / palma / absolute
+# α slice: target=0.9, realized=0.8888888888888888
+# Block order: paper-aligned (script/block_display.jl)
+# index	name
+1	d
+2	a
+4	b
+5	c
+6	e

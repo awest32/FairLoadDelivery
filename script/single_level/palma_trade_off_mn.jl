@@ -63,8 +63,8 @@ using CSV
 using Dates
 import MathOptInterface as MOI
 
-const _PMD = PowerModelsDistribution
 const PMD  = PowerModelsDistribution
+const _PMD = PowerModelsDistribution   # matches the alias used inside FairLoadDelivery (src/FairLoadDelivery.jl:41) so the local Palma machinery below (lines 225+) can call _PMD.var/_PMD.ref/_PMD.ids the same way the module-internal code does.
 
 include("../../src/implementation/visualization.jl")
 
@@ -74,16 +74,16 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case ="more_meshed_6_bus" #"13_bus"
+case = "more_meshed_bd_6_bus"   # BD variant; was "more_meshed_6_bus" for baseline
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
 pshed_type = "absolute"  # only absolute supported in this script
-
+relaxed = false
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 # Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
@@ -91,20 +91,28 @@ pshed_type = "absolute"  # only absolute supported in this script
 # carried in plots or CSVs.
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
-const SELECTED_HOURS = [2, 5, 8, 12, 15, 18, 21, 23]
-const N_PERIODS      = length(SELECTED_HOURS)
+#SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
+SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+
+N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
 # demand pushes past nameplate. Bump up for more shedding, down for less.
-const PEAK_STRESS = 1.0
+PEAK_STRESS = 1.0
+# When true, each schedule is first divided by its own daily mean so the
+# daily-average per-load scale equals PEAK_STRESS exactly and the nameplate pd
+# is the daily mean (peaks reach ~1.15× nominal at the daily max). Matches the
+# bilevel run_efficiency_mn.jl / run_validation_mn.jl convention so trade-off
+# vs bilevel results are on the same demand axis.
+CENTER_AT_NOMINAL = true
 # OLD uniform-scalar profile (commented for reference / quick A/B):
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
-const PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [2, 4, 6]   # trough (h=2), midday plateau (h=12), evening peak (h=18)
+REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
-alpha_points = 6
+alpha_points = 20
 alphas = collect(LinRange(0.0, 1.0, alpha_points))
 
 # ============================================================
@@ -146,7 +154,15 @@ eng, math, lbs, critical_id = setup_network(case_path, LS_PERCENT;
 # mn_data = create_multinetwork_data(math, N_PERIODS, LOAD_SCALE_FACTORS)
 
 mn_data = FairLoadDelivery.create_multinetwork_data_profiled(math, N_PERIODS;
-    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS)
+    hours = SELECTED_HOURS, peak_stress = PEAK_STRESS,
+    center_at_nominal = CENTER_AT_NOMINAL)
+
+# Pure-diagnostic per-period aggregate demand fraction (not consumed by the
+# MIP). Saved to the JLD2 below so plot/log annotations can label periods
+# with their effective aggregate scale, matching the bilevel scripts.
+LOAD_SCALE_FACTORS = FairLoadDelivery.aggregate_demand_fraction(math, N_PERIODS;
+    hours = SELECTED_HOURS, center_at_nominal = CENTER_AT_NOMINAL) .* PEAK_STRESS
+@info "LOAD_SCALE_FACTORS (agg_scales per period): $(round.(LOAD_SCALE_FACTORS, digits=3))"
 
 println("Load profile assignments for $case:")
 for row in FairLoadDelivery.profile_assignment_table(math)
@@ -156,7 +172,14 @@ nw_ids_sorted     = sort(collect(keys(mn_data["nw"])), by = x -> parse(Int, x))
 nw_ids_int_sorted = parse.(Int, nw_ids_sorted)        # ints, matches PMD nw_ids
 n_loads           = length(mn_data["nw"][nw_ids_sorted[1]]["load"])
 
-output_dir = joinpath(@__DIR__, "../../results/$date/palma_trade_off_mn")
+if relaxed
+    rel = "_relaxed"
+    kind = "relaxed"
+else
+    rel = ""
+    kind = "integer"
+end
+output_dir = joinpath(@__DIR__, "../../results/$date/palma$(rel)_trade_off_mn")
 isdir(output_dir) || mkpath(output_dir)
 
 # ============================================================
@@ -393,6 +416,12 @@ per_load_dist_a0 = fill(NaN, n_loads, N_PERIODS)
 per_load_dist_a1 = fill(NaN, n_loads, N_PERIODS)
 # Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
 per_load_agg     = fill(NaN, alpha_points, n_loads)
+# Full (α × load × period) tensor — needed by the trade-off heatmap /
+# grouped-bar replot scripts. Matches min_max_trade_off_mn.jl's JLD2 schema.
+per_load_period_shed = fill(NaN, alpha_points, n_loads, N_PERIODS)
+# Raw per-period solution dict per α — Dict("nw_id" => solution_nw) keyed by string.
+# `nothing` at non-feasible α points.
+solutions_per_alpha = Vector{Any}(nothing, alpha_points)
 
 for (idx, alpha) in enumerate(alphas)
     set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
@@ -415,6 +444,7 @@ for (idx, alpha) in enumerate(alphas)
                            for lid in palma.load_ids]
         total_shed[idx, t] = sum(per_load_shed_t)
         max_shed[idx, t]   = maximum(per_load_shed_t)
+        per_load_period_shed[idx, :, t] .= per_load_shed_t
         if idx == 1
             per_load_dist_a0[:, t] .= per_load_shed_t
         elseif idx == alpha_points
@@ -439,6 +469,16 @@ for (idx, alpha) in enumerate(alphas)
             "model(σ·top) = $(round(σ_val * top_val, digits=4))   ",
             "[σ=$(round(σ_val, digits=6)), top_sum=$(round(top_val, digits=3)), bot_sum=$(round(bot_val, digits=3))]")
     flush(stdout)
+
+    # Capture full per-period solution dict (loads/blocks/switches/buses/branches
+    # with their PMD-standard fields) for JLD2 persistence. build_solution reads
+    # JuMP values off the already-optimized mld_mn.model — uses the sol_component_value
+    # hooks wired into the variable_mc_* constructors (see src/core/variable.jl).
+    try
+        solutions_per_alpha[idx] = FairLoadDelivery._IM.build_solution(mld_mn)
+    catch err
+        @warn "build_solution failed at alpha=$alpha — JLD2 will have nothing for this α ($err)"
+    end
 end
 
 # ============================================================
@@ -457,7 +497,7 @@ for (k, t) in enumerate(REP_PERIODS)
             marker = period_markers[mod1(k, length(period_markers))], lw = 2,
             line_z = alphas)
 end
-savefig(p3d, joinpath(output_dir, "pareto3d_integer_$(pshed_type).svg"))
+savefig(p3d, joinpath(output_dir, "pareto3d_$(kind)_$(pshed_type).svg"))
 display(p3d)
 
 # ============================================================
@@ -478,7 +518,7 @@ for t in 1:N_PERIODS
           title  = "t=$t  λ=$(PEAK_TIME_COSTS[t])",
           colorbar = false, legend = false)
 end
-savefig(panel, joinpath(output_dir, "pareto_per_period_integer_$(pshed_type).svg"))
+savefig(panel, joinpath(output_dir, "pareto_per_period_$(kind)_$(pshed_type).svg"))
 display(panel)
 
 # Cost-weighted aggregates retained for CSV export only (no plot).
@@ -521,56 +561,77 @@ ref_nw0 = mn_data["nw"][nw_ids_sorted[1]]
 load_labels = [ref_nw0["load"][lid]["name"]
                for lid in sort(collect(keys(ref_nw0["load"])), by = x -> parse(Int, x))]
 
-# FONT_KW kept for backwards compat with existing call sites, but now matches
-# the 9pt defaults set in figure_defaults.jl so nothing in this script
-# overrides the unified font sizes.
-const FONT_KW = (tickfontsize = 9, guidefontsize = 9,
-                 titlefontsize = 9, legendfontsize = 9)
+# FONT_KW now mirrors post_hoc_fairness_pareto.jl's _PARETO_FONT so the
+# single-panel summary figures share their typographic scale with the
+# paper-ready Pareto plots.
+FONT_KW = (tickfontsize = 22, guidefontsize = 22,
+           titlefontsize = 26, legendfontsize = 14,
+           fontfamily = "Computer Modern")
+const ANNOT_PT = 14  # bar-top / pareto-endpoint annotation size
 
-function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}, title_str::String)
+function build_dist_plot_agg(per_load_agg_vec::AbstractVector{<:Real}; ylim_max::Real)
     p = bar(load_labels, per_load_agg_vec,
         xlabel = "load",
         ylabel = "aggregate load shed (kW)",
-        title  = title_str,
         legend = false,
         color  = :steelblue,
-        linecolor = :black;
+        linecolor = :black,
+        ylims = (0.0, ylim_max * 1.10);
         FONT_KW...)
-    ymax = maximum(filter(isfinite, per_load_agg_vec); init = 0.0)
     for (i, v) in enumerate(per_load_agg_vec)
         isfinite(v) || continue
-        annotate!(p, i, v + (ymax > 0 ? ymax : 1.0) * 0.02,
-            text("$(round(v, digits = 1))", 9, :center))
+        annotate!(p, i, v + ylim_max * 0.02,
+            text("$(round(v, digits = 1))", ANNOT_PT, :center))
     end
     return p
 end
 
-p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :],
-    "alpha = 0 (efficiency) — aggregate over periods")
-p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :],
-    "alpha = 1 (Palma) — aggregate over periods")
+# Share the y-axis between α=0 and α=1 bars so the visual comparison reflects
+# absolute magnitudes; pick the larger of the two so neither chart is clipped.
+ymax_shared = max(
+    maximum(filter(isfinite, per_load_agg[1, :]);   init = 0.0),
+    maximum(filter(isfinite, per_load_agg[end, :]); init = 0.0))
 
-# Total shed (left axis) + served-Palma (right axis, finite entries only).
-p_metrics = plot(alphas, agg_total_shed, label = "total shed (kW)",
-    lw = 2, marker = :circle, color = :steelblue,
-    xlabel = "alpha", ylabel = "aggregate load shed (kW)",
-    title  = "Aggregate total shed + served-Palma vs alpha", legend = :topleft;
-    FONT_KW...)
+p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :];   ylim_max = ymax_shared)
+p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :]; ylim_max = ymax_shared)
+
+# Pareto curve: aggregate total shed (x) vs Palma ratio of shed (y).
+# Dots match the steelblue of the bar charts and are enlarged to 14pt
+# (3.5× the default); α encoding lives on the top axis below. Drops NaN
+# Palma entries (low-α points where bot40 = 0 — same guard as
+# post_hoc_fairness_pareto.jl).
 finite_palma = findall(isfinite, palma_ratio_log)
-if !isempty(finite_palma)
-    plot!(twinx(p_metrics), alphas[finite_palma], palma_ratio_log[finite_palma],
-        label = "Palma (top10/bot40 served)", lw = 2, marker = :diamond,
-        ls = :dash, color = :darkorange,
-        ylabel = "aggregate Palma (served-day)", legend = :topright;
-        FONT_KW...)
+p_pareto = plot(agg_total_shed[finite_palma], palma_ratio_log[finite_palma],
+    seriestype = :line, lc = :grey,
+    marker = :circle, markersize = 14, color = :steelblue,
+    markerstrokecolor = :steelblue,
+    xlabel = "total load shed (kW)",
+    ylabel = "Palma ratio of shed (unitless)",
+    legend = false;
+    FONT_KW...)
+# Annotate the α=0 / α=1 endpoints (5% of the y-range above the marker)
+# using the filtered finite-Palma α values. Same style as the bar-chart
+# value labels.
+let _ts_e = agg_total_shed[finite_palma],
+    _ys_e = palma_ratio_log[finite_palma],
+    _αs_e = alphas[finite_palma]
+    yrange = maximum(_ys_e) - minimum(_ys_e)
+    yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
+    annotate!(p_pareto, _ts_e[1],   _ys_e[1]   + yoff,
+        text("ν=$(round(_αs_e[1],   digits=2))", ANNOT_PT, :center))
+    annotate!(p_pareto, _ts_e[end], _ys_e[end] + yoff,
+        text("ν=$(round(_αs_e[end], digits=2))", ANNOT_PT, :center))
 end
 
-fig1 = plot(p_dist_a0, p_dist_a1, p_metrics,
-    layout = (1, 3), size = (1900, 600),
-    left_margin = 14Plots.mm, right_margin = 6Plots.mm,
-    top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
-savefig(fig1, joinpath(output_dir, "summary_integer_$(pshed_type).svg"))
-display(fig1)
+# Save each panel as its own figure (was a single 3-panel fig1).
+for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+    _fig = plot(_p; size = (900, 760),
+        left_margin = 7Plots.mm, right_margin = 6Plots.mm,
+        top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
+    savefig(_fig, joinpath(output_dir,
+        "summary_single_$(_name)_$(kind)_$(pshed_type).svg"))
+    _name == "pareto" && display(_fig)
+end
 
 # ============================================================
 # FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
@@ -594,14 +655,14 @@ p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
 p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
     color = :cividis, colorbar = false,
     xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "alpha", title = "", framestyle = :box)
+    ylabel = "ν", title = "", framestyle = :box)
 
 fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
     layout = @layout([a b c d e{0.02w}]),
     size = (2200, 600),
     left_margin = 14Plots.mm, right_margin = 6Plots.mm,
     top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)
-savefig(fig2, joinpath(output_dir, "pareto_norms_integer_$(pshed_type).svg"))
+savefig(fig2, joinpath(output_dir, "pareto_norms_$(kind)_$(pshed_type).svg"))
 display(fig2)
 
 # ============================================================
@@ -621,5 +682,59 @@ agg_rows = DataFrame(alpha = alphas,
     cost_weighted_max  = weighted_max,
     palma_ratio        = palma_ratio_log)
 CSV.write(joinpath(output_dir, "palma_sweep_mn_aggregate_$(pshed_type).csv"), agg_rows)
+
+# ============================================================
+# PERSIST SWEEP DATA FOR STANDALONE VISUALIZATION SCRIPTS
+# Same schema as min_max_trade_off_mn.jl's trade_off_mn_*.jld2 so
+# trade_off_heatmap_mn.jl and trade_off_grouped_mn.jl can target either
+# fair_func with one loader. Saved as palma_sweep_mn_<case>_<pshed_type>.jld2.
+# ============================================================
+using JLD2
+math_ref = mn_data["nw"][nw_ids_sorted[1]]
+bus_name_map = FairLoadDelivery.build_bus_name_maps(math_ref)
+ref_load_ids = sort(collect(keys(math_ref["load"])), by = x -> parse(Int, x))
+load_bus_ids   = [math_ref["load"][lid]["load_bus"] for lid in ref_load_ids]
+load_bus_names = [get(bus_name_map, bid, "bus_$bid") for bid in load_bus_ids]
+
+per_load_period_pd = zeros(n_loads, N_PERIODS)
+for (t, nw_id) in enumerate(nw_ids_sorted)
+    nw_data = mn_data["nw"][nw_id]
+    for (j, lid) in enumerate(ref_load_ids)
+        per_load_period_pd[j, t] = sum(nw_data["load"][lid]["pd"])
+    end
+end
+
+jld_path = joinpath(output_dir, "palma_sweep_mn_$(case)_$(pshed_type).jld2")
+JLD2.jldsave(jld_path;
+    alphas               = alphas,
+    per_load_period_shed = per_load_period_shed,  # alpha × load × period
+    per_load_period_pd   = per_load_period_pd,    # load × period
+    per_load_agg         = per_load_agg,          # alpha × load (sum over periods)
+    total_shed           = total_shed,            # alpha × period
+    max_shed             = max_shed,              # alpha × period
+    palma_ratio_log      = palma_ratio_log,
+    load_labels          = load_labels,
+    load_bus_ids         = load_bus_ids,
+    load_bus_names       = load_bus_names,
+    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
+    N_PERIODS            = N_PERIODS,
+    PEAK_STRESS          = PEAK_STRESS,
+    CENTER_AT_NOMINAL    = CENTER_AT_NOMINAL,
+    case                 = case,
+    pshed_type           = pshed_type,
+    fair_func            = "palma",
+    # Per-α raw per-period solution dicts (loads/blocks/switches/buses/branches).
+    # Built via _IM.build_solution after each α's JuMP.optimize!; nothing where
+    # the α point was infeasible. See run_validation_mn.jl Step 6 for the
+    # downstream schema.
+    solutions_per_alpha  = solutions_per_alpha,
+    math_switch          = math["switch"],
+    math_branch          = math["branch"],
+    math_bus             = math["bus"],
+    math_load            = math["load"],
+    load_block_sets      = lbs,
+)
+println("Saved trade-off sweep data → $jld_path")
 
 println("Done. Results written to: ", output_dir)

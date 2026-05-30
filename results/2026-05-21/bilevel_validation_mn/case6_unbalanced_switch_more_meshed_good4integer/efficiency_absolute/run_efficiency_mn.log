@@ -1,0 +1,1601 @@
+┌ Info: Logging to results/2026-05-21/bilevel_validation_mn/case6_unbalanced_switch_more_meshed_good4integer/efficiency_absolute\run_efficiency_mn.log
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_efficiency_mn.jl:74
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Info: N_PERIODS=24, agg_scales=[0.8479854262731626, 0.8209116806392722, 0.8045632237581454, 0.8079152275923159, 0.8387202438113252, 0.8980381122690839, 0.9676482934843788, 1.0258647367355271, 1.0757845717168208, 1.1086396193254484, 1.1338430847598189, 1.1478945274297554, 1.1501794143778719, 1.1368178312533255, 1.123310031164268, 1.1118984910387417, 1.1069837587121172, 1.101107729225653, 1.0722361959025872, 1.034470288465074, 0.9842055523687825, 0.9334650162377547, 0.8989053063178417, 0.8686116371409339], λ=[5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.01, 5.04, 5.15, 5.5, 6.4, 8.38, 11.95, 17.17, 23.15, 28.08, 30.0, 28.08, 23.15, 17.17, 11.95, 8.38], peak_stress=1.0
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_efficiency_mn.jl:97
+┌ Debug: pm model build time: 23.631999969482422
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 9.20300006866455
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: Integer MLD termination: OPTIMAL, objective=7641.119
+└ @ Main c:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_efficiency_mn.jl:176
+┌ Debug: pm model build time: 15.246999979019165
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 9.039000034332275
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023999929428100586
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.029999971389770508
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.011999845504760742
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.026000022888183594
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.02200007438659668
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023000001907348633
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.021999835968017578
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.03699994087219238
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023000001907348633
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023999929428100586
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009999990463256836
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023999929428100586
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.02500009536743164
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.021000146865844727
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023000001907348633
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.03399991989135742
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.012000083923339844
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.021999835968017578
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.02200007438659668
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.0070002079010009766
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.02200007438659668
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.02499985694885254
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023000001907348633
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.01100015640258789
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.032000064849853516
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.0279998779296875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009999990463256836
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.0280001163482666
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.0070002079010009766
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.023999929428100586
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\TableOperations\5GGWt_6ngOn.dll for TableOperations [ab02a1b2-a7df-11e8-156e-fb1833f50b87]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Observables\qosmH_6ngOn.dll for Observables [510215fc-4207-5dde-b226-833fc4488ee2]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Widgets\F5dj0_6ngOn.dll for Widgets [cc8bc4a8-27d6-5769-a93b-9d913e69aa62]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractTrees\tEX7J_6ngOn.dll for AbstractTrees [1520ce14-60c1-5f80-bbc7-55ef81b5835c]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\NearestNeighbors\Yj1kF_6ngOn.dll for NearestNeighbors [b8a86587-4115-5ab1-83bc-aa920d37bbce]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Clustering\Ovl2Q_6ngOn.dll for Clustering [aaaa29a8-35af-508c-8bc3-b662a17a0fe5]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\WoodburyMatrices\LdtKf_6ngOn.dll for WoodburyMatrices [efce3f68-66dc-5838-9240-27a6d6f5f9b6]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Ratios\zQEsd_6ngOn.dll for Ratios [c84ed2f1-dad5-54f0-aa8e-dbefe2724439]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AxisAlgorithms\lW7vi_6ngOn.dll for AxisAlgorithms [13072b0f-2c55-5437-9ae7-d433b7a33950]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\OffsetArrays\UDEDl_6ngOn.dll for OffsetArrays [6fe1bfb0-de20-5000-8ca7-80f57d26f881]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\OffsetArraysAdaptExt\evlsb_6ngOn.dll for OffsetArraysAdaptExt [9ea13c92-b805-51cc-a17e-c5d4dc71a5cc]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Interpolations\VpKVx_6ngOn.dll for Interpolations [a98d9a8b-a2ab-59e6-89dd-64a1c18fca59]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\RatiosFixedPointNumbersExt\R2tFd_6ngOn.dll for RatiosFixedPointNumbersExt [dc815b64-233b-5bd3-8c5c-a58ec2b485bf]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\MultivariateStats\l7I74_6ngOn.dll for MultivariateStats [6f286f6a-111f-5878-ab1e-185364afe411]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTs\Di3HZ_6ngOn.dll for AbstractFFTs [621f4979-c628-5d54-868e-fcf4e3e8185c]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTsChainRulesCoreExt\g4vnt_6ngOn.dll for AbstractFFTsChainRulesCoreExt [07c0d231-1838-56d6-9ec8-835e5b9b958e]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\MuladdMacro\myzFY_ICJ7p.dll for MuladdMacro [46d2c3a1-f734-5fdb-9937-b9b9aeba4221]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\IntegerMathUtils\WLcRF_6ngOn.dll for IntegerMathUtils [18e54dd8-cb9d-406c-a71d-865a43cbb235]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Primes\TX3XQ_6ngOn.dll for Primes [27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\FFTA\V4Q1C_6ngOn.dll for FFTA [b86e33f2-c0db-4aa1-a6e0-ab43e668529e]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\KernelDensity\4QyGx_6ngOn.dll for KernelDensity [5ab0869b-81aa-558d-bb23-cbf5423bbe9b]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\StatsPlots\SiylL_6ngOn.dll for StatsPlots [f3b207a7-027a-5e70-b257-86293d7955fd]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\InterpolationsForwardDiffExt\M1AeY_6ngOn.dll for InterpolationsForwardDiffExt [c0419daf-3bc6-522d-af4f-b7766712b465]
+└ @ Base loading.jl:1269
+┌ Debug: Extension InterpolationsForwardDiffExt of Interpolations loaded
+└ @ Base loading.jl:1580
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTsTestExt\Pr5Et_6ngOn.dll for AbstractFFTsTestExt [f14dd36e-a047-53ac-8286-f8b5d0265aae]
+└ @ Base loading.jl:1269
+┌ Debug: Extension AbstractFFTsTestExt of AbstractFFTs loaded
+└ @ Base loading.jl:1580
+┌ Debug: message: repl/getvariables
+│   time = 17793373995
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793374000
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374032
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793374060
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793374060
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793374096
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793374101
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374138
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374138
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374191
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374191
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374193
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374193
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374194
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374194
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374195
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374195
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374197
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374198
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374198
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374215
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374215
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374229
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374229
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374230
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374230
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374232
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374232
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374237
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374241
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374241
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374252
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374252
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793374272
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793374272
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793374321
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793374322
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374373
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374373
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374448
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374465
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374465
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374502
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374502
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374507
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374507
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374509
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374510
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374510
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374514
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374514
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374517
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374517
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374520
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374520
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374522
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374522
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374522
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374522
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374524
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374524
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374525
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374525
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374550
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374550
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793374564
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793374564
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793374566
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793374567
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374574
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374574
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374659
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374659
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374670
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374670
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374732
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374732
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374738
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374738
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374743
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374743
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374766
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374813
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374813
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374817
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374817
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374826
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374826
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374826
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374826
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374828
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374828
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374830
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374830
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374836
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374836
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374843
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374843
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374851
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374851
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374853
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374853
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374875
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374875
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374883
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374883
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374894
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374896
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374896
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374898
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374898
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374899
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374901
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374903
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374903
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374911
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374915
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374915
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374917
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374917
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374919
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374919
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374922
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374922
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374932
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374932
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374952
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374952
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374958
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374958
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374958
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374958
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793374996
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793374996
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375006
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375012
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375012
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375012
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375012
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375017
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375021
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375021
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375021
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375021
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375024
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375024
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375024
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375024
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375030
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375030
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375067
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375067
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375068
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375068
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375080
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375080
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375081
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375081
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375086
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375090
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375092
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375092
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375093
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375093
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375095
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375095
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375101
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375101
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375122
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375122
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375135
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375192
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375192
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375194
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375194
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375211
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375211
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375211
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375211
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375218
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375218
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375218
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375218
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375220
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375220
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375220
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375220
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375225
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375225
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375225
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375225
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375226
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375226
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375226
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375226
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375233
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375239
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375246
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375246
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375246
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375246
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375260
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375260
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375262
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375262
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375273
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375273
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375275
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375275
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375277
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375277
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375292
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375292
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375293
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375293
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375295
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375295
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375303
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375303
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375305
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375305
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375306
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375306
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375307
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375307
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375335
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375335
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375338
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375338
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375348
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375348
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375366
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375366
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375368
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375368
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375372
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375372
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375374
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375374
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375376
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375376
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375377
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375377
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375384
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375384
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375388
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375388
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375389
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375391
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375391
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375393
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375393
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375420
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375420
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375423
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375424
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375511
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375511
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375592
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375592
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375604
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375604
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375611
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375611
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375614
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375614
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375620
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375620
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375629
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375629
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375667
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375667
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375670
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375671
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375729
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375729
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375742
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375742
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375744
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375744
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375748
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375748
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375751
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375751
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375754
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375754
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375758
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375758
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375760
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375760
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375761
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375761
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375764
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375764
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375767
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375767
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375772
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375772
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375777
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375777
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375781
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375781
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375788
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375788
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375804
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375804
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375807
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375807
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375812
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375812
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375816
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375816
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375820
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375820
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375825
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375825
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375833
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375833
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375841
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375841
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375850
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375850
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375864
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375864
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375880
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375880
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+ done
+│   time = 17793375393
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375420
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375420
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375423
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375424
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375446
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375511
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375511
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375592
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375592
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375600
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375604
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375604
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375611
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375611
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375614
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375614
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375620
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375620
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375624
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375629
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375629
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375632
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/runcode
+│   time = 17793375667
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/runcode done
+│   time = 17793375667
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/getvariables
+│   time = 17793375670
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/getvariables done
+│   time = 17793375671
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375729
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375729
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375742
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375742
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375744
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375744
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375748
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375748
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375751
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375751
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375754
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375754
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375758
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375758
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375760
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375760
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375761
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375761
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375764
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375764
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375767
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375767
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375772
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375772
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375777
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375777
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375781
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375781
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375788
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375788
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375792
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375799
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375804
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375804
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375807
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375807
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375812
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375812
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375816
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375816
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375820
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375820
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375825
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375825
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375833
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375833
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375838
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375841
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375841
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375844
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375850
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375850
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375864
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375864
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375880
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375880
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196
+┌ Debug: message: repl/isModuleLoaded
+│   time = 17793375892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:180
+┌ Debug: message: repl/isModuleLoaded done
+│   time = 17793375892
+└ @ VSCodeServer c:\Users\awest\.vscode\extensions\julialang.language-julia-1.215.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:196

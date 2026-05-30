@@ -1,0 +1,5 @@
+case,fair_func,pshed_type,metric,value
+case6_unbalanced_switch_more_meshed_good4integer,palma,absolute,L1,1164.8744380672342
+case6_unbalanced_switch_more_meshed_good4integer,palma,absolute,L2,615.6424260618794
+case6_unbalanced_switch_more_meshed_good4integer,palma,absolute,Linf,456.00000000000006
+case6_unbalanced_switch_more_meshed_good4integer,palma,absolute,CoV,0.7040860809101462

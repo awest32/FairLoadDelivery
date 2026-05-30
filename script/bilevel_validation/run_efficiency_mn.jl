@@ -36,30 +36,40 @@ include("validation_utils.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-#const CASE      = "motivation_c_good4integer"
-const CASE = "case6_unbalanced_switch_more_meshed_good4integer"
-case            = "more_meshed_6bus" #"13_bus"
-#"../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-const CASE_FILE = joinpath(@__DIR__, "../../data/pmd_opendss/$CASE.dss")
+# CASE = "motivation_c_good4integer"
+# case            = "motivation_c_13bus"
+# CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
+CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
+ #CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
+ #CASE = "motivation_c_good4integer"
+case = "6_bus" #"13_bus"#"6_bus"
+#critical_load = ["611"]
+CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT      = 0.8
-const FAIR_FUNC = "efficiency"
+FAIR_FUNC = "efficiency"
 pshed_type      = "absolute"
 
-# Downsampled hours-of-day (0-indexed) covering trough → peak → descent. See
-# run_validation_mn.jl for rationale; T=8 keeps DiffOpt forward-mode tractable
-# vs the full 24h day.
-const SELECTED_HOURS    = [2, 5, 8, 12, 15, 18, 21, 23]
-const N_PERIODS         = length(SELECTED_HOURS)
-const PEAK_STRESS       = 1.0
+# 2026-05-24 short-period defense follow-up for motivation_c (13-bus).
+# T=2: midday plateau + evening peak so peak_time_cost differentiation is
+# maximal. Bump to [12, 18, 22] (T=3, peak in middle) if the 2-period run is
+# fast.
+
+#SELECTED_HOURS    = [4, 18, 8]
+ # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+ SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+
+N_PERIODS         = length(SELECTED_HOURS)
+
+PEAK_STRESS       = 1.0
 # When true, each schedule is divided by its own daily mean before applying
 # peak_stress — so the daily-average per-load scale equals PEAK_STRESS exactly
 # (1.4× nominal here) and the nameplate pd is the daily mean, matching the
 # single-period reference.
-const CENTER_AT_NOMINAL = true
-const PERIOD_HOURS      = SELECTED_HOURS
-const PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
+CENTER_AT_NOMINAL = true
+PERIOD_HOURS      = SELECTED_HOURS
+PEAK_TIME_COSTS   = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                            for h in PERIOD_HOURS]
-REP_PERIODS = [2, 4, 6]   # → hours 2, 12, 18 (trough/plateau/peak)
+REP_PERIODS = collect(1:N_PERIODS)   # show all periods on the grouped bar
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 ipopt_solver   = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
@@ -184,6 +194,7 @@ print_validation_header("Step 3: Per-period AC feasibility")
 
 mn_rounded_solutions = Dict{String,Dict{String,Any}}()
 per_period_results   = Dict{String,Any}()
+ac_solutions_by_nw   = Dict{String,Any}()
 
 for (t, nw_id) in enumerate(nw_ids_sorted)
     println("\n  ----- Period $t (nw=$nw_id, λ=$(PEAK_TIME_COSTS[t]), agg_scale=$(round(LOAD_SCALE_FACTORS[t], digits=3))) -----")
@@ -233,6 +244,11 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     period_checks["ac_convergence"] = Dict("passed" => ac_ok_t, "details" => ["status: $ac_term_t"])
     print_check_result("Period $t: AC PF converged", ac_ok_t, "status: $ac_term_t")
 
+    ac_solutions_by_nw[nw_id] = Dict(
+        "solution"           => get(ac_result_t, "solution", Dict{String,Any}()),
+        "termination_status" => string(ac_term_t),
+    )
+
     if ac_ok_t && haskey(ac_result_t, "solution")
         v_passed_ac, v_violations_ac, v_summary_ac = check_voltage_limits_ac(ac_result_t, math_ac_t)
         period_checks["voltage_limits_ac"] = Dict("passed" => v_passed_ac,
@@ -264,21 +280,56 @@ include("results_block_mn.jl")
 # ============================================================
 # STEP 5: PERSIST PER-RUN DATA (same schema as run_validation_mn.jl Step 6)
 # ============================================================
+# Efficiency runner has no bilevel loop, so "final weights" are just the
+# initial per-load weights, replicated per period to match the run_validation_mn.jl
+# layout (T*N flat vector indexed period-major). Saved so replot scripts can
+# read the same schema regardless of which fair_func produced the JLD2.
+_ref_load_ids = sort(collect(keys(mn_new["nw"][nw_ids_sorted[1]]["load"])),
+                     by = x -> parse(Int, x))
+_final_weight_ids = parse.(Int, _ref_load_ids)
+_init_weights = [mn_new["nw"][nw_ids_sorted[1]]["load"][lid]["weight"]
+                 for lid in _ref_load_ids]
+_final_fair_weights = repeat(_init_weights, N_PERIODS)
+
 jld_path = joinpath(save_dir, "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
 JLD2.jldsave(jld_path;
-    pshed_matrix         = pshed_matrix,
-    load_labels          = load_labels,
-    period_labels        = period_labels,
-    LOAD_SCALE_FACTORS   = LOAD_SCALE_FACTORS,
-    PEAK_TIME_COSTS      = PEAK_TIME_COSTS,
-    CASE                 = CASE,
-    FAIR_FUNC            = FAIR_FUNC,
-    pshed_type           = pshed_type,
-    N_PERIODS            = N_PERIODS,
-    period_total         = period_total,
-    period_max           = period_max,
-    rounded_objectives   = rounded_objectives,
-    relaxed_mn_objective = mn_relaxed_final["objective"],
+    pshed_matrix             = pshed_matrix,
+    pd_ref_matrix            = pd_ref_matrix,
+    load_labels              = load_labels,
+    period_labels            = period_labels,
+    bus_labels               = bus_labels,
+    bus_pd_matrix            = bus_pd_matrix,
+    bus_pshed_matrix         = bus_pshed_matrix,
+    bus_status_matrix        = bus_status_matrix,
+    relaxed_pshed_matrix     = relaxed_pshed_matrix,
+    relaxed_bus_pshed_matrix = relaxed_bus_pshed_matrix,
+    relaxed_bus_status_matrix = relaxed_bus_status_matrix,
+    final_fair_weights       = _final_fair_weights,
+    final_weight_ids         = _final_weight_ids,
+    LOAD_SCALE_FACTORS       = LOAD_SCALE_FACTORS,
+    PEAK_TIME_COSTS          = PEAK_TIME_COSTS,
+    SELECTED_HOURS           = SELECTED_HOURS,
+    PEAK_STRESS              = PEAK_STRESS,
+    CENTER_AT_NOMINAL        = CENTER_AT_NOMINAL,
+    LS_PERCENT               = LS_PERCENT,
+    CASE                     = CASE,
+    FAIR_FUNC                = FAIR_FUNC,
+    pshed_type               = pshed_type,
+    N_PERIODS                = N_PERIODS,
+    period_total             = period_total,
+    period_max               = period_max,
+    rounded_objectives       = rounded_objectives,
+    relaxed_mn_objective     = mn_relaxed_final["objective"],
+    # Raw per-period solutions + static element metadata; see run_validation_mn.jl
+    # Step 6 for the schema.
+    mn_relaxed_solution_per_period = mn_integer["solution"]["nw"],
+    mn_rounded_solution_per_period = Dict(nw_id => v["solution"] for (nw_id, v) in mn_rounded_solutions),
+    mn_ac_solution_per_period      = ac_solutions_by_nw,
+    math_switch              = math["switch"],
+    math_branch              = math["branch"],
+    math_bus                 = math["bus"],
+    math_load                = math["load"],
+    load_block_sets          = lbs,
 )
 println("Saved efficiency run data → $jld_path")
 

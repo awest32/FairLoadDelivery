@@ -1,0 +1,6 @@
+case,fair_func,pshed_type,block,n_loads,pshed_kw,pd_kw,shed_pct
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,3,3,456.00000000000006,456.00000000000006,100.0
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,4,1,261.72523961661346,360.0,72.7014554490593
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,5,1,288.0000000000001,288.0000000000001,100.0
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,6,3,206.05750798722048,528.0,39.02604317939782
+case6_unbalanced_switch_more_meshed_good4integer,min_max,absolute,7,1,12.345132743362838,48.000000000000014,25.71902654867257

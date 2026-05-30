@@ -6,22 +6,22 @@ using PowerModelsDistribution, PowerModels
 using Ipopt, Gurobi, HiGHS
 using JuMP
 import MathOptInterface
-const MOI = MathOptInterface
+MOI = MathOptInterface
 using LinearAlgebra, SparseArrays
 using DiffOpt
 
-const PMD = PowerModelsDistribution
+PMD = PowerModelsDistribution
 
 include("../bilevel_validation/validation_utils.jl")
 include("../../src/implementation/other_fair_funcs.jl")
 include("../../src/implementation/load_shed_as_parameter.jl")
 
-const LS_PERCENT = 0.8
-const SOURCE_PU = 1.03
-const N_PERIODS = 3
-const LOAD_SCALE_FACTORS = [0.8, 1.0, 0.9]
-const ITERATIONS = 2
-const critical_buses = []
+LS_PERCENT = 0.8
+SOURCE_PU = 1.03
+N_PERIODS = 3
+LOAD_SCALE_FACTORS = [0.8, 1.0, 0.9]
+ITERATIONS = 2
+critical_buses = []
 
 # Reuse create_multinetwork_data from the comparison script
 function create_multinetwork_data(base_math::Dict{String,Any}, n_periods::Int, load_scales::Vector{Float64})

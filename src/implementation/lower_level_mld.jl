@@ -125,7 +125,8 @@ function DiffOpt.forward_differentiate!(model::MOI.Bridges.LazyBridgeOptimizer{D
     return DiffOpt.forward_differentiate!(model.model; tol = 1e-4)
 end
 
-function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vector{Float64})
+function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vector{Float64};
+                                       timings::Union{Dict,Nothing}=nothing)
     nw_ids = model[:nw_ids]
     T = length(nw_ids)
 
@@ -179,24 +180,44 @@ function diff_forward_full_jacobian_mn(model::JuMP.Model, fair_load_weights::Vec
     n_pshed_total = length(all_pshed_vars)
 
     # Solve once — perturbations only affect differentiation direction, not the optimal solution
-    optimize!(model)
+    t_primal = @elapsed optimize!(model)
 
-    # Build Jacobian column by column: (T*N) x (T*N)
+    # Build Jacobian column by column: (T*N) x (T*N).
+    # DiffOpt.forward_differentiate! errors on non-KKT termination statuses
+    # (ITERATION_LIMIT in particular), so only compute the Jacobian when the
+    # primal converged. When it didn't, return zeros + warn — downstream
+    # callers (parity tests, bilevel iters with safety nets) can decide
+    # whether the zero-Jacobian incumbent is still useful.
     jacobian = zeros(n_pshed_total, n_weights_total)
-    for j in 1:n_weights_total
-        DiffOpt.empty_input_sensitivities!(model)
+    primal_status = termination_status(model)
+    t_jacobian = 0.0
+    if primal_status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED,
+                          MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
+        t_jacobian = @elapsed for j in 1:n_weights_total
+            DiffOpt.empty_input_sensitivities!(model)
 
-        # Perturb ONLY weight j (standard basis vector e_j across all periods)
-        for (idx, (n, key, param)) in enumerate(all_weight_params)
-            perturbation = (idx == j) ? 1.0 : 0.0
-            DiffOpt.set_forward_parameter(model, param, perturbation)
+            # Perturb ONLY weight j (standard basis vector e_j across all periods)
+            for (idx, (n, key, param)) in enumerate(all_weight_params)
+                perturbation = (idx == j) ? 1.0 : 0.0
+                DiffOpt.set_forward_parameter(model, param, perturbation)
+            end
+
+            DiffOpt.forward_differentiate!(model)
+
+            for (i, var) in enumerate(all_pshed_vars)
+                jacobian[i, j] = DiffOpt.get_forward_variable(model, var)
+            end
         end
+    else
+        @warn "[diff_forward_full_jacobian_mn] primal terminated $primal_status — skipping DiffOpt forward differentiation, returning ZERO Jacobian and using the current incumbent pshed values. Upper-level Δw will be unconstrained by lower-level sensitivities."
+    end
 
-        DiffOpt.forward_differentiate!(model)
-
-        for (i, var) in enumerate(all_pshed_vars)
-            jacobian[i, j] = DiffOpt.get_forward_variable(model, var)
-        end
+    if timings !== nothing
+        timings[:primal_solve_s]  = t_primal
+        timings[:jacobian_loop_s] = t_jacobian
+        timings[:per_col_avg_s]   = n_weights_total > 0 ? t_jacobian / n_weights_total : 0.0
+        timings[:n_cols]          = n_weights_total
+        timings[:primal_status]   = string(primal_status)
     end
 
     # Collect pshed values (flattened across periods)
@@ -213,14 +234,16 @@ Multiperiod lower-level solution: instantiates the multiperiod implicit diff mod
 sets weights, computes Jacobian via DiffOpt.
 Returns: dpshed_mat (T*N x N), pshed_val (T*N), pshed_nw_ids, weight_vals, weight_ids, refs
 """
-function lower_level_soln_mn(mn_data::Dict{String,Any}, weights_new, k)
-    mld_paramed = instantiate_mc_model(
+function lower_level_soln_mn(mn_data::Dict{String,Any}, weights_new, k;
+                             timings::Union{Dict,Nothing}=nothing)
+    t_build = @elapsed mld_paramed = instantiate_mc_model(
         mn_data,
         LinDist3FlowPowerModel,
         build_mn_mc_mld_shedding_implicit_diff;
         multinetwork=true,
         ref_extensions=[FairLoadDelivery.ref_add_load_blocks!]
     )
+    timings !== nothing && (timings[:model_build_s] = t_build)
 
     nw_ids = sort(collect(_PMD.nw_ids(mld_paramed)))
     first_nw = nw_ids[1]
@@ -243,7 +266,8 @@ function lower_level_soln_mn(mn_data::Dict{String,Any}, weights_new, k)
         @info "Iteration $k: Solving multiperiod lower-level MLD with $(length(weights_prev)) per-period weights"
     end
 
-    dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, _ = diff_forward_full_jacobian_mn(mld_paramed.model, weights_prev)
+    dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, _ =
+        diff_forward_full_jacobian_mn(mld_paramed.model, weights_prev; timings=timings)
     return dpshed_mat, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
 end
 

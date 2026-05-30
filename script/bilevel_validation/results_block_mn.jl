@@ -15,8 +15,18 @@
 using StatsPlots
 using FairLoadDelivery
 
-# Unified 9pt font defaults for every figure produced here.
+# Unified 9pt font defaults, then bump up — matches per_block_fairness_mn.jl
+# and per_period_norms_mn.jl so all bilevel-validation aggregate plots share a
+# single visual scale (legible when scaled down in the paper). Include must
+# come first so the bump survives.
 include(joinpath(@__DIR__, "../figure_defaults.jl"))
+include(joinpath(@__DIR__, "../block_display.jl"))
+default(
+    guidefontsize  = 20,
+    tickfontsize   = 18,
+    titlefontsize  = 22,
+    legendfontsize = 16,
+)
 
 # Representative periods for grouped bar (override before include() to customize).
 # Default picks 3 evenly-spaced indices into 1:N_PERIODS so it adapts to
@@ -27,11 +37,11 @@ if !@isdefined(REP_PERIODS)
         unique([1, max(1, N_PERIODS ÷ 2), N_PERIODS])
 end
 
-print_validation_header("Step 5: Load-shed heatmap + final result")
+#print_validation_header("Step 5: Load-shed heatmap + final result")
 
 ref_load_ids = sort(collect(keys(mn_new["nw"][nw_ids_sorted[1]]["load"])), by=x->parse(Int, x))
 load_labels  = [mn_new["nw"][nw_ids_sorted[1]]["load"][lid]["name"] for lid in ref_load_ids]
-period_labels = ["t=$t" for t in 1:N_PERIODS]
+period_labels = [string(t) for t in 1:N_PERIODS]
 
 pshed_matrix = fill(NaN, N_PERIODS, length(ref_load_ids))
 for (t, nw_id) in enumerate(nw_ids_sorted)
@@ -41,6 +51,23 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
     for (j, lid) in enumerate(ref_load_ids)
         if haskey(sol_t["load"], lid) && haskey(sol_t["load"][lid], "pshed")
             pshed_matrix[t, j] = sum(sol_t["load"][lid]["pshed"])
+        end
+    end
+end
+
+# Relaxed (pre-rounding) per-load pshed pulled directly from the Step 3
+# final relaxed multi-period MLD. Values are continuous in [0, pd] — the
+# DiffOpt LP relaxation does not force integrality of z_demand / z_block.
+relaxed_pshed_matrix = fill(NaN, N_PERIODS, length(ref_load_ids))
+if @isdefined(mn_relaxed_final) && haskey(mn_relaxed_final, "solution")
+    for (t, nw_id) in enumerate(nw_ids_sorted)
+        haskey(mn_relaxed_final["solution"]["nw"], nw_id) || continue
+        sol_t = mn_relaxed_final["solution"]["nw"][nw_id]
+        haskey(sol_t, "load") || continue
+        for (j, lid) in enumerate(ref_load_ids)
+            if haskey(sol_t["load"], lid) && haskey(sol_t["load"][lid], "pshed")
+                relaxed_pshed_matrix[t, j] = sum(sol_t["load"][lid]["pshed"])
+            end
         end
     end
 end
@@ -58,9 +85,10 @@ bus_labels = [get(bus_name_map, bid, "bus_$bid") for bid in all_bus_ids]
 bus_col = Dict(bid => k for (k, bid) in enumerate(all_bus_ids))
 load_to_bus_col = [bus_col[math_ref["load"][lid]["load_bus"]] for lid in ref_load_ids]
 
-pd_ref_matrix    = zeros(N_PERIODS, length(ref_load_ids))
-bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
-bus_pd_matrix    = zeros(N_PERIODS, length(all_bus_ids))
+pd_ref_matrix          = zeros(N_PERIODS, length(ref_load_ids))
+bus_pshed_matrix       = zeros(N_PERIODS, length(all_bus_ids))
+bus_pd_matrix          = zeros(N_PERIODS, length(all_bus_ids))
+relaxed_bus_pshed_matrix = zeros(N_PERIODS, length(all_bus_ids))
 for (t, nw_id) in enumerate(nw_ids_sorted)
     nw_data = mn_new["nw"][nw_id]
     for (j, lid) in enumerate(ref_load_ids)
@@ -69,9 +97,15 @@ for (t, nw_id) in enumerate(nw_ids_sorted)
         bus_pd_matrix[t, load_to_bus_col[j]] += pd_total
         v = pshed_matrix[t, j]
         bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(v) ? 0.0 : v
+        vr = relaxed_pshed_matrix[t, j]
+        relaxed_bus_pshed_matrix[t, load_to_bus_col[j]] += isnan(vr) ? 0.0 : vr
     end
 end
 
+# Bus-level z_demand (= served indicator): 1.0 = served, 0.0 = shed.
+# The block constraint forces all loads at a bus to share shed status, so
+# bus_status_matrix takes binary values when the rounded MLD solution
+# respects integrality. Equivalent to z_demand for any load at the bus.
 bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
 for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     if bus_pd_matrix[t, b] > 1e-9
@@ -79,17 +113,118 @@ for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
     end
 end
 
-p_heat = heatmap(bus_labels, period_labels, bus_status_matrix,
-    xlabel = "Bus",
-    ylabel = "Period",
-    color  = cgrad(["#2A6F6B", "#E5EFEA"]),  # muted teal (shed) → pale sage (served)
+# Relaxed served fraction lives in [0, 1] (continuous) — no binarization.
+relaxed_bus_status_matrix = fill(NaN, N_PERIODS, length(all_bus_ids))
+any_relaxed = any(!isnan, relaxed_pshed_matrix)
+if any_relaxed
+    for t in 1:N_PERIODS, b in 1:length(all_bus_ids)
+        if bus_pd_matrix[t, b] > 1e-9
+            relaxed_bus_status_matrix[t, b] = 1.0 - relaxed_bus_pshed_matrix[t, b] / bus_pd_matrix[t, b]
+        end
+    end
+end
+
+# Re-aggregate to paper-aligned blocks if this case has a mapping defined in
+# script/block_display.jl. Otherwise render bus-level (each bus = its own
+# pseudo-block) so the figure semantics stay consistent across cases.
+display_info = resolve_block_display_from_buses(CASE, bus_labels)
+
+if display_info !== nothing
+    display_blocks, bus2block = display_info
+    @assert all(>(0), bus2block) "case $CASE block_display mapping does not cover every bus in bus_labels " *
+        "(uncovered: $(bus_labels[bus2block .== 0])). Fix BLOCK_DISPLAY in block_display.jl."
+    n_blocks_h = length(display_blocks)
+    block_tick_labels_h = [string(num) for (num, _) in display_blocks]
+    block_index_names_h = [label    for (_, label) in display_blocks]
+    block_order_descr_h = "paper-aligned (script/block_display.jl)"
+
+    block_pd_h    = zeros(N_PERIODS, n_blocks_h)
+    block_pshed_h = zeros(N_PERIODS, n_blocks_h)
+    for t in 1:N_PERIODS, b in 1:length(bus_labels)
+        col = bus2block[b]
+        col == 0 && continue
+        block_pd_h[t, col]    += bus_pd_matrix[t, b]
+        block_pshed_h[t, col] += bus_pshed_matrix[t, b]
+    end
+    status_matrix_h = fill(NaN, N_PERIODS, n_blocks_h)
+    for t in 1:N_PERIODS, b in 1:n_blocks_h
+        block_pd_h[t, b] > 1e-9 || continue
+        status_matrix_h[t, b] = 1.0 - block_pshed_h[t, b] / block_pd_h[t, b]
+    end
+else
+    n_blocks_h = length(bus_labels)
+    block_tick_labels_h = string.(1:n_blocks_h)
+    block_index_names_h = bus_labels
+    block_order_descr_h = "bus-level fallback (no block_display mapping for case $CASE)"
+    status_matrix_h = bus_status_matrix
+end
+
+println("\nBlock index → name mapping:")
+for (i, name) in enumerate(block_index_names_h)
+    println("  $(block_tick_labels_h[i])\t→\t$name")
+end
+map_path_h = joinpath(save_dir, "block_index_map_$(pshed_type)_$case.txt")
+open(map_path_h, "w") do io
+    println(io, "# Block index → name mapping for $(CASE) / $(FAIR_FUNC) / $(pshed_type)")
+    println(io, "# Block order: $(block_order_descr_h)")
+    println(io, "# index\tname")
+    for (i, name) in enumerate(block_index_names_h)
+        println(io, "$(block_tick_labels_h[i])\t$name")
+    end
+end
+println("Block index map → $map_path_h")
+
+p_heat = heatmap(block_tick_labels_h, period_labels, status_matrix_h,
+    xlabel = "Load Block",
+    ylabel = "Time Period",
+    color  = cgrad(["#E5EFEA", "#2A6F6B"]),  # pale sage (shed) → muted teal (served)
     clims  = (0.0, 1.0),
-    xrotation = 45,
+    xrotation = 0,
     yticks = (1:N_PERIODS, period_labels),
     colorbar = false,
 )
 display(p_heat)
 savefig(p_heat, joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))
+
+# ---- Relaxed (pre-rounding) per-block heatmap. Same color scale and block
+# ordering as the rounded one; rendered with a continuous gradient + visible
+# colorbar because relaxed served fraction is fractional in [0, 1]. Skipped
+# silently if mn_relaxed_final wasn't in scope (e.g. legacy REPL re-run).
+if any_relaxed
+    if display_info !== nothing
+        relaxed_block_pd    = zeros(N_PERIODS, n_blocks_h)
+        relaxed_block_pshed = zeros(N_PERIODS, n_blocks_h)
+        for t in 1:N_PERIODS, b in 1:length(bus_labels)
+            col = bus2block[b]
+            col == 0 && continue
+            relaxed_block_pd[t, col]    += bus_pd_matrix[t, b]
+            relaxed_block_pshed[t, col] += relaxed_bus_pshed_matrix[t, b]
+        end
+        relaxed_status_matrix_h = fill(NaN, N_PERIODS, n_blocks_h)
+        for t in 1:N_PERIODS, b in 1:n_blocks_h
+            relaxed_block_pd[t, b] > 1e-9 || continue
+            relaxed_status_matrix_h[t, b] = 1.0 - relaxed_block_pshed[t, b] / relaxed_block_pd[t, b]
+        end
+    else
+        relaxed_status_matrix_h = relaxed_bus_status_matrix
+    end
+
+    p_heat_relaxed = heatmap(block_tick_labels_h, period_labels, relaxed_status_matrix_h,
+        xlabel = "Load Block",
+        ylabel = "Time Period",
+        color  = cgrad(["#E5EFEA", "#2A6F6B"]),
+        clims  = (0.0, 1.0),
+        xrotation = 0,
+        yticks = (1:N_PERIODS, period_labels),
+        colorbar = true,
+        colorbar_title = "served fraction",
+    )
+    display(p_heat_relaxed)
+    savefig(p_heat_relaxed, joinpath(save_dir, "loadshed_heatmap_relaxed_$(pshed_type)_$case.svg"))
+else
+    relaxed_status_matrix_h = nothing
+    @info "Skipping relaxed heatmap — mn_relaxed_final solution not present in scope."
+end
 
 # ---- Grouped bar over representative periods (matches min_max_trade_off_mn style) ----
 rep_valid = filter(t -> 1 <= t <= N_PERIODS, REP_PERIODS)
@@ -161,7 +296,7 @@ validation_results["final"] = Dict(
     "relaxed_mn_objective"   => mn_relaxed_final["objective"],
 )
 
-report_path = joinpath(save_dir, "validation_report_mn_$(pshed_type)_$case.txt")
+report_path = joinpath(save_dir, "validation_report_mn_$(FAIR_FUNC)_$(pshed_type)_$case.txt")
 generate_summary_report(validation_results, report_path)
 println("\nResults block complete. Heatmap → $(joinpath(save_dir, "loadshed_heatmap_$(pshed_type)_$case.svg"))")
 println("Report → $report_path")

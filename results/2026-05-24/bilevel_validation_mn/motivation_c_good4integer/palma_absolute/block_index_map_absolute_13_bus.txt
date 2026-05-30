@@ -1,0 +1,13 @@
+# Block index → name mapping for motivation_c_good4integer / palma / absolute
+# Block order: bus-level fallback (no block_display mapping for case motivation_c_good4integer)
+# index	name
+1	671
+2	634
+3	652
+4	675
+5	700
+6	611
+7	645
+8	692
+9	670
+10	646
