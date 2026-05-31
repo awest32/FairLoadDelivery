@@ -1,0 +1,8 @@
+# Block index → name mapping for case6_unbalanced_switch_more_meshed_bd_good4integer / gini / absolute
+# Block order: bus-level fallback (no block_display mapping for case case6_unbalanced_switch_more_meshed_bd_good4integer)
+# index	name
+1	loadbuse
+2	loadbusa
+3	loadbusb
+4	loadbusc
+5	loadbusd

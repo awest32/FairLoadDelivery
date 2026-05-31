@@ -1,0 +1,1145 @@
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xa8379dff
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.02s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.55332411e+02 -7.39512764e+01  4.33e+02 1.00e-01  1.94e+00     0s
+   1   6.32461252e+01 -9.73998105e+01  1.03e+02 2.01e-02  4.82e-01     0s
+   2   3.78911010e+01 -9.20978038e+01  4.12e+01 1.57e-02  2.17e-01     0s
+   3   2.54817637e+01 -7.47801246e+01  2.57e+01 7.90e-03  1.33e-01     0s
+   4   1.94772291e+01 -5.73769194e+01  9.59e+00 4.16e-03  6.10e-02     0s
+   5   1.28597259e+01 -3.13609716e+01  3.68e+00 1.15e-03  2.55e-02     0s
+   6   1.22420290e+01 -5.16585882e+00  1.35e+00 2.23e-04  8.46e-03     0s
+   7   1.08191712e+01  6.64819452e+00  3.07e-01 2.16e-05  1.79e-03     0s
+   8   1.05789494e+01  9.27301611e+00  1.80e-01 3.45e-06  6.32e-04     0s
+   9   1.03653877e+01  9.86439216e+00  4.15e-02 1.06e-06  2.07e-04     0s
+  10   1.02690072e+01  1.01351411e+01  1.86e-02 1.82e-07  6.27e-05     0s
+  11   1.02339294e+01  1.01823369e+01  3.42e-03 7.89e-08  2.03e-05     0s
+  12   1.02206099e+01  1.02096507e+01  5.35e-04 1.70e-08  4.12e-06     0s
+  13   1.02176452e+01  1.02161216e+01  3.87e-05 2.13e-09  5.37e-07     0s
+  14   1.02173600e+01  1.02171279e+01  7.74e-06 1.97e-10  8.42e-08     0s
+  15   1.02172891e+01  1.02172871e+01  4.31e-08 1.06e-12  7.00e-10     0s
+
+Barrier solved model in 15 iterations and 0.11 seconds (0.03 work units)
+Optimal objective 1.02172891e+01
+
+
+User-callback calls 141, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x4a8b8233
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.48369273e+02 -3.70028068e+01  4.34e+02 1.00e-01  1.99e+00     0s
+   1   6.85795564e+01 -4.61683086e+01  1.45e+02 3.04e-02  6.84e-01     0s
+   2   3.97353514e+01 -4.38536322e+01  6.56e+01 2.28e-02  3.31e-01     0s
+   3   2.53552977e+01 -3.79249137e+01  3.97e+01 1.30e-02  2.02e-01     0s
+   4   1.50629266e+01 -2.75863501e+01  1.65e+01 4.27e-03  8.92e-02     0s
+   5   1.48623060e+01 -1.56851650e+01  5.66e+00 1.14e-03  3.79e-02     0s
+   6   1.15685357e+01 -4.96334465e+00  3.03e+00 3.93e-04  1.83e-02     0s
+   7   1.23334148e+01  1.48802753e+00  1.40e+00 1.52e-04  9.94e-03     0s
+   8   1.13872502e+01  5.01874596e+00  7.11e-01 6.99e-05  5.37e-03     0s
+   9   1.05065197e+01  8.16029876e+00  2.65e-01 2.04e-05  1.88e-03     0s
+  10   1.00245735e+01  9.40637911e+00  7.95e-02 3.39e-06  4.94e-04     0s
+  11   9.87738319e+00  9.74240120e+00  2.71e-02 3.31e-07  1.17e-04     0s
+  12   9.81652343e+00  9.78699313e+00  5.13e-03 6.99e-08  2.47e-05     0s
+  13   9.80462071e+00  9.79999641e+00  8.89e-04 6.95e-09  3.97e-06     0s
+  14   9.80222389e+00  9.80198748e+00  7.88e-06 5.18e-11  1.62e-07     0s
+  15   9.80218599e+00  9.80218422e+00  1.17e-08 3.69e-13  1.16e-09     0s
+
+Barrier solved model in 15 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 9.80218599e+00
+
+
+User-callback calls 138, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xf3231000
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.40668869e+02 -7.39448837e+01  4.33e+02 1.00e-01  1.94e+00     0s
+   1   5.70142523e+01 -9.70415440e+01  9.49e+01 1.86e-02  4.49e-01     0s
+   2   3.27674729e+01 -9.03073618e+01  3.67e+01 1.44e-02  1.96e-01     0s
+   3   2.29065726e+01 -7.32337624e+01  2.11e+01 7.52e-03  1.15e-01     0s
+   4   2.05238553e+01 -5.40770222e+01  9.31e+00 3.86e-03  5.83e-02     0s
+   5   1.54765927e+01 -3.90131250e+01  4.48e+00 2.25e-03  3.27e-02     0s
+   6   1.14860906e+01 -1.32289282e+01  1.42e+00 5.15e-04  1.15e-02     0s
+   7   1.09544277e+01  2.57636122e+00  4.69e-01 8.45e-05  3.48e-03     0s
+   8   1.00391287e+01  6.91560298e+00  1.88e-01 2.59e-05  1.26e-03     0s
+   9   9.57319902e+00  8.98228135e+00  4.55e-02 2.90e-06  2.42e-04     0s
+  10   9.44941820e+00  9.30410614e+00  1.64e-02 3.85e-07  6.44e-05     0s
+  11   9.40907887e+00  9.35820121e+00  5.34e-03 1.30e-07  2.21e-05     0s
+  12   9.39025683e+00  9.37884129e+00  6.65e-04 3.66e-08  4.42e-06     0s
+  13   9.38798682e+00  9.38645236e+00  1.87e-04 1.76e-09  6.96e-07     0s
+  14   9.38719909e+00  9.38699034e+00  2.68e-05 1.65e-10  9.62e-08     0s
+  15   9.38708703e+00  9.38708134e+00  9.55e-07 2.48e-12  2.86e-09     0s
+
+Barrier solved model in 15 iterations and 0.09 seconds (0.03 work units)
+Optimal objective 9.38708703e+00
+
+
+User-callback calls 141, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x3bba0d82
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.33337454e+02 -7.39416874e+01  4.32e+02 1.00e-01  1.93e+00     0s
+   1   5.39256692e+01 -9.76327643e+01  9.06e+01 1.77e-02  4.30e-01     0s
+   2   3.13374608e+01 -9.06822119e+01  3.46e+01 1.38e-02  1.86e-01     0s
+   3   2.21577981e+01 -7.15669639e+01  1.99e+01 6.71e-03  1.08e-01     0s
+   4   1.96045578e+01 -5.31519173e+01  8.45e+00 3.55e-03  5.43e-02     0s
+   5   1.46653595e+01 -3.77258477e+01  4.00e+00 2.04e-03  3.02e-02     0s
+   6   1.10376586e+01 -1.12678645e+01  1.47e+00 4.05e-04  1.06e-02     0s
+   7   9.86241239e+00  3.66950801e+00  4.25e-01 4.35e-05  2.65e-03     0s
+   8   9.27386341e+00  7.26939416e+00  1.40e-01 1.10e-05  8.23e-04     0s
+   9   9.09701791e+00  8.52404269e+00  2.12e-02 2.38e-06  2.10e-04     0s
+  10   9.02187813e+00  8.89712950e+00  9.10e-03 2.92e-07  5.01e-05     0s
+  11   8.98729484e+00  8.93210997e+00  2.14e-03 1.50e-07  2.02e-05     0s
+  12   8.97539935e+00  8.95536659e+00  4.28e-04 6.10e-08  6.99e-06     0s
+  13   8.97240503e+00  8.96840997e+00  1.24e-05 1.32e-08  1.32e-06     0s
+  14   8.97204590e+00  8.97140481e+00  1.44e-06 1.70e-09  2.12e-07     0s
+  15   8.97198147e+00  8.97197512e+00  3.67e-08 9.31e-12  2.13e-09     0s
+
+Barrier solved model in 15 iterations and 0.09 seconds (0.03 work units)
+Optimal objective 8.97198147e+00
+
+
+User-callback calls 146, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x1b1c44ec
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.26006329e+02 -7.39384911e+01  4.32e+02 1.00e-01  1.93e+00     0s
+   1   5.14566010e+01 -9.82528977e+01  8.88e+01 1.67e-02  4.21e-01     0s
+   2   2.95765363e+01 -9.00739859e+01  3.36e+01 1.24e-02  1.80e-01     0s
+   3   2.23554237e+01 -7.29097850e+01  1.13e+01 7.15e-03  7.70e-02     0s
+   4   1.33754715e+01 -4.41896587e+01  5.99e+00 2.74e-03  3.90e-02     0s
+   5   1.12256144e+01 -2.11747525e+01  2.31e+00 8.23e-04  1.67e-02     0s
+   6   1.02555803e+01 -6.54517964e-02  6.86e-01 1.26e-04  4.53e-03     0s
+   7   9.40281606e+00  5.18273246e+00  3.83e-01 4.04e-05  1.87e-03     0s
+   8   8.89061654e+00  6.88060466e+00  1.51e-01 1.74e-05  8.33e-04     0s
+   9   8.68355733e+00  8.02555605e+00  5.48e-02 4.76e-06  2.71e-04     0s
+  10   8.61756706e+00  8.43397289e+00  2.91e-02 8.25e-07  8.76e-05     0s
+  11   8.56951788e+00  8.51787358e+00  4.08e-03 2.35e-07  2.07e-05     0s
+  12   8.55722481e+00  8.55066786e+00  8.96e-05 2.45e-08  2.23e-06     0s
+  13   8.55541324e+00  8.55467498e+00  1.09e-05 1.47e-09  2.51e-07     0s
+  14   8.55502994e+00  8.55500038e+00  1.72e-07 6.47e-12  9.76e-09     0s
+  15   8.55502286e+00  8.55502125e+00  1.43e-09 4.34e-13  5.23e-10     0s
+
+Barrier solved model in 15 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 8.55502286e+00
+
+
+User-callback calls 142, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x1842729e
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.18675542e+02 -7.39352948e+01  4.32e+02 1.00e-01  1.93e+00     0s
+   1   4.93551258e+01 -9.89076882e+01  8.88e+01 1.58e-02  4.20e-01     0s
+   2   2.99708090e+01 -8.70333370e+01  3.87e+01 1.08e-02  1.97e-01     0s
+   3   2.18254721e+01 -7.40391702e+01  1.42e+01 6.92e-03  8.84e-02     0s
+   4   1.42753845e+01 -4.75854697e+01  7.04e+00 2.53e-03  4.41e-02     0s
+   5   1.12531126e+01 -2.26785773e+01  3.11e+00 8.08e-04  1.92e-02     0s
+   6   9.69000830e+00 -3.88669169e+00  1.23e+00 1.30e-04  6.66e-03     0s
+   7   8.84669006e+00  1.47431620e+00  4.87e-01 6.34e-05  3.13e-03     0s
+   8   8.51117540e+00  5.99220456e+00  2.44e-01 1.49e-05  1.10e-03     0s
+   9   8.27533112e+00  7.49686666e+00  4.01e-02 3.40e-06  2.95e-04     0s
+  10   8.18142453e+00  8.04185806e+00  1.52e-02 3.43e-07  5.96e-05     0s
+  11   8.15754672e+00  8.09523459e+00  6.18e-03 1.39e-07  2.60e-05     0s
+  12   8.13576888e+00  8.13006439e+00  6.49e-05 1.41e-08  1.92e-06     0s
+  13   8.13444154e+00  8.13418545e+00  3.32e-06 8.95e-11  8.66e-08     0s
+  14   8.13435801e+00  8.13435622e+00  4.17e-09 5.32e-13  5.82e-10     0s
+
+Barrier solved model in 14 iterations and 0.07 seconds (0.03 work units)
+Optimal objective 8.13435801e+00
+
+
+User-callback calls 139, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x09179fb2
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.11345157e+02 -7.39320985e+01  4.32e+02 1.00e-01  1.92e+00     0s
+   1   4.59520086e+01 -9.95867341e+01  8.55e+01 1.48e-02  4.03e-01     0s
+   2   2.61572966e+01 -9.17102127e+01  3.01e+01 1.11e-02  1.64e-01     0s
+   3   2.00394705e+01 -7.27037351e+01  9.90e+00 6.19e-03  6.99e-02     0s
+   4   1.27866264e+01 -4.05986002e+01  4.90e+00 2.33e-03  3.32e-02     0s
+   5   1.02046172e+01 -1.78275131e+01  2.04e+00 7.78e-04  1.42e-02     0s
+   6   9.09912403e+00 -1.77637800e+00  9.62e-01 1.93e-04  5.17e-03     0s
+   7   8.33377218e+00  3.18599367e+00  4.39e-01 7.90e-05  2.29e-03     0s
+   8   7.98880423e+00  6.40841028e+00  1.86e-01 1.43e-05  7.19e-04     0s
+   9   7.83428415e+00  7.32245073e+00  1.69e-02 3.30e-06  1.85e-04     0s
+  10   7.75583598e+00  7.65096189e+00  6.88e-03 2.72e-07  4.08e-05     0s
+  11   7.72810107e+00  7.68881744e+00  2.27e-03 8.87e-08  1.50e-05     0s
+  12   7.71540710e+00  7.71086111e+00  1.84e-05 8.20e-09  1.50e-06     0s
+  13   7.71377191e+00  7.71357536e+00  4.87e-07 2.18e-10  6.44e-08     0s
+  14   7.71369315e+00  7.71369082e+00  1.80e-09 2.34e-12  7.59e-10     0s
+
+Barrier solved model in 14 iterations and 0.07 seconds (0.03 work units)
+Optimal objective 7.71369315e+00
+
+
+User-callback calls 138, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xebac46c3
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.00s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.04015252e+02 -7.39289022e+01  4.31e+02 1.00e-01  1.92e+00     0s
+   1   4.32844273e+01 -1.00317858e+02  8.55e+01 1.37e-02  4.01e-01     0s
+   2   2.44159380e+01 -9.31228856e+01  2.89e+01 1.06e-02  1.58e-01     0s
+   3   1.87267945e+01 -7.31018157e+01  1.24e+01 5.77e-03  7.80e-02     0s
+   4   1.57674147e+01 -5.31702676e+01  5.77e+00 3.29e-03  4.28e-02     0s
+   5   1.00533008e+01 -2.78318774e+01  2.07e+00 1.38e-03  1.84e-02     0s
+   6   8.46342292e+00 -3.20382891e+00  6.56e-01 2.41e-04  5.06e-03     0s
+   7   7.74777263e+00  4.43596645e+00  2.15e-01 4.20e-05  1.38e-03     0s
+   8   7.47480874e+00  6.26644600e+00  1.07e-01 1.17e-05  5.25e-04     0s
+   9   7.33465360e+00  6.67321085e+00  2.11e-02 6.57e-06  2.43e-04     0s
+  10   7.30347932e+00  7.09100887e+00  9.00e-03 1.94e-06  8.02e-05     0s
+  11   7.29479042e+00  7.21672533e+00  5.34e-03 6.08e-07  3.15e-05     0s
+  12   7.28606211e+00  7.26480877e+00  2.46e-03 1.32e-07  9.60e-06     0s
+  13   7.28309256e+00  7.27595730e+00  1.26e-03 2.82e-08  3.50e-06     0s
+  14   7.28021921e+00  7.27898297e+00  1.02e-04 5.84e-09  5.00e-07     0s
+  15   7.27986362e+00  7.27984012e+00  1.63e-07 3.93e-11  7.80e-09     0s
+  16   7.27986249e+00  7.27986121e+00  7.72e-10 2.18e-12  4.18e-10     0s
+
+Barrier solved model in 16 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 7.27986249e+00
+
+
+User-callback calls 144, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x8bd3138f
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   9.66859257e+01 -7.39257059e+01  4.31e+02 1.00e-01  1.91e+00     0s
+   1   4.07606414e+01 -1.01061657e+02  8.29e+01 1.26e-02  3.89e-01     0s
+   2   2.36997378e+01 -9.20065140e+01  3.08e+01 9.12e-03  1.64e-01     0s
+   3   1.69124072e+01 -7.46258591e+01  9.09e+00 5.27e-03  6.58e-02     0s
+   4   1.17706074e+01 -4.34493031e+01  5.10e+00 2.03e-03  3.41e-02     0s
+   5   9.56646954e+00 -1.77312352e+01  2.11e+00 6.67e-04  1.38e-02     0s
+   6   7.92105868e+00 -1.90432092e+00  8.00e-01 1.83e-04  4.51e-03     0s
+   7   7.53849716e+00  2.75759073e+00  5.25e-01 7.43e-05  2.24e-03     0s
+   8   7.07115154e+00  5.82194095e+00  2.08e-01 1.11e-05  6.23e-04     0s
+   9   6.91349189e+00  6.63186569e+00  3.29e-02 7.78e-07  1.22e-04     0s
+  10   6.85083702e+00  6.79306777e+00  8.94e-03 9.65e-08  2.67e-05     0s
+  11   6.84014764e+00  6.81986092e+00  3.02e-03 3.12e-08  9.26e-06     0s
+  12   6.83391065e+00  6.83110570e+00  9.53e-05 3.59e-09  9.96e-07     0s
+  13   6.83293256e+00  6.83281393e+00  6.16e-07 3.52e-11  3.90e-08     0s
+  14   6.83291767e+00  6.83291597e+00  1.27e-09 4.81e-13  5.53e-10     0s
+
+Barrier solved model in 14 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 6.83291767e+00
+
+
+User-callback calls 136, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x9f0d86b6
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   8.93573087e+01 -7.39225096e+01  4.31e+02 1.00e-01  1.91e+00     0s
+   1   3.86768445e+01 -1.01604023e+02  8.32e+01 1.23e-02  3.90e-01     0s
+   2   2.16909618e+01 -8.80459241e+01  3.30e+01 7.97e-03  1.69e-01     0s
+   3   1.39772754e+01 -7.09587110e+01  1.26e+01 4.29e-03  7.56e-02     0s
+   4   1.18795427e+01 -5.07223739e+01  4.80e+00 2.27e-03  3.69e-02     0s
+   5   8.74581759e+00 -2.44127524e+01  2.01e+00 8.02e-04  1.61e-02     0s
+   6   7.41853983e+00 -6.76176530e+00  7.04e-01 2.32e-04  5.98e-03     0s
+   7   6.92266350e+00  3.52449735e+00  3.38e-01 2.74e-05  1.53e-03     0s
+   8   6.55132675e+00  5.73609548e+00  1.35e-01 3.36e-06  4.06e-04     0s
+   9   6.48132123e+00  6.03095033e+00  7.25e-02 1.54e-06  2.19e-04     0s
+  10   6.42161580e+00  6.19786370e+00  1.50e-02 7.72e-07  8.74e-05     0s
+  11   6.39484607e+00  6.27457037e+00  4.89e-03 4.26e-07  4.39e-05     0s
+  12   6.39055838e+00  6.33777124e+00  2.93e-03 1.71e-07  2.00e-05     0s
+  13   6.38664927e+00  6.37960601e+00  2.13e-04 2.17e-08  2.51e-06     0s
+  14   6.38603318e+00  6.38566350e+00  1.88e-05 1.62e-10  1.39e-07     0s
+  15   6.38597290e+00  6.38597078e+00  2.11e-08 6.75e-13  7.10e-10     0s
+
+Barrier solved model in 15 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 6.38597290e+00
+
+
+User-callback calls 141, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x53adf3a6
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   8.20295724e+01 -7.39193133e+01  4.30e+02 1.00e-01  1.91e+00     0s
+   1   3.65170787e+01 -1.02115443e+02  8.35e+01 1.21e-02  3.90e-01     0s
+   2   1.94769825e+01 -8.71017575e+01  2.77e+01 7.43e-03  1.46e-01     0s
+   3   1.33370163e+01 -6.81713714e+01  1.19e+01 3.87e-03  7.07e-02     0s
+   4   1.17489150e+01 -4.79827471e+01  5.08e+00 1.99e-03  3.62e-02     0s
+   5   8.06076976e+00 -2.54687236e+01  2.08e+00 7.51e-04  1.64e-02     0s
+   6   7.20094550e+00 -1.11901040e+01  1.20e+00 3.16e-04  8.36e-03     0s
+   7   6.64030353e+00  3.60725048e-01  4.62e-01 7.05e-05  2.69e-03     0s
+   8   6.18504134e+00  4.26008846e+00  1.63e-01 1.56e-05  8.13e-04     0s
+   9   6.05385112e+00  5.09559489e+00  8.18e-02 7.14e-06  3.99e-04     0s
+  10   5.99967788e+00  5.51580617e+00  3.99e-02 3.47e-06  1.98e-04     0s
+  11   5.97205168e+00  5.74214624e+00  2.29e-02 1.51e-06  9.75e-05     0s
+  12   5.95481758e+00  5.81541838e+00  1.15e-02 9.14e-07  5.68e-05     0s
+  13   5.94698236e+00  5.92717921e+00  3.83e-03 7.90e-08  1.01e-05     0s
+  14   5.93928073e+00  5.93799604e+00  9.11e-05 2.18e-09  5.04e-07     0s
+  15   5.93903706e+00  5.93899341e+00  3.19e-06 3.20e-11  1.72e-08     0s
+  16   5.93902792e+00  5.93902702e+00  3.81e-09 7.25e-13  2.96e-10     0s
+
+Barrier solved model in 16 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 5.93902792e+00
+
+
+User-callback calls 146, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xe4472719
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-02, 2e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   7.47029489e+01 -7.39161170e+01  4.30e+02 1.00e-01  1.90e+00     0s
+   1   3.42790938e+01 -1.02641296e+02  8.38e+01 1.19e-02  3.91e-01     0s
+   2   1.78991201e+01 -8.52134698e+01  2.47e+01 6.56e-03  1.32e-01     0s
+   3   1.19706834e+01 -6.76652847e+01  1.03e+01 3.81e-03  6.43e-02     0s
+   4   8.58042573e+00 -3.94805813e+01  3.58e+00 1.29e-03  2.66e-02     0s
+   5   7.47594201e+00 -2.55881488e+01  1.52e+00 7.55e-04  1.49e-02     0s
+   6   6.63618669e+00 -1.24334648e+01  6.41e-01 3.77e-04  7.65e-03     0s
+   7   6.16198042e+00 -5.42838212e+00  3.86e-01 2.15e-04  4.52e-03     0s
+   8   5.85069215e+00  1.92254319e+00  1.38e-01 5.68e-05  1.48e-03     0s
+   9   5.65417060e+00  4.73343900e+00  7.00e-02 8.51e-06  3.78e-04     0s
+  10   5.58206143e+00  5.21916704e+00  4.15e-02 2.45e-06  1.61e-04     0s
+  11   5.52551584e+00  5.30571568e+00  1.62e-02 1.60e-06  8.86e-05     0s
+  12   5.50937651e+00  5.42650768e+00  1.10e-03 5.44e-07  2.84e-05     0s
+  13   5.49471050e+00  5.47913609e+00  2.42e-04 8.62e-08  5.36e-06     0s
+  14   5.49057509e+00  5.49006651e+00  8.02e-06 3.60e-10  1.74e-07     0s
+  15   5.49037243e+00  5.49037005e+00  9.22e-09 1.71e-12  7.83e-10     0s
+
+Barrier solved model in 15 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 5.49037243e+00
+
+
+User-callback calls 142, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x6e1b06b8
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   6.73777593e+01 -7.39129207e+01  4.29e+02 1.00e-01  1.90e+00     0s
+   1   3.19603076e+01 -1.03180521e+02  8.41e+01 1.17e-02  3.91e-01     0s
+   2   1.64976667e+01 -8.49216851e+01  2.26e+01 6.28e-03  1.23e-01     0s
+   3   1.12364540e+01 -6.73877014e+01  8.98e+00 3.54e-03  5.88e-02     0s
+   4   8.50824866e+00 -4.29433723e+01  3.44e+00 1.61e-03  2.76e-02     0s
+   5   7.08361251e+00 -1.88163415e+01  1.45e+00 5.19e-04  1.18e-02     0s
+   6   5.76486266e+00 -2.83541098e+00  4.84e-01 1.24e-04  3.58e-03     0s
+   7   5.67489585e+00  7.56134913e-01  3.43e-01 6.44e-05  2.07e-03     0s
+   8   5.20642210e+00  3.83065423e+00  1.33e-01 1.37e-05  5.99e-04     0s
+   9   5.11598352e+00  4.74599451e+00  5.93e-02 2.23e-06  1.80e-04     0s
+  10   5.06223520e+00  4.88371238e+00  8.47e-03 1.15e-06  6.71e-05     0s
+  11   5.04672817e+00  4.98191139e+00  3.15e-04 4.31e-07  2.17e-05     0s
+  12   5.04213121e+00  5.01655306e+00  5.50e-05 1.71e-07  8.50e-06     0s
+  13   5.04087150e+00  5.03889490e+00  1.53e-06 1.07e-08  6.52e-07     0s
+  14   5.04079646e+00  5.04072958e+00  4.77e-07 8.09e-12  2.29e-08     0s
+  15   5.04078637e+00  5.04077556e+00  6.63e-09 2.40e-13  3.51e-09     0s
+  16   5.04077887e+00  5.04077777e+00  4.65e-09 6.23e-14  3.59e-10     0s
+
+Barrier solved model in 16 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 5.04077887e+00
+
+
+User-callback calls 146, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x50eebcb4
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   6.00544615e+01 -7.39097244e+01  4.28e+02 1.00e-01  1.89e+00     0s
+   1   2.95576933e+01 -1.03712745e+02  8.44e+01 1.16e-02  3.92e-01     0s
+   2   1.55036555e+01 -8.66528520e+01  2.38e+01 5.69e-03  1.27e-01     0s
+   3   1.19621393e+01 -6.84772074e+01  8.95e+00 3.25e-03  5.91e-02     0s
+   4   8.21868714e+00 -3.74816076e+01  4.07e+00 9.44e-04  2.65e-02     0s
+   5   6.40663792e+00 -1.62829500e+01  1.39e+00 2.92e-04  1.04e-02     0s
+   6   5.23108163e+00 -3.70153842e+00  5.54e-01 8.23e-05  3.78e-03     0s
+   7   4.90840177e+00  1.43316725e+00  3.03e-01 2.71e-05  1.50e-03     0s
+   8   4.71443548e+00  3.90493519e+00  1.47e-01 3.37e-06  4.12e-04     0s
+   9   4.62831595e+00  4.31590162e+00  6.14e-02 1.11e-06  1.61e-04     0s
+  10   4.59676367e+00  4.49810471e+00  8.16e-03 3.26e-07  3.98e-05     0s
+  11   4.59130192e+00  4.54262491e+00  3.25e-03 1.59e-07  1.89e-05     0s
+  12   4.58835641e+00  4.58215483e+00  7.98e-04 1.22e-08  2.78e-06     0s
+  13   4.58705972e+00  4.58665940e+00  2.56e-06 3.93e-10  1.33e-07     0s
+  14   4.58702175e+00  4.58701956e+00  2.93e-09 1.71e-12  7.14e-10     0s
+
+Barrier solved model in 14 iterations and 0.09 seconds (0.03 work units)
+Optimal objective 4.58702175e+00
+
+
+User-callback calls 142, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xef4a02d0
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   5.27337316e+01 -7.39065280e+01  4.27e+02 1.00e-01  1.88e+00     0s
+   1   2.70676547e+01 -1.04224937e+02  8.46e+01 1.17e-02  3.92e-01     0s
+   2   1.41009638e+01 -8.54511457e+01  2.18e+01 5.17e-03  1.18e-01     0s
+   3   1.07078728e+01 -6.83323918e+01  7.72e+00 3.09e-03  5.41e-02     0s
+   4   7.69274852e+00 -3.67645021e+01  4.29e+00 9.61e-04  2.64e-02     0s
+   5   5.64367343e+00 -1.83963916e+01  1.52e+00 3.24e-04  1.11e-02     0s
+   6   4.85890070e+00 -7.56922583e+00  5.56e-01 1.56e-04  5.01e-03     0s
+   7   4.53334045e+00 -3.49452517e+00  3.32e-01 9.81e-05  3.14e-03     0s
+   8   4.35062458e+00  1.17549445e+00  1.24e-01 3.50e-05  1.20e-03     0s
+   9   4.19193378e+00  3.47556068e+00  4.66e-02 5.85e-06  2.88e-04     0s
+  10   4.18740660e+00  3.90351520e+00  2.44e-02 1.76e-06  1.19e-04     0s
+  11   4.15650853e+00  4.05055790e+00  1.53e-02 4.24e-07  5.06e-05     0s
+  12   4.12565442e+00  4.10625852e+00  1.86e-03 6.94e-08  8.28e-06     0s
+  13   4.12120417e+00  4.11498785e+00  2.16e-05 2.24e-08  2.06e-06     0s
+  14   4.12085840e+00  4.11966129e+00  6.13e-07 4.02e-09  3.92e-07     0s
+  15   4.12075014e+00  4.12070863e+00  2.12e-08 1.01e-10  1.36e-08     0s
+  16   4.12074568e+00  4.12074348e+00  1.11e-09 5.58e-12  7.19e-10     0s
+
+Barrier solved model in 16 iterations and 0.09 seconds (0.03 work units)
+Optimal objective 4.12074568e+00
+
+
+User-callback calls 144, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x7ef2001f
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   4.54166116e+01 -7.39033317e+01  4.26e+02 1.00e-01  1.88e+00     0s
+   1   2.44858484e+01 -1.04746547e+02  8.48e+01 1.17e-02  3.92e-01     0s
+   2   1.26434379e+01 -8.37960253e+01  1.99e+01 4.49e-03  1.09e-01     0s
+   3   9.30607398e+00 -6.83070761e+01  6.53e+00 2.86e-03  4.92e-02     0s
+   4   7.20773575e+00 -3.66512628e+01  4.19e+00 9.56e-04  2.57e-02     0s
+   5   5.52866446e+00 -1.67264302e+01  1.49e+00 3.08e-04  1.03e-02     0s
+   6   4.62597969e+00 -9.08160186e+00  5.53e-01 1.74e-04  5.47e-03     0s
+   7   4.12499117e+00 -3.55741717e+00  2.78e-01 9.30e-05  2.95e-03     0s
+   8   3.79895646e+00  1.26297450e+00  1.14e-01 2.69e-05  9.82e-04     0s
+   9   3.66765299e+00  2.93520548e+00  2.44e-02 6.85e-06  2.71e-04     0s
+  10   3.68236826e+00  3.46236498e+00  7.76e-03 1.61e-06  8.08e-05     0s
+  11   3.64925005e+00  3.61278736e+00  2.41e-03 1.66e-07  1.45e-05     0s
+  12   3.64364464e+00  3.64136164e+00  1.39e-04 6.12e-09  8.95e-07     0s
+  13   3.64340973e+00  3.64340229e+00  1.68e-07 1.47e-11  2.60e-09     0s
+  14   3.64340916e+00  3.64340802e+00  5.12e-09 2.25e-12  3.73e-10     0s
+
+Barrier solved model in 14 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 3.64340916e+00
+
+
+User-callback calls 137, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xb7385a7f
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-02, 3e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   3.81047950e+01 -7.39001354e+01  4.24e+02 1.00e-01  1.87e+00     0s
+   1   2.18069319e+01 -1.05260706e+02  8.49e+01 1.17e-02  3.92e-01     0s
+   2   1.10995980e+01 -8.24646555e+01  1.79e+01 3.99e-03  9.93e-02     0s
+   3   7.81134138e+00 -6.47997235e+01  4.30e+00 2.32e-03  3.92e-02     0s
+   4   5.82355230e+00 -2.88049634e+01  2.25e+00 7.16e-04  1.69e-02     0s
+   5   4.52495858e+00 -1.24628807e+01  1.22e+00 2.44e-04  7.74e-03     0s
+   6   3.94851939e+00 -5.46065334e+00  4.82e-01 1.18e-04  3.79e-03     0s
+   7   3.53410312e+00 -2.83730775e+00  2.78e-01 7.83e-05  2.46e-03     0s
+   8   3.36600967e+00  8.41199887e-01  1.28e-01 2.75e-05  9.71e-04     0s
+   9   3.20336829e+00  2.70713600e+00  3.46e-02 3.74e-06  1.96e-04     0s
+  10   3.18474653e+00  3.08843813e+00  7.11e-03 4.30e-07  3.79e-05     0s
+  11   3.16366813e+00  3.14584928e+00  2.35e-03 3.65e-08  7.91e-06     0s
+  12   3.15668316e+00  3.15634776e+00  4.78e-05 2.62e-10  1.52e-07     0s
+  13   3.15655066e+00  3.15654737e+00  5.30e-08 3.71e-12  1.12e-09     0s
+
+Barrier solved model in 13 iterations and 0.07 seconds (0.03 work units)
+Optimal objective 3.15655066e+00
+
+
+User-callback calls 134, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0xa4704705
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   3.08012318e+01 -7.38969391e+01  4.22e+02 1.00e-01  1.85e+00     0s
+   1   1.90239074e+01 -1.05774432e+02  8.49e+01 1.18e-02  3.92e-01     0s
+   2   9.46407799e+00 -8.32951936e+01  1.57e+01 4.27e-03  9.08e-02     0s
+   3   7.09322033e+00 -6.32622268e+01  3.73e+00 2.37e-03  3.63e-02     0s
+   4   5.09806288e+00 -2.36391508e+01  1.30e+00 6.47e-04  1.24e-02     0s
+   5   3.64037513e+00 -7.91105541e+00  4.88e-01 1.94e-04  4.62e-03     0s
+   6   3.07066589e+00 -1.29303954e+00  1.84e-01 6.03e-05  1.69e-03     0s
+   7   2.85371744e+00 -7.48350854e-01  7.06e-02 5.15e-05  1.30e-03     0s
+   8   2.74523079e+00  1.24512690e+00  4.15e-02 1.99e-05  5.50e-04     0s
+   9   2.70414587e+00  2.39448928e+00  1.67e-02 3.27e-06  1.21e-04     0s
+  10   2.67375049e+00  2.61447223e+00  4.46e-04 6.16e-07  2.02e-05     0s
+  11   2.67027378e+00  2.66378575e+00  1.07e-05 4.32e-08  2.15e-06     0s
+  12   2.66971627e+00  2.66953554e+00  9.54e-07 4.64e-11  6.03e-08     0s
+  13   2.66969164e+00  2.66968910e+00  1.05e-09 6.06e-13  8.24e-10     0s
+
+Barrier solved model in 13 iterations and 0.08 seconds (0.03 work units)
+Optimal objective 2.66969164e+00
+
+
+User-callback calls 138, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x2d71695a
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-03, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.37572730e+01 -3.69484696e+01  4.24e+02 1.00e-01  1.87e+00     0s
+   1   1.35953772e+01 -5.19227135e+01  8.29e+01 1.16e-02  3.85e-01     0s
+   2   6.80569888e+00 -4.22114056e+01  2.16e+01 4.95e-03  1.16e-01     0s
+   3   5.29648464e+00 -3.42083876e+01  8.50e+00 3.07e-03  5.68e-02     0s
+   4   3.78494853e+00 -1.89484875e+01  4.69e+00 9.58e-04  2.80e-02     0s
+   5   2.87422127e+00 -9.56039940e+00  1.73e+00 3.17e-04  1.19e-02     0s
+   6   2.57448677e+00 -2.88190516e+00  6.34e-01 9.49e-05  4.56e-03     0s
+   7   2.39353686e+00  1.15802989e-01  3.77e-01 3.34e-05  1.94e-03     0s
+   8   2.25956096e+00  1.68266816e+00  1.51e-01 4.68e-06  5.22e-04     0s
+   9   2.20199450e+00  2.02457871e+00  4.35e-02 1.15e-06  1.54e-04     0s
+  10   2.19198547e+00  2.15298983e+00  2.23e-02 1.37e-07  4.45e-05     0s
+  11   2.18302382e+00  2.18104972e+00  2.77e-03 2.78e-09  3.65e-06     0s
+  12   2.18180391e+00  2.18179605e+00  3.06e-06 5.09e-12  7.71e-09     0s
+  13   2.18180095e+00  2.18180039e+00  3.99e-09 5.34e-13  3.71e-10     0s
+
+Barrier solved model in 13 iterations and 0.07 seconds (0.03 work units)
+Optimal objective 2.18180095e+00
+
+
+User-callback calls 140, time in user-callback 0.00 sec
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3408 rows, 1965 columns and 8328 nonzeros
+Model fingerprint: 0x48fe086f
+Model has 99 quadratic constraints
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+Presolve removed 1644 rows and 870 columns
+Presolve time: 0.01s
+Presolved: 1941 rows, 1245 columns, 5936 nonzeros
+Presolved model has 72 second-order cone constraints
+Ordering time: 0.01s
+
+Barrier statistics:
+ AA' NZ     : 1.993e+04
+ Factor NZ  : 6.233e+04 (roughly 2 MB of memory)
+ Factor Ops : 2.546e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.62480461e+01 -7.38905465e+01  4.13e+02 1.00e-01  1.81e+00     0s
+   1   1.30984599e+01 -1.06720227e+02  8.42e+01 1.20e-02  3.87e-01     0s
+   2   6.05070155e+00 -8.13257627e+01  1.11e+01 3.90e-03  7.07e-02     0s
+   3   4.25105514e+00 -4.35630790e+01  1.89e+00 1.15e-03  2.13e-02     0s
+   4   3.05683686e+00 -1.43284962e+01  6.29e-01 2.84e-04  6.93e-03     0s
+   5   2.24355484e+00 -5.62604874e+00  2.51e-01 1.15e-04  2.99e-03     0s
+   6   1.94081369e+00 -5.11483329e-01  9.12e-02 3.11e-05  9.31e-04     0s
+   7   1.80189841e+00  9.63948813e-01  5.96e-02 7.83e-06  3.48e-04     0s
+   8   1.72785799e+00  1.34945295e+00  3.33e-02 3.13e-06  1.64e-04     0s
+   9   1.68768086e+00  1.59927557e+00  1.53e-02 3.80e-07  4.67e-05     0s
+  10   1.67762820e+00  1.65865384e+00  3.87e-04 2.84e-08  6.62e-06     0s
+  11   1.66796783e+00  1.66729544e+00  6.19e-06 2.29e-10  2.25e-07     0s
+  12   1.66790148e+00  1.66788662e+00  4.19e-08 5.44e-12  4.87e-09     0s
+  13   1.66790086e+00  1.66789993e+00  2.04e-08 2.40e-13  3.11e-10     0s
+
+Barrier solved model in 13 iterations and 0.07 seconds (0.03 work units)
+Optimal objective 1.66790086e+00
+
+
+User-callback calls 135, time in user-callback 0.00 sec
+[ PowerModelsDistribution | Info ] : Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+[ PowerModelsDistribution | Info ] : Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+[ Main | Info ] : LOAD_SCALE_FACTORS (agg_scales per period): [0.839, 1.072, 0.899]
+Load profile assignments for more_meshed_6_bus:
+  (name = "l5", bus = 1, n_phases = 1, balanced = true, phases = [(1, -1)])
+  (name = "l6", bus = 1, n_phases = 1, balanced = true, phases = [(1, 1)])
+  (name = "l7", bus = 1, n_phases = 1, balanced = true, phases = [(1, 0)])
+  (name = "l1", bus = 4, n_phases = 1, balanced = true, phases = [(1, -1)])
+  (name = "l2", bus = 4, n_phases = 1, balanced = true, phases = [(3, -1)])
+  (name = "l3", bus = 4, n_phases = 1, balanced = true, phases = [(2, 0)])
+  (name = "l4", bus = 5, n_phases = 1, balanced = true, phases = [(2, 0)])
+  (name = "l9", bus = 6, n_phases = 3, balanced = true, phases = [(1, 1), (1, -1), (1, 0)])
+  (name = "l8", bus = 7, n_phases = 3, balanced = true, phases = [(2, -1), (2, 0), (2, 1)])
+alpha=0.0  status=OPTIMAL
+alpha=0.05263157894736842  status=OPTIMAL
+alpha=0.10526315789473684  status=OPTIMAL
+alpha=0.15789473684210525  status=OPTIMAL
+alpha=0.21052631578947367  status=OPTIMAL
+alpha=0.2631578947368421  status=OPTIMAL
+alpha=0.3157894736842105  status=OPTIMAL
+alpha=0.3684210526315789  status=OPTIMAL
+alpha=0.42105263157894735  status=OPTIMAL
+alpha=0.47368421052631576  status=OPTIMAL
+alpha=0.5263157894736842  status=OPTIMAL
+alpha=0.5789473684210527  status=OPTIMAL
+alpha=0.631578947368421  status=OPTIMAL
+alpha=0.6842105263157895  status=OPTIMAL
+alpha=0.7368421052631579  status=OPTIMAL
+alpha=0.7894736842105263  status=OPTIMAL
+alpha=0.8421052631578947  status=OPTIMAL
+alpha=0.8947368421052632  status=OPTIMAL
+alpha=0.9473684210526315  status=OPTIMAL
+alpha=1.0  status=OPTIMAL
+Saved trade-off sweep data → C:\Users\awest\github\FairLoadDelivery\script\single_level\../../results/2026-05-30/trade_off_mn\min_max_relaxed_trade_off_mn_more_meshed_6_bus_absolute.jld2
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
