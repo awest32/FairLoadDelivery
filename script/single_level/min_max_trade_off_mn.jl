@@ -26,10 +26,11 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
+# case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
 #case_name = "../../data/ieee_13_aw_edit/pmonm_13_bus_mod.dss"
-case = "more_meshed_bd_6_bus"   # BD variant adds QuadBD switch; was "more_meshed_6_bus" for baseline
+case = "more_meshed_6_bus"   # baseline (no BD switch)
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
@@ -52,7 +53,8 @@ end
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent (was collect(0:23) for T=24)
+# SELECTED_HOURS  = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+SELECTED_HOURS    = [4, 18, 22]            # T=3: trough, evening peak, descent
 
 #SELECTED_HOURS    = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)
@@ -80,7 +82,7 @@ PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2
 
 # Representative subset (1-indexed period indices into SELECTED_HOURS) for the
 # busy 3-period plots. For T=3 with [4, 8, 18] there are only 3 periods, so plot all.
-REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
+REP_PERIODS = collect(1:N_PERIODS)   # all periods (T=3)
 
 pshed_type = "absolute"  # "absolute" or "proportional"
 # Solver selection.
