@@ -42,15 +42,10 @@ SHOW_BILEVEL = true
 # latest run on disk is wrong (e.g. T mismatch with the single-level sweeps,
 # bad convergence) and you want to pin a specific historical result instead.
 # Set to nothing / drop the key to fall back to `_bilevel_jld2`'s mtime pick.
-# Current pin: 5/30 palma was run at T=5 and lands left of the efficient
-# T=24 marker — use the 5/27 T=24 result until the T=24 palma rerun lands.
-const BILEVEL_OVERRIDES = Dict(
-    "palma" => joinpath(@__DIR__, "..", "results", "2026-05-27",
-        "bilevel_validation_mn",
-        "case6_unbalanced_switch_more_meshed_good4integer",
-        "palma_absolute",
-        "bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_palma_absolute.jld2"),
-)
+# 2026-06-01: cleared — both palma and min-max bilevel now come from the T=24
+# reverse-mode SLP runs (run_validation_mn_slp.jl), which are the latest on disk
+# and align with the 5/28 T=24 single-level trade-off sweeps.
+const BILEVEL_OVERRIDES = Dict{String,String}()
 
 @assert haskey(CASE_TAGS, CASE_KEY) "Unknown CASE_KEY=$CASE_KEY"
 tags = CASE_TAGS[CASE_KEY]
