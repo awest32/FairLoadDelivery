@@ -302,9 +302,15 @@ function slp_cc_palma(mn_data::Dict{String,Any};
         obj_prev = obj
         while γ ≥ min_step
             w_try = w .+ γ .* d
-            tm, twp, tpv, tps, _ = solve_at(w_try)
-            to = merit(tps)
-            if isfinite(to) && to < obj - 1e-10
+            tm, twp, tpv, tps, tst = solve_at(w_try)
+            # Reject trials whose lower-level solve did NOT converge: a
+            # LOCALLY_INFEASIBLE/iteration-limited Ipopt solve still returns finite
+            # pshed (its last iterate), so a merit-only test would accept it — and
+            # the NEXT iteration's reverse_differentiate! then throws on the
+            # non-optimal model. Only converged, descending steps are accepted.
+            feas = tst in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
+            to = feas ? merit(tps) : Inf
+            if feas && isfinite(to) && to < obj - 1e-10
                 w = w_try; cur_model = tm; cur_wp = twp; cur_pv = tpv
                 pshed = tps; obj = to; accepted = true
                 break

@@ -193,9 +193,13 @@ function slp_minmax(mn_data::Dict{String,Any};
         obj_prev = obj
         while γ ≥ min_step
             w_try = w .+ γ .* d
-            tm, twp, tpv, tps, _ = solve_at(w_try)
-            to = merit(tps)
-            if isfinite(to) && to < obj - 1e-10
+            tm, twp, tpv, tps, tst = solve_at(w_try)
+            # Reject non-converged trials (see slp_cc_palma.jl): an infeasible/
+            # iteration-limited Ipopt solve returns finite pshed but is unsafe to
+            # adjoint-differentiate next iteration. Only converged steps accepted.
+            feas = tst in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
+            to = feas ? merit(tps) : Inf
+            if feas && isfinite(to) && to < obj - 1e-10
                 w = w_try; cur_model = tm; cur_wp = twp; cur_pv = tpv
                 pshed = tps; obj = to; accepted = true
                 break
