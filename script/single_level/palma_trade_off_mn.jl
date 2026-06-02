@@ -99,7 +99,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 # BINARY regardless (relaxing it collapses the McCormick `u` to zero and
 # breaks the sort — see legacy/palma_reformulation/README.md). When false the
 # MLD switch/block vars are binary (`build_mn_mc_mld_min_max_integer`).
-relaxed = true
+relaxed = get(ENV, "RELAXED", "true") == "true"   # env-overridable so one orchestration can run integer + relaxed
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 # Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
@@ -449,6 +449,7 @@ n_bot_palma = palma.bottom_40_idx[end]   # = floor(0.4n) (bot40 count)
 bot_sum_warm   = 0.0
 pshed_warm_tot = 0.0
 for (ti, nw) in enumerate(nw_ids_int_sorted)
+    global pshed_warm_tot, bot_sum_warm   # accumulators live in the script's global scope
     pserved_warm_t = [sum(_PMD.ref(mld_eff, nw, :load, lid)["pd"]) -
                       sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
                       for lid in palma.load_ids]

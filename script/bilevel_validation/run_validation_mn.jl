@@ -47,8 +47,8 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # ============================================================
 # CONFIGURATION
 # ============================================================
-CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
- #CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
+ #CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # no-bd — matches single-level + finals
  #CASE = "motivation_c_good4integer"
 case = "6_bus" #"13_bus"#"6_bus"
 #critical_load = ["611"]
@@ -71,7 +71,8 @@ N_BERNOULLI_SAMPLES = 2000
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
  # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
- SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+ #SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+ SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle — matches single-level + finals
  #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
@@ -82,7 +83,7 @@ PERIOD_HOURS      = SELECTED_HOURS
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
+REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
