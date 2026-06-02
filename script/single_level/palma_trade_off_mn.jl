@@ -3,37 +3,44 @@ Multi-period, single-level served-Palma vs efficiency trade-off
 ================================================================
 
 Multi-period analogue of `palma_trade_off.jl`. Builds a multinetwork MLD
-problem (per-period constraints from `build_mn_mc_mld_min_max_integer`,
-which we instantiate purely for the constraint set), then attaches a
-**single aggregate served-Palma** machinery — Palma is computed across
-all periods on per-load aggregate served:
+problem (per-period constraints from `build_mn_mc_mld_min_max[_integer]`,
+which we instantiate purely for the constraint set), then attaches
+**cost-weighted, per-period-sorted served-Palma** machinery, aggregated into
+ONE ratio, whose fairness objective is matched to the bilevel upper level
+(`palma_ratio_minimization` in `load_shed_as_parameter.jl`):
 
-    served_i = Σ_t ( pd_{t,i} − Σ_phase pshed_{t,i,phase} )    ∈ [0, P_i]
-    P_i      = Σ_t pd_{t,i}
+    per period t:  sort pserved_t  →  top10%(pserved_t),  bot40%(pserved_t)
+    top_sum    = Σ_t λ_t · top10%(pserved_t)        ← cost-weighted Palma NUMERATOR
+    bot_sum    = Σ_t λ_t · bot40%(pserved_t)
+    fairness   = Palma = top_sum / bot_sum
+    objective  = α · (σ · top_sum)  +  (1 − α) · eff_total
 
-This is the **single-level control** for the bilevel Palma comparison.
-Uses the same "weak" Charnes-Cooper form as `load_shed_as_parameter.jl`
-and the single-period `palma_trade_off.jl`:
+The Palma numerator is the **top-10% of served IN EACH period** (a true decile,
+not the sum of all served), cost-weighted by λ_t. Period costs enter only as
+multipliers on the per-period top/bot SUMS, so the fairness term is still a pure
+ratio σ·top_sum — identical to the bilevel's. `eff_total` is the UNCOSTED
+total-shed fraction (no λ), so α=1 recovers exactly the bilevel fairness
+objective and (1−α) trades it against plain efficiency. Single-level and bilevel
+thus share ONE fairness objective.
+
+Charnes-Cooper "weak" form, ONE σ over the cost-weighted AGGREGATE top/bot:
 
     σ free, lower-bounded
     σ · bot_sum = 1                              ← bilinear constraint
-    objective:  α · (σ · top_sum) + (1 − α) · Σ_t λ_t · eff_term_t
+    σ · top_sum in the objective                 ← bilinear
 
-with σ·top_sum and σ·bot_sum=1 enforced by Gurobi `NonConvex=2` spatial
-branching.
+both via Gurobi `NonConvex=2`. Per-period SORTING (deciles within each period)
+but a SINGLE σ over the aggregated cost-weighted top/bot is what makes this both
+tractable (one bilinear σ, not T) AND feasible for integer shedding: σ·bot_sum=1
+only needs `Σ_t λ_t·bot40_t > 0` (SOME period has a nonzero bottom-40%), whereas
+the per-σ_t form was infeasible because whole-block integer shedding zeroes a
+period's bottom-40% (see `script/diagnostics/probe_per_period_palma_feasibility.jl`).
 
-Why "control": the bilevel Palma upper level (`load_shed_as_parameter.jl`)
-uses this same Palma machinery on top of a Jacobian-derived linear
-expression for pshed — pshed is a *parameter* there, not a decision
-variable, so σ × pshed bilinearity sits over a small, tractable
-expression. In the single-level version pshed is live (subject to the
-full multi-period MLD), so σ × top_sum couples through every period's
-constraints. The result is a hard MIP: expect `TIME_LIMIT` returns at
-non-zero gap on most α points. The script accepts feasible incumbents
-and writes whatever Pareto curve Gurobi can produce in `TimeLimit`.
+The Palma *permutations* `a[t]` stay BINARY even when the MLD is LP-relaxed
+(`relaxed=true`): relaxing them collapses the McCormick `u` and breaks the sort.
 
-If you want the script to converge tightly, that's exactly the
-motivation for going bilevel.
+An UNCOSTED aggregate served-Palma (λ_t=1, served TOTALS) is also computed as a
+SECONDARY diagnostic; saved/plotted alongside but NOT the optimized metric.
 
 This script is a sandbox: Palma machinery is defined locally and not
 pushed into `src/`. The existing `objective_mn_palma_mld` in
@@ -74,16 +81,25 @@ include(joinpath(@__DIR__, "../figure_defaults.jl"))
 # ============================================================
 # CONFIGURATION
 # ============================================================
-case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"
+case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_good4integer.dss"  # no-bd; matches pinned T=24 finals + run_validation_mn_slp.jl
+#case_name = "../../data/pmd_opendss/case6_unbalanced_switch_more_meshed_bd_good4integer.dss"  # BD variant (T=5 HEAD)
 #case_name = "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss"
-case = "more_meshed_bd_6_bus"   # BD variant; was "more_meshed_6_bus" for baseline
+case = "more_meshed_6_bus"   # baseline label; matches the pinned finals JLD2 key. BD variant was "more_meshed_bd_6_bus".
 
 dir = @__DIR__
 case_path = joinpath(dir, case_name)
 date = Dates.format(now(), "yyyy-mm-dd")
 LS_PERCENT = 0.8
 pshed_type = "absolute"  # only absolute supported in this script
-relaxed = false
+# When true, the lower-level MLD is genuinely LP-relaxed (continuous
+# switch_state / z_block / z_demand via `build_mn_mc_mld_min_max`, i.e.
+# `_build_mn_period_fair!(…; relax=true)`), so pshed is continuous and the
+# per-period served distribution is non-degenerate — the right "relaxed"
+# analogue for the served-Palma sort. The Palma *permutation* `a[t]` stays
+# BINARY regardless (relaxing it collapses the McCormick `u` to zero and
+# breaks the sort — see legacy/palma_reformulation/README.md). When false the
+# MLD switch/block vars are binary (`build_mn_mc_mld_min_max_integer`).
+relaxed = true
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 # Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
@@ -91,8 +107,9 @@ relaxed = false
 # carried in plots or CSVs.
 # Downsampled hours-of-day (0-indexed); mirrors min_max_trade_off_mn.jl so
 # results stay comparable across fair-funcs.
-#SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
-SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+#SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01].
+#SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5 (BD HEAD): trough, midday, pre-peak, evening peak, descent
+SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle — matches the pinned finals + run_validation_mn_slp.jl
 
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
@@ -108,7 +125,8 @@ CENTER_AT_NOMINAL = true
 # const LOAD_SCALE_FACTORS = [round(s, digits=3) for s in LinRange(0.7, 1.0, N_PERIODS)]
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
-REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
+#REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
+REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18 (trough, midday, evening peak); matches run_validation_mn_slp.jl
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
@@ -206,145 +224,182 @@ function palma_ratio_value(vals::AbstractVector; eps_denom::Float64 = 1e-6)
 end
 
 """
-Attach AGGREGATE served-Palma machinery to a multinetwork JuMP model.
-Palma is computed once over loads, where each load's served value is the
-sum across all periods:
+Attach COST-WEIGHTED PER-PERIOD-SORTED served-Palma machinery to a multinetwork
+JuMP model, aggregated into ONE Palma ratio. This is the single-level control
+whose **fairness objective matches the bilevel upper level**:
 
-    served_i = Σ_t ( pd_{t,i} − Σ_phase pshed_{t,i,phase} )    ∈ [0, P_i]
-    P_i      = Σ_t pd_{t,i}
+    per period t:  sort pserved_t   →   top10%(pserved_t),  bot40%(pserved_t)
+    top_sum = Σ_t λ_t · top10%(pserved_t)        ← cost-weighted Palma NUMERATOR
+    bot_sum = Σ_t λ_t · bot40%(pserved_t)         ← cost-weighted Palma DENOMINATOR
+    fairness = Palma = top_sum / bot_sum,   one σ,   σ·bot_sum = 1
 
-Charnes-Cooper "weak" form, matching `palma_trade_off.jl` and
-`load_shed_as_parameter.jl`: σ enters as a free auxiliary variable and
-the bilinearities `σ·bot_sum=1` (constraint) and `σ·top_sum` (objective)
-are handled by Gurobi `NonConvex=2` spatial branching. This is the
-intentionally "less-tractable" single-level control — it exists to be
-compared against the bilevel formulation, where the Jacobian severs the
-σ × pshed coupling and the upper-level Palma becomes tractable.
+The Palma numerator is the **top-10% of served IN EACH period** (a true Palma
+decile), cost-weighted by λ_t and summed — NOT the sum of all served. Period
+costs λ_t enter only as multipliers on the per-period top/bot SUMS (so the
+objective is still a pure ratio σ·top_sum). `u[t]` is the McCormick BILINEAR
+term `u[t][i,j] = a[t][i,j]·pserved_{t,j}` that linearizes the per-period sort.
 
-The single-level multi-period MIP is HARD: all MLD constraints are
-live, σ multiplies a sort-derived expression that depends on every
-period's pshed, and Gurobi spatial branching has to subdivide the σ
-domain inside the full B&B tree. Expect TIME_LIMIT returns at non-zero
-gap — the script accepts feasible incumbents.
+ONE σ for the whole horizon (Charnes-Cooper weak form): σ·bot_sum=1 (constraint)
+and σ·top_sum (objective) are bilinear → Gurobi `NonConvex=2`. The single σ over
+the cost-weighted AGGREGATE top/bot is what makes this both tractable and
+feasible for integer shedding: σ·bot_sum=1 only needs `Σ_t λ_t·bot40_t > 0`
+(SOME period has a nonzero bottom-40%), not every period — the per-σ_t form was
+infeasible because whole-block integer shedding zeroes a period's bottom-40%
+(see `script/diagnostics/probe_per_period_palma_feasibility.jl`).
+
+The Palma permutations `a[t]` stay BINARY even when the MLD itself is LP-relaxed
+(`relax_binary` governs only the permutations): relaxing them collapses the
+McCormick `u` and breaks the sort (legacy/palma_reformulation/README.md).
+
+`λ` must align with `nw_ids_int` (λ[ti] is the cost of period nw_ids_int[ti]).
 """
-function add_palma_machinery_aggregate!(pm; nw_ids_int::Vector{Int},
-                                         relax_binary::Bool = false)
+function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
+                                           λ::Vector{Float64},
+                                           relax_binary::Bool = false)
     model = pm.model
 
     nw0      = nw_ids_int[1]
     load_ids = sort(collect(_PMD.ids(pm, nw0, :load)))
     n        = length(load_ids)
+    T        = length(nw_ids_int)
+    @assert length(λ) == T "λ length must match number of periods"
 
-    P_total = [sum(sum(_PMD.ref(pm, nw, :load, i)["pd"]) for nw in nw_ids_int) for i in load_ids]
-    total_demand_all = sum(P_total)
+    # Per-period nameplate demand P_{t,i} (= McCormick upper bound on served).
+    P_period = Dict{Int,Vector{Float64}}()
+    for nw in nw_ids_int
+        P_period[nw] = [sum(_PMD.ref(pm, nw, :load, i)["pd"]) for i in load_ids]
+    end
+    total_demand_all = sum(sum(P_period[nw]) for nw in nw_ids_int)
     @assert total_demand_all > 0 "Aggregate demand is zero; Palma is undefined."
 
-    # Aggregate per-load shed / served (sum over periods + phases).
-    # pserved_agg reads from the PMD-native :pd dispatch variable directly
-    # (equivalent to P_total[k] − pshed_agg[k] via constraint_load_shed_definition,
-    # but reads as "served" without the subtraction). pshed_agg is kept for
-    # post-hoc reporting in the sweep loop below.
+    top_10_idx, bottom_40_idx = compute_palma_indices(n)
+
+    # Uncosted aggregate shed/served per load — for x-axis total shed + diagnostics.
     pshed_agg = JuMP.@expression(model, [k = 1:n],
         sum(sum(_PMD.var(pm, nw, :pshed, load_ids[k])) for nw in nw_ids_int))
     pserved_agg = JuMP.@expression(model, [k = 1:n],
         sum(sum(_PMD.var(pm, nw, :pd, load_ids[k])) for nw in nw_ids_int))
 
-    # Permutation matrix
-    a = if relax_binary
-        JuMP.@variable(model, [1:n, 1:n], lower_bound = 0, upper_bound = 1, base_name = "palma_a")
-    else
-        JuMP.@variable(model, [1:n, 1:n], Bin, base_name = "palma_a")
-    end
-    u = JuMP.@variable(model, [1:n, 1:n], lower_bound = 0, base_name = "palma_u")
+    # Per-period sort machinery; accumulate cost-weighted top/bot contributions.
+    a        = Vector{Any}(undef, T)
+    u        = Vector{Any}(undef, T)
+    pserved_period = Dict{Int,Any}()
+    top10_terms = Any[]   # λ_t · top10%(pserved_t)
+    bot40_terms = Any[]   # λ_t · bot40%(pserved_t)
 
-    # McCormick: u[i,j] = a[i,j] * pserved_agg[j], with 0 ≤ pserved_agg[j] ≤ P_total[j]
-    for i in 1:n, j in 1:n
-        Pj = P_total[j]
-        JuMP.@constraint(model, u[i, j] >= pserved_agg[j] + a[i, j] * Pj - Pj)
-        JuMP.@constraint(model, u[i, j] <= a[i, j] * Pj)
-        JuMP.@constraint(model, u[i, j] <= pserved_agg[j])
+    for (ti, nw) in enumerate(nw_ids_int)
+        Pt = P_period[nw]
+        pserved_t = JuMP.@expression(model, [k = 1:n],
+            sum(_PMD.var(pm, nw, :pd, load_ids[k])))
+        pserved_period[nw] = pserved_t
+
+        a[ti] = relax_binary ?
+            JuMP.@variable(model, [1:n, 1:n], lower_bound = 0, upper_bound = 1, base_name = "palma_a_$ti") :
+            JuMP.@variable(model, [1:n, 1:n], Bin, base_name = "palma_a_$ti")
+        u[ti] = JuMP.@variable(model, [1:n, 1:n], lower_bound = 0, base_name = "palma_u_$ti")
+
+        # McCormick bilinear term: u[t][i,j] = a[t][i,j] · pserved_{t,j}, 0 ≤ pserved ≤ Pt.
+        for i in 1:n, j in 1:n
+            Pj = Pt[j]
+            JuMP.@constraint(model, u[ti][i, j] >= pserved_t[j] + a[ti][i, j] * Pj - Pj)
+            JuMP.@constraint(model, u[ti][i, j] <= a[ti][i, j] * Pj)
+            JuMP.@constraint(model, u[ti][i, j] <= pserved_t[j])
+        end
+        for i in 1:n
+            JuMP.@constraint(model, sum(a[ti][i, j] for j in 1:n) == 1)
+        end
+        for j in 1:n
+            JuMP.@constraint(model, sum(a[ti][i, j] for i in 1:n) == 1)
+        end
+
+        sorted_t = JuMP.@expression(model, [i = 1:n], sum(u[ti][i, j] for j in 1:n))
+        for k in 1:(n - 1)
+            JuMP.@constraint(model, sorted_t[k] <= sorted_t[k + 1])
+        end
+
+        push!(top10_terms, λ[ti] * sum(sorted_t[i] for i in top_10_idx))
+        push!(bot40_terms, λ[ti] * sum(sorted_t[i] for i in bottom_40_idx))
     end
 
-    for i in 1:n
-        JuMP.@constraint(model, sum(a[i, j] for j in 1:n) == 1)
-    end
-    for j in 1:n
-        JuMP.@constraint(model, sum(a[i, j] for i in 1:n) == 1)
-    end
+    # Cost-weighted aggregate Palma numerator/denominator → ONE ratio.
+    top_sum = JuMP.@expression(model, sum(top10_terms))   # Σ_t λ_t · top10%(pserved_t)
+    bot_sum = JuMP.@expression(model, sum(bot40_terms))   # Σ_t λ_t · bot40%(pserved_t)
 
-    sorted_v = JuMP.@expression(model, [i = 1:n], sum(u[i, j] for j in 1:n))
-    for k in 1:(n - 1)
-        JuMP.@constraint(model, sorted_v[k] <= sorted_v[k + 1])
-    end
-
-    top_10_idx, bottom_40_idx = compute_palma_indices(n)
-    top_sum = JuMP.@expression(model, sum(sorted_v[i] for i in top_10_idx))
-    bot_sum = JuMP.@expression(model, sum(sorted_v[i] for i in bottom_40_idx))
-
-    # Weak Charnes-Cooper: σ free, σ·bot_sum=1 enforced by NonConvex=2.
+    # Weak Charnes-Cooper: σ free, σ·bot_sum=1 (NonConvex=2).
     σ = JuMP.@variable(model, base_name = "palma_sigma", lower_bound = 1e-8)
     JuMP.@constraint(model, σ * bot_sum == 1.0)
 
-    # Per-period efficiency expressions (in x-space)
-    eff_per_nw = Dict{Int,Any}()
-    for nw in nw_ids_int
-        td_nw = sum(sum(_PMD.ref(pm, nw, :load, d)["pd"]) for d in _PMD.ids(pm, nw, :load))
-        eff_per_nw[nw] = JuMP.@expression(model,
-            sum(sum(_PMD.var(pm, nw, :pshed, d)) for d in _PMD.ids(pm, nw, :load)) / td_nw)
-    end
+    # UNCOSTED efficiency: total fraction of horizon demand shed (NO λ — period
+    # costs live only in the fairness top/bot sums, so α=1 is exactly the bilevel
+    # fairness objective).
+    eff_total = JuMP.@expression(model,
+        sum(sum(sum(_PMD.var(pm, nw, :pshed, d)) for d in _PMD.ids(pm, nw, :load))
+            for nw in nw_ids_int) / total_demand_all)
 
     return (
-        n = n, load_ids = load_ids,
-        P_total = P_total, total_demand_all = total_demand_all,
+        n = n, T = T, load_ids = load_ids, nw_ids_int = nw_ids_int,
+        P_period = P_period, total_demand_all = total_demand_all,
+        top_10_idx = top_10_idx, bottom_40_idx = bottom_40_idx,
         pshed_agg = pshed_agg, pserved_agg = pserved_agg,
-        a = a, u = u, sorted_v = sorted_v,
+        pserved_period = pserved_period,
+        a = a, u = u,
         top_sum = top_sum, bot_sum = bot_sum, σ = σ,
-        eff_per_nw = eff_per_nw,
+        eff_total = eff_total,
     )
 end
 
 """
-Set the multinetwork objective:
+Set the multinetwork objective — fairness term matched EXACTLY to the bilevel
+upper level:
 
-    min  α · (σ · top_sum) + (1 − α) · Σ_t λ_t · eff_term_t
+    min  α · (σ · top_sum)  +  (1 − α) · eff_total
 
-Both σ·top_sum and the σ·bot_sum=1 constraint are bilinear; Gurobi
-NonConvex=2 handles them. At the optimum (CC normalization active),
-σ·top_sum = top_sum/bot_sum = the Palma ratio of x-space served values.
+The fairness part `σ · top_sum` is the cost-weighted aggregate Palma ratio
+`top_sum/bot_sum`, with `top_sum = Σ_t λ_t·top10%(pserved_t)` and
+`bot_sum = Σ_t λ_t·bot40%(pserved_t)` set up in the machinery — the SAME
+pure-ratio fairness the bilevel upper level minimizes. At the CC optimum
+`σ · top_sum = top_sum / bot_sum`. The efficiency term is the UNCOSTED
+total-shed fraction (no λ — period costs live only in the top/bot sums), so
+α=1 recovers exactly the bilevel fairness objective and (1−α) trades it against
+plain efficiency. This is what makes single-level and bilevel share one
+fairness objective.
 """
-function set_palma_alpha_objective_agg!(pm, palma::NamedTuple,
-                                        nw_ids_int::Vector{Int},
-                                        λ::Vector{Float64}; alpha::Float64)
+function set_palma_alpha_objective_cw!(pm, palma::NamedTuple; alpha::Float64)
     @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1]"
-    @assert length(λ) == length(nw_ids_int) "λ length must match number of periods"
     fairness_part = alpha * (palma.σ * palma.top_sum)
-    eff_part = (1.0 - alpha) * sum(λ[idx] * palma.eff_per_nw[nw]
-                                   for (idx, nw) in enumerate(nw_ids_int))
+    eff_part      = (1.0 - alpha) * palma.eff_total
     JuMP.@objective(pm.model, Min, fairness_part + eff_part)
 end
 
 # ============================================================
 # INSTANTIATE MULTINETWORK MODEL + ATTACH PALMA MACHINERY
 # ============================================================
-# Use the existing multi-period min-max integer build for the constraint set;
-# we'll overwrite its objective with the per-α Palma+efficiency one.
-build_fn = pm -> FairLoadDelivery.build_mn_mc_mld_min_max_integer(pm; alpha = 1.0)
+# Build the per-period MLD constraint set; the objective is overwritten with
+# the per-α matched (per-period cost-weighted served-Palma) + efficiency one.
+# `relaxed` selects whether the MLD switch/block vars are continuous
+# (build_mn_mc_mld_min_max → _build_mn_period_fair!(…; relax=true)) or binary
+# (build_mn_mc_mld_min_max_integer). The Palma permutation stays binary either way.
+build_fn = relaxed ?
+    (pm -> FairLoadDelivery.build_mn_mc_mld_min_max(pm; alpha = 1.0)) :
+    (pm -> FairLoadDelivery.build_mn_mc_mld_min_max_integer(pm; alpha = 1.0))
 mld_mn = _PMD.instantiate_mc_model(mn_data, _PMD.LinDist3FlowPowerModel, build_fn;
     multinetwork  = true,
     ref_extensions = [FairLoadDelivery.ref_add_load_blocks!])
 
-# Weak CC: σ·bot_sum=1 (constraint) and σ·top_sum (objective) are bilinear.
-# Gurobi NonConvex=2 spatially branches. Expect TIME_LIMIT returns at non-zero gap;
-# script accepts feasible incumbents.
+# Weak CC: ONE σ·bot_sum=1 (constraint) and σ·top_sum (objective) are bilinear.
+# Gurobi NonConvex=2 spatially branches. A single aggregate σ (over cost-weighted
+# served totals) is far more tractable than the per-period form — and feasible
+# for integer shedding (only needs each load served sometime). Expect possible
+# TIME_LIMIT returns at non-zero gap; the script accepts feasible incumbents.
 JuMP.set_optimizer(mld_mn.model, Gurobi.Optimizer)
 JuMP.set_optimizer_attribute(mld_mn.model, "NonConvex",    2)
 JuMP.set_optimizer_attribute(mld_mn.model, "MIPGap",       1e-2)        # 1% — control, not tight
-JuMP.set_optimizer_attribute(mld_mn.model, "TimeLimit",    60 * 5)      # 5 min per α
+JuMP.set_optimizer_attribute(mld_mn.model, "TimeLimit",    60 * 10)     # 10 min per α
 JuMP.set_optimizer_attribute(mld_mn.model, "MIPFocus",     1)
 JuMP.set_optimizer_attribute(mld_mn.model, "NumericFocus", 2)
 
-palma = add_palma_machinery_aggregate!(mld_mn;
-    nw_ids_int = nw_ids_int_sorted, relax_binary = false)
+palma = add_palma_machinery_cw_aggregate!(mld_mn;
+    nw_ids_int = nw_ids_int_sorted, λ = PEAK_TIME_COSTS, relax_binary = false)
 
 # ============================================================
 # WARMSTART: pure-efficiency multi-period MLD (no Palma machinery)
@@ -356,8 +411,11 @@ palma = add_palma_machinery_aggregate!(mld_mn;
 # then push its (pshed, switch, block, a, u, σ) values onto `mld_mn` as
 # JuMP start values so Gurobi has an incumbent at root for every α.
 println("Warmstart: solving pure-efficiency multi-period MLD (no Palma machinery)…")
-build_fn_eff = pm -> FairLoadDelivery.build_mn_mc_mld_min_max_integer(pm;
-    peak_time_costs = PEAK_TIME_COSTS, alpha = 0.0)
+build_fn_eff = relaxed ?
+    (pm -> FairLoadDelivery.build_mn_mc_mld_min_max(pm;
+        peak_time_costs = PEAK_TIME_COSTS, alpha = 0.0)) :
+    (pm -> FairLoadDelivery.build_mn_mc_mld_min_max_integer(pm;
+        peak_time_costs = PEAK_TIME_COSTS, alpha = 0.0))
 mld_eff = _PMD.instantiate_mc_model(mn_data, _PMD.LinDist3FlowPowerModel, build_fn_eff;
     multinetwork = true, ref_extensions = [FairLoadDelivery.ref_add_load_blocks!])
 JuMP.set_optimizer(mld_eff.model, Gurobi.Optimizer)
@@ -385,24 +443,32 @@ for nw in nw_ids_int_sorted
     end
 end
 
-# Palma-specific (a, u, σ) from per-load aggregate served.
-pshed_warm_agg = [sum(sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
-                      for nw in nw_ids_int_sorted)
-                  for lid in palma.load_ids]
-pserved_warm = palma.P_total .- pshed_warm_agg
-perm         = sortperm(pserved_warm)              # ascending positions
-a_start      = zeros(palma.n, palma.n)
-for (i, j) in enumerate(perm); a_start[i, j] = 1.0; end
-u_start      = a_start .* reshape(pserved_warm, 1, :)
-n_bot_palma  = max(1, floor(Int, 0.4 * palma.n))
-bot_sum_val  = sum(pserved_warm[perm[k]] for k in 1:n_bot_palma)
-σ_start      = 1.0 / max(bot_sum_val, 1e-8)
-for i in 1:palma.n, j in 1:palma.n
-    JuMP.set_start_value(palma.a[i, j], a_start[i, j])
-    JuMP.set_start_value(palma.u[i, j], u_start[i, j])
+# Palma-specific starts: per-period permutation a[t]/u[t] from each period's
+# served vector, and ONE σ from the cost-weighted aggregate bot_sum.
+n_bot_palma = palma.bottom_40_idx[end]   # = floor(0.4n) (bot40 count)
+bot_sum_warm   = 0.0
+pshed_warm_tot = 0.0
+for (ti, nw) in enumerate(nw_ids_int_sorted)
+    pserved_warm_t = [sum(_PMD.ref(mld_eff, nw, :load, lid)["pd"]) -
+                      sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
+                      for lid in palma.load_ids]
+    pshed_warm_tot += sum(sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
+                          for lid in palma.load_ids)
+
+    perm    = sortperm(pserved_warm_t)            # ascending positions
+    a_start = zeros(palma.n, palma.n)
+    for (i, j) in enumerate(perm); a_start[i, j] = 1.0; end
+    u_start = a_start .* reshape(pserved_warm_t, 1, :)
+    for i in 1:palma.n, j in 1:palma.n
+        JuMP.set_start_value(palma.a[ti][i, j], a_start[i, j])
+        JuMP.set_start_value(palma.u[ti][i, j], u_start[i, j])
+    end
+    # contribution to the cost-weighted aggregate denominator: λ_t · bot40(served_t)
+    bot_sum_warm += PEAK_TIME_COSTS[ti] * sum(pserved_warm_t[perm[k]] for k in 1:n_bot_palma)
 end
+σ_start = 1.0 / max(bot_sum_warm, 1e-8)
 JuMP.set_start_value(palma.σ, σ_start)
-println("  warm pshed_total=$(round(sum(pshed_warm_agg), digits=2))   σ_start=$(round(σ_start, digits=6))")
+println("  warm pshed_total=$(round(pshed_warm_tot, digits=2))   σ_start=$(round(σ_start, digits=6))")
 
 # ============================================================
 # ALPHA SWEEP
@@ -411,7 +477,13 @@ println("  warm pshed_total=$(round(sum(pshed_warm_agg), digits=2))   σ_start=$
 # CSV and plots, rather than masquerading as 0 shed.
 total_shed       = fill(NaN, alpha_points, N_PERIODS)     # per-period totals (for plots)
 max_shed         = fill(NaN, alpha_points, N_PERIODS)
-palma_ratio_log  = fill(NaN, alpha_points)                # one aggregate Palma per α
+# PRIMARY fairness metric — matches the bilevel upper level:
+#   palma_cost_weighted_log[α] = Σ_t λ_t·top10(srv_t) / Σ_t λ_t·bot40(srv_t)
+# (cost-weighted per-period served-Palma — the quantity σ·top_sum minimizes).
+palma_cost_weighted_log = fill(NaN, alpha_points)
+# SECONDARY (diagnostic only): the UNCOSTED horizon-aggregate served-Palma
+# (λ_t = 1). Kept for comparison; NOT the optimized metric.
+palma_ratio_log  = fill(NaN, alpha_points)
 per_load_dist_a0 = fill(NaN, n_loads, N_PERIODS)
 per_load_dist_a1 = fill(NaN, n_loads, N_PERIODS)
 # Per-α, per-load aggregate shed (sum across periods) — used for Figure 2 norms.
@@ -424,8 +496,7 @@ per_load_period_shed = fill(NaN, alpha_points, n_loads, N_PERIODS)
 solutions_per_alpha = Vector{Any}(nothing, alpha_points)
 
 for (idx, alpha) in enumerate(alphas)
-    set_palma_alpha_objective_agg!(mld_mn, palma, nw_ids_int_sorted,
-                                   PEAK_TIME_COSTS; alpha = alpha)
+    set_palma_alpha_objective_cw!(mld_mn, palma; alpha = alpha)
 
     JuMP.optimize!(mld_mn.model)
     status = JuMP.termination_status(mld_mn.model)
@@ -437,8 +508,7 @@ for (idx, alpha) in enumerate(alphas)
         continue   # NaN-init means CSV + plots will show this α as missing, not as 0 shed.
     end
 
-    # Per-period totals/distributions (still useful for visualizing how each
-    # period absorbs the day's shed)
+    # Per-period totals/distributions (for the per-period plots + the JLD2 tensor).
     for (t, nw) in enumerate(nw_ids_int_sorted)
         per_load_shed_t = [sum(JuMP.value.(_PMD.var(mld_mn, nw, :pshed, lid)))
                            for lid in palma.load_ids]
@@ -452,22 +522,30 @@ for (idx, alpha) in enumerate(alphas)
         end
     end
 
-    # Aggregate post-hoc served-Palma (computed from x-space pserved) +
-    # model sanity check (y-space y_top_sum should equal the same Palma value
-    # because y_bot_sum = 1 forces y = (top_x/bot_x) at equality).
+    # PRIMARY (matched) fairness: cost-weighted aggregate Palma over per-period
+    # deciles — top_sum/bot_sum with top_sum=Σ_t λ_t·top10%(pserved_t),
+    # bot_sum=Σ_t λ_t·bot40%(pserved_t). Computed post-hoc by sorting each
+    # period's served values, and cross-checked against the model's σ·top_sum.
+    cw_top = 0.0; cw_bot = 0.0
+    for (t, nw) in enumerate(nw_ids_int_sorted)
+        s = sort([JuMP.value(palma.pserved_period[nw][k]) for k in 1:palma.n])
+        cw_top += PEAK_TIME_COSTS[t] * sum(s[i] for i in palma.top_10_idx)
+        cw_bot += PEAK_TIME_COSTS[t] * sum(s[i] for i in palma.bottom_40_idx)
+    end
+    palma_cost_weighted_log[idx] = cw_bot < 1e-6 ? Inf : cw_top / cw_bot
+
+    # Uncosted aggregate shed/served (x-axis total shed + diagnostic Palma).
     pshed_agg_vals   = [JuMP.value(palma.pshed_agg[k])   for k in 1:palma.n]
     pserved_agg_vals = [JuMP.value(palma.pserved_agg[k]) for k in 1:palma.n]
     palma_ratio_log[idx] = palma_ratio_value(pserved_agg_vals)
     per_load_agg[idx, :] .= pshed_agg_vals
 
-    σ_val   = JuMP.value(palma.σ)
-    top_val = JuMP.value(palma.top_sum)
-    bot_val = JuMP.value(palma.bot_sum)
+    model_fair = JuMP.value(palma.σ) * JuMP.value(palma.top_sum)
     flush(stdout)
     println("  agg total_shed = $(round(sum(pshed_agg_vals), digits=3))   ",
-            "palma_served (x-space post-hoc) = $(round(palma_ratio_log[idx], digits=4))   ",
-            "model(σ·top) = $(round(σ_val * top_val, digits=4))   ",
-            "[σ=$(round(σ_val, digits=6)), top_sum=$(round(top_val, digits=3)), bot_sum=$(round(bot_val, digits=3))]")
+            "cost-wtd Palma Σλ·top10/Σλ·bot40 (post-hoc) = $(round(palma_cost_weighted_log[idx], digits=4))   ",
+            "model(σ·top) = $(round(model_fair, digits=4))   ",
+            "uncosted-agg-served-Palma (diag) = $(round(palma_ratio_log[idx], digits=4))")
     flush(stdout)
 
     # Capture full per-period solution dict (loads/blocks/switches/buses/branches
@@ -489,7 +567,7 @@ period_markers = [:circle, :diamond, :utriangle, :rect, :star5, :pentagon, :hexa
 p3d = plot3d(xlabel = "total load shed (kW)",
              ylabel = "max load shed (kW)",
              zlabel = "period",
-             title  = "Multi-period Pareto (Palma, integer) — rep. periods",
+             title  = "Multi-period Pareto (Palma, $kind) — rep. periods",
              legend = :topright)
 for (k, t) in enumerate(REP_PERIODS)
     plot3d!(p3d, total_shed[:, t], max_shed[:, t], fill(t, alpha_points),
@@ -595,36 +673,42 @@ ymax_shared = max(
 p_dist_a0 = build_dist_plot_agg(per_load_agg[1, :];   ylim_max = ymax_shared)
 p_dist_a1 = build_dist_plot_agg(per_load_agg[end, :]; ylim_max = ymax_shared)
 
-# Pareto curve: aggregate total shed (x) vs Palma ratio of shed (y).
-# Dots match the steelblue of the bar charts and are enlarged to 14pt
-# (3.5× the default); α encoding lives on the top axis below. Drops NaN
-# Palma entries (low-α points where bot40 = 0 — same guard as
-# post_hoc_fairness_pareto.jl).
-finite_palma = findall(isfinite, palma_ratio_log)
-p_pareto = plot(agg_total_shed[finite_palma], palma_ratio_log[finite_palma],
-    seriestype = :line, lc = :grey,
-    marker = :circle, markersize = 14, color = :steelblue,
-    markerstrokecolor = :steelblue,
-    xlabel = "total load shed (kW)",
-    ylabel = "Palma ratio of shed (unitless)",
-    legend = false;
-    FONT_KW...)
-# Annotate the α=0 / α=1 endpoints (5% of the y-range above the marker)
-# using the filtered finite-Palma α values. Same style as the bar-chart
-# value labels.
-let _ts_e = agg_total_shed[finite_palma],
-    _ys_e = palma_ratio_log[finite_palma],
-    _αs_e = alphas[finite_palma]
-    yrange = maximum(_ys_e) - minimum(_ys_e)
-    yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
-    annotate!(p_pareto, _ts_e[1],   _ys_e[1]   + yoff,
-        text("ν=$(round(_αs_e[1],   digits=2))", ANNOT_PT, :center))
-    annotate!(p_pareto, _ts_e[end], _ys_e[end] + yoff,
-        text("ν=$(round(_αs_e[end], digits=2))", ANNOT_PT, :center))
+# Helper: build a Pareto curve (aggregate total shed x vs a fairness metric y),
+# dropping NaN-y entries (TimeLimit-with-no-incumbent or bot40=0 — same guard as
+# post_hoc_fairness_pareto.jl). Dots match the steelblue bars at 14pt; α (=ν)
+# endpoints annotated 5% of the y-range above the marker.
+function build_pareto_curve(xvec, yvec, ylab)
+    fin = findall(isfinite, yvec)
+    p = plot(xvec[fin], yvec[fin],
+        seriestype = :line, lc = :grey,
+        marker = :circle, markersize = 14, color = :steelblue,
+        markerstrokecolor = :steelblue,
+        xlabel = "total load shed (kW)",
+        ylabel = ylab,
+        legend = false;
+        FONT_KW...)
+    if !isempty(fin)
+        _ys = yvec[fin]; _xs = xvec[fin]; _αs = alphas[fin]
+        yrange = maximum(_ys) - minimum(_ys)
+        yoff = 0.05 * (yrange == 0 ? 1.0 : yrange)
+        annotate!(p, _xs[1],   _ys[1]   + yoff, text("ν=$(round(_αs[1],   digits=2))", ANNOT_PT, :center))
+        annotate!(p, _xs[end], _ys[end] + yoff, text("ν=$(round(_αs[end], digits=2))", ANNOT_PT, :center))
+    end
+    return p
 end
 
+# PRIMARY Pareto: matches the bilevel upper level — total shed vs the
+# cost-weighted per-period served-Palma: Σ_t λ_t·top10(srv_t) / Σ_t λ_t·bot40(srv_t).
+p_pareto = build_pareto_curve(agg_total_shed, palma_cost_weighted_log,
+    raw"cost-weighted served-Palma  ($\Sigma_t \lambda_t \mathrm{top}_t / \Sigma_t \lambda_t \mathrm{bot}_t$)")
+# SECONDARY (diagnostic): UNCOSTED aggregate served-Palma (λ_t=1). Saved for
+# side-by-side comparison; NOT the optimized quantity.
+p_pareto_aggdiag = build_pareto_curve(agg_total_shed, palma_ratio_log,
+    "uncosted aggregate served-Palma (diagnostic)")
+
 # Save each panel as its own figure (was a single 3-panel fig1).
-for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1),
+                    ("pareto", p_pareto), ("pareto_aggdiag", p_pareto_aggdiag))
     _fig = plot(_p; size = (900, 760),
         left_margin = 7Plots.mm, right_margin = 6Plots.mm,
         top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
@@ -666,7 +750,7 @@ savefig(fig2, joinpath(output_dir, "pareto_norms_$(kind)_$(pshed_type).svg"))
 display(fig2)
 
 # ============================================================
-# CSV: per-period shed + one aggregate Palma per α
+# CSV: per-period shed; aggregate fairness metrics per α
 # ============================================================
 period_rows = DataFrame(alpha = Float64[], period = Int[], lambda = Float64[],
     total_shed = Float64[], max_shed = Float64[])
@@ -677,10 +761,11 @@ end
 CSV.write(joinpath(output_dir, "palma_sweep_mn_per_period_$(pshed_type).csv"), period_rows)
 
 agg_rows = DataFrame(alpha = alphas,
-    agg_total_shed     = [sum(total_shed[i, :]) for i in 1:alpha_points],
-    cost_weighted_shed = weighted_total,
-    cost_weighted_max  = weighted_max,
-    palma_ratio        = palma_ratio_log)
+    agg_total_shed       = [sum(total_shed[i, :]) for i in 1:alpha_points],
+    cost_weighted_shed   = weighted_total,
+    cost_weighted_max    = weighted_max,
+    palma_cost_weighted  = palma_cost_weighted_log,  # PRIMARY: Σ_t λ_t·top10(srv_t)/Σ_t λ_t·bot40(srv_t) (matched to bilevel)
+    palma_ratio_uncosted = palma_ratio_log)          # SECONDARY: uncosted aggregate served-Palma (diagnostic)
 CSV.write(joinpath(output_dir, "palma_sweep_mn_aggregate_$(pshed_type).csv"), agg_rows)
 
 # ============================================================
@@ -712,6 +797,10 @@ JLD2.jldsave(jld_path;
     per_load_agg         = per_load_agg,          # alpha × load (sum over periods)
     total_shed           = total_shed,            # alpha × period
     max_shed             = max_shed,              # alpha × period
+    # PRIMARY fairness metric — matches the bilevel upper level:
+    #   palma_cost_weighted_log[α] = Σ_t λ_t·top10(srv_t) / Σ_t λ_t·bot40(srv_t)
+    palma_cost_weighted_log = palma_cost_weighted_log,   # alpha
+    # SECONDARY (diagnostic): UNCOSTED aggregate served-Palma (λ_t=1).
     palma_ratio_log      = palma_ratio_log,
     load_labels          = load_labels,
     load_bus_ids         = load_bus_ids,
