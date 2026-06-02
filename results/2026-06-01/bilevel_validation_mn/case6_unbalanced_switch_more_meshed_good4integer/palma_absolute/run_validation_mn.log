@@ -1,0 +1,529 @@
+┌ Info: Logging to results/2026-06-01/bilevel_validation_mn/case6_unbalanced_switch_more_meshed_good4integer/palma_absolute\run_validation_mn.log
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn_slp.jl:110
+┌ Info: Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:186
+┌ Info: Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\io\dss\parse.jl:312
+┌ Info: basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:1017
+┌ Warning: basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Warning: basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ Info: N_PERIODS=24, hours=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], agg_scales=[0.8479854262731626, 0.8209116806392722, 0.8045632237581454, 0.8079152275923159, 0.8387202438113252, 0.8980381122690839, 0.9676482934843788, 1.0258647367355271, 1.0757845717168208, 1.1086396193254484, 1.1338430847598189, 1.1478945274297554, 1.1501794143778719, 1.1368178312533255, 1.123310031164268, 1.1118984910387417, 1.1069837587121172, 1.101107729225653, 1.0722361959025872, 1.034470288465074, 0.9842055523687825, 0.9334650162377547, 0.8989053063178417, 0.8686116371409339], peak_stress=1.0, λ=[5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.01, 5.04, 5.15, 5.5, 6.4, 8.38, 11.95, 17.17, 23.15, 28.08, 30.0, 28.08, 23.15, 17.17, 11.95, 8.38]
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn_slp.jl:137
+┌ Info: Built multinetwork with 24 periods, 9 loads per period (profiled)
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn_slp.jl:148
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: [SLP-CC] iter   0  obj=5.438759e+02  step=5.000e-01  min_bot=6.157e+00
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\slp_cc_palma.jl:326
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: [SLP-CC] iter   5  obj=5.323546e+02  step=1.250e-01  min_bot=6.473e+00
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\slp_cc_palma.jl:326
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+│             and negative values for the Jacobian of the constraints.
+└ @ DiffOpt.NonLinearProgram C:\Users\awest\.julia\packages\DiffOpt\pIPwS\src\NonLinearProgram\NonLinearProgram.jl:423
+┌ Info: [SLP-CC] done: 9 iters, converged, best_obj=5.317715e+02, primal=38 adjoint=36
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\slp_cc_palma.jl:340
+┌ Info: [palma/absolute] SLP bilevel: 9 iters, converged=true, primal=38 adjoint=36, 1999.3s
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn_slp.jl:194
+┌ Debug: pm model build time: 0.41100001335144043
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 37.73299980163574
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Info: relaxed multi-period termination: ALMOST_LOCALLY_SOLVED (converged=true)
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn_slp.jl:226
+┌ Debug: pm model build time: 1.244999885559082
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 2.0250000953674316
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 11.773000001907349
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 1.9800000190734863
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00599980354309082
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.013000011444091797
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.004999876022338867
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014000177383422852
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.008999824523925781
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014000177383422852
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.013000011444091797
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015999794006347656
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.029000043869018555
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01900005340576172
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.019999980926513672
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003000020980834961
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003999948501586914
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01100015640258789
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.013000011444091797
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.018000125885009766
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003000020980834961
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.008999824523925781
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009000062942504883
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.020999908447265625
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003000020980834961
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.007999897003173828
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.010999917984008789
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01900005340576172
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003999948501586914
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014000177383422852
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009999990463256836
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01900005340576172
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003999948501586914
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.011999845504760742
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.008999824523925781
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.015000104904174805
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.003000020980834961
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.03500008583068848
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.01100015640258789
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01699995994567871
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006000041961669922
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.017999887466430664
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.006999969482421875
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.018000125885009766
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.004999876022338867
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.016000032424926758
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.009000062942504883
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01399993896484375
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.013000011444091797
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.00800013542175293
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.01699995994567871
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: pm model build time: 0.005000114440917969
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:45
+┌ Debug: pm model solve and solution time: 0.014999866485595703
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\prob\common.jl:54
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\TableOperations\5GGWt_6ngOn.dll for TableOperations [ab02a1b2-a7df-11e8-156e-fb1833f50b87]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Observables\qosmH_6ngOn.dll for Observables [510215fc-4207-5dde-b226-833fc4488ee2]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Widgets\F5dj0_6ngOn.dll for Widgets [cc8bc4a8-27d6-5769-a93b-9d913e69aa62]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractTrees\tEX7J_6ngOn.dll for AbstractTrees [1520ce14-60c1-5f80-bbc7-55ef81b5835c]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\NearestNeighbors\Yj1kF_6ngOn.dll for NearestNeighbors [b8a86587-4115-5ab1-83bc-aa920d37bbce]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Clustering\Ovl2Q_6ngOn.dll for Clustering [aaaa29a8-35af-508c-8bc3-b662a17a0fe5]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\WoodburyMatrices\LdtKf_6ngOn.dll for WoodburyMatrices [efce3f68-66dc-5838-9240-27a6d6f5f9b6]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Ratios\zQEsd_6ngOn.dll for Ratios [c84ed2f1-dad5-54f0-aa8e-dbefe2724439]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AxisAlgorithms\lW7vi_6ngOn.dll for AxisAlgorithms [13072b0f-2c55-5437-9ae7-d433b7a33950]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\OffsetArrays\UDEDl_6ngOn.dll for OffsetArrays [6fe1bfb0-de20-5000-8ca7-80f57d26f881]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\OffsetArraysAdaptExt\evlsb_6ngOn.dll for OffsetArraysAdaptExt [9ea13c92-b805-51cc-a17e-c5d4dc71a5cc]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Interpolations\VpKVx_6ngOn.dll for Interpolations [a98d9a8b-a2ab-59e6-89dd-64a1c18fca59]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\RatiosFixedPointNumbersExt\R2tFd_6ngOn.dll for RatiosFixedPointNumbersExt [dc815b64-233b-5bd3-8c5c-a58ec2b485bf]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\MultivariateStats\l7I74_6ngOn.dll for MultivariateStats [6f286f6a-111f-5878-ab1e-185364afe411]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTs\Di3HZ_6ngOn.dll for AbstractFFTs [621f4979-c628-5d54-868e-fcf4e3e8185c]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTsChainRulesCoreExt\g4vnt_6ngOn.dll for AbstractFFTsChainRulesCoreExt [07c0d231-1838-56d6-9ec8-835e5b9b958e]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\MuladdMacro\myzFY_ICJ7p.dll for MuladdMacro [46d2c3a1-f734-5fdb-9937-b9b9aeba4221]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\IntegerMathUtils\WLcRF_6ngOn.dll for IntegerMathUtils [18e54dd8-cb9d-406c-a71d-865a43cbb235]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\Primes\TX3XQ_6ngOn.dll for Primes [27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\FFTA\V4Q1C_6ngOn.dll for FFTA [b86e33f2-c0db-4aa1-a6e0-ab43e668529e]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\KernelDensity\4QyGx_6ngOn.dll for KernelDensity [5ab0869b-81aa-558d-bb23-cbf5423bbe9b]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\StatsPlots\SiylL_6ngOn.dll for StatsPlots [f3b207a7-027a-5e70-b257-86293d7955fd]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\InterpolationsForwardDiffExt\M1AeY_6ngOn.dll for InterpolationsForwardDiffExt [c0419daf-3bc6-522d-af4f-b7766712b465]
+└ @ Base loading.jl:1269
+┌ Debug: Extension InterpolationsForwardDiffExt of Interpolations loaded
+└ @ Base loading.jl:1580
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\AbstractFFTsTestExt\Pr5Et_6ngOn.dll for AbstractFFTsTestExt [f14dd36e-a047-53ac-8286-f8b5d0265aae]
+└ @ Base loading.jl:1269
+┌ Debug: Extension AbstractFFTsTestExt of AbstractFFTs loaded
+└ @ Base loading.jl:1580
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\3af036b12a076c2d4c042dde6d956ef4eac2c2ce\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\1da3b3a2698813adf2b925c46aa2d68ec8474449\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\58a307887a7b823f6a7cac7e6337710ec14aced2\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\df4cc9189a878ad66ad99fed70ece5cf4e45b246\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\90274e5aad7e8e2a9105fae1f4b4fc52a955322f\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\fcc05863e77d0e700007d714ef7304c87b39d10e\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\166f431d14e588224598f7952888bb847a545ac6\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\13e3cf8e6f38d3b6418b758bb68cb8b149c28251\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\04cb27664b0d5037a605ba01e373ec8be6ef60af\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\cb74fa09f359d430ea01be69a61cd98b50ec8c22\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\6e310796647a1c58e5873a7ab7ad32b8e60dea3f\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\d119ba6f3cc7e3fb09a8bb637f705bf9d9982000\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\ce4261864aeaa78b205a3f6fb750be4c4afe9b4b\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\ec3406e9ba84281719f20b0fb3a874c9e3bac027\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\8d9f87bf9e08a0e0db47c0ab531ee29fff143eee\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\41cbcbec1d1b6ca0484999b1db571f8066f29233\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\5c7df64500371e5ab4723fe2fc999b996aa8f3a7\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\81ad3b6f8af8fa057c1a9640ca91454b669b342b\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\8258f1ad1bf2f9853eb157e9d4b755f0e427a0ea\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\25bfd4c7adfcd3cb3399a7c509ec239a32c247f3\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\9fa0dc316d94c97a5ce05d7eba953db78ea33810\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\98941fbb5eed27cef1d77fa8710290bc197dd24f\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\ba2dc75245508e0cf0c860081b2f2fd10bdf4357\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\7e207f56275705f9cbc88b826acd28ea0e40f1ae\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\7a64f03d9f7bd683b3896a81663bdfdb4ee6074c\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\02775a21e94cac114e07abbcf93b4d00c82a58e2\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\70d649d1599a152c00a4714d4fc620bb3c680f62\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\c2f4f3bb11c021b1508ebf8de35dde7a4f0f6723\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\004a4c653a5364f66fd8d8c2fe9c81f3fb5ae8fe\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\8e19ee77a5aed0ac3f6828efb9671b8c619cd27b\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\bceb83cbb02f69a09fbeb440ce60389ee6ee1afe\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\848dfc9dd7fae7e0a28e367b621a600925bce9dc\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\c04efad666b8d0d8189cef3700287fe5d8d28338\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\artifacts\a54b856f4d0dfe6301d42d55eba59ee6c86756c2\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin\..\lib\julia)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin\..\lib)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: `windows`: AddDllDirectory(C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin)
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\funcptrs.jl:56
+┌ Debug: Artifacts setup
+│   ENV["GKSwstype"] = 
+│   ENV["GKS_QT"] = set PATH=C:\Users\awest\.julia\artifacts\3af036b12a076c2d4c042dde6d956ef4eac2c2ce\bin;C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin;C:\Users\awest\.julia\artifacts\1da3b3a2698813adf2b925c46aa2d68ec8474449\bin;C:\Users\awest\.julia\artifacts\58a307887a7b823f6a7cac7e6337710ec14aced2\bin;C:\Users\awest\.julia\artifacts\df4cc9189a878ad66ad99fed70ece5cf4e45b246\bin;C:\Users\awest\.julia\artifacts\90274e5aad7e8e2a9105fae1f4b4fc52a955322f\bin;C:\Users\awest\.julia\artifacts\fcc05863e77d0e700007d714ef7304c87b39d10e\bin;C:\Users\awest\.julia\artifacts\166f431d14e588224598f7952888bb847a545ac6\bin;C:\Users\awest\.julia\artifacts\13e3cf8e6f38d3b6418b758bb68cb8b149c28251\bin;C:\Users\awest\.julia\artifacts\04cb27664b0d5037a605ba01e373ec8be6ef60af\bin;C:\Users\awest\.julia\artifacts\cb74fa09f359d430ea01be69a61cd98b50ec8c22\bin;C:\Users\awest\.julia\artifacts\6e310796647a1c58e5873a7ab7ad32b8e60dea3f\bin;C:\Users\awest\.julia\artifacts\d119ba6f3cc7e3fb09a8bb637f705bf9d9982000\bin;C:\Users\awest\.julia\artifacts\ce4261864aeaa78b205a3f6fb750be4c4afe9b4b\bin;C:\Users\awest\.julia\artifacts\ec3406e9ba84281719f20b0fb3a874c9e3bac027\bin;C:\Users\awest\.julia\artifacts\8d9f87bf9e08a0e0db47c0ab531ee29fff143eee\bin;C:\Users\awest\.julia\artifacts\41cbcbec1d1b6ca0484999b1db571f8066f29233\bin;C:\Users\awest\.julia\artifacts\5c7df64500371e5ab4723fe2fc999b996aa8f3a7\bin;C:\Users\awest\.julia\artifacts\81ad3b6f8af8fa057c1a9640ca91454b669b342b\bin;C:\Users\awest\.julia\artifacts\8258f1ad1bf2f9853eb157e9d4b755f0e427a0ea\bin;C:\Users\awest\.julia\artifacts\25bfd4c7adfcd3cb3399a7c509ec239a32c247f3\bin;C:\Users\awest\.julia\artifacts\9fa0dc316d94c97a5ce05d7eba953db78ea33810\bin;C:\Users\awest\.julia\artifacts\98941fbb5eed27cef1d77fa8710290bc197dd24f\bin;C:\Users\awest\.julia\artifacts\ba2dc75245508e0cf0c860081b2f2fd10bdf4357\bin;C:\Users\awest\.julia\artifacts\7e207f56275705f9cbc88b826acd28ea0e40f1ae\bin;C:\Users\awest\.julia\artifacts\7a64f03d9f7bd683b3896a81663bdfdb4ee6074c\bin;C:\Users\awest\.julia\artifacts\02775a21e94cac114e07abbcf93b4d00c82a58e2\bin;C:\Users\awest\.julia\artifacts\70d649d1599a152c00a4714d4fc620bb3c680f62\bin;C:\Users\awest\.julia\artifacts\c2f4f3bb11c021b1508ebf8de35dde7a4f0f6723\bin;C:\Users\awest\.julia\artifacts\004a4c653a5364f66fd8d8c2fe9c81f3fb5ae8fe\bin;C:\Users\awest\.julia\artifacts\8e19ee77a5aed0ac3f6828efb9671b8c619cd27b\bin;C:\Users\awest\.julia\artifacts\bceb83cbb02f69a09fbeb440ce60389ee6ee1afe\bin;C:\Users\awest\.julia\artifacts\848dfc9dd7fae7e0a28e367b621a600925bce9dc\bin;C:\Users\awest\.julia\artifacts\c04efad666b8d0d8189cef3700287fe5d8d28338\bin;C:\Users\awest\.julia\artifacts\a54b856f4d0dfe6301d42d55eba59ee6c86756c2\bin;C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin\..\lib\julia;C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin\..\lib;C:\Users\awest\.julia\juliaup\julia-1.12.1+0.x64.w64.mingw32\bin & "C:\Users\awest\.julia\artifacts\a54b856f4d0dfe6301d42d55eba59ee6c86756c2\bin\gksqt.exe"
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\GR.jl:376
+┌ Debug: Default GKS_ENCODING
+│   ENV["GKS_ENCODING"] = utf8
+└ @ GR C:\Users\awest\.julia\packages\GR\s7T1Y\src\GR.jl:390
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\ScopedValues\fN9Bp_6ngOn.dll for ScopedValues [7e506255-f358-4e82-b7e4-beb19740aa63]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\ChunkCodecCore\54tFi_6ngOn.dll for ChunkCodecCore [0b6fb165-00bc-4d37-ab8b-79f91016dbe1]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\ChunkCodecLibZlib\dbPpT_6ngOn.dll for ChunkCodecLibZlib [4c0bbee4-addc-4d73-81a0-b6caacae83c8]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\ChunkCodecLibZstd\j9Tqa_6ngOn.dll for ChunkCodecLibZstd [55437552-ac27-4d47-9aa3-63184e8fd398]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\JLD2\O1EyT_6ngOn.dll for JLD2 [033835bb-8acc-5ee8-8aae-3f567f8a3819]
+└ @ Base loading.jl:1269
+┌ Debug: Loading object cache file C:\Users\awest\.julia\compiled\v1.12\UnPackExt\uehqT_6ngOn.dll for UnPackExt [54d139d9-0a94-509c-a857-5483d55ba1db]
+└ @ Base loading.jl:1269
+┌ Debug: Extension UnPackExt of JLD2 loaded
+└ @ Base loading.jl:1580

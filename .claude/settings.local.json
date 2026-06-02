@@ -11,7 +11,8 @@
       "Bash(tee results/2026-05-08/trade_off_mn_proportional.out)",
       "Bash(powershell -NoProfile -Command \"Get-Content -Path 'C:\\\\Users\\\\awest\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-awest-github-FairLoadDelivery\\\\032c6c08-b44d-4288-a196-a332b00a5d0d\\\\tasks\\\\bk2wkjym8.output' -Wait -Tail 0 | Select-String -Pattern '--- Iteration \\\\d|----- Period \\\\d|Step \\\\d:|Multi-period validation complete|Results block complete|Heatmap →|Report →|Σ pshed|MethodError|StackOverflow|^ERROR:|Stacktrace|UndefVarError|ArgumentError|BoundsError|cannot find|TerminationStatus|not converged'\")",
       "Bash(FAIR_FUNC=palma julia *)",
-      "Bash(FAIR_FUNC=min_max julia *)"
+      "Bash(FAIR_FUNC=min_max julia *)",
+      "PowerShell(Copy-Item *)"
     ]
   }
 }

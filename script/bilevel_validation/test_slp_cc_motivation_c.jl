@@ -37,8 +37,8 @@ include("../../src/implementation/frank_wolfe_palma.jl")
 include("../../src/implementation/slp_cc_palma.jl")
 
 # --- motivation_c config (mirrors run_validation_mn_motivation_c.jl) ----------
-CASE       = "motivation_c_good4integer"
-CASE_FILE  = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/motivation_c_good4integer.dss")
+CASE       = get(ENV, "SLP_CASE", "motivation_c_good4integer")  # or "motivation_c"
+CASE_FILE  = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 SELECTED_HOURS = haskey(ENV, "SLP_HOURS") ?
     parse.(Int, split(ENV["SLP_HOURS"], ",")) : [2, 4, 8, 12, 15, 18, 20, 22]  # T=8, peak @18
