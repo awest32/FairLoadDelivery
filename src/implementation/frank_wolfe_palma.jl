@@ -21,8 +21,11 @@ This is the win over the MILP path's `1 primal + T·N forward columns + Gurobi M
 The reverse mode was validated to machine precision against the forward Jacobian
 in script/bilevel_validation/spike_reverse_mode.jl (2026-05-31).
 
-Objective (matches the MILP upper level, λ-weighted served-Palma):
-    f(w) = Σ_t λ_t · [ Σ_{top10%} sorted(served_t) / Σ_{bot40%} sorted(served_t) ]
+Objective (cost-weighted served-Palma, ratio of sums — matches the single-level
+trade-off `add_palma_machinery_cw_aggregate!`):
+    f(w) = ( Σ_t λ_t · Σ_{top10%} sorted(served_t) )
+           ────────────────────────────────────────────
+           ( Σ_t λ_t · Σ_{bot40%} sorted(served_t) )
     served = pd − pshed*(w)
 
 Requires `compute_palma_indices` / `palma_ratio` from load_shed_as_parameter.jl
@@ -55,15 +58,22 @@ end
 """
     palma_value(pshed, pd; n_loads, peak_time_costs=Float64[], eps_denom=1e-6)
 
-λ-weighted served-Palma objective used by the Frank-Wolfe upper level:
+Cost-weighted served-Palma objective used by the SLP / Frank-Wolfe upper level —
+the **ratio of cost-weighted sums** (matched to the single-level trade-off):
 
-    f = Σ_t λ_t · top10%(sorted served_t) / bot40%(sorted served_t),   served = pd − pshed.
+    f = ( Σ_t λ_t · top10%(sorted served_t) ) / ( Σ_t λ_t · bot40%(sorted served_t) )
+      = T(w) / B(w),    served = pd − pshed.
 
-Per-period denominator is softened to `max(bot, eps_denom)` so the objective stays
-finite at the degenerate bot40→0 corner (where the true Palma → ∞). For REPORTING
-the ratio, use the existing `palma_ratio` (hard cutoff, returns Inf); this function
-is the smooth surrogate FW minimizes. Mirrors the MILP upper level's per-period
-λ structure exactly.
+Each period is sorted independently (a true per-period top-10% / bot-40% decile),
+λ-weighted, then summed into ONE numerator T and ONE denominator B; the objective
+is their single ratio. This is `(Σλ·top)/(Σλ·bot)`, NOT the old `Σλ·(top/bot)`
+(sum of per-period ratios) — it matches `add_palma_machinery_cw_aggregate!` in
+`script/single_level/palma_trade_off_mn.jl` (σ·top_sum with σ·bot_sum=1).
+
+The single GLOBAL denominator B is softened to `max(B, eps_denom)`; because B sums
+over all periods it is far more robust to the bot40→0 corner than any per-period
+bot_t (B vanishes only if EVERY period's bottom-40% is fully shed). For REPORTING
+use `palma_ratio` (hard cutoff, Inf).
 """
 function palma_value(pshed::Vector{Float64}, pd::Vector{Float64};
                      n_loads::Int, peak_time_costs::Vector{Float64} = Float64[],
@@ -76,31 +86,32 @@ function palma_value(pshed::Vector{Float64}, pd::Vector{Float64};
     @assert length(λ) == T "peak_time_costs must have length T=$T"
     top_idx, bot_idx = compute_palma_indices(n)
 
-    total = 0.0
+    Tsum = 0.0   # Σ_t λ_t · top10%(served_t)
+    Bsum = 0.0   # Σ_t λ_t · bot40%(served_t)
     for t in 1:T
         off = (t - 1) * n
         served = Float64[pd[off + j] - pshed[off + j] for j in 1:n]
         s = sort(served)
-        top = sum(max(0.0, s[i]) for i in top_idx)
-        bot = sum(max(0.0, s[i]) for i in bot_idx)
-        total += λ[t] * (top / max(bot, eps_denom))
+        Tsum += λ[t] * sum(max(0.0, s[i]) for i in top_idx)
+        Bsum += λ[t] * sum(max(0.0, s[i]) for i in bot_idx)
     end
-    return total
+    return Tsum / max(Bsum, eps_denom)
 end
 
 """
     palma_grad_pshed(pshed, pd; n_loads, peak_time_costs=Float64[], eps_denom=1e-6)
 
-Analytic v = ∂(palma_value)/∂pshed, length T·N. This is the seed handed to the
+Analytic v = ∂(palma_value)/∂pshed, length T·N, for the RATIO-OF-SUMS objective
+f = T/B with T = Σ_t λ_t·top_t, B = Σ_t λ_t·bot_t. This is the seed handed to the
 adjoint solve; `∇_w f = Jᵀ v`.
 
-Per period: served = pd − pshed, sort ascending. For the ratio R = top/bot,
-  ∂R/∂sorted[i] = +1/bot           for i in top10% positions,
-  ∂R/∂sorted[i] = −top/bot²        for i in bot40% positions,
-scattered back to the originating load via the sort permutation, then
-  ∂/∂pshed = −∂/∂served            (since served = pd − pshed),
-and scaled by λ_t. Denominator softened to max(bot, eps_denom) to match
-`palma_value`. A valid (sub)gradient under ties.
+T and B are GLOBAL scalars, so the per-served derivatives couple all periods:
+  ∂f/∂served_i = +λ_t / B          for i in period t's top10% positions,
+  ∂f/∂served_i = −λ_t · T / B²     for i in period t's bot40% positions,
+scattered back via the per-period sort permutation, then ∂/∂pshed = −∂/∂served.
+B softened to max(B, eps_denom); when floored the bottom term is dropped (its
+derivative is 0 under the constant floor), avoiding the bot→0 gradient blow-up.
+A valid (sub)gradient under ties.
 """
 function palma_grad_pshed(pshed::Vector{Float64}, pd::Vector{Float64};
                           n_loads::Int, peak_time_costs::Vector{Float64} = Float64[],
@@ -113,35 +124,37 @@ function palma_grad_pshed(pshed::Vector{Float64}, pd::Vector{Float64};
     @assert length(λ) == T "peak_time_costs must have length T=$T"
     top_idx, bot_idx = compute_palma_indices(n)
 
+    # Pass 1: the GLOBAL cost-weighted numerator/denominator.
+    Tsum = 0.0; Bsum = 0.0
+    for t in 1:T
+        off = (t - 1) * n
+        s = sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
+        Tsum += λ[t] * sum(max(0.0, s[i]) for i in top_idx)
+        Bsum += λ[t] * sum(max(0.0, s[i]) for i in bot_idx)
+    end
+    Beff = max(Bsum, eps_denom)
+    floored = Bsum ≤ eps_denom
+
+    # Pass 2: scatter ∂f/∂served back to pshed, period by period.
     v = zeros(m)
     for t in 1:T
         off = (t - 1) * n
         served = Float64[pd[off + j] - pshed[off + j] for j in 1:n]
         perm = sortperm(served)                # perm[i] = original load at sorted position i
-        s = served[perm]
-        top = sum(max(0.0, s[i]) for i in top_idx)
-        bot = sum(max(0.0, s[i]) for i in bot_idx)
-        bot_eff = max(bot, eps_denom)
-        # When the denominator is floored (bot ≤ eps_denom), palma_value uses the
-        # CONSTANT eps_denom, so its derivative w.r.t. the bottom-40% served is 0 —
-        # NOT −top/bot_eff². Applying −top/eps_denom² there would emit ~1e12 garbage
-        # gradients (the FW blow-up). Guard the bottom term on the live-denominator
-        # regime; the top term is value/denominator either way.
-        floored = bot ≤ eps_denom
 
-        gsorted = zeros(n)                      # ∂R/∂sorted[i]
+        gsorted = zeros(n)                      # ∂f/∂sorted[i]
         for i in top_idx
-            gsorted[i] += 1.0 / bot_eff
+            gsorted[i] += λ[t] / Beff
         end
         if !floored
             for i in bot_idx
-                gsorted[i] += -top / (bot_eff^2)
+                gsorted[i] += -λ[t] * Tsum / (Beff^2)
             end
         end
 
         for i in 1:n
             j = perm[i]                         # back to original load index in period
-            v[off + j] = -λ[t] * gsorted[i]     # ∂/∂pshed = −∂/∂served
+            v[off + j] = -gsorted[i]            # ∂/∂pshed = −∂/∂served
         end
     end
     return v

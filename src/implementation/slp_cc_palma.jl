@@ -98,20 +98,23 @@ end
     cc_lp_step(w_k, served, sets, grads, λ, n, T; w_lo, w_hi, Δ, σ_min, lp_optimizer)
         -> w_new
 
-One fixed-sort Charnes–Cooper LP. Per period t with σ_t = 1/bot_t(w) and the
-rescaled step `dz = σ_t·Δw`:
+One fixed-sort Charnes–Cooper LP for the RATIO-OF-SUMS objective
+f = T(w)/B(w) with T = Σ_t λ_t·top_t, B = Σ_t λ_t·bot_t. ONE σ = 1/B(w) for the
+whole horizon and a single rescaled step `dz = σ·Δw`:
 
-  minimize   Σ_t λ_t (a_t·σ_t + gtop_t·dz_t)            (= Σ_t λ_t·σ_t·top_t(w))
-  subject to b_t·σ_t + gbot_t·dz_t = 1                  (σ_t·bot_t(w) = 1)
-             (sA−sD)·σ_t + gbotcut_t·dz_t ≥ 0           (variant-b bottom cut)
-             (sC−sE)·σ_t + gtopcut_t·dz_t ≥ 0           (variant-b top cut)
-             |dz_t| ≤ Δ·σ_t                              (trust region)
-             (w_lo−w_k)·σ_t ≤ dz_t ≤ (w_hi−w_k)·σ_t      (weight box)
-             σ_t ≥ σ_min
+  minimize   σ·T(w_k) + Σ_t λ_t·gtop_t·dz_t            (= σ·T(w))
+  subject to σ·B(w_k) + Σ_t λ_t·gbot_t·dz_t = 1        (σ·B(w) = 1)
+             (sA−sD)·σ + gbotcut_t·dz_t ≥ 0  ∀t        (variant-b bottom cut)
+             (sC−sE)·σ + gtopcut_t·dz_t ≥ 0  ∀t        (variant-b top cut)
+             |dz_j| ≤ Δ·σ                               (trust region)
+             (w_lo−w_k)·σ ≤ dz_j ≤ (w_hi−w_k)·σ         (weight box)
+             σ ≥ σ_min
 
-where a_t = top_t(w_k), b_t = bot_t(w_k) are constants from `served`. Recovers
-Δw_t = dz_t/σ_t and returns w_k + Δw clamped to the box. On non-optimal LP
-status returns w_k (zero step → the outer loop reads it as stationary).
+where T(w_k) = Σ_t λ_t·top_t(w_k), B(w_k) = Σ_t λ_t·bot_t(w_k) are constants from
+`served`. A single σ over the cost-weighted aggregate matches the bilevel /
+single-level objective (ratio of sums, not sum of ratios) and is far more robust
+to bot→0 (B vanishes only if every period's bottom-40% is shed). Recovers
+Δw = dz/σ, clamps to the box. On non-optimal LP status returns w_k (zero step).
 """
 function cc_lp_step(w_k::Vector{Float64}, served::Vector{Float64}, sets,
                     grads, λ::Vector{Float64}, n::Int, T::Int;
@@ -121,52 +124,69 @@ function cc_lp_step(w_k::Vector{Float64}, served::Vector{Float64}, sets,
     m = n * T
     model = JuMP.Model(lp_optimizer)
     set_silent(model)
-    @variable(model, σ[1:T] >= σ_min)
+    @variable(model, σ >= σ_min)              # ONE σ for the whole horizon
     @variable(model, dz[1:m])
-    obj = JuMP.AffExpr(0.0)
+
+    # Cost-weighted aggregate numerator/denominator constants T(w_k), B(w_k).
+    T_wk = 0.0; B_wk = 0.0
     for t in 1:T
         off = (t - 1) * n
-        T_set, B_set, (A, D), (C, E) = sets[t]
+        T_set, B_set, _, _ = sets[t]
         servt = view(served, (off + 1):(off + n))
-        a_t = sum(servt[i] for i in T_set)        # top_t(w_k)
-        b_t = sum(servt[i] for i in B_set)        # bot_t(w_k)
-        # σ_t · bot_t(w) = 1
-        @constraint(model, b_t * σ[t] + sum(gbot[off + j] * dz[off + j] for j in 1:n) == 1)
-        # variant-(b) boundary cuts (keep the sort self-consistent over the step)
-        @constraint(model, (servt[A] - servt[D]) * σ[t] +
+        T_wk += λ[t] * sum(servt[i] for i in T_set)
+        B_wk += λ[t] * sum(servt[i] for i in B_set)
+    end
+
+    # σ·B(w) = 1   →   σ·B(w_k) + Σ_t λ_t·gbot_t·dz_t = 1
+    denom = JuMP.AffExpr(0.0)
+    JuMP.add_to_expression!(denom, B_wk, σ)
+    for t in 1:T
+        off = (t - 1) * n
+        for j in 1:n
+            JuMP.add_to_expression!(denom, λ[t] * gbot[off + j], dz[off + j])
+        end
+    end
+    @constraint(model, denom == 1.0)
+
+    # Per-period variant-(b) boundary cuts (single σ) + trust region + box.
+    for t in 1:T
+        off = (t - 1) * n
+        _, _, (A, D), (C, E) = sets[t]
+        servt = view(served, (off + 1):(off + n))
+        @constraint(model, (servt[A] - servt[D]) * σ +
                            sum(gbotcut[off + j] * dz[off + j] for j in 1:n) >= 0)
-        @constraint(model, (servt[C] - servt[E]) * σ[t] +
+        @constraint(model, (servt[C] - servt[E]) * σ +
                            sum(gtopcut[off + j] * dz[off + j] for j in 1:n) >= 0)
         for j in 1:n
             gj = off + j
-            @constraint(model, dz[gj] <=  Δ * σ[t])             # trust region
-            @constraint(model, dz[gj] >= -Δ * σ[t])
-            @constraint(model, dz[gj] <= (w_hi[gj] - w_k[gj]) * σ[t])  # box
-            @constraint(model, dz[gj] >= (w_lo[gj] - w_k[gj]) * σ[t])
+            @constraint(model, dz[gj] <=  Δ * σ)                       # trust region
+            @constraint(model, dz[gj] >= -Δ * σ)
+            @constraint(model, dz[gj] <= (w_hi[gj] - w_k[gj]) * σ)     # box
+            @constraint(model, dz[gj] >= (w_lo[gj] - w_k[gj]) * σ)
         end
-        JuMP.add_to_expression!(obj, λ[t] * a_t, σ[t])          # λ_t·a_t·σ_t
+    end
+
+    # Objective: σ·T(w) = σ·T(w_k) + Σ_t λ_t·gtop_t·dz_t
+    obj = JuMP.AffExpr(0.0)
+    JuMP.add_to_expression!(obj, T_wk, σ)
+    for t in 1:T
+        off = (t - 1) * n
         for j in 1:n
             JuMP.add_to_expression!(obj, λ[t] * gtop[off + j], dz[off + j])
         end
     end
     @objective(model, Min, obj)
+
     optimize!(model)
     st = termination_status(model)
     if st ∉ (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL)
         @warn "[SLP-CC] LP status $st — taking zero step this iter"
         return copy(w_k)
     end
-    σv = JuMP.value.(σ); dzv = JuMP.value.(dz)
+    σv = JuMP.value(σ); dzv = JuMP.value.(dz)
     w_new = copy(w_k)
-    for t in 1:T
-        off = (t - 1) * n
-        for j in 1:n
-            gj = off + j
-            w_new[gj] = w_k[gj] + dzv[gj] / σv[t]
-        end
-    end
     @inbounds for gj in 1:m
-        w_new[gj] = clamp(w_new[gj], w_lo[gj], w_hi[gj])
+        w_new[gj] = clamp(w_k[gj] + dzv[gj] / σv, w_lo[gj], w_hi[gj])
     end
     return w_new
 end
@@ -216,7 +236,8 @@ Sequential Charnes–Cooper LP upper level (variant b). Per outer iteration:
   5. Backtracking line search on the TRUE Palma objective (monotone descent),
      best-iterate tracking. Re-sort next iteration (active-set update).
 
-Minimizes Σ_t λ_t·top_t/bot_t. Returns `(; weights, pshed, palma_value,
+Minimizes (Σ_t λ_t·top_t)/(Σ_t λ_t·bot_t) (ratio of cost-weighted sums; matches
+the single-level trade-off). Returns `(; weights, pshed, palma_value,
 palma_ratio_reported, period_ratios, equality_floor, converged, slp_iters,
 n_primal, n_adjoint, history, weight_ids, pshed_nw_ids)`.
 """

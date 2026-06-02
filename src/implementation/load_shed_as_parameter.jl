@@ -323,11 +323,15 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Per-Period Sort Decomposition
+    # Per-Period Sort, Cost-Weighted AGGREGATE Palma (ratio of sums)
     #
-    # Each period's N pshed values are sorted independently using N×N
-    # binary permutation matrices. The objective is the cost-weighted sum
-    # of per-period Palma ratios: min Σ_t λ[t] * Palma_t
+    # Each period's N served values are sorted independently using N×N binary
+    # permutation matrices, giving per-period top_t / bot_t. The objective is the
+    # single cost-weighted aggregate Palma ratio
+    #   min  (Σ_t λ[t]·top_t) / (Σ_t λ[t]·bot_t)
+    # via ONE Charnes-Cooper σ (σ·Σλ·bot = 1, min σ·Σλ·top) — NOT the sum of
+    # per-period ratios Σ_t λ[t]·(top_t/bot_t). Matches the single-level control
+    # add_palma_machinery_cw_aggregate!.
     #
     # Binary count: T*N² (e.g., 9*225 = 2025 for T=9, N=15)
     # vs global sort: (T*N)² (e.g., 135² = 18225)
@@ -417,9 +421,10 @@ function palma_ratio_minimization(
     # Palma indices (same for each period since all have n loads)
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    # Build per-period Palma ratios via Charnes-Cooper
-    # σ[t] = 1 / bot_sum_t, objective = min Σ_t λ[t] * σ[t] * top_sum_t
-    @variable(model, σ[1:n_periods] >= 1e-8)
+    # Cost-weighted aggregate Palma via Charnes-Cooper: ONE σ for the whole
+    # horizon. top_sum = Σ_t λ_t·top_t, bot_sum = Σ_t λ_t·bot_t; σ·bot_sum = 1;
+    # objective = min σ·top_sum  (= (Σ_t λ_t·top_t)/(Σ_t λ_t·bot_t), ratio of sums).
+    @variable(model, σ >= 1e-8)
 
     period_top_sums = []
     period_bot_sums = []
@@ -454,22 +459,53 @@ function palma_ratio_minimization(
             @constraint(model, sorted_t[k] <= sorted_t[k+1])
         end
 
-        # Palma sums for this period
+        # Per-period Palma sums (aggregated below with the λ weights)
         push!(period_top_sums, @expression(model, sum(sorted_t[i] for i in top_10_idx)))
         push!(period_bot_sums, @expression(model, sum(sorted_t[i] for i in bottom_40_idx)))
-
-        # Charnes-Cooper normalization: σ[t] * bot_sum_t = 1
-        @constraint(model, σ[t] * period_bot_sums[t] == 1.0)
     end
 
     #=========================================================================
-    # Objective: pure cost-weighted sum of per-period Palma ratios
-    #   min Σ_t λ[t] * σ[t] * top_sum_t       (σ[t] = 1 / bot_sum_t)
+    # Objective: cost-weighted aggregate served-Palma (ratio of sums)
+    #   top_sum = Σ_t λ[t]·top_t,  bot_sum = Σ_t λ[t]·bot_t
+    #   σ·bot_sum = 1,  min σ·top_sum   (= top_sum/bot_sum)
     #
-    # No efficiency term, no regularizer — the upper level is pure served-Palma.
+    # ONE σ over the cost-weighted aggregate — matches the single-level
+    # add_palma_machinery_cw_aggregate!. No efficiency term, no regularizer:
+    # the upper level is pure served-Palma.
     =========================================================================#
 
-    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))
+    top_sum_agg = @expression(model, sum(λ[t] * period_top_sums[t] for t in 1:n_periods))
+    bot_sum_agg = @expression(model, sum(λ[t] * period_bot_sums[t] for t in 1:n_periods))
+    @constraint(model, σ * bot_sum_agg == 1.0)
+    @objective(model, Min, σ * top_sum_agg)
+
+    # MIP warm-start: the always-feasible "stay at current weights" point —
+    #   Δw = 0; a[t] = permutation sorting period t's CURRENT served ascending;
+    #   u[t] = a[t]·served_prev; σ = 1/(Σ_t λ_t·bot40(served_prev_t)) = 1/bot_sum_agg.
+    # Recomputed each call from pshed_prev so it adapts to the current iterate. Gives
+    # Gurobi a feasible incumbent (objective = current Palma) at root rather than
+    # hunting for the first feasible point — the fix for the TIME_LIMIT-no-incumbent
+    # stall the single global normalization caused. (A "sequential" start reusing the
+    # previous iter's solution is NOT feasible-safe: the served sort order shifts
+    # between iters, violating the ascending-sort constraints — so the current-sort
+    # do-nothing point is the right per-iteration start.)
+    let bot_sum_ws = 0.0
+        for j in 1:m
+            set_start_value(Δw[j], 0.0)
+        end
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            served_t = Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
+            perm = sortperm(served_t)                       # perm[i] = load at sort position i
+            for i in 1:n, j in 1:n
+                hit = (perm[i] == j)
+                set_start_value(a[t][i, j], hit ? 1.0 : 0.0)
+                set_start_value(u[t][i, j], hit ? served_t[j] : 0.0)
+            end
+            bot_sum_ws += λ[t] * sum(served_t[perm[i]] for i in bottom_40_idx)
+        end
+        set_start_value(σ, 1.0 / max(bot_sum_ws, 1e-8))
+    end
 
     #=========================================================================
     # Solve
@@ -697,11 +733,9 @@ function palma_ratio_minimization_formal_cc(
         end
     end
 
-    # σ_t ≥ σ_min > 0 (no upper bound — matches formal CC math)
-    @variable(model, σ[t = 1:n_periods])
-    for t in 1:n_periods
-        JuMP.set_lower_bound(σ[t], sigma_min)
-    end
+    # ONE σ ≥ σ_min > 0 for the whole horizon (no upper bound — matches formal CC
+    # math). Ratio of cost-weighted sums ⇒ a single CC scaling, not one per period.
+    @variable(model, σ >= sigma_min)
 
     # Binary permutation matrices — unchanged from weak CC
     a = Any[]
@@ -715,7 +749,7 @@ function palma_ratio_minimization_formal_cc(
     # Rescaled pserved (linear expression). By block-diagonality, only k with
     # t(k) == t(j) contributes — we still sum over all k since J[j,k] ≈ 0 off-block.
     @expression(model, pserved_z[j = 1:m],
-        σ[((j - 1) ÷ n) + 1] * (pd[j] - pshed_prev[j])
+        σ * (pd[j] - pshed_prev[j])
         - sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
     )
 
@@ -774,53 +808,86 @@ function palma_ratio_minimization_formal_cc(
         for k in 1:(n - 1)
             @constraint(model, sorted_z_t[k] <= sorted_z_t[k + 1])
         end
-
-        # Formal-CC denominator normalization (LINEAR): Σ_{i∈bot40,j} u_z[t][i,j] = 1
-        @constraint(model, sum(u_z[t][i, j] for i in bottom_40_idx, j in 1:n) == 1)
     end
 
-    # Rescaled trust region
+    # Formal-CC denominator normalization (LINEAR), ONE constraint over the
+    # cost-weighted aggregate: Σ_t λ_t·Σ_{i∈bot40,j} u_z[t][i,j] = 1  (= σ·bot_sum=1).
+    @constraint(model,
+        sum(λ[t] * sum(u_z[t][i, j] for i in bottom_40_idx, j in 1:n)
+            for t in 1:n_periods) == 1)
+
+    # Rescaled trust region (single σ)
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
-        @constraint(model, Δw_z[j] >= -trust_radius * σ[t])
-        @constraint(model, Δw_z[j] <=  trust_radius * σ[t])
+        @constraint(model, Δw_z[j] >= -trust_radius * σ)
+        @constraint(model, Δw_z[j] <=  trust_radius * σ)
     end
 
-    # Rescaled weight bounds
+    # Rescaled weight bounds (single σ)
     for j in 1:m
         lid_idx = ((j - 1) % n_per_period) + 1
         load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
-        t = ((j - 1) ÷ n) + 1
         if load_id in critical_ids
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= 100.0 * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= 100.0 * σ)
         else
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] >= w_min * σ[t])
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= w_max * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] >= w_min * σ)
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= w_max * σ)
         end
     end
 
-    # Rescaled per-period weight budget
+    # Rescaled per-period weight budget (single σ)
     if isfinite(weight_budget)
         for t in 1:n_periods
             offset = (t - 1) * n
             sum_prev = sum(weights_prev[offset + i] for i in 1:n)
             @constraint(model,
-                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ[t])
+                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ)
         end
     end
 
     # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇔ pserved ∈ [0, pd-ε] ⇒
-    #     pserved_z ∈ [0, (pd-ε)·σ_t]
+    #     pserved_z ∈ [0, (pd-ε)·σ]   (single σ)
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
         @constraint(model, pserved_z[j] >= 0)
-        @constraint(model, pserved_z[j] <= (pd[j] - ε) * σ[t])
+        @constraint(model, pserved_z[j] <= (pd[j] - ε) * σ)
     end
 
-    # Linear objective: min Σ_t λ_t · Σ_{i∈top10,j} u_z[t][i,j]
+    # Linear objective: min Σ_t λ_t · Σ_{i∈top10,j} u_z[t][i,j]  (= σ·top_sum)
     @objective(model, Min,
         sum(λ[t] * sum(u_z[t][i, j] for i in top_10_idx, j in 1:n)
             for t in 1:n_periods))
+
+    # MIP warm-start: the always-feasible "stay at current weights" point in z-space —
+    #   Δw_z = 0; a[t] = permutation sorting period t's CURRENT served ascending;
+    #   σ = 1/(Σ_t λ_t·bot40(served_prev_t)) so the single normalization Σλ·Σ_{bot40}u_z=1
+    #   holds exactly; u_z[t] = a[t]·σ·served_prev. Recomputed each call from pshed_prev.
+    # Without this the formal-CC MILP could not find ANY feasible incumbent in the
+    # TimeLimit under the single global normalization (per-period scales float, loose
+    # relaxation). The do-nothing point fixes that; a "sequential" carry of the prior
+    # iterate's solution is NOT feasible-safe (served sort order shifts between iters).
+    let bot_sum_ws = 0.0,
+        served_by_t = Vector{Vector{Float64}}(undef, n_periods),
+        perm_by_t   = Vector{Vector{Int}}(undef, n_periods)
+        for t in 1:n_periods
+            offset = (t - 1) * n
+            served_t = Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
+            served_by_t[t] = served_t
+            perm_by_t[t]   = sortperm(served_t)
+            bot_sum_ws += λ[t] * sum(served_t[perm_by_t[t][i]] for i in bottom_40_idx)
+        end
+        σ_ws = 1.0 / max(bot_sum_ws, 1e-8)
+        set_start_value(σ, σ_ws)
+        for j in 1:m
+            set_start_value(Δw_z[j], 0.0)
+        end
+        for t in 1:n_periods
+            served_t = served_by_t[t]; perm = perm_by_t[t]
+            for i in 1:n, j in 1:n
+                hit = (perm[i] == j)
+                set_start_value(a[t][i, j], hit ? 1.0 : 0.0)
+                set_start_value(u_z[t][i, j], hit ? σ_ws * served_t[j] : 0.0)
+            end
+        end
+    end
 
     solve_time = @elapsed optimize!(model)
     status = termination_status(model)
@@ -834,13 +901,9 @@ function palma_ratio_minimization_formal_cc(
             @warn "[Palma formal CC] Solver hit $status with an incumbent — returning suboptimal solution"
         end
 
-        σ_val   = value.(σ)
+        σ_val    = value(σ)
         Δw_z_val = value.(Δw_z)
-        Δw_val   = similar(Δw_z_val)
-        for k in 1:m
-            t = ((k - 1) ÷ n) + 1
-            Δw_val[k] = Δw_z_val[k] / σ_val[t]
-        end
+        Δw_val   = Δw_z_val ./ σ_val
 
         weights_new     = weights_prev .+ Δw_val
         pshed_new_val   = pshed_prev   .+ dpshed_dw * Δw_val
