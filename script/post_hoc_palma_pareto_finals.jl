@@ -116,6 +116,32 @@ function _palma_ratio_safe(x::AbstractVector{<:Real})
     return (bot40 > 1e-4 * total) ? top10 / bot40 : NaN
 end
 
+"""
+Matched fairness metric — per-period cost-weighted SERVED-Palma:
+
+    Σ_t λ_t · ( top10%(pserved_t) / bot40%(pserved_t) ),   pserved_{t,j} = pd_{t,j} − shed_{t,j}
+
+This is exactly what the bilevel upper level (`palma_ratio_minimization`) and the
+refactored single-level trade-off (`palma_trade_off_mn.jl`) optimize — sorting
+each period independently, NOT the horizon-aggregate shed. `shed_pl` and `pd_pl`
+are [period × load]; `λ` has length T. Returns NaN if any period's served-Palma
+is undefined (bot40 below threshold), mirroring `palma_cost_weighted_log`.
+"""
+function _cost_weighted_served_palma(shed_pl::AbstractMatrix, pd_pl::AbstractMatrix,
+                                     λ::AbstractVector)
+    T = size(shed_pl, 1)
+    @assert size(pd_pl, 1) == T "pd_pl period axis ($(size(pd_pl,1))) ≠ shed_pl ($T)"
+    @assert length(λ) == T "λ length ($(length(λ))) ≠ T ($T)"
+    acc = 0.0
+    for t in 1:T
+        served_t = [max(0.0, pd_pl[t, j] - shed_pl[t, j]) for j in axes(shed_pl, 2)]
+        pt = _palma_ratio_safe(served_t)
+        isfinite(pt) || return NaN
+        acc += λ[t] * pt
+    end
+    return acc
+end
+
 function shed_norms(v::AbstractVector{<:Real})
     finite = filter(isfinite, v)
     isempty(finite) && return (L1 = NaN, L2 = NaN, Linf = NaN,
@@ -141,10 +167,26 @@ function load_trade_off_curve(path::String)
     n_α          = length(alphas)
     L1    = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α)
     CoV   = zeros(n_α); Palma = zeros(n_α)
+    # L1/L2/L∞/CoV: aggregate per-load shed vector (unchanged).
     for i in 1:n_α
         nm = shed_norms(collect(per_load_agg[i, :]))
         L1[i] = nm.L1; L2[i] = nm.L2; Linf[i] = nm.Linf
-        CoV[i] = nm.CoV; Palma[i] = nm.Palma
+        CoV[i] = nm.CoV
+    end
+    # Palma: the MATCHED metric = Σ_t λ_t · Palma_t^served. Prefer the value the
+    # (refactored) trade-off script saves directly; fall back to recomputing it
+    # from the per-period shed/pd tensors for older pinned JLD2s that predate it.
+    λ = saved["PEAK_TIME_COSTS"]
+    if haskey(saved, "palma_cost_weighted_log")
+        Palma .= saved["palma_cost_weighted_log"]
+    else
+        plps = saved["per_load_period_shed"]   # alpha × load × period
+        pd   = saved["per_load_period_pd"]     # load × period
+        pd_pl = permutedims(pd)                # period × load
+        for i in 1:n_α
+            shed_pl = permutedims(@view plps[i, :, :])   # load×period → period×load
+            Palma[i] = _cost_weighted_served_palma(shed_pl, pd_pl, λ)
+        end
     end
     total_shed = L1
     return (alphas = alphas, total_shed = total_shed,
@@ -152,21 +194,36 @@ function load_trade_off_curve(path::String)
             n_periods = saved["N_PERIODS"], source = path)
 end
 
-"Aggregate a (T × n_loads) shed matrix into per-load totals, ignoring NaNs."
-function _aggregate_norms(matrix::AbstractMatrix)
+"""
+Norms for a [period × load] shed matrix. L1/L2/L∞/CoV are computed on the
+per-load aggregate-shed vector (sum over periods, NaNs ignored). `Palma` is the
+MATCHED per-period cost-weighted served-Palma — `Σ_t λ_t·Palma_t^served` — which
+needs the per-period demand `pd_pl` [period × load] and costs `λ`. When those
+are not supplied, `Palma` falls back to NaN (the aggregate-shed Palma is no
+longer what we plot).
+"""
+function _aggregate_norms(matrix::AbstractMatrix;
+                          pd_pl::Union{Nothing,AbstractMatrix} = nothing,
+                          λ::Union{Nothing,AbstractVector} = nothing)
     n_loads = size(matrix, 2)
     v = zeros(n_loads)
     for t in axes(matrix, 1), j in 1:n_loads
         x = matrix[t, j]; isnan(x) || (v[j] += x)
     end
     nm = shed_norms(v)
+    palma = (pd_pl === nothing || λ === nothing) ? NaN :
+            _cost_weighted_served_palma(matrix, pd_pl, λ)
     return (total_shed = nm.L1, L1 = nm.L1, L2 = nm.L2,
-            Linf = nm.Linf, CoV = nm.CoV, Palma = nm.Palma)
+            Linf = nm.Linf, CoV = nm.CoV, Palma = palma)
 end
 
 function load_bilevel_point(path::String)
     saved = JLD2.load(path)
-    int_norms = _aggregate_norms(saved["pshed_matrix"])
+    # Per-period demand + costs for the matched served-Palma. pd_ref_matrix is
+    # [period × load], same orientation as pshed_matrix.
+    pd_pl = saved["pd_ref_matrix"]
+    λ     = saved["PEAK_TIME_COSTS"]
+    int_norms = _aggregate_norms(saved["pshed_matrix"]; pd_pl = pd_pl, λ = λ)
     # The bilevel pipeline saves the final relaxed MLD (Step 3, pre-rounding)
     # alongside the rounded integer solution. Older JLD2s predate this
     # instrumentation or may have an all-NaN matrix on non-convergence —
@@ -175,7 +232,7 @@ function load_bilevel_point(path::String)
     if haskey(saved, "relaxed_pshed_matrix")
         rlx_mat = saved["relaxed_pshed_matrix"]
         if any(!isnan, rlx_mat)
-            rlx_norms = _aggregate_norms(rlx_mat)
+            rlx_norms = _aggregate_norms(rlx_mat; pd_pl = pd_pl, λ = λ)
         end
     end
     return (int = int_norms, rlx = rlx_norms,
@@ -237,7 +294,24 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
         end
     end
     append!(xs_all, xs_bi); append!(ys_all, ys_bi)
-    isempty(xs_all) && error("Nothing to plot for y=$ylab.")
+    if isempty(xs_all)
+        # No finite points for this y-axis. For the matched served-Palma this
+        # happens in the INTEGER/rounded domain: whole-block integer shedding
+        # zeroes a period's bot40-served, so the per-period Palma is undefined
+        # (the σ_t·bot_sum_t=1 protection only holds in the continuous problem).
+        # Degrade to an annotated empty panel instead of crashing the whole run,
+        # so the other (L1/L∞/CoV) panels and the relaxed figures still render.
+        @warn "No finite points for y=$ylab — rendering empty panel " *
+              "(matched per-period served-Palma is undefined for integer/rounded shedding)."
+        p = plot(; xlabel = "total load shed (kW)", ylabel = ylab,
+            xlims = (0, 1), ylims = (0, 1), xticks = false, yticks = false,
+            framestyle = :box, legend = false,
+            background_color = :white, foreground_color = :black, _PARETO_FONT...)
+        annotate!(p, 0.5, 0.5,
+            text("undefined for integer shedding\n(per-period bot40 served = 0)",
+                 18, :center, :gray40))
+        return p
+    end
 
     if zoom && !isempty(xs_bi)
         # Frame around the bilevel markers with 50% padding so the stars sit
@@ -323,7 +397,7 @@ function build_summary_figure(sweeps::Dict, bilevels::Dict, out_path::String;
         raw"$\ell_\infty$ norm of load shed (kW)"; zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_palma = _pareto_panel(sweeps, bilevels, :Palma,
-        "Palma ratio of load shed (unitless)"; zoom = zoom,
+        "cost-weighted served-Palma (unitless)"; zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_cov   = _pareto_panel(sweeps, bilevels, :CoV,
         "CoV of load shed (unitless)"; zoom = zoom,
@@ -345,7 +419,7 @@ function build_palma_figure(sweeps::Dict, bilevels::Dict, out_path::String;
                                bilevel_alpha::Real = 1.0,
                                bilevel_label_suffix::AbstractString = "")
     panel = _pareto_panel(sweeps, bilevels, :Palma,
-        "Palma ratio of load shed (unitless)";
+        "cost-weighted served-Palma (unitless)";
         show_legend = true, legend_position = legend_position, zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     fig = plot(panel;
@@ -396,9 +470,12 @@ for st in SWEEP_STYLES
     sweeps[st.key] = load_trade_off_curve(path)
 end
 
-# Trim the α=1 tail of the relaxed Palma sweep — the endpoint collapses
-# (no bot40 mass / huge top10), pulling the y-axis to where the rest of the
-# sweep and the bilevel stars become unreadable.
+# NOTE: the α=1 endpoint of the relaxed sweep used to be trimmed because the
+# aggregate-SHED Palma collapsed there (no bot40 mass / huge top10), wrecking the
+# y-axis. The MATCHED served-Palma we now plot is well-behaved at α=1 (pure
+# fairness maximizes the bot40 served mass → small, finite ratio), so the trim is
+# no longer needed. `_drop_nan` in `_pareto_panel` still removes any genuinely
+# undefined low-α points (a period's bot40 served fully shed under pure efficiency).
 function _trim_last(sw::NamedTuple)
     n = length(sw.alphas)
     n < 2 && return sw
@@ -407,11 +484,6 @@ function _trim_last(sw::NamedTuple)
             L1 = sw.L1[keep], L2 = sw.L2[keep], Linf = sw.Linf[keep],
             CoV = sw.CoV[keep], Palma = sw.Palma[keep],
             n_periods = sw.n_periods, source = sw.source)
-end
-if haskey(sweeps, "palma_relaxed")
-    n_before = length(sweeps["palma_relaxed"].alphas)
-    sweeps["palma_relaxed"] = _trim_last(sweeps["palma_relaxed"])
-    println("  trimmed palma_relaxed: $n_before → $(length(sweeps["palma_relaxed"].alphas)) α points (dropped α=1 endpoint)")
 end
 
 if SHOW_BILEVEL

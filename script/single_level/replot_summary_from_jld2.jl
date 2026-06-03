@@ -102,7 +102,7 @@ function replot_one(path::String)
         # aggregate (palma_ratio_log) for older JLD2s that predate it.
         yvec = haskey(d, "palma_cost_weighted_log") ? d["palma_cost_weighted_log"] : d["palma_ratio_log"]
         ylab = haskey(d, "palma_cost_weighted_log") ?
-            "cost-weighted served-Palma" : "Palma ratio of shed (unitless)"
+            "cost-weighted served-Palma (unitless)" : "Palma ratio of shed (unitless)"
         finite_palma = findall(isfinite, yvec)
         xs = agg_total_shed[finite_palma]
         ys = yvec[finite_palma]
