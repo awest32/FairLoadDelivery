@@ -701,11 +701,11 @@ end
 # PRIMARY Pareto: matches the bilevel upper level — total shed vs the
 # cost-weighted per-period served-Palma: Σ_t λ_t·top10(srv_t) / Σ_t λ_t·bot40(srv_t).
 p_pareto = build_pareto_curve(agg_total_shed, palma_cost_weighted_log,
-    "cost-weighted served-Palma (unitless)")
+    "Palma (unitless)")
 # SECONDARY (diagnostic): UNCOSTED aggregate served-Palma (λ_t=1). Saved for
 # side-by-side comparison; NOT the optimized quantity.
 p_pareto_aggdiag = build_pareto_curve(agg_total_shed, palma_ratio_log,
-    "uncosted served-Palma (unitless, diagnostic)")
+    "Palma (unitless, uncosted diagnostic)")
 
 # Save each panel as its own figure (was a single 3-panel fig1).
 for (_name, _p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1),

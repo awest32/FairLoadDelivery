@@ -397,7 +397,7 @@ function build_summary_figure(sweeps::Dict, bilevels::Dict, out_path::String;
         raw"$\ell_\infty$ norm of load shed (kW)"; zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_palma = _pareto_panel(sweeps, bilevels, :Palma,
-        "cost-weighted served-Palma (unitless)"; zoom = zoom,
+        "Palma (unitless)"; zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     p_cov   = _pareto_panel(sweeps, bilevels, :CoV,
         "CoV of load shed (unitless)"; zoom = zoom,
@@ -419,7 +419,7 @@ function build_palma_figure(sweeps::Dict, bilevels::Dict, out_path::String;
                                bilevel_alpha::Real = 1.0,
                                bilevel_label_suffix::AbstractString = "")
     panel = _pareto_panel(sweeps, bilevels, :Palma,
-        "cost-weighted served-Palma (unitless)";
+        "Palma (unitless)";
         show_legend = true, legend_position = legend_position, zoom = zoom,
         bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
     fig = plot(panel;
