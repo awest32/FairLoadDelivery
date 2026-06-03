@@ -720,30 +720,17 @@ end
 
 # ============================================================
 # FIGURE 2: Pareto fronts (aggregate total shed vs L1 / L2 / L∞ / CoV of the
-# per-load aggregate-shed vector), α encoded by marker color. Colorbar lives
-# in a dedicated narrow subplot so the four data panels stay equally sized.
+# per-load aggregate-shed vector). Uses the SAME post-hoc style as Figure 1 /
+# post_hoc_palma_pareto_finals.jl (steelblue dots + grey line + ν endpoint
+# annotations) — no cividis colorbar.
 # ============================================================
-function pareto_norm_plot(total_shed_vec, norm_vec, alphas_vec, ylab)
-    plot(total_shed_vec, norm_vec,
-        seriestype = :line, lc = :grey,
-        marker = :circle, marker_z = alphas_vec, color = :cividis,
-        clims = (0.0, 1.0), colorbar = false,
-        xlabel = "total load shed (kW)", ylabel = ylab,
-        legend = false; FONT_KW...)
-end
+p_l1   = build_pareto_curve(agg_total_shed, l1_vec,   "L1 norm of shed (kW)")
+p_l2   = build_pareto_curve(agg_total_shed, l2_vec,   "L2 norm of shed (kW)")
+p_linf = build_pareto_curve(agg_total_shed, linf_vec, "L∞ norm of shed (kW)")
+p_cov  = build_pareto_curve(agg_total_shed, cov_vec,  "CoV (stdev/mean)")
 
-p_l1   = pareto_norm_plot(agg_total_shed, l1_vec,   alphas, "L1 norm of shed (kW)")
-p_l2   = pareto_norm_plot(agg_total_shed, l2_vec,   alphas, "L2 norm of shed (kW)")
-p_linf = pareto_norm_plot(agg_total_shed, linf_vec, alphas, "L∞ norm of shed (kW)")
-p_cov  = pareto_norm_plot(agg_total_shed, cov_vec,  alphas, "CoV (stdev/mean)")
-
-p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
-    color = :cividis, colorbar = false,
-    xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-    ylabel = "ν", title = "", framestyle = :box)
-
-fig2 = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
-    layout = @layout([a b c d e{0.02w}]),
+fig2 = plot(p_l1, p_l2, p_linf, p_cov,
+    layout = (1, 4),
     size = (2200, 600),
     left_margin = 14Plots.mm, right_margin = 6Plots.mm,
     top_margin = 8Plots.mm, bottom_margin = 14Plots.mm)

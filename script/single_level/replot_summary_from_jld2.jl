@@ -24,9 +24,12 @@ font_kw = (tickfontsize = 22, guidefontsize = 22,
            fontfamily = "Computer Modern")
 const ANNOT_PT = 14
 
-# Hard-coded sweep files to refresh. Add more here as new sweeps land.
+# Sweep files to refresh. Override with REPLOT_TARGETS (";"-separated paths) to
+# re-plot specific JLD2s without editing this default list.
 results_root = joinpath(@__DIR__, "..", "..", "results")
-const TARGETS = [
+const TARGETS = haskey(ENV, "REPLOT_TARGETS") ?
+    String.(split(ENV["REPLOT_TARGETS"], ";")) :
+    [
     joinpath(results_root, "2026-05-28", "palma_trade_off_mn",
              "palma_sweep_mn_more_meshed_6_bus_absolute.jld2"),
     joinpath(results_root, "2026-05-28", "palma_relaxed_trade_off_mn",
@@ -95,17 +98,21 @@ function replot_one(path::String)
     end
 
     p_pareto = if _is_palma(fair_func)
-        palma_ratio_log = d["palma_ratio_log"]
-        finite_palma = findall(isfinite, palma_ratio_log)
+        # PRIMARY: matched cost-weighted served-Palma; fall back to the uncosted
+        # aggregate (palma_ratio_log) for older JLD2s that predate it.
+        yvec = haskey(d, "palma_cost_weighted_log") ? d["palma_cost_weighted_log"] : d["palma_ratio_log"]
+        ylab = haskey(d, "palma_cost_weighted_log") ?
+            "cost-weighted served-Palma" : "Palma ratio of shed (unitless)"
+        finite_palma = findall(isfinite, yvec)
         xs = agg_total_shed[finite_palma]
-        ys = palma_ratio_log[finite_palma]
+        ys = yvec[finite_palma]
         αs = alphas[finite_palma]
         p = plot(xs, ys,
             seriestype = :line, lc = :grey,
             marker = :circle, markersize = 14, color = :steelblue,
             markerstrokecolor = :steelblue,
             xlabel = "total load shed (kW)",
-            ylabel = "Palma ratio of shed (unitless)",
+            ylabel = ylab,
             legend = false; font_kw...)
         _annotate_alpha_endpoints!(p, xs, ys, αs)
         p
@@ -167,24 +174,25 @@ function replot_one(path::String)
         cov_vec[i]  = m > 1e-9 ? s / m : NaN
     end
 
+    # Post-hoc style (steelblue dots + grey line + ν endpoint annotations), matching
+    # the summary pareto above and post_hoc_palma_pareto_finals.jl — no cividis colorbar.
     function pareto_norm_panel(y, ylab)
-        plot(agg_total_shed, y,
+        fin = findall(isfinite, y)
+        p = plot(agg_total_shed[fin], y[fin],
             seriestype = :line, lc = :grey,
-            marker = :circle, marker_z = alphas, color = :cividis,
-            clims = (0.0, 1.0), colorbar = false,
+            marker = :circle, markersize = 14, color = :steelblue,
+            markerstrokecolor = :steelblue,
             xlabel = "total load shed (kW)", ylabel = ylab,
             legend = false; font_kw...)
+        _annotate_alpha_endpoints!(p, agg_total_shed[fin], y[fin], alphas[fin])
+        p
     end
     p_l1   = pareto_norm_panel(l1_vec,   "L1 norm of shed (kW)")
     p_l2   = pareto_norm_panel(l2_vec,   "L2 norm of shed (kW)")
     p_linf = pareto_norm_panel(linf_vec, "L∞ norm of shed (kW)")
     p_cov  = pareto_norm_panel(cov_vec,  "CoV (stdev/mean)")
-    p_cbar = heatmap(reshape(collect(LinRange(0.0, 1.0, 256)), :, 1);
-        color = :cividis, colorbar = false,
-        xticks = false, yticks = ([1, 128, 256], ["0", "0.5", "1"]),
-        ylabel = "ν", title = "", framestyle = :box, font_kw...)
-    fig_norms = plot(p_l1, p_l2, p_linf, p_cov, p_cbar,
-        layout = @layout([a b c d e{0.02w}]),
+    fig_norms = plot(p_l1, p_l2, p_linf, p_cov,
+        layout = (1, 4),
         size = (2200, 600),
         left_margin = 7Plots.mm, right_margin = 6Plots.mm,
         top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)
