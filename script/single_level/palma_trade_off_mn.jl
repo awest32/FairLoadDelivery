@@ -130,7 +130,7 @@ REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18 (trough, midday, 
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
-alpha_points = 20
+alpha_points = 12
 alphas = collect(LinRange(0.0, 1.0, alpha_points))
 
 # ============================================================
@@ -394,7 +394,7 @@ mld_mn = _PMD.instantiate_mc_model(mn_data, _PMD.LinDist3FlowPowerModel, build_f
 JuMP.set_optimizer(mld_mn.model, Gurobi.Optimizer)
 JuMP.set_optimizer_attribute(mld_mn.model, "NonConvex",    2)
 JuMP.set_optimizer_attribute(mld_mn.model, "MIPGap",       1e-2)        # 1% — control, not tight
-JuMP.set_optimizer_attribute(mld_mn.model, "TimeLimit",    60 * 10)     # 10 min per α
+JuMP.set_optimizer_attribute(mld_mn.model, "TimeLimit",    180)         # 3 min per α (gaps don't close past this; bounds the NonConvex-MIQCP overrun)
 JuMP.set_optimizer_attribute(mld_mn.model, "MIPFocus",     1)
 JuMP.set_optimizer_attribute(mld_mn.model, "NumericFocus", 2)
 
