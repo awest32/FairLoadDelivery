@@ -1,6 +1,33 @@
 #=
 Sequential Charnes–Cooper LP upper level for served-Palma  (variant b)
 ======================================================================
+
+OBJECTIVE NOTE — single-σ, INTENTIONALLY NOT matched to the CC-MILP bilevel
+---------------------------------------------------------------------------
+This SLP (and `palma_value`/`palma_grad_pshed` in `frank_wolfe_palma.jl`)
+optimizes a SINGLE-σ ratio-of-sums:
+
+    f_SLP = ( Σ_t λ_t · top10(pshed_t) ) / ( Σ_t λ_t · bot40(pshed_t) )      (ONE global denom)
+
+The Gini/Palma CC-MILP bilevel (`load_shed_as_parameter.jl`,
+`palma_ratio_minimization[_formal_cc]`) optimizes a DIFFERENT functional — a
+per-period sum-of-ratios with a per-period σ_t:
+
+    f_CC  = Σ_t λ_t · ( top10(pshed_t) / bot40(pshed_t) )                    (σ_t · bot40_t = 1 per period)
+
+These are deliberately NOT unified. Do NOT "fix" this SLP to the per-period
+form: on shed-Palma the per-period denominator bot40(pshed_t) is routinely ≈0
+(it's the 40% LEAST-shed loads in a period), so per-period σ_t·bot_t=1 is
+numerically fragile / blows up. The single global denom only vanishes if EVERY
+period's bottom-40% is fully shed. The CC-MILP gets away with per-period σ_t
+because it forces pshed ∈ [ε, pd] (every load sheds ≥ ε, so bot40_t > 0); the
+SLP reads the raw lower-level MLD pshed, which has no such floor.
+
+CONSEQUENCE: the SLP and the CC-MILP produce DIFFERENT in-model objective
+values. Compare the two ONLY through the neutral post-hoc metric
+(`script/post_hoc_fairness_pareto.jl`, `_palma_ratio_safe` over per-load shed
+totals), never by their in-model objective. (2026-06-04, fairness-bilevel merge.)
+
 An alternative to the Frank-Wolfe driver in `frank_wolfe_palma.jl`. FW is a
 smooth conditional-gradient method, but Palma is hostile to it on two counts:
 the objective is FRACTIONAL (top/bot — FW must soften it with eps_denom and the

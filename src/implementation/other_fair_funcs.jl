@@ -515,18 +515,36 @@ function proportional_mn(served::Vector{<:AbstractVector{<:Real}};
 end
 
 """
-    palma_mn(shed; peak_time_costs=Float64[], weights=nothing)
+    palma_mn(shed; peak_time_costs=Float64[])
 
-Σ_t λ_t · Palma_t on `w_{t,i} · pshed_{t,i}` per period.
+Σ_t λ_t · Palma_t on **load shed** (pshed), matching the historical post-hoc
+convention. Per-period Palma is `top10%(shed_t) / bot40%(shed_t)` after sort.
+Lower = shed is more evenly distributed across loads. Different metric from the
+upper-level Palma objective (which sorts on pserved), but the bilevel is
+designed such that minimizing Palma(pserved) in the upper level reduces this
+post-hoc Palma(pshed) — high pserved-inequality and high pshed-inequality
+generally move together when pd is roughly uniform across loads.
 """
 function palma_mn(shed::Vector{<:AbstractVector{<:Real}};
-                  peak_time_costs::Vector{<:Real}=Float64[],
-                  weights::Union{Nothing,Vector{<:AbstractVector{<:Real}}}=nothing)
-    x = _weight_values(shed, weights)
-    T = length(x)
+                  peak_time_costs::Vector{<:Real}=Float64[])
+    T = length(shed)
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
     @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
-    return sum(palma_ratio(λ[t] * x[t]) for t in 1:T)
+    return sum(λ[t] * palma_ratio(Float64[shed[t][i] for i in eachindex(shed[t])]) for t in 1:T)
+end
+
+"""
+    gini_mn(shed; peak_time_costs=Float64[])
+
+Σ_t λ_t · Gini_t on **load shed** (pshed) — historical post-hoc convention,
+analogous to `palma_mn`. Per-period Gini = Σ_i (2i−n−1) shed_{(i)} / (n · Σ shed).
+"""
+function gini_mn(shed::Vector{<:AbstractVector{<:Real}};
+                 peak_time_costs::Vector{<:Real}=Float64[])
+    T = length(shed)
+    λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
+    @assert length(λ) == T "peak_time_costs must have length $T, got $(length(λ))"
+    return sum(λ[t] * gini_index(Float64[shed[t][i] for i in eachindex(shed[t])]) for t in 1:T)
 end
 
 

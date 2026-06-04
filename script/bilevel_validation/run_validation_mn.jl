@@ -37,6 +37,7 @@ using CSV
 using Dates
 using Logging, LoggingExtras
 using Printf
+using JLD2
 
 const PMD = PowerModelsDistribution
 
@@ -48,7 +49,7 @@ include("../../src/implementation/load_shed_as_parameter.jl")
 # CONFIGURATION
 # ============================================================
  #CASE = "case6_unbalanced_switch_more_meshed_bd_good4integer"
-CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # no-bd — matches single-level + finals
+CASE = "case6_unbalanced_switch_more_meshed_good4integer"  # baseline (no QuadBD)
  #CASE = "motivation_c_good4integer"
 case = "6_bus" #"13_bus"#"6_bus"
 #critical_load = ["611"]
@@ -56,10 +57,7 @@ CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
-FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
-# Which quantity the Palma objective sorts: "served" (income-Palma analogy; default)
-# or "shed" (fairness of the shed burden — matches the single-level shed-objective).
-PALMA_ON = get(ENV, "PALMA_TARGET", "served") == "shed" ? :shed : :served
+FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")  # "min_max", "palma", "gini", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -74,10 +72,14 @@ N_BERNOULLI_SAMPLES = 2000
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
  # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
- #SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
- #SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
- SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8 — defense: original formal-CC MILP tractable (forward Jacobian = 72 cols, vs 216 at T=24 which hung)
+ # SELECTED_HOURS  = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
+ SELECTED_HOURS    = [4, 18, 22]            # T=3: trough, evening peak, descent
+ # SELECTED_HOURS  = [4, 18]                # T=2: trough vs evening peak
  #SELECTED_HOURS    = [4, 18, 8]
+# ENV override (e.g. SELECTED_HOURS="4,12,18,22" for T=4); falls back to the line above.
+if haskey(ENV, "SELECTED_HOURS")
+    SELECTED_HOURS = parse.(Int, split(ENV["SELECTED_HOURS"], ","))
+end
 
  N_PERIODS         = length(SELECTED_HOURS)
 PEAK_STRESS       = 1.0                            # uniform multiplier over the paper schedules
@@ -87,7 +89,7 @@ PERIOD_HOURS      = SELECTED_HOURS
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [1, 4, 6]   # T=8 indices → hours 4, 12, 18
+REP_PERIODS = collect(1:N_PERIODS)   # all periods (T=3 currently)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -104,9 +106,7 @@ ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer,
     "print_level"     => 0)
 gurobi_solver = Gurobi.Optimizer
 
-# shed-objective writes to a separate dir so it won't overwrite the served run.
-obj_dir_suffix = PALMA_ON === :shed ? "_shedobj" : ""
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)$(obj_dir_suffix)"
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
@@ -169,9 +169,43 @@ iter_timings = Dict{Symbol,Any}[]   # one dict per completed bilevel iteration
 last_status = MOI.OPTIMIZE_NOT_CALLED
 final_weight_ids = Int[]
 final_pshed_nw_ids = Tuple[]
+# Fallback snapshot of iter-N data so a Step-3 failure (Ipopt LOCALLY_INFEASIBLE
+# on the final relaxed solve at the converged weights) doesn't discard the
+# whole bilevel — we still want a usable pshed matrix to plot the bilevel
+# point against the single-level Pareto.
+final_pshed_val::Vector{Float64} = Float64[]
+final_pd_all::Vector{Float64}    = Float64[]
 
-for k in 1:ITERATIONS
-    global fair_weights, iteration_label_consistent, last_status, final_weight_ids, final_pshed_nw_ids
+# Optional resume: if ENV["RESUME_FROM_JLD2"] is set, skip the bilevel loop and
+# load the converged weights from a prior run's JLD2. Used to re-run Step 3
+# onwards (rounding, AC PF, full save) without redoing 20 bilevel iterations —
+# e.g. after fixing the Step-3 integer warmstart logic below.
+RESUME_JLD2 = get(ENV, "RESUME_FROM_JLD2", "")
+RESUMING = !isempty(RESUME_JLD2)
+
+if RESUMING
+    @info "RESUMING from JLD2: $RESUME_JLD2 — skipping bilevel iteration loop"
+    @assert isfile(RESUME_JLD2) "RESUME_FROM_JLD2 path does not exist: $RESUME_JLD2"
+    rdata = JLD2.load(RESUME_JLD2)
+    fair_weights      = rdata["final_fair_weights"]
+    final_weight_ids  = rdata["final_weight_ids"]
+    n_loads_resume    = length(final_weight_ids)
+    @assert length(fair_weights) == n_loads_resume * length(nw_ids_sorted) "RESUME JLD2 fair_weights length mismatches (N=$n_loads_resume) × (T=$(length(nw_ids_sorted)))"
+    # Push the saved per-period weights into mn_new
+    for (t, nw_id) in enumerate(nw_ids_sorted)
+        offset = (t - 1) * n_loads_resume
+        for (j, lid) in enumerate(final_weight_ids)
+            mn_new["nw"][nw_id]["load"][string(lid)]["weight"] = fair_weights[offset + j]
+        end
+    end
+    # Mirror final_pshed_nw_ids from the JLD2 if present, else reconstruct
+    final_pshed_nw_ids = Tuple[(nw_id, lid) for nw_id in nw_ids_sorted for lid in final_weight_ids]
+    last_status = MOI.OPTIMAL
+end
+
+for k in 1:(RESUMING ? 0 : ITERATIONS)
+    global fair_weights, iteration_label_consistent, last_status, final_weight_ids, final_pshed_nw_ids,
+           final_pshed_val, final_pd_all
     println("\n  --- Iteration $k ---")
 
     timing = Dict{Symbol,Any}(:iter => k)
@@ -182,11 +216,12 @@ for k in 1:ITERATIONS
         # then run DiffOpt lower level on the topology-fixed multinetwork. Mirrors
         # the single-period warm-start at run_validation.jl:220-225.
         #
-        # Skipped for Palma: with switch topology fixed, pshed becomes near-binary
-        # ({0, pd} per load) and bottom-40%-of-served can sum to zero in some
-        # periods, leaving the Charnes-Cooper constraint σ[t]*bot_sum_t==1 with no
-        # feasible σ — Gurobi then hits TimeLimit with no incumbent.
-        if FAIR_FUNC != "palma"
+        # Skipped for Palma and Gini: with switch topology fixed, pshed becomes
+        # near-binary ({0, pd} per load) → χ = pserved/pd is near-binary too. The
+        # Palma bot40 sum or the Gini n·Σχ normalization can hit zero in at least
+        # one period, leaving Charnes-Cooper σ unbounded — Gurobi then hits
+        # TimeLimit with no incumbent. (See memory project_palma_skip_integer_warmstart.)
+        if FAIR_FUNC != "palma" && FAIR_FUNC != "gini"
             t_int = @elapsed mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
                 peak_time_costs=PEAK_TIME_COSTS)
             timing[:integer_warmstart_s] = t_int
@@ -225,6 +260,10 @@ for k in 1:ITERATIONS
 
     # Per-load pd reference matching pshed ordering (across all periods)
     pd_all = Float64[sum(refs[nw][:load][lid]["pd"]) for (nw, lid) in pshed_nw_ids]
+    # Snapshot the current iter's pshed_val + pd_all so a Step-3 abort below
+    # still has a usable bilevel point to save as a fallback JLD2.
+    final_pshed_val = copy(pshed_val)
+    final_pd_all    = copy(pd_all)
 
     # Upper-level fairness step (multi-period, peak-cost weighted).
     # Wrapped in try/catch so an upper-level error (e.g. formal-CC INFEASIBLE
@@ -251,7 +290,17 @@ for k in 1:ITERATIONS
                     dpshed, pshed_val, weight_vals, pd_all;
                     critical_ids=critical_id, weight_ids=weight_ids,
                     peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-                    time_limit=60*10, timings=upper_timings, palma_on=PALMA_ON)
+                    time_limit=60*10, timings=upper_timings)
+            elseif FAIR_FUNC == "gini"
+                # Gini formal-CC MILP on absolute shed (pshed). Reuses the
+                # per-period permutation + indicator-constraint infrastructure
+                # from Palma formal CC; differs only in the sort-position
+                # coefficients (2i−n−1) and the n·Σpshed_z=1 normalization.
+                pshed_new, fair_weight_vals, status = lin_gini_w_grad_input(
+                    dpshed, pshed_val, weight_vals, pd_all;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    time_limit=60*10, timings=upper_timings)
             elseif FAIR_FUNC == "efficiency"
                 pshed_new, fair_weight_vals, status = efficient_load_shed(
                     dpshed, pshed_val, weight_vals;
@@ -259,7 +308,7 @@ for k in 1:ITERATIONS
                     peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
                     timings=upper_timings)
             else
-                error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+                error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"gini\", \"efficiency\".")
             end
         end
         timing[:upper_level_total_s] = t_upper
@@ -318,8 +367,31 @@ validation_results["bilevel"] = Dict(
 
 # ============================================================
 # STEP 3: FINAL RELAXED MULTI-PERIOD SOLVE
+#
+# For FAIR_FUNCs that use the integer warmstart inside the bilevel loop
+# (min_max / efficiency), run the same warmstart here before the relaxed NLP.
+# Otherwise Ipopt starts from a topology-free state at the converged weights
+# and its KKT can degenerate ("Inertia correction needed" → LOCALLY_INFEASIBLE)
+# even though every in-loop iter solved on the warmstarted topology. Mirrors
+# the gating in the bilevel loop above; palma/gini skip it for the same reason
+# as the loop (binary pshed → bot40→0 → CC infeasible).
 # ============================================================
 print_validation_header("Step 3: Final relaxed multi-period MLD with updated weights")
+if FAIR_FUNC != "palma" && FAIR_FUNC != "gini"
+    @info "[Step 3] Running integer warmstart (FAIR_FUNC=$FAIR_FUNC) before relaxed NLP to match in-loop state"
+    mld_int_step3 = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
+        peak_time_costs=PEAK_TIME_COSTS)
+    step3_int_term = mld_int_step3["termination_status"]
+    @info "[Step 3] integer warmstart status = $step3_int_term"
+    if step3_int_term in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED]
+        for nw_id in nw_ids_sorted
+            mn_new["nw"][nw_id] = update_network(
+                mld_int_step3["solution"]["nw"][nw_id], mn_new["nw"][nw_id])
+        end
+    else
+        @warn "[Step 3] integer warmstart did not converge ($step3_int_term) — proceeding without it"
+    end
+end
 mn_relaxed_final = FairLoadDelivery.solve_mn_mc_mld_shed_implicit_diff(mn_new, ipopt_solver)
 relaxed_term = mn_relaxed_final["termination_status"]
 relaxed_ok = relaxed_term in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
@@ -520,15 +592,58 @@ end
 println("\nMulti-period validation complete.")
 
 else  # !relaxed_ok — Step 3 did not converge
-    @warn "[$FAIR_FUNC/$pshed_type] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6 (rounding, plots, JLD2 save) to avoid building outputs on a non-converged relaxation."
+    @warn "[$FAIR_FUNC/$pshed_type] Step 3 final relaxed multi-period MLD did not converge (status $relaxed_term). Skipping Steps 4–6 (rounding, AC PF, results block) — saving FALLBACK JLD2 from last completed bilevel iter."
     abort_path = joinpath(save_dir, "step3_aborted.txt")
     open(abort_path, "w") do io
         println(io, "Step 3 relaxed multi-period MLD did not converge.")
         println(io, "termination_status      = $relaxed_term")
         println(io, "bilevel completed_iters = $(length(all_pshed_lower))")
         println(io, "bilevel last_status     = $last_status")
-        println(io, "Steps 4–6 skipped (rounding, results block, JLD2 save).")
+        println(io, "Steps 4–6 skipped (rounding, results block).")
+        println(io, "Fallback JLD2 written using iter-N pshed_val (NOT iter-N+1 weights).")
     end
     println("Wrote $abort_path")
+
+    # Fallback: write a partial JLD2 with iter-N's pshed_val so the post-hoc
+    # comparison still has a bilevel marker. Schema matches the happy-path save
+    # at the top of the if-branch above so post_hoc_fairness_pareto.jl can
+    # load it unchanged. Both pshed_matrix (rounded — None here) and
+    # relaxed_pshed_matrix get the same fallback matrix; downstream readers
+    # should treat this as "best available" rather than rounded-feasible.
+    if !isempty(final_pshed_val) && !isempty(final_weight_ids)
+        n_per_period = length(final_weight_ids)
+        T = length(final_pshed_val) ÷ n_per_period
+        pshed_mat_fb = reshape(final_pshed_val, n_per_period, T)'  # T × N
+        pd_mat_fb    = reshape(final_pd_all,    n_per_period, T)'  # T × N
+
+        jld_path = joinpath(save_dir,
+            "bilevel_mn_$(CASE)_$(FAIR_FUNC)_$(pshed_type).jld2")
+        local_math_load = math["load"]
+        JLD2.jldopen(jld_path, "w") do f
+            f["pshed_matrix"]         = pshed_mat_fb              # fallback (relaxed proxy)
+            f["relaxed_pshed_matrix"] = pshed_mat_fb
+            f["pd_ref_matrix"]        = pd_mat_fb
+            f["final_fair_weights"]   = fair_weights
+            f["final_weight_ids"]     = final_weight_ids
+            f["LOAD_SCALE_FACTORS"]   = LOAD_SCALE_FACTORS
+            f["PEAK_TIME_COSTS"]      = PEAK_TIME_COSTS
+            f["SELECTED_HOURS"]       = SELECTED_HOURS
+            f["PEAK_STRESS"]          = PEAK_STRESS
+            f["CENTER_AT_NOMINAL"]    = CENTER_AT_NOMINAL
+            f["LS_PERCENT"]           = LS_PERCENT
+            f["CASE"]                 = CASE
+            f["FAIR_FUNC"]            = FAIR_FUNC
+            f["pshed_type"]           = pshed_type
+            f["N_PERIODS"]            = N_PERIODS
+            f["iter_timings"]         = iter_timings
+            f["math_load"]            = local_math_load
+            f["step3_fallback"]       = true
+        end
+        println("FALLBACK bilevel JLD2 saved → $jld_path  (Step 3 NOT converged, " *
+                "matrix is iter-N relaxed pshed_val from inside the bilevel loop)")
+    else
+        @warn "[$FAIR_FUNC/$pshed_type] Bilevel loop produced no usable iter snapshot — no fallback JLD2 written."
+    end
+
     println("\nMulti-period validation halted at Step 3.")
 end
