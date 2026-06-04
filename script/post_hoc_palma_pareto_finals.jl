@@ -52,20 +52,28 @@ RESULTS_ROOT = joinpath(@__DIR__, "../results")
 # PINNED INPUT DATA (defense finals — do NOT mtime-pick)
 # ============================================================
 # Trade-off Palma sweeps: 2026-06-03 (T=8, no-bd, matched-objective + warm-start).
-const PIN_DATE = get(ENV, "FINALS_DATE", "2026-06-03")
+const PIN_DATE = get(ENV, "FINALS_DATE", "2026-06-03")           # trade-off sweeps date
+# The bilevel point can come from a different run/date than the sweeps, e.g. the
+# 2026-06-04 SLP reverse-mode shed run overlaid on the 2026-06-03 shed sweeps.
+const BILEVEL_DATE = get(ENV, "FINALS_BILEVEL_DATE", PIN_DATE)
+# Which quantity the Palma objective optimized: "shed" reads the *_shedobj output
+# dirs, "served" the plain dirs. BOTH axes (sweeps + bilevel) must match — the
+# plotted metric (per-load aggregate shed-Palma) is comparable only within a target.
+const OBJ_SUFFIX = get(ENV, "PALMA_TARGET", "served") == "shed" ? "_shedobj" : ""
 const PINNED_TRADE_OFF = Dict(
     (fair_func = "palma", relaxed = false) =>
-        joinpath(RESULTS_ROOT, PIN_DATE, "palma_trade_off_mn",
+        joinpath(RESULTS_ROOT, PIN_DATE, "palma_trade_off_mn$(OBJ_SUFFIX)",
                  "palma_sweep_mn_$(tags.trade_off)_$(PSHED_TYPE).jld2"),
     (fair_func = "palma", relaxed = true) =>
-        joinpath(RESULTS_ROOT, PIN_DATE, "palma_relaxed_trade_off_mn",
+        joinpath(RESULTS_ROOT, PIN_DATE, "palma_relaxed_trade_off_mn$(OBJ_SUFFIX)",
                  "palma_sweep_mn_$(tags.trade_off)_$(PSHED_TYPE).jld2"),
 )
 
-# Bilevel Palma: 2026-06-03 (T=8) — original formal-CC MILP via run_validation_mn.jl.
+# Bilevel Palma: served default = 2026-06-03 formal-CC MILP; shed = 2026-06-04 SLP
+# reverse-mode run (set FINALS_BILEVEL_DATE=2026-06-04 PALMA_TARGET=shed).
 const PINNED_BILEVEL = Dict(
-    "palma" => joinpath(RESULTS_ROOT, PIN_DATE, "bilevel_validation_mn",
-        tags.bilevel, "palma_$(PSHED_TYPE)",
+    "palma" => joinpath(RESULTS_ROOT, BILEVEL_DATE, "bilevel_validation_mn",
+        tags.bilevel, "palma_$(PSHED_TYPE)$(OBJ_SUFFIX)",
         "bilevel_mn_$(tags.bilevel)_palma_$(PSHED_TYPE).jld2"),
 )
 

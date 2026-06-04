@@ -1,0 +1,2 @@
+forrtl: error (200): program aborting due to window-CLOSE event
+Initialization of symbol handler failed. Error code %d:87

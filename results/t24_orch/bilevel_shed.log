@@ -1,0 +1,1091 @@
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit https://github.com/coin-or/Ipopt
+******************************************************************************
+
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Precompiling packages...
+  19190.4 ms  ✓ FairLoadDelivery
+  1 dependency successfully precompiled in 30 seconds. 414 already precompiled.
+[ Main | Info ] : Logging to results/2026-06-03/bilevel_validation_mn/case6_unbalanced_switch_more_meshed_good4integer/palma_absolute_shedobj\run_validation_mn.log
+[ PowerModelsDistribution | Info ] : Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+[ PowerModelsDistribution | Info ] : Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+[ Main | Info ] : N_PERIODS=8, hours=[4, 6, 8, 12, 15, 18, 20, 22], agg_scales=[0.8387202438113252, 0.9676482934843788, 1.0757845717168208, 1.1501794143778719, 1.1118984910387417, 1.0722361959025872, 0.9842055523687825, 0.8989053063178417], peak_stress=1.0, λ=[5.0, 5.0, 5.01, 6.4, 17.17, 30.0, 23.15, 11.95]
+[ Main | Info ] : Built multinetwork with 8 periods, 9 loads per period (profiled)
+[ FairLoadDelivery | Info ] : Iteration 1: Solving multiperiod lower-level MLD with initial parameter values from ref
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+[ Main | Info ] : [Palma formal CC] Jacobian is block-diagonal (max off-block-diag = 0.0)
+[ Main | Info ] : [Palma formal CC] T=8, N=9, m=72 (indicator-constraint form, σ unbounded above)
+[ Main | Info ] : [Palma formal CC] Solver status: TIME_LIMIT (solve_time=1134.83s)
+┌ Main | Warning ] : [Palma formal CC] Solver hit TIME_LIMIT with an incumbent — returning suboptimal solution
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:915
+[ Main | Info ] : [palma/absolute] iter 1 upper-level status = TIME_LIMIT
+┌ Main | Warning ] : [palma/absolute] iter 1 upper-level hit TIME_LIMIT — using suboptimal incumbent
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:280
+[ Main | Info ] : [palma/absolute] iter 1 timings: int=0.0s lower=101.5s (primal=15.4s jac=55.7s) upper=1140.6s total=1242.1s
+[ FairLoadDelivery | Info ] : Iteration 2: Solving multiperiod lower-level MLD with 72 per-period weights
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+[ Main | Info ] : [Palma formal CC] Jacobian is block-diagonal (max off-block-diag = 0.0)
+[ Main | Info ] : [Palma formal CC] T=8, N=9, m=72 (indicator-constraint form, σ unbounded above)
+[ Main | Info ] : [Palma formal CC] Solver status: TIME_LIMIT (solve_time=600.12s)
+┌ Main | Warning ] : [Palma formal CC] Solver hit TIME_LIMIT with an incumbent — returning suboptimal solution
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:915
+[ Main | Info ] : [palma/absolute] iter 2 upper-level status = TIME_LIMIT
+┌ Main | Warning ] : [palma/absolute] iter 2 upper-level hit TIME_LIMIT — using suboptimal incumbent
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:280
+[ Main | Info ] : [palma/absolute] iter 2 timings: int=0.0s lower=44.5s (primal=10.1s jac=33.7s) upper=600.2s total=644.6s
+[ FairLoadDelivery | Info ] : Iteration 3: Solving multiperiod lower-level MLD with 72 per-period weights
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+[ Main | Info ] : [Palma formal CC] Jacobian is block-diagonal (max off-block-diag = 0.0)
+[ Main | Info ] : [Palma formal CC] T=8, N=9, m=72 (indicator-constraint form, σ unbounded above)
+[ Main | Info ] : [Palma formal CC] Solver status: TIME_LIMIT (solve_time=600.08s)
+┌ Main | Warning ] : [Palma formal CC] Solver hit TIME_LIMIT with an incumbent — returning suboptimal solution
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:915
+[ Main | Info ] : [palma/absolute] iter 3 upper-level status = TIME_LIMIT
+┌ Main | Warning ] : [palma/absolute] iter 3 upper-level hit TIME_LIMIT — using suboptimal incumbent
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:280
+[ Main | Info ] : [palma/absolute] iter 3 timings: int=0.0s lower=51.9s (primal=6.9s jac=44.6s) upper=600.1s total=652.0s
+[ FairLoadDelivery | Info ] : Iteration 4: Solving multiperiod lower-level MLD with 72 per-period weights
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+[ Main | Info ] : [Palma formal CC] Jacobian is block-diagonal (max off-block-diag = 0.0)
+[ Main | Info ] : [Palma formal CC] T=8, N=9, m=72 (indicator-constraint form, σ unbounded above)
+[ Main | Info ] : [Palma formal CC] Solver status: TIME_LIMIT (solve_time=600.06s)
+┌ Main | Warning ] : [Palma formal CC] Solver hit TIME_LIMIT with an incumbent — returning suboptimal solution
+└ @ Main C:\Users\awest\github\FairLoadDelivery\src\implementation\load_shed_as_parameter.jl:915
+[ Main | Info ] : [palma/absolute] iter 4 upper-level status = TIME_LIMIT
+┌ Main | Warning ] : [palma/absolute] iter 4 upper-level hit TIME_LIMIT — using suboptimal incumbent
+└ @ Main C:\Users\awest\github\FairLoadDelivery\script\bilevel_validation\run_validation_mn.jl:280
+[ Main | Info ] : [palma/absolute] iter 4 timings: int=0.0s lower=47.9s (primal=9.8s jac=37.9s) upper=600.1s total=648.0s
+[ FairLoadDelivery | Info ] : Iteration 5: Solving multiperiod lower-level MLD with 72 per-period weights
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+┌ DiffOpt.NonLinearProgram | Info ] : Inertia correction needed. 
+│             Attempting correction by adding diagonal matrix with positive values for the Jacobian of the stationary equations
+└             and negative values for the Jacobian of the constraints.
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27

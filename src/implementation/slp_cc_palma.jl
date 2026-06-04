@@ -70,13 +70,16 @@ Four adjoint solves (independent of T) giving ∇_w of, per period:
   gbotcut — served_A − served_D         (bottom boundary gap)
   gtopcut — served_C − served_E         (top boundary gap)
 Each is length m = T·n over the weight parameters; by block-diagonality the
-gradient for period t is nonzero only on period t's weight block. Signs use
-∂served/∂w = −∂pshed/∂w = −Jᵀ·seed. `model` must already be at the primal
-solution for the current weights. `sets[t]` is the tuple from `palma_sets_and_cuts`.
+gradient for period t is nonzero only on period t's weight block. Signs follow the
+metric quantity q: ∂q/∂w = qsgn·Jᵀ·seed with qsgn = −1 for served (q = pd−pshed)
+and +1 for shed (q = pshed). `model` must already be at the primal solution for the
+current weights. `sets[t]` is the tuple from `palma_sets_and_cuts`.
 """
 function cc_reverse_grads(model::JuMP.Model, pshed_vars::Vector{JuMP.VariableRef},
                           weight_params::Vector{JuMP.VariableRef},
-                          n::Int, T::Int, sets)
+                          n::Int, T::Int, sets; palma_on::Symbol = :served)
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
+    qsgn = palma_on === :shed ? 1.0 : -1.0    # ∂q/∂pshed: +1 (shed) or −1 (served)
     m = n * T
     v_top = zeros(m); v_bot = zeros(m); v_botcut = zeros(m); v_topcut = zeros(m)
     for t in 1:T
@@ -84,13 +87,13 @@ function cc_reverse_grads(model::JuMP.Model, pshed_vars::Vector{JuMP.VariableRef
         T_set, B_set, (A, D), (C, E) = sets[t]
         for i in T_set; v_top[off + i] = 1.0; end
         for i in B_set; v_bot[off + i] = 1.0; end
-        v_botcut[off + A] += 1.0; v_botcut[off + D] -= 1.0    # served_A − served_D
-        v_topcut[off + C] += 1.0; v_topcut[off + E] -= 1.0    # served_C − served_E
+        v_botcut[off + A] += 1.0; v_botcut[off + D] -= 1.0    # q_A − q_D
+        v_topcut[off + C] += 1.0; v_topcut[off + E] -= 1.0    # q_C − q_E
     end
-    gtop    = -fw_vjp!(model, pshed_vars, weight_params, v_top)
-    gbot    = -fw_vjp!(model, pshed_vars, weight_params, v_bot)
-    gbotcut = -fw_vjp!(model, pshed_vars, weight_params, v_botcut)
-    gtopcut = -fw_vjp!(model, pshed_vars, weight_params, v_topcut)
+    gtop    = qsgn * fw_vjp!(model, pshed_vars, weight_params, v_top)
+    gbot    = qsgn * fw_vjp!(model, pshed_vars, weight_params, v_bot)
+    gbotcut = qsgn * fw_vjp!(model, pshed_vars, weight_params, v_botcut)
+    gtopcut = qsgn * fw_vjp!(model, pshed_vars, weight_params, v_topcut)
     return gtop, gbot, gbotcut, gtopcut
 end
 
@@ -194,17 +197,21 @@ end
 """
     period_palma_ratios(pshed, pd; n_loads) -> Vector{Float64}
 
-Per-period EXACT served-Palma ratios top_t/bot_t (eps_denom-free; Inf if a
-period's bottom-40% served is 0). For reporting against the equality floor
+Per-period EXACT Palma ratios top_t/bot_t (eps_denom-free; Inf if a period's
+bottom-40% of the metric quantity is 0). `palma_on` selects served (q = pd−pshed)
+or shed (q = pshed). For reporting against the equality floor
 `ceil(0.1N)/floor(0.4N)`.
 """
-function period_palma_ratios(pshed::Vector{Float64}, pd::Vector{Float64}; n_loads::Int)
+function period_palma_ratios(pshed::Vector{Float64}, pd::Vector{Float64}; n_loads::Int,
+                             palma_on::Symbol = :served)
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     m = length(pshed); n = n_loads; T = m ÷ n
     top_idx, bot_idx = compute_palma_indices(n)
     out = zeros(T)
     for t in 1:T
         off = (t - 1) * n
-        s = sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
+        s = palma_on === :shed ? sort(Float64[pshed[off + j] for j in 1:n]) :
+                                 sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
         top = sum(max(0.0, s[i]) for i in top_idx)
         bot = sum(max(0.0, s[i]) for i in bot_idx)
         out[t] = bot > 0 ? top / bot : Inf
@@ -252,7 +259,9 @@ function slp_cc_palma(mn_data::Dict{String,Any};
                       tol::Real = 1e-4,
                       σ_min::Float64 = 1e-8,
                       min_step::Float64 = 1e-3,
+                      palma_on::Symbol = :shed,
                       verbose::Bool = true)
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     w_min, w_max = w_bounds
 
     # Discover ordering / box / pd from one build.
@@ -283,7 +292,10 @@ function slp_cc_palma(mn_data::Dict{String,Any};
         n_primal[] += 1
         return mdl, wp, pv, ps, status
     end
-    merit(ps) = palma_value(ps, pd_all; n_loads = n, peak_time_costs = λ)
+    merit(ps) = palma_value(ps, pd_all; n_loads = n, peak_time_costs = λ, palma_on = palma_on)
+    # Metric quantity per (period,load): shed = pshed, or served = pd − pshed.
+    qof(ps, off) = palma_on === :shed ? Float64[ps[off + j] for j in 1:n] :
+                                        Float64[pd_all[off + j] - ps[off + j] for j in 1:n]
 
     cur_model, cur_wp, cur_pv, pshed, st0 = solve_at(w)
     if st0 ∉ (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL, MOI.ALMOST_LOCALLY_SOLVED)
@@ -305,15 +317,15 @@ function slp_cc_palma(mn_data::Dict{String,Any};
         sets = Vector{Any}(undef, T)
         for t in 1:T
             off = (t - 1) * n
-            servt = Float64[pd_all[off + j] - pshed[off + j] for j in 1:n]
-            sets[t] = palma_sets_and_cuts(servt, n)
+            sets[t] = palma_sets_and_cuts(qof(pshed, off), n)
         end
         # (3) structured reverse gradients at the current KKT point
-        grads = cc_reverse_grads(cur_model, cur_pv, cur_wp, n, T, sets)
+        grads = cc_reverse_grads(cur_model, cur_pv, cur_wp, n, T, sets; palma_on = palma_on)
         n_adjoint[] += 4
-        served_full = pd_all .- pshed
+        # Metric values handed to the CC-LP (q = shed or served, same as the sort).
+        q_full = palma_on === :shed ? copy(pshed) : pd_all .- pshed
         # (4) CC-LP trust-region step
-        w_lp = cc_lp_step(w, served_full, sets, grads, λ, n, T;
+        w_lp = cc_lp_step(w, q_full, sets, grads, λ, n, T;
                           w_lo = w_lo, w_hi = w_hi, Δ = trust_radius,
                           σ_min = σ_min, lp_optimizer = lp_optimizer)
         # (5) backtracking line search on the TRUE objective
@@ -338,7 +350,7 @@ function slp_cc_palma(mn_data::Dict{String,Any};
             end
             γ *= 0.5
         end
-        min_bot = minimum(period_bot_sums(pshed, pd_all; n_loads = n))
+        min_bot = minimum(period_bot_sums(pshed, pd_all; n_loads = n, palma_on = palma_on))
         push!(history, (iter = it, obj = obj, step = accepted ? γ : 0.0, min_bot = min_bot))
         if obj < best_obj
             best_obj = obj; best_w .= w; best_pshed .= pshed
@@ -361,11 +373,12 @@ function slp_cc_palma(mn_data::Dict{String,Any};
     verbose && @info @sprintf("[SLP-CC] done: %d iters, %s, best_obj=%.6e, primal=%d adjoint=%d",
                               slp_iter, converged ? "converged" : "max_iters",
                               best_obj, n_primal[], n_adjoint[])
+    best_q = palma_on === :shed ? best_pshed : pd_all .- best_pshed
     return (; weights = copy(best_w),
               pshed = copy(best_pshed),
               palma_value = best_obj,
-              palma_ratio_reported = palma_ratio(pd_all .- best_pshed),
-              period_ratios = period_palma_ratios(best_pshed, pd_all; n_loads = n),
+              palma_ratio_reported = palma_ratio(best_q),
+              period_ratios = period_palma_ratios(best_pshed, pd_all; n_loads = n, palma_on = palma_on),
               equality_floor = floor_val,
               converged = converged,
               slp_iters = slp_iter,

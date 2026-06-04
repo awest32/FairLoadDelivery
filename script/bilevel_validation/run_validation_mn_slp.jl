@@ -61,6 +61,9 @@ LS_PERCENT = 0.8
 ITERATIONS = 20
 FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")  # "palma" or "min_max" (env-overridable for the two SLP solvers)
 UPPER_METHOD = get(ENV, "UPPER_METHOD", "slp")  # "slp" or "fw" (palma only); FW is reverse-mode (no forward Jacobian)
+# Which quantity the Palma objective sorts/optimizes: "shed" (pshed; fairness of the
+# shed burden — the reported metric, default) or "served" (pd−pshed; income-Palma analogy).
+PALMA_ON = get(ENV, "PALMA_TARGET", "shed") == "served" ? :served : :shed
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -74,8 +77,8 @@ N_BERNOULLI_SAMPLES = 2000
 # from 24 → 8 drops per-iter cost ~9×. Hours chosen to span the operational
 # regimes: trough (4), morning ramp (6,8), midday plateau (12), pre-peak rise
 # (15), evening peak (18), descent (20), late-night start (22).
- # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (matches 5/28 trade-off + 5/27 bilevel data)
+ # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (matches 5/28 trade-off + 5/27 bilevel data)
+ SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8 — defense config (matches run_validation_mn.jl); SLP reverse-mode, no forward Jacobian
  #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
@@ -86,7 +89,7 @@ PERIOD_HOURS      = SELECTED_HOURS
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18 (trough, midday, evening peak)
+REP_PERIODS = [1, 4, 6]   # T=8 indices → hours 4, 12, 18 (trough, midday, evening peak)
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -103,7 +106,10 @@ ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer,
     "print_level"     => 0)
 gurobi_solver = Gurobi.Optimizer
 
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
+# shed-objective writes to a separate dir so it won't overwrite a served run
+# (matches run_validation_mn.jl's obj_dir_suffix convention).
+obj_dir_suffix = (FAIR_FUNC == "palma" && PALMA_ON === :shed) ? "_shedobj" : ""
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)$(obj_dir_suffix)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
@@ -190,7 +196,7 @@ elseif FAIR_FUNC == "palma"
     slp_cc_palma(mn_data; lp_optimizer = gurobi_solver,
         critical_ids = critical_id, peak_time_costs = PEAK_TIME_COSTS,
         w_bounds = (1.0, 10.0), trust_radius = 0.5, max_iters = ITERATIONS,
-        tol = 1e-4, verbose = true)
+        tol = 1e-4, palma_on = PALMA_ON, verbose = true)
 elseif FAIR_FUNC == "min_max"
     slp_minmax(mn_data; lp_optimizer = gurobi_solver,
         critical_ids = critical_id, w_bounds = (1.0, 10.0),

@@ -77,7 +77,8 @@ use `palma_ratio` (hard cutoff, Inf).
 """
 function palma_value(pshed::Vector{Float64}, pd::Vector{Float64};
                      n_loads::Int, peak_time_costs::Vector{Float64} = Float64[],
-                     eps_denom::Float64 = 1e-6)
+                     eps_denom::Float64 = 1e-6, palma_on::Symbol = :served)
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     m = length(pshed)
     n = n_loads
     @assert m % n == 0 "length(pshed)=$m not divisible by n_loads=$n"
@@ -86,12 +87,13 @@ function palma_value(pshed::Vector{Float64}, pd::Vector{Float64};
     @assert length(λ) == T "peak_time_costs must have length T=$T"
     top_idx, bot_idx = compute_palma_indices(n)
 
-    Tsum = 0.0   # Σ_t λ_t · top10%(served_t)
-    Bsum = 0.0   # Σ_t λ_t · bot40%(served_t)
+    Tsum = 0.0   # Σ_t λ_t · top10%(q_t)
+    Bsum = 0.0   # Σ_t λ_t · bot40%(q_t)
     for t in 1:T
         off = (t - 1) * n
-        served = Float64[pd[off + j] - pshed[off + j] for j in 1:n]
-        s = sort(served)
+        q = palma_on === :shed ? Float64[pshed[off + j] for j in 1:n] :
+                                 Float64[pd[off + j] - pshed[off + j] for j in 1:n]
+        s = sort(q)
         Tsum += λ[t] * sum(max(0.0, s[i]) for i in top_idx)
         Bsum += λ[t] * sum(max(0.0, s[i]) for i in bot_idx)
     end
@@ -115,7 +117,8 @@ A valid (sub)gradient under ties.
 """
 function palma_grad_pshed(pshed::Vector{Float64}, pd::Vector{Float64};
                           n_loads::Int, peak_time_costs::Vector{Float64} = Float64[],
-                          eps_denom::Float64 = 1e-6)
+                          eps_denom::Float64 = 1e-6, palma_on::Symbol = :served)
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     m = length(pshed)
     n = n_loads
     @assert m % n == 0 "length(pshed)=$m not divisible by n_loads=$n"
@@ -123,24 +126,28 @@ function palma_grad_pshed(pshed::Vector{Float64}, pd::Vector{Float64};
     λ = isempty(peak_time_costs) ? ones(T) : peak_time_costs
     @assert length(λ) == T "peak_time_costs must have length T=$T"
     top_idx, bot_idx = compute_palma_indices(n)
+    # q is the sorted quantity: served = pd−pshed (default) or shed = pshed.
+    # ∂q/∂pshed = −1 (served) or +1 (shed); the chain-rule sign below follows.
+    qsgn = palma_on === :shed ? 1.0 : -1.0
+    qvec(off) = palma_on === :shed ? Float64[pshed[off + j] for j in 1:n] :
+                                     Float64[pd[off + j] - pshed[off + j] for j in 1:n]
 
     # Pass 1: the GLOBAL cost-weighted numerator/denominator.
     Tsum = 0.0; Bsum = 0.0
     for t in 1:T
         off = (t - 1) * n
-        s = sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
+        s = sort(qvec(off))
         Tsum += λ[t] * sum(max(0.0, s[i]) for i in top_idx)
         Bsum += λ[t] * sum(max(0.0, s[i]) for i in bot_idx)
     end
     Beff = max(Bsum, eps_denom)
     floored = Bsum ≤ eps_denom
 
-    # Pass 2: scatter ∂f/∂served back to pshed, period by period.
+    # Pass 2: scatter ∂f/∂q back to pshed, period by period.
     v = zeros(m)
     for t in 1:T
         off = (t - 1) * n
-        served = Float64[pd[off + j] - pshed[off + j] for j in 1:n]
-        perm = sortperm(served)                # perm[i] = original load at sorted position i
+        perm = sortperm(qvec(off))             # perm[i] = original load at sorted position i
 
         gsorted = zeros(n)                      # ∂f/∂sorted[i]
         for i in top_idx
@@ -154,7 +161,7 @@ function palma_grad_pshed(pshed::Vector{Float64}, pd::Vector{Float64};
 
         for i in 1:n
             j = perm[i]                         # back to original load index in period
-            v[off + j] = -gsorted[i]            # ∂/∂pshed = −∂/∂served
+            v[off + j] = qsgn * gsorted[i]      # ∂/∂pshed = (∂q/∂pshed)·∂f/∂q
         end
     end
     return v
@@ -258,14 +265,16 @@ Per-period bottom-40%-of-served sums — the Palma denominators. A period sum ne
 means its poorest 40% are fully shed (the corner-collapse degeneracy); the Palma
 objective diverges there. Diagnostic for FW step health.
 """
-function period_bot_sums(pshed::Vector{Float64}, pd::Vector{Float64}; n_loads::Int)
+function period_bot_sums(pshed::Vector{Float64}, pd::Vector{Float64}; n_loads::Int,
+                         palma_on::Symbol = :served)
     m = length(pshed); n = n_loads; T = m ÷ n
     _, bot_idx = compute_palma_indices(n)
     out = zeros(T)
     for t in 1:T
         off = (t - 1) * n
-        served = sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
-        out[t] = sum(max(0.0, served[i]) for i in bot_idx)
+        q = palma_on === :shed ? sort(Float64[pshed[off + j] for j in 1:n]) :
+                                 sort(Float64[pd[off + j] - pshed[off + j] for j in 1:n])
+        out[t] = sum(max(0.0, q[i]) for i in bot_idx)
     end
     return out
 end
