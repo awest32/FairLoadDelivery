@@ -239,8 +239,10 @@ function palma_ratio_minimization(
     peak_time_costs::Vector{Float64} = Float64[],  # On-peak/off-peak weighting per period (empty = uniform)
     time_limit::Real = 60 * 15,  # Gurobi TimeLimit per upper-level solve (seconds)
     n_loads::Int = 0,  # Number of loads per period (0 = infer from weights_prev length)
-    weight_budget::Float64 = Inf  # Per-period upper bound on Σ_i weights_{t,i}; Inf = no constraint
+    weight_budget::Float64 = Inf,  # Per-period upper bound on Σ_i weights_{t,i}; Inf = no constraint
+    palma_on::Symbol = :served  # :served (default, income-Palma analogy) or :shed (fairness of the shed burden)
 )
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     m = length(pshed_prev)       # T*N: total pshed values (= total weights)
     w_min, w_max = w_bounds
     ε = 1e-8  # Small positive for σ lower bound
@@ -380,6 +382,9 @@ function palma_ratio_minimization(
         pshed_prev[j] + sum(dpshed_dw[j, k] * Δw[k] for k in 1:m)
     )
     @expression(model, pserved_new[j=1:m], pd[j] - pshed_new[j])
+    # The quantity the Palma ratio sorts: served (pd−pshed) or shed (pshed).
+    # Both lie in [0, pd], so the McCormick bound P_j = pd[j] is unchanged.
+    sortq_new = palma_on === :shed ? pshed_new : pserved_new
 
     #=========================================================================
     # Trust Region and Weight Bounds
@@ -440,17 +445,15 @@ function palma_ratio_minimization(
             @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
         end
 
-        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pserved_new[offset+j]
-        # with bounds 0 ≤ pserved_new[j] ≤ pd[j] (pshed ∈ [ε, pd] ⇒ pserved ∈ [0, pd−ε];
-        # we use the looser [0, pd] envelope here for symmetry with the single-level
-        # served-Palma scripts).
+        # McCormick envelopes: u[t][i,j] = a[t][i,j] * sortq_new[offset+j]
+        # (sortq_new = served or shed; both ∈ [0, pd], so the [0, pd] envelope holds).
         for i in 1:n, j in 1:n
             gj = offset + j
             P_j = pd[gj]
 
-            @constraint(model, u[t][i, j] >= pserved_new[gj] + a[t][i, j] * P_j - P_j)
+            @constraint(model, u[t][i, j] >= sortq_new[gj] + a[t][i, j] * P_j - P_j)
             @constraint(model, u[t][i, j] <= a[t][i, j] * P_j)
-            @constraint(model, u[t][i, j] <= pserved_new[gj])
+            @constraint(model, u[t][i, j] <= sortq_new[gj])
         end
 
         # Sorted values for this period (ascending)
@@ -495,7 +498,9 @@ function palma_ratio_minimization(
         end
         for t in 1:n_periods
             offset = (t - 1) * n
-            served_t = Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
+            served_t = palma_on === :shed ?
+                Float64[pshed_prev[offset + j] for j in 1:n] :
+                Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
             perm = sortperm(served_t)                       # perm[i] = load at sort position i
             for i in 1:n, j in 1:n
                 hit = (perm[i] == j)
@@ -530,18 +535,18 @@ function palma_ratio_minimization(
         # Compute pshed_new from the expression, then pserved_new = pd − pshed_new
         pshed_new_val   = pshed_prev .+ dpshed_dw * Δw_val
         pserved_new_val = pd .- pshed_new_val
+        sortq_val       = palma_on === :shed ? pshed_new_val : pserved_new_val
 
-        # Collect per-period permutation matrices and sorted SERVED values
+        # Collect per-period permutation matrices and sorted (served or shed) values
         a_vals = [value.(a[t]) for t in 1:n_periods]
         sorted_val = Float64[]
         for t in 1:n_periods
             offset = (t - 1) * n
-            pserved_t = pserved_new_val[offset+1:offset+n]
-            append!(sorted_val, a_vals[t] * pserved_t)
+            append!(sorted_val, a_vals[t] * sortq_val[offset+1:offset+n])
         end
 
-        # Compute actual Palma ratio over SERVED (top10% / bot40% of pserved_new)
-        actual_palma = palma_ratio(pserved_new_val)
+        # Achieved Palma ratio over the optimized quantity (served or shed)
+        actual_palma = palma_ratio(sortq_val)
 
         return (
             weights_new = weights_new,
@@ -560,13 +565,14 @@ function palma_ratio_minimization(
         Δw_val = zeros(m)
         pshed_new_val = copy(pshed_prev)
         pserved_new_val = pd .- pshed_new_val
-        actual_palma = palma_ratio(pserved_new_val)
+        sortq_val = palma_on === :shed ? pshed_new_val : pserved_new_val
+        actual_palma = palma_ratio(sortq_val)
         # Identity permutation per period as a placeholder
         a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
         sorted_val = Float64[]
         for t in 1:n_periods
             offset = (t - 1) * n
-            append!(sorted_val, sort(pserved_new_val[offset+1:offset+n]))
+            append!(sorted_val, sort(sortq_val[offset+1:offset+n]))
         end
         return (
             weights_new = copy(weights_prev),
@@ -650,7 +656,9 @@ function palma_ratio_minimization_formal_cc(
     sigma_min::Float64 = 1e-8,
     block_tol::Float64 = 1e-6,           # warning threshold on off-block Jacobian entries
     time_limit::Real = 60 * 15,          # Gurobi TimeLimit per upper-level solve (seconds)
+    palma_on::Symbol = :served,          # :served (default) or :shed — quantity the Palma ratio sorts
 )
+    @assert palma_on in (:served, :shed) "palma_on must be :served or :shed"
     m = length(pshed_prev)
     w_min, w_max = w_bounds
     ε = 1e-8
@@ -746,11 +754,14 @@ function palma_ratio_minimization_formal_cc(
     # Rescaled weight changes
     @variable(model, Δw_z[1:m])
 
-    # Rescaled pserved (linear expression). By block-diagonality, only k with
+    # Rescaled sort quantity (linear expression). By block-diagonality, only k with
     # t(k) == t(j) contributes — we still sum over all k since J[j,k] ≈ 0 off-block.
+    #   served_z = σ·(pd − pshed_prev) − J·Δw_z   (sort served)
+    #   shed_z   = σ·pshed_prev       + J·Δw_z    (sort shed; pshed_new = pshed_prev + J·Δw)
     @expression(model, pserved_z[j = 1:m],
-        σ * (pd[j] - pshed_prev[j])
-        - sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
+        palma_on === :shed ?
+            σ * pshed_prev[j] + sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m) :
+            σ * (pd[j] - pshed_prev[j]) - sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
     )
 
     # Rescaled u: u_z[t][i,j] = a[t][i,j] · pserved_z[offset+j] via indicator constraints
@@ -844,11 +855,12 @@ function palma_ratio_minimization_formal_cc(
         end
     end
 
-    # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇔ pserved ∈ [0, pd-ε] ⇒
-    #     pserved_z ∈ [0, (pd-ε)·σ]   (single σ)
+    # Rescaled sort-quantity bounds (single σ): served ∈ [0, pd-ε] ⇒ z ∈ [0,(pd-ε)σ];
+    # shed ∈ [ε, pd] ⇒ z ∈ [0, pd·σ] (lower bound 0 is a harmless relaxation of εσ).
     for j in 1:m
+        ub = palma_on === :shed ? pd[j] * σ : (pd[j] - ε) * σ
         @constraint(model, pserved_z[j] >= 0)
-        @constraint(model, pserved_z[j] <= (pd[j] - ε) * σ)
+        @constraint(model, pserved_z[j] <= ub)
     end
 
     # Linear objective: min Σ_t λ_t · Σ_{i∈top10,j} u_z[t][i,j]  (= σ·top_sum)
@@ -869,7 +881,9 @@ function palma_ratio_minimization_formal_cc(
         perm_by_t   = Vector{Vector{Int}}(undef, n_periods)
         for t in 1:n_periods
             offset = (t - 1) * n
-            served_t = Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
+            served_t = palma_on === :shed ?
+                Float64[pshed_prev[offset + j] for j in 1:n] :
+                Float64[pd[offset + j] - pshed_prev[offset + j] for j in 1:n]
             served_by_t[t] = served_t
             perm_by_t[t]   = sortperm(served_t)
             bot_sum_ws += λ[t] * sum(served_t[perm_by_t[t][i]] for i in bottom_40_idx)
@@ -908,15 +922,16 @@ function palma_ratio_minimization_formal_cc(
         weights_new     = weights_prev .+ Δw_val
         pshed_new_val   = pshed_prev   .+ dpshed_dw * Δw_val
         pserved_new_val = pd           .- pshed_new_val
+        sortq_val       = palma_on === :shed ? pshed_new_val : pserved_new_val
 
         a_vals = [value.(a[t]) for t in 1:n_periods]
         sorted_val = Float64[]
         for t in 1:n_periods
             offset = (t - 1) * n
-            append!(sorted_val, a_vals[t] * pserved_new_val[offset+1:offset+n])
+            append!(sorted_val, a_vals[t] * sortq_val[offset+1:offset+n])
         end
 
-        actual_palma = palma_ratio(pserved_new_val)
+        actual_palma = palma_ratio(sortq_val)
 
         return (
             weights_new   = weights_new,
@@ -933,12 +948,13 @@ function palma_ratio_minimization_formal_cc(
         Δw_val = zeros(m)
         pshed_new_val = copy(pshed_prev)
         pserved_new_val = pd .- pshed_new_val
-        actual_palma = palma_ratio(pserved_new_val)
+        sortq_val = palma_on === :shed ? pshed_new_val : pserved_new_val
+        actual_palma = palma_ratio(sortq_val)
         a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
         sorted_val = Float64[]
         for t in 1:n_periods
             offset = (t - 1) * n
-            append!(sorted_val, sort(pserved_new_val[offset+1:offset+n]))
+            append!(sorted_val, sort(sortq_val[offset+1:offset+n]))
         end
         return (
             weights_new   = copy(weights_prev),
@@ -988,6 +1004,7 @@ function lin_palma_reformulated(
     use_weak_cc::Bool = false,
     time_limit::Real = 60 * 15,  # Gurobi TimeLimit per upper-level solve (seconds)
     timings::Union{Dict,Nothing} = nothing,
+    palma_on::Symbol = :served,  # :served (default) or :shed — quantity the Palma ratio sorts
 )
     formulation_used = use_weak_cc ? "weak_cc_miqcp" : "formal_cc_milp"
     result = if use_weak_cc
@@ -1002,6 +1019,7 @@ function lin_palma_reformulated(
             n_loads         = n_loads,
             weight_budget   = weight_budget,
             time_limit      = time_limit,
+            palma_on        = palma_on,
         )
     else
         # Try formal CC; on INFEASIBLE (typically the σ_max-vs-degenerate-bot40
@@ -1018,6 +1036,7 @@ function lin_palma_reformulated(
                 n_loads         = n_loads,
                 weight_budget   = weight_budget,
                 time_limit      = time_limit,
+                palma_on        = palma_on,
             )
         catch err
             if occursin("INFEASIBLE", string(err))
@@ -1034,6 +1053,7 @@ function lin_palma_reformulated(
                     n_loads         = n_loads,
                     weight_budget   = weight_budget,
                     time_limit      = time_limit,
+                    palma_on        = palma_on,
                 )
             else
                 rethrow(err)

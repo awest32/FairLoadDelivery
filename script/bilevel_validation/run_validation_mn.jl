@@ -57,6 +57,9 @@ CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
 FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
+# Which quantity the Palma objective sorts: "served" (income-Palma analogy; default)
+# or "shed" (fairness of the shed burden — matches the single-level shed-objective).
+PALMA_ON = get(ENV, "PALMA_TARGET", "served") == "shed" ? :shed : :served
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -72,7 +75,8 @@ N_BERNOULLI_SAMPLES = 2000
 # (15), evening peak (18), descent (20), late-night start (22).
  # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
  #SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle — matches single-level + finals
+ #SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+ SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8 — defense: original formal-CC MILP tractable (forward Jacobian = 72 cols, vs 216 at T=24 which hung)
  #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
@@ -83,7 +87,7 @@ PERIOD_HOURS      = SELECTED_HOURS
                            for h in PERIOD_HOURS]
 # Override results_block_mn.jl default — pick trough/plateau/peak indices into
 # SELECTED_HOURS so the grouped bar covers the 3 most distinct regimes.
-REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18
+REP_PERIODS = [1, 4, 6]   # T=8 indices → hours 4, 12, 18
 
 switch_rating = sqrt.([(26.0^2+13.1^2),(23.0^2+9^2),(21.0^2+9.5^2)])*LS_PERCENT
 
@@ -100,7 +104,9 @@ ipopt_solver  = optimizer_with_attributes(Ipopt.Optimizer,
     "print_level"     => 0)
 gurobi_solver = Gurobi.Optimizer
 
-save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)"
+# shed-objective writes to a separate dir so it won't overwrite the served run.
+obj_dir_suffix = PALMA_ON === :shed ? "_shedobj" : ""
+save_dir = "results/$(Dates.today())/bilevel_validation_mn/$CASE/$(FAIR_FUNC)_$(pshed_type)$(obj_dir_suffix)"
 mkpath(save_dir)
 
 log_file = joinpath(save_dir, "run_validation_mn.log")
@@ -245,7 +251,7 @@ for k in 1:ITERATIONS
                     dpshed, pshed_val, weight_vals, pd_all;
                     critical_ids=critical_id, weight_ids=weight_ids,
                     peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
-                    time_limit=60*10, timings=upper_timings)
+                    time_limit=60*10, timings=upper_timings, palma_on=PALMA_ON)
             elseif FAIR_FUNC == "efficiency"
                 pshed_new, fair_weight_vals, status = efficient_load_shed(
                     dpshed, pshed_val, weight_vals;

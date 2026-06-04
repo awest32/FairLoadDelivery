@@ -48,6 +48,29 @@ const TARGETS = haskey(ENV, "REPLOT_TARGETS") ?
 # efficiency sweeps render max-per-load-shed-vs-total-shed.
 _is_palma(ff::AbstractString) = startswith(ff, "palma")
 
+# Cost-weighted per-period Palma (the matched-objective form) over a [period × load]
+# value matrix: Σ_t λ_t·top10(v_t) / Σ_t λ_t·bot40(v_t). Returns NaN if the
+# denominator collapses. Used for both served (v = pserved) and shed (v = pshed).
+_palma_idx(n) = (collect((n - max(1, ceil(Int, 0.1n)) + 1):n), collect(1:max(1, floor(Int, 0.4n))))
+function _cw_palma(mat_pl::AbstractMatrix, λ::AbstractVector; eps = 1e-6)
+    ti, bi = _palma_idx(size(mat_pl, 2))
+    top = 0.0; bot = 0.0
+    for t in axes(mat_pl, 1)
+        s = sort(mat_pl[t, :])
+        top += λ[t] * sum(s[i] for i in ti)
+        bot += λ[t] * sum(s[i] for i in bi)
+    end
+    bot < eps ? NaN : top / bot
+end
+
+# UNCOSTED (λ=1) Palma of a per-load vector v: top10%/bot40% of the sorted totals.
+# Relative denominator guard mirrors post_hoc_palma_pareto_finals.jl.
+function _palma_uncosted(v::AbstractVector)
+    s = sort(collect(v)); ti, bi = _palma_idx(length(v))
+    num = sum(s[i] for i in ti); den = sum(s[i] for i in bi); tot = sum(s)
+    (tot > 0 && den > 1e-4 * tot) ? num / den : NaN
+end
+
 function build_dist_plot_agg(load_labels, per_load_agg_vec; ylim_max)
     p = bar(load_labels, per_load_agg_vec,
         xlabel = "load",
@@ -97,35 +120,39 @@ function replot_one(path::String)
             text("ν=$(round(αs[end], digits=2))", ANNOT_PT, :center))
     end
 
-    p_pareto = if _is_palma(fair_func)
-        # PRIMARY: matched cost-weighted served-Palma; fall back to the uncosted
-        # aggregate (palma_ratio_log) for older JLD2s that predate it.
-        yvec = haskey(d, "palma_cost_weighted_log") ? d["palma_cost_weighted_log"] : d["palma_ratio_log"]
-        ylab = "Palma (unitless)"
-        finite_palma = findall(isfinite, yvec)
-        xs = agg_total_shed[finite_palma]
-        ys = yvec[finite_palma]
-        αs = alphas[finite_palma]
-        p = plot(xs, ys,
+    function _pareto_panel(yvec, ylab)
+        fin = findall(isfinite, yvec)
+        p = plot(agg_total_shed[fin], yvec[fin],
             seriestype = :line, lc = :grey,
             marker = :circle, markersize = 14, color = :steelblue,
             markerstrokecolor = :steelblue,
-            xlabel = "total load shed (kW)",
-            ylabel = ylab,
+            xlabel = "total load shed (kW)", ylabel = ylab,
             legend = false; font_kw...)
-        _annotate_alpha_endpoints!(p, xs, ys, αs)
+        isempty(fin) || _annotate_alpha_endpoints!(p, agg_total_shed[fin], yvec[fin], alphas[fin])
         p
+    end
+
+    # Palma sweeps: PRIMARY plot is SHED-Palma (clean/monotone on integer +
+    # relaxed); served-Palma kept as a secondary panel (it degenerates on the
+    # relaxed sweep at high α). Both are cost-weighted per-period
+    # (Σ_t λ_t·top10 / Σ_t λ_t·bot40), computed from the per-period tensors.
+    # min_max/efficiency: max per-load shed.
+    p_pareto_served = nothing
+    p_pareto = if _is_palma(fair_func)
+        # UNCOSTED aggregate Palma (λ=1) of the per-load totals — the classic
+        # "Palma ratio of load shed". Cost-weighting distorted the bilevel
+        # comparison; absolute shed is the reported metric. PRIMARY = shed,
+        # secondary = served.
+        pdp    = d["per_load_period_pd"]                       # load × period
+        pd_tot = [sum(pdp[j, :]) for j in 1:size(pdp, 1)]      # per-load total demand
+        nα = length(alphas)
+        shed_p   = [_palma_uncosted(per_load_agg[i, :]) for i in 1:nα]
+        served_p = [_palma_uncosted(pd_tot .- per_load_agg[i, :]) for i in 1:nα]
+        p_pareto_served = _pareto_panel(served_p, "Palma served (unitless, uncosted)")
+        _pareto_panel(shed_p, "Palma shed (unitless, uncosted)")
     else
         agg_max_shed = [maximum(per_load_agg[i, :]) for i in 1:size(per_load_agg, 1)]
-        p = plot(agg_total_shed, agg_max_shed,
-            seriestype = :line, lc = :grey,
-            marker = :circle, markersize = 14, color = :steelblue,
-            markerstrokecolor = :steelblue,
-            xlabel = "total load shed (kW)",
-            ylabel = "max per-load shed (kW)",
-            legend = false; font_kw...)
-        _annotate_alpha_endpoints!(p, agg_total_shed, agg_max_shed, alphas)
-        p
+        _pareto_panel(agg_max_shed, "max per-load shed (kW)")
     end
 
     # Per-panel filename suffix matches the trade-off scripts' conventions:
@@ -141,7 +168,9 @@ function replot_one(path::String)
         "$(pshed_type)_$(case)_$(fair_func)"
     end
 
-    for (name, p) in (("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto))
+    panels = Any[("alpha0", p_dist_a0), ("alpha1", p_dist_a1), ("pareto", p_pareto)]
+    p_pareto_served === nothing || push!(panels, ("pareto_served", p_pareto_served))
+    for (name, p) in panels
         fig = plot(p; size = (900, 760),
             left_margin = 7Plots.mm, right_margin = 6Plots.mm,
             top_margin = 8Plots.mm, bottom_margin = 7Plots.mm)

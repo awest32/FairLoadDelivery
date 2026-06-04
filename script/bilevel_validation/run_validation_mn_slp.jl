@@ -60,6 +60,7 @@ CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
 FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")  # "palma" or "min_max" (env-overridable for the two SLP solvers)
+UPPER_METHOD = get(ENV, "UPPER_METHOD", "slp")  # "slp" or "fw" (palma only); FW is reverse-mode (no forward Jacobian)
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1
 N_BERNOULLI_SAMPLES = 2000
@@ -177,7 +178,15 @@ final_pshed_nw_ids = Tuple[]
 # ============================================================
 println("\n  --- SLP bilevel upper level ($FAIR_FUNC) ---")
 _t_slp = time()
-slp_res = if FAIR_FUNC == "palma"
+slp_res = if FAIR_FUNC == "palma" && UPPER_METHOD == "fw"
+    # Frank-Wolfe (reverse-mode): 1 adjoint/iter, no forward Jacobian — avoids the
+    # DiffOpt inertia-correction hang the forward-Jacobian MILP path hit at T=24.
+    # Same matched served-Palma objective (palma_value / palma_grad_pshed).
+    frank_wolfe_palma(mn_data;
+        critical_ids = critical_id, peak_time_costs = PEAK_TIME_COSTS,
+        w_bounds = (1.0, 10.0), trust_radius = 0.5, max_iters = ITERATIONS,
+        tol = 1e-4, verbose = true)
+elseif FAIR_FUNC == "palma"
     slp_cc_palma(mn_data; lp_optimizer = gurobi_solver,
         critical_ids = critical_id, peak_time_costs = PEAK_TIME_COSTS,
         w_bounds = (1.0, 10.0), trust_radius = 0.5, max_iters = ITERATIONS,
@@ -192,7 +201,7 @@ else
 end
 t_slp = time() - _t_slp
 @info @sprintf("[%s/%s] SLP bilevel: %d iters, converged=%s, primal=%d adjoint=%d, %.1fs",
-    FAIR_FUNC, pshed_type, slp_res.slp_iters, slp_res.converged,
+    FAIR_FUNC, pshed_type, (hasproperty(slp_res, :slp_iters) ? slp_res.slp_iters : slp_res.fw_iters), slp_res.converged,
     slp_res.n_primal, slp_res.n_adjoint, t_slp)
 
 # Push final per-period weights into mn_new (order-robust: aligned by (nw,lid) pair).

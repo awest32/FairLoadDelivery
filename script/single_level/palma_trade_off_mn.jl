@@ -100,6 +100,9 @@ pshed_type = "absolute"  # only absolute supported in this script
 # breaks the sort — see legacy/palma_reformulation/README.md). When false the
 # MLD switch/block vars are binary (`build_mn_mc_mld_min_max_integer`).
 relaxed = get(ENV, "RELAXED", "true") == "true"   # env-overridable so one orchestration can run integer + relaxed
+# Which quantity the Palma objective sorts: "served" (matches the income-Palma
+# formulation; default) or "shed" (experiment — optimize fairness of the shed burden).
+PALMA_SORT = get(ENV, "PALMA_TARGET", "served") == "shed" ? :pshed : :pd
 # Multi-period setup mirrors min_max_trade_off_mn.jl so results are directly comparable.
 # Per-load profiles follow Hamilton & Aliprantis (PECI 2023): each load name is
 # deterministically mapped to (schedule, ±1h shift). The per-period demand level
@@ -109,7 +112,8 @@ relaxed = get(ENV, "RELAXED", "true") == "true"   # env-overridable so one orche
 # results stay comparable across fair-funcs.
 #SELECTED_HOURS = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01].
 #SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5 (BD HEAD): trough, midday, pre-peak, evening peak, descent
-SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle — matches the pinned finals + run_validation_mn_slp.jl
+#SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8: trough, ramp, midday, pre-peak, evening peak, descent (defense; original MILP method tractable here)
 
 N_PERIODS      = length(SELECTED_HOURS)
 # Peak-stress multiplier: scales every schedule value uniformly so peak-hour
@@ -126,7 +130,7 @@ CENTER_AT_NOMINAL = true
 PEAK_TIME_COSTS = [round(5.0 + 25.0 * exp(-((h - 18)^2) / (2 * 2.5^2)), digits=2)
                         for h in SELECTED_HOURS]
 #REP_PERIODS = [1, 3, 5]   # T=5 indices → hours 4, 15, 22
-REP_PERIODS = [5, 13, 19]   # T=24 indices → hours 4, 12, 18 (trough, midday, evening peak); matches run_validation_mn_slp.jl
+REP_PERIODS = [1, 4, 6]   # T=8 indices → hours 4, 12, 18 (trough, midday, evening peak)
 
 # Palma sweep: kept smaller than min-max because each solve is a 24-period
 # bilinear MIP (per-period σ_t · bot_sum_t = 1 + bilinear objective).
@@ -197,7 +201,10 @@ else
     rel = ""
     kind = "integer"
 end
-output_dir = joinpath(@__DIR__, "../../results/$date/palma$(rel)_trade_off_mn")
+# Shed-objective experiment writes to a separate folder so it doesn't overwrite
+# the served-objective (default) results.
+obj_suffix = PALMA_SORT === :pshed ? "_shedobj" : ""
+output_dir = joinpath(@__DIR__, "../../results/$date/palma$(rel)_trade_off_mn$(obj_suffix)")
 isdir(output_dir) || mkpath(output_dir)
 
 # ============================================================
@@ -255,7 +262,8 @@ McCormick `u` and breaks the sort (legacy/palma_reformulation/README.md).
 """
 function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
                                            λ::Vector{Float64},
-                                           relax_binary::Bool = false)
+                                           relax_binary::Bool = false,
+                                           sort_target::Symbol = :pd)  # :pd = served-Palma (default); :pshed = shed-Palma (experiment)
     model = pm.model
 
     nw0      = nw_ids_int[1]
@@ -289,8 +297,9 @@ function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
 
     for (ti, nw) in enumerate(nw_ids_int)
         Pt = P_period[nw]
+        # sort_target = :pd → served-Palma; :pshed → shed-Palma. Both ∈ [0, Pt].
         pserved_t = JuMP.@expression(model, [k = 1:n],
-            sum(_PMD.var(pm, nw, :pd, load_ids[k])))
+            sum(_PMD.var(pm, nw, sort_target, load_ids[k])))
         pserved_period[nw] = pserved_t
 
         a[ti] = relax_binary ?
@@ -399,7 +408,8 @@ JuMP.set_optimizer_attribute(mld_mn.model, "MIPFocus",     1)
 JuMP.set_optimizer_attribute(mld_mn.model, "NumericFocus", 2)
 
 palma = add_palma_machinery_cw_aggregate!(mld_mn;
-    nw_ids_int = nw_ids_int_sorted, λ = PEAK_TIME_COSTS, relax_binary = false)
+    nw_ids_int = nw_ids_int_sorted, λ = PEAK_TIME_COSTS, relax_binary = false,
+    sort_target = PALMA_SORT)
 
 # ============================================================
 # WARMSTART: pure-efficiency multi-period MLD (no Palma machinery)
@@ -444,17 +454,18 @@ for nw in nw_ids_int_sorted
 end
 
 # Palma-specific starts: per-period permutation a[t]/u[t] from each period's
-# served vector, and ONE σ from the cost-weighted aggregate bot_sum.
+# SORT-TARGET vector (served or shed, matching the objective), and ONE σ from the
+# cost-weighted aggregate bot_sum.
 n_bot_palma = palma.bottom_40_idx[end]   # = floor(0.4n) (bot40 count)
 bot_sum_warm   = 0.0
 pshed_warm_tot = 0.0
 for (ti, nw) in enumerate(nw_ids_int_sorted)
     global pshed_warm_tot, bot_sum_warm   # accumulators live in the script's global scope
-    pserved_warm_t = [sum(_PMD.ref(mld_eff, nw, :load, lid)["pd"]) -
-                      sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
-                      for lid in palma.load_ids]
-    pshed_warm_tot += sum(sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid)))
-                          for lid in palma.load_ids)
+    shed_warm_t = [sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid))) for lid in palma.load_ids]
+    pshed_warm_tot += sum(shed_warm_t)
+    # the warm permutation must sort the SAME quantity the objective sorts
+    pserved_warm_t = PALMA_SORT === :pshed ? shed_warm_t :
+        [sum(_PMD.ref(mld_eff, nw, :load, lid)["pd"]) for lid in palma.load_ids] .- shed_warm_t
 
     perm    = sortperm(pserved_warm_t)            # ascending positions
     a_start = zeros(palma.n, palma.n)

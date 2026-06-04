@@ -51,21 +51,20 @@ RESULTS_ROOT = joinpath(@__DIR__, "../results")
 # ============================================================
 # PINNED INPUT DATA (defense finals — do NOT mtime-pick)
 # ============================================================
-# Trade-off Palma sweeps: 2026-05-28 (T=24). Integer in palma_trade_off_mn,
-# relaxed in the sibling palma_relaxed_trade_off_mn folder.
+# Trade-off Palma sweeps: 2026-06-03 (T=8, no-bd, matched-objective + warm-start).
+const PIN_DATE = get(ENV, "FINALS_DATE", "2026-06-03")
 const PINNED_TRADE_OFF = Dict(
     (fair_func = "palma", relaxed = false) =>
-        joinpath(RESULTS_ROOT, "2026-05-28", "palma_trade_off_mn",
+        joinpath(RESULTS_ROOT, PIN_DATE, "palma_trade_off_mn",
                  "palma_sweep_mn_$(tags.trade_off)_$(PSHED_TYPE).jld2"),
     (fair_func = "palma", relaxed = true) =>
-        joinpath(RESULTS_ROOT, "2026-05-28", "palma_relaxed_trade_off_mn",
+        joinpath(RESULTS_ROOT, PIN_DATE, "palma_relaxed_trade_off_mn",
                  "palma_sweep_mn_$(tags.trade_off)_$(PSHED_TYPE).jld2"),
 )
 
-# Bilevel Palma: 2026-05-27 (T=24) — the previous solution strategy
-# (run_validation_mn.jl), explicitly NOT the 2026-06-01 SLP reverse-mode run.
+# Bilevel Palma: 2026-06-03 (T=8) — original formal-CC MILP via run_validation_mn.jl.
 const PINNED_BILEVEL = Dict(
-    "palma" => joinpath(RESULTS_ROOT, "2026-05-27", "bilevel_validation_mn",
+    "palma" => joinpath(RESULTS_ROOT, PIN_DATE, "bilevel_validation_mn",
         tags.bilevel, "palma_$(PSHED_TYPE)",
         "bilevel_mn_$(tags.bilevel)_palma_$(PSHED_TYPE).jld2"),
 )
@@ -167,26 +166,13 @@ function load_trade_off_curve(path::String)
     n_α          = length(alphas)
     L1    = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α)
     CoV   = zeros(n_α); Palma = zeros(n_α)
-    # L1/L2/L∞/CoV: aggregate per-load shed vector (unchanged).
+    # All metrics on the per-load AGGREGATE-shed vector, UNCOSTED (λ=1): Palma is
+    # the classic top10%/bot40% Palma ratio of total load shed (cost-weighting
+    # distorted the bilevel comparison; absolute shed is the sensible measure).
     for i in 1:n_α
         nm = shed_norms(collect(per_load_agg[i, :]))
         L1[i] = nm.L1; L2[i] = nm.L2; Linf[i] = nm.Linf
-        CoV[i] = nm.CoV
-    end
-    # Palma: the MATCHED metric = Σ_t λ_t · Palma_t^served. Prefer the value the
-    # (refactored) trade-off script saves directly; fall back to recomputing it
-    # from the per-period shed/pd tensors for older pinned JLD2s that predate it.
-    λ = saved["PEAK_TIME_COSTS"]
-    if haskey(saved, "palma_cost_weighted_log")
-        Palma .= saved["palma_cost_weighted_log"]
-    else
-        plps = saved["per_load_period_shed"]   # alpha × load × period
-        pd   = saved["per_load_period_pd"]     # load × period
-        pd_pl = permutedims(pd)                # period × load
-        for i in 1:n_α
-            shed_pl = permutedims(@view plps[i, :, :])   # load×period → period×load
-            Palma[i] = _cost_weighted_served_palma(shed_pl, pd_pl, λ)
-        end
+        CoV[i] = nm.CoV; Palma[i] = nm.Palma
     end
     total_shed = L1
     return (alphas = alphas, total_shed = total_shed,
@@ -202,28 +188,22 @@ needs the per-period demand `pd_pl` [period × load] and costs `λ`. When those
 are not supplied, `Palma` falls back to NaN (the aggregate-shed Palma is no
 longer what we plot).
 """
-function _aggregate_norms(matrix::AbstractMatrix;
-                          pd_pl::Union{Nothing,AbstractMatrix} = nothing,
-                          λ::Union{Nothing,AbstractVector} = nothing)
+function _aggregate_norms(matrix::AbstractMatrix)
+    # matrix is [period × load]; sum over periods → per-load total shed, then the
+    # UNCOSTED aggregate norms (Palma = top10%/bot40% of total shed).
     n_loads = size(matrix, 2)
     v = zeros(n_loads)
     for t in axes(matrix, 1), j in 1:n_loads
         x = matrix[t, j]; isnan(x) || (v[j] += x)
     end
     nm = shed_norms(v)
-    palma = (pd_pl === nothing || λ === nothing) ? NaN :
-            _cost_weighted_served_palma(matrix, pd_pl, λ)
     return (total_shed = nm.L1, L1 = nm.L1, L2 = nm.L2,
-            Linf = nm.Linf, CoV = nm.CoV, Palma = palma)
+            Linf = nm.Linf, CoV = nm.CoV, Palma = nm.Palma)
 end
 
 function load_bilevel_point(path::String)
     saved = JLD2.load(path)
-    # Per-period demand + costs for the matched served-Palma. pd_ref_matrix is
-    # [period × load], same orientation as pshed_matrix.
-    pd_pl = saved["pd_ref_matrix"]
-    λ     = saved["PEAK_TIME_COSTS"]
-    int_norms = _aggregate_norms(saved["pshed_matrix"]; pd_pl = pd_pl, λ = λ)
+    int_norms = _aggregate_norms(saved["pshed_matrix"])
     # The bilevel pipeline saves the final relaxed MLD (Step 3, pre-rounding)
     # alongside the rounded integer solution. Older JLD2s predate this
     # instrumentation or may have an all-NaN matrix on non-convergence —
@@ -232,7 +212,7 @@ function load_bilevel_point(path::String)
     if haskey(saved, "relaxed_pshed_matrix")
         rlx_mat = saved["relaxed_pshed_matrix"]
         if any(!isnan, rlx_mat)
-            rlx_norms = _aggregate_norms(rlx_mat; pd_pl = pd_pl, λ = λ)
+            rlx_norms = _aggregate_norms(rlx_mat)
         end
     end
     return (int = int_norms, rlx = rlx_norms,
