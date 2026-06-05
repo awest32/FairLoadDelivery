@@ -52,7 +52,7 @@ end
 # Downsampled hours-of-day (0-indexed) covering trough → peak → descent. Cuts
 # the single-level multi-period MILP from T=24 to T=8 to keep solve times in
 # range comparable to the bilevel scripts.
-SELECTED_HOURS    = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent (was collect(0:23) for T=24)
+SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8: matches palma trade-off + T=8 bilevel runs (was [4,12,15,18,22] T=5)
 
 #SELECTED_HOURS    = [4, 18, 8]   # 13-bus motivation_c: T=3, peak in middle position so plots show off-peak → peak → off-peak. λ=[5.0, 30.0, 5.01]. Was collect(0:23) for case6 T=24.
 N_PERIODS      = length(SELECTED_HOURS)

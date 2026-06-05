@@ -99,7 +99,7 @@ pshed_type = "absolute"  # only absolute supported in this script
 # BINARY regardless (relaxing it collapses the McCormick `u` to zero and
 # breaks the sort — see legacy/palma_reformulation/README.md). When false the
 # MLD switch/block vars are binary (`build_mn_mc_mld_min_max_integer`).
-relaxed = get(ENV, "RELAXED", "true") == "true"   # env-overridable so one orchestration can run integer + relaxed
+relaxed = get(ENV, "RELAXED", "true") == "false"   # env-overridable so one orchestration can run integer + relaxed
 # Which quantity the Palma objective sorts: "served" (matches the income-Palma
 # formulation; default) or "shed" (experiment — optimize fairness of the shed burden).
 PALMA_SORT = get(ENV, "PALMA_TARGET", "served") == "shed" ? :pshed : :pd
@@ -282,25 +282,25 @@ function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
 
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    # Uncosted aggregate shed/served per load — for x-axis total shed + diagnostics.
+    # temporal costed aggregate shed/served per load — for x-axis total shed + diagnostics.
     pshed_agg = JuMP.@expression(model, [k = 1:n],
-        sum(sum(_PMD.var(pm, nw, :pshed, load_ids[k])) for nw in nw_ids_int))
+        sum(λ[nw+1] * sum(_PMD.var(pm, nw, :pshed, load_ids[k])) for nw in nw_ids_int))
     pserved_agg = JuMP.@expression(model, [k = 1:n],
-        sum(sum(_PMD.var(pm, nw, :pd, load_ids[k])) for nw in nw_ids_int))
+        sum(λ[nw+1] * sum(_PMD.var(pm, nw, :pd, load_ids[k])) for nw in nw_ids_int))
 
     # Per-period sort machinery; accumulate cost-weighted top/bot contributions.
     a        = Vector{Any}(undef, T)
     u        = Vector{Any}(undef, T)
-    pserved_period = Dict{Int,Any}()
-    top10_terms = Any[]   # λ_t · top10%(pserved_t)
-    bot40_terms = Any[]   # λ_t · bot40%(pserved_t)
+    ps_period = Dict{Int,Any}()
+    top10_terms = Any[]   # top10%(pserved_t)
+    bot40_terms = Any[]   # bot40%(pserved_t)
 
     for (ti, nw) in enumerate(nw_ids_int)
-        Pt = P_period[nw]
+        Pt = λ[ti] * P_period[nw]
         # sort_target = :pd → served-Palma; :pshed → shed-Palma. Both ∈ [0, Pt].
-        pserved_t = JuMP.@expression(model, [k = 1:n],
+        ps_t = JuMP.@expression(model, [k = 1:n],
             sum(_PMD.var(pm, nw, sort_target, load_ids[k])))
-        pserved_period[nw] = pserved_t
+        ps_period[nw] = ps_t
 
         a[ti] = relax_binary ?
             JuMP.@variable(model, [1:n, 1:n], lower_bound = 0, upper_bound = 1, base_name = "palma_a_$ti") :
@@ -310,9 +310,9 @@ function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
         # McCormick bilinear term: u[t][i,j] = a[t][i,j] · pserved_{t,j}, 0 ≤ pserved ≤ Pt.
         for i in 1:n, j in 1:n
             Pj = Pt[j]
-            JuMP.@constraint(model, u[ti][i, j] >= pserved_t[j] + a[ti][i, j] * Pj - Pj)
+            JuMP.@constraint(model, u[ti][i, j] >= ps_t[j] + a[ti][i, j] * Pj - Pj)
             JuMP.@constraint(model, u[ti][i, j] <= a[ti][i, j] * Pj)
-            JuMP.@constraint(model, u[ti][i, j] <= pserved_t[j])
+            JuMP.@constraint(model, u[ti][i, j] <= ps_t[j])
         end
         for i in 1:n
             JuMP.@constraint(model, sum(a[ti][i, j] for j in 1:n) == 1)
@@ -350,7 +350,7 @@ function add_palma_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
         P_period = P_period, total_demand_all = total_demand_all,
         top_10_idx = top_10_idx, bottom_40_idx = bottom_40_idx,
         pshed_agg = pshed_agg, pserved_agg = pserved_agg,
-        pserved_period = pserved_period,
+        ps_period = ps_period,
         a = a, u = u,
         top_sum = top_sum, bot_sum = bot_sum, σ = σ,
         eff_total = eff_total,
@@ -461,22 +461,22 @@ bot_sum_warm   = 0.0
 pshed_warm_tot = 0.0
 for (ti, nw) in enumerate(nw_ids_int_sorted)
     global pshed_warm_tot, bot_sum_warm   # accumulators live in the script's global scope
-    shed_warm_t = [sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid))) for lid in palma.load_ids]
+    shed_warm_t = PEAK_TIME_COSTS[ti] * [sum(JuMP.value.(_PMD.var(mld_eff, nw, :pshed, lid))) for lid in palma.load_ids]
     pshed_warm_tot += sum(shed_warm_t)
     # the warm permutation must sort the SAME quantity the objective sorts
-    pserved_warm_t = PALMA_SORT === :pshed ? shed_warm_t :
+    ps_warm_t = PALMA_SORT === :pshed ? shed_warm_t :
         [sum(_PMD.ref(mld_eff, nw, :load, lid)["pd"]) for lid in palma.load_ids] .- shed_warm_t
 
-    perm    = sortperm(pserved_warm_t)            # ascending positions
+    perm    = sortperm(ps_warm_t)            # ascending positions
     a_start = zeros(palma.n, palma.n)
     for (i, j) in enumerate(perm); a_start[i, j] = 1.0; end
-    u_start = a_start .* reshape(pserved_warm_t, 1, :)
+    u_start = a_start .* reshape(ps_warm_t, 1, :)
     for i in 1:palma.n, j in 1:palma.n
         JuMP.set_start_value(palma.a[ti][i, j], a_start[i, j])
         JuMP.set_start_value(palma.u[ti][i, j], u_start[i, j])
     end
     # contribution to the cost-weighted aggregate denominator: λ_t · bot40(served_t)
-    bot_sum_warm += PEAK_TIME_COSTS[ti] * sum(pserved_warm_t[perm[k]] for k in 1:n_bot_palma)
+    bot_sum_warm += sum(ps_warm_t[perm[k]] for k in 1:n_bot_palma)
 end
 σ_start = 1.0 / max(bot_sum_warm, 1e-8)
 JuMP.set_start_value(palma.σ, σ_start)
@@ -540,7 +540,7 @@ for (idx, alpha) in enumerate(alphas)
     # period's served values, and cross-checked against the model's σ·top_sum.
     cw_top = 0.0; cw_bot = 0.0
     for (t, nw) in enumerate(nw_ids_int_sorted)
-        s = sort([JuMP.value(palma.pserved_period[nw][k]) for k in 1:palma.n])
+        s = sort([JuMP.value(palma.ps_period[nw][k]) for k in 1:palma.n])
         cw_top += PEAK_TIME_COSTS[t] * sum(s[i] for i in palma.top_10_idx)
         cw_bot += PEAK_TIME_COSTS[t] * sum(s[i] for i in palma.bottom_40_idx)
     end

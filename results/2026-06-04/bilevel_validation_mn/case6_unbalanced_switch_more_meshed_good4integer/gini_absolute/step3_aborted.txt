@@ -1,0 +1,6 @@
+Step 3 relaxed multi-period MLD did not converge.
+termination_status      = LOCALLY_INFEASIBLE
+bilevel completed_iters = 20
+bilevel last_status     = OPTIMAL
+Steps 4–6 skipped (rounding, results block).
+Fallback JLD2 written using iter-N pshed_val (NOT iter-N+1 weights).
