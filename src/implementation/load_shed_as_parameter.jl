@@ -208,19 +208,28 @@ NamedTuple with fields:
 ```
 pshed_new[j] = pshed_prev[j] + Σ_k dpshed_dw[j,k] * Δw[k]
 ```
-Palma sort + Charnes-Cooper operates on `pshed_new` (top10% shed / bot40% shed).
-The objective is pure Palma — no efficiency term, no regularizer.
 
-## McCormick Envelopes for u[i,j] = a[i,j] * pshed_new[j]
-Since a[i,j] ∈ {0,1} and pshed_new[j] ∈ [0, P_j]:
+## Cost-Weighted AGGREGATE shed-Palma
+The Palma sort operates on the per-load COST-WEIGHTED AGGREGATE shed
+```
+pshed_agg[i] = Σ_t λ[t] * pshed_new[(t-1)*n + i]     (i = 1..n)
+```
+with McCormick upper bound `P_agg[i] = Σ_t λ[t] * pd[(t-1)*n + i]`. There is a
+SINGLE sort, a SINGLE σ, and the objective is the ratio of deciles of
+`pshed_agg` — the period costs live entirely inside `pshed_agg`, so the
+objective carries no explicit λ. (Replaces the earlier per-period sum-of-ratios
+`Σ_t λ_t·σ_t·top_t`.) Pure Palma — no efficiency term, no regularizer.
+
+## McCormick Envelopes for u[i,j] = a[i,j] * pshed_agg[j]
+Since a[i,j] ∈ {0,1} and pshed_agg[j] ∈ [0, P_agg[j]]:
 1. u[i,j] ≥ 0
-2. u[i,j] ≥ pshed_new[j] + a[i,j]*P_j - P_j
-3. u[i,j] ≤ a[i,j] * P_j
-4. u[i,j] ≤ pshed_new[j]
+2. u[i,j] ≥ pshed_agg[j] + a[i,j]*P_agg[j] - P_agg[j]
+3. u[i,j] ≤ a[i,j] * P_agg[j]
+4. u[i,j] ≤ pshed_agg[j]
 
 ## Charnes-Cooper Transformation
 Transform min(num/denom) to: min(num*σ) s.t. denom*σ = 1
-where σ = 1/denom > 0.
+where σ = 1/denom > 0, denom = bot40(pshed_agg).
 """
 function palma_ratio_minimization(
     dpshed_dw::Matrix{Float64},
@@ -321,21 +330,22 @@ function palma_ratio_minimization(
     end
 
     #=========================================================================
-    # Per-Period Sort Decomposition
+    # Cost-Weighted AGGREGATE Sort Decomposition
     #
-    # Each period's N pshed values are sorted independently using N×N
-    # binary permutation matrices. The objective is the cost-weighted sum
-    # of per-period Palma ratios: min Σ_t λ[t] * Palma_t
+    # The N per-load COST-WEIGHTED AGGREGATE shed values
+    #   pshed_agg[i] = Σ_t λ[t]·pshed_{t,i}
+    # are sorted ONCE with a single N×N binary permutation matrix. The objective
+    # is the single cost-weighted aggregate Palma ratio (one σ), NOT the earlier
+    # per-period sum-of-ratios.
     #
-    # Binary count: T*N² (e.g., 9*225 = 2025 for T=9, N=15)
-    # vs global sort: (T*N)² (e.g., 135² = 18225)
+    # Binary count: N² (one permutation) vs the earlier per-period T*N².
     =========================================================================#
 
     # Determine number of periods
     @assert m % n_per_period == 0 "m=$m must be divisible by n_per_period=$n_per_period"
     n_periods = m ÷ n_per_period
     n = n_per_period
-    @info "[Palma] Per-period sort: $n_periods period(s), $n loads/period, $m weights, $(n_periods * n^2) binaries"
+    @info "[Palma] Cost-weighted aggregate sort: $n_periods period(s), $n loads/period, $m weights, $(n^2) binaries"
 
     # Period costs: λ[t] for each period (default uniform)
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
@@ -348,17 +358,18 @@ function palma_ratio_minimization(
     # Weight changes (m = T*N per-period weight decision variables)
     @variable(model, Δw[1:m])
 
-    # Per-period permutation matrices: a[t][i,j] for t=1..T, i,j=1..n
-    a = []
-    u = []
-    for t in 1:n_periods
-        if relax_binary
-            push!(a, @variable(model, [1:n, 1:n], lower_bound=0, upper_bound=1, base_name="a_$t"))
-        else
-            push!(a, @variable(model, [1:n, 1:n], Bin, base_name="a_$t"))
-        end
-        push!(u, @variable(model, [1:n, 1:n], lower_bound=0, base_name="u_$t"))
+    # ONE aggregate permutation matrix a[i,j] (i,j = 1..n) that sorts the
+    # COST-WEIGHTED AGGREGATE per-load shed pshed_agg (built below), plus its
+    # McCormick auxiliary u. The previous per-period sort is intentionally
+    # collapsed: the Palma metric is now the ratio of deciles of the single
+    # vector Σ_t λ_t·pshed_{t,i}, so the period costs live inside pshed_agg and
+    # there is ONE sort and ONE σ for the whole horizon (not T of each).
+    if relax_binary
+        @variable(model, a[1:n, 1:n], lower_bound=0, upper_bound=1, base_name="a_agg")
+    else
+        @variable(model, a[1:n, 1:n], Bin, base_name="a_agg")
     end
+    @variable(model, u[1:n, 1:n], lower_bound=0, base_name="u_agg")
 
     #=========================================================================
     # P_shed as EXPRESSION (Core Simplification)
@@ -407,64 +418,65 @@ function palma_ratio_minimization(
     @constraint(model, pshed_ub[j=1:m], pshed_new[j] <= pd[j])
 
     #=========================================================================
-    # Per-Period Sorting: Permutation + McCormick + Ascending Order
+    # Cost-Weighted AGGREGATE Sort: Permutation + McCormick + Ascending Order
+    #
+    # Single sort over the per-load COST-WEIGHTED AGGREGATE shed
+    #     pshed_agg[i] = Σ_t λ[t] · pshed_new[(t-1)·n + i]          i = 1..n
+    # with McCormick upper bound
+    #     P_agg[i]     = Σ_t λ[t] · pd[(t-1)·n + i].
+    # Period costs λ_t enter ONLY through pshed_agg, so the Palma ratio
+    # top10(pshed_agg)/bot40(pshed_agg) is a single cost-weighted aggregate
+    # ratio and the objective carries no explicit λ. This deliberately collapses
+    # the previous per-period sort / per-period σ_t (sum-of-ratios) into ONE
+    # ratio of cost-weighted sums.
     =========================================================================#
 
-    # Palma indices (same for each period since all have n loads)
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
-    # Build per-period Palma ratios via Charnes-Cooper
-    # σ[t] = 1 / bot_sum_t, objective = min Σ_t λ[t] * σ[t] * top_sum_t
-    @variable(model, σ[1:n_periods] >= 1e-8)
+    # Cost-weighted aggregate per-load shed (linear in Δw via pshed_new).
+    @expression(model, pshed_agg[i=1:n],
+        sum(λ[t] * pshed_new[(t - 1) * n + i] for t in 1:n_periods))
+    # McCormick upper bound on pshed_agg[i] (cost-weighted aggregate demand).
+    P_agg = [sum(λ[t] * pd[(t - 1) * n + i] for t in 1:n_periods) for i in 1:n]
 
-    period_top_sums = []
-    period_bot_sums = []
-
-    for t in 1:n_periods
-        offset = (t - 1) * n
-
-        # Doubly stochastic constraints
-        for i in 1:n
-            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)
-        end
-        for j in 1:n
-            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
-        end
-
-        # McCormick envelopes: u[t][i,j] = a[t][i,j] * pshed_new[offset+j]
-        # with bounds 0 ≤ pshed_new[j] ≤ pd[j] (pshed ∈ [ε, pd]; we use the
-        # looser [0, pd] lower envelope for the standard McCormick form).
-        for i in 1:n, j in 1:n
-            gj = offset + j
-            P_j = pd[gj]
-
-            @constraint(model, u[t][i, j] >= pshed_new[gj] + a[t][i, j] * P_j - P_j)
-            @constraint(model, u[t][i, j] <= a[t][i, j] * P_j)
-            @constraint(model, u[t][i, j] <= pshed_new[gj])
-        end
-
-        # Sorted values for this period (ascending)
-        sorted_t = @expression(model, [i=1:n], sum(u[t][i, j] for j in 1:n))
-        for k in 1:n-1
-            @constraint(model, sorted_t[k] <= sorted_t[k+1])
-        end
-
-        # Palma sums for this period
-        push!(period_top_sums, @expression(model, sum(sorted_t[i] for i in top_10_idx)))
-        push!(period_bot_sums, @expression(model, sum(sorted_t[i] for i in bottom_40_idx)))
-
-        # Charnes-Cooper normalization: σ[t] * bot_sum_t = 1
-        @constraint(model, σ[t] * period_bot_sums[t] == 1.0)
+    # Doubly stochastic permutation
+    for i in 1:n
+        @constraint(model, sum(a[i, j] for j in 1:n) == 1)
+    end
+    for j in 1:n
+        @constraint(model, sum(a[i, j] for i in 1:n) == 1)
     end
 
+    # McCormick envelopes: u[i,j] = a[i,j] * pshed_agg[j], 0 ≤ pshed_agg[j] ≤ P_agg[j].
+    for i in 1:n, j in 1:n
+        Pj = P_agg[j]
+        @constraint(model, u[i, j] >= pshed_agg[j] + a[i, j] * Pj - Pj)
+        @constraint(model, u[i, j] <= a[i, j] * Pj)
+        @constraint(model, u[i, j] <= pshed_agg[j])
+    end
+
+    # Ascending-sorted cost-weighted aggregate shed
+    sorted = @expression(model, [i=1:n], sum(u[i, j] for j in 1:n))
+    for k in 1:n-1
+        @constraint(model, sorted[k] <= sorted[k+1])
+    end
+
+    top_sum = @expression(model, sum(sorted[i] for i in top_10_idx))
+    bot_sum = @expression(model, sum(sorted[i] for i in bottom_40_idx))
+
+    # Charnes-Cooper normalization: σ · bot_sum = 1 (single σ for the horizon).
+    @variable(model, σ >= 1e-8)
+    @constraint(model, σ * bot_sum == 1.0)
+
     #=========================================================================
-    # Objective: pure cost-weighted sum of per-period Palma ratios
-    #   min Σ_t λ[t] * σ[t] * top_sum_t       (σ[t] = 1 / bot_sum_t)
+    # Objective: cost-weighted AGGREGATE shed-Palma ratio (single σ)
+    #   min σ · top_sum         (σ = 1 / bot_sum)
     #
-    # No efficiency term, no regularizer — the upper level is pure shed-Palma.
+    # No explicit λ (cost is inside pshed_agg), no efficiency term, no
+    # regularizer — the upper level is pure cost-weighted aggregate shed-Palma.
     =========================================================================#
 
-    @objective(model, Min, sum(λ[t] * σ[t] * period_top_sums[t] for t in 1:n_periods))
+    @objective(model, Min, σ * top_sum)
 
     #=========================================================================
     # Solve
@@ -489,17 +501,14 @@ function palma_ratio_minimization(
         # Compute pshed_new from the expression
         pshed_new_val = pshed_prev .+ dpshed_dw * Δw_val
 
-        # Collect per-period permutation matrices and sorted SHED values
-        a_vals = [value.(a[t]) for t in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            pshed_t = pshed_new_val[offset+1:offset+n]
-            append!(sorted_val, a_vals[t] * pshed_t)
-        end
+        # Cost-weighted aggregate per-load shed + its single sort.
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        a_val = value.(a)
+        sorted_val = a_val * pshed_agg_val
 
-        # Compute actual Palma ratio over SHED (top10% / bot40% of pshed_new)
-        actual_palma = palma_ratio(pshed_new_val)
+        # Actual Palma ratio over the COST-WEIGHTED AGGREGATE shed (the optimized metric).
+        actual_palma = palma_ratio(pshed_agg_val)
 
         return (
             weights_new = weights_new,
@@ -508,7 +517,7 @@ function palma_ratio_minimization(
             palma_ratio = actual_palma,
             status = status,
             solve_time = solve_time,
-            permutation = a_vals,
+            permutation = a_val,
             sorted_values = sorted_val
         )
     elseif status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
@@ -517,14 +526,13 @@ function palma_ratio_minimization(
         @warn "[Palma] Solver hit $status with NO incumbent — returning no-progress (Δw=0, weights unchanged) (solve_time=$(round(solve_time, digits=2))s)"
         Δw_val = zeros(m)
         pshed_new_val = copy(pshed_prev)
-        actual_palma = palma_ratio(pshed_new_val)
-        # Identity permutation per period as a placeholder
-        a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            append!(sorted_val, sort(pshed_new_val[offset+1:offset+n]))
-        end
+        # Cost-weighted aggregate per-load shed (no-progress incumbent).
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        actual_palma = palma_ratio(pshed_agg_val)
+        # Identity permutation placeholder + ascending aggregate shed.
+        a_val = Matrix{Float64}(I, n, n)
+        sorted_val = sort(pshed_agg_val)
         return (
             weights_new = copy(weights_prev),
             pshed_new = pshed_new_val,
@@ -532,7 +540,7 @@ function palma_ratio_minimization(
             palma_ratio = actual_palma,
             status = status,
             solve_time = solve_time,
-            permutation = a_vals,
+            permutation = a_val,
             sorted_values = sorted_val
         )
     else
@@ -552,38 +560,36 @@ end
 Formal-CC reformulation of [`palma_ratio_minimization`](@ref). The weak-CC
 version multiplies σ in at only two places, leaving `σ·u` bilinear terms that
 force Gurobi `NonConvex=2`. The formal CC rescales **every** original decision
-variable by σ (`z = σ·y`) — the resulting model is a pure MILP:
+variable by σ (`z = σ·y`) — the resulting model is a pure MILP.
 
-  * The upper-level Palma sorts on **absolute pshed**, so
-    `σ_t = 1 / bot40_sum_pshed_t`.
-  * `Δw → Δw_z = σ_t · Δw`
-  * `u   → u_z = σ_t · u  =  a · pshed_z` (binary × continuous, via indicator
-    constraints — see implementation comment for details)
-  * `pshed_new → pshed_z = σ_t · pshed_new` (linear expression in Δw_z and σ)
-  * `σ_t · bot_sum = 1`        → `Σ_{i∈bot40,j} u_z[t][i,j] = 1` (linear)
-  * `min σ_t · top_sum`        → `min Σ_{i∈top10,j} u_z[t][i,j]` (linear)
-  * every RHS constant `g` becomes `g · σ_t` under rescaling (trust region,
+Like the weak-CC version, the Palma sort is over the per-load COST-WEIGHTED
+AGGREGATE shed `pshed_agg[i] = Σ_t λ_t·pshed_{t,i}`, so there is a SINGLE sort,
+a SINGLE σ = 1 / bot40(pshed_agg), and the objective carries no explicit λ:
+
+  * `Δw → Δw_z = σ · Δw`
+  * `pshed_new → pshed_z = σ · pshed_new` (linear in Δw_z and σ), and
+    `pshed_agg_z[i] = Σ_t λ_t·pshed_z[(t-1)n+i] = σ · pshed_agg[i]`
+  * `u → u_z = a · pshed_agg_z` (binary × continuous, via indicator constraints)
+  * `σ · bot_sum = 1`        → `Σ_{i∈bot40,j} u_z[i,j] = 1` (linear)
+  * `min σ · top_sum`        → `min Σ_{i∈top10,j} u_z[i,j]` (linear, no λ)
+  * every RHS constant `g` becomes `g · σ` under rescaling (trust region,
     weight bounds, weight budget, pshed bounds).
 
-Requires the Jacobian to be **block-diagonal in periods**: `J[j,k] = 0` whenever
-`t(j) ≠ t(k)`. The lower-level multinetwork MLD is fully separable across
-periods (see `build_mn_mc_mld_shedding_implicit_diff`), so this holds by
-construction; a runtime guard logs a warning if off-block magnitudes exceed
-`block_tol`.
+With a SINGLE global σ the rescaling `pshed_z = σ·pshed_new` is EXACT regardless
+of the Jacobian's period-block structure (`Σ_k J[j,k]·Δw_z[k] = σ·Σ_k J[j,k]·Δw[k]`),
+so block-diagonality is no longer required for correctness — the runtime guard
+is retained only as an informational diagnostic.
 
 Recovery of original-space variables:
-    Δw[k]       = Δw_z[k] / σ_{t(k)}
+    Δw[k]       = Δw_z[k] / σ
     pshed_new   = pshed_prev + J · Δw
     weights_new = weights_prev + Δw
 
-σ-bounds: `σ_t ≥ σ_min > 0` (a small positive lower bound for numerical safety)
+σ-bounds: `σ ≥ σ_min > 0` (a small positive lower bound for numerical safety)
 and **no upper bound** — matches the formal CC math, where σ = 1/bot_sum can grow
-arbitrarily large as bot_sum approaches zero. Earlier versions imposed
-`σ_max = 10 / bot40_sum_prev_t` to support a McCormick big-M envelope on
-`a · pshed_z`; that heuristic created an artificial INFEASIBLE failure mode
-once bilevel iterations pushed bot_sum_prev to zero. Indicator constraints
-remove the need for any upper bound. The `sigma_max_scale` kwarg is retained
-for backward compatibility but is ignored.
+arbitrarily large as bot_sum approaches zero. Indicator constraints (not
+McCormick) encode `u_z = a · pshed_agg_z`, so no σ upper bound is needed. The
+`sigma_max_scale` kwarg is retained for backward compatibility but is ignored.
 """
 function palma_ratio_minimization_formal_cc(
     dpshed_dw::Matrix{Float64},
@@ -655,27 +661,25 @@ function palma_ratio_minimization_formal_cc(
             v > block_tol && (n_off_block_diag += 1)
         end
     end
+    # Informational only: with a SINGLE global σ the rescaling pshed_z = σ·pshed_new
+    # is exact even with off-block coupling, so this no longer affects correctness.
     if n_off_block_diag > 0
-        @warn "[Palma formal CC] Jacobian off-block-diagonal entries exceed $block_tol: $n_off_block_diag entries, max=$max_off_block_diag. Formal CC assumes block-diagonality — solution may be inexact."
+        @info "[Palma formal CC] Jacobian has $n_off_block_diag off-block-diagonal entries > $block_tol (max=$max_off_block_diag) — harmless under single-σ rescaling."
     else
         @info "[Palma formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
     end
 
     # Palma sort indices ---------------------------------------------------------
-    # Formal CC has NO upper bound on σ_t (mathematically σ_t = 1/bot_sum can grow
+    # Formal CC has NO upper bound on σ (mathematically σ = 1/bot_sum can grow
     # unboundedly as bot_sum → 0 — that's how the CC normalization absorbs ratios
-    # that approach infinity). Earlier versions of this function imposed a
-    # σ_max = 10/bot_sum_prev heuristic to support McCormick big-M envelopes on
-    # `u_z = a · pshed_z`; that heuristic created an artificial INFEASIBLE
-    # failure mode when bilevel iterations pushed bot_sum_prev toward 0. The
-    # current implementation uses indicator constraints (see below) instead of
-    # McCormick, so no σ_max is needed.
+    # that approach infinity). The implementation uses indicator constraints (see
+    # below) instead of McCormick, so no σ_max is needed.
     top_10_idx, bottom_40_idx = compute_palma_indices(n)
 
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods
 
-    @info "[Palma formal CC] T=$n_periods, N=$n, m=$m (indicator-constraint form, σ unbounded above)"
+    @info "[Palma formal CC] T=$n_periods, N=$n, m=$m (cost-weighted aggregate sort, single σ unbounded above, $(n^2) binaries)"
 
     # Build the MILP ------------------------------------------------------------
     model = JuMP.Model(solver)
@@ -692,105 +696,86 @@ function palma_ratio_minimization_formal_cc(
         end
     end
 
-    # σ_t ≥ σ_min > 0 (no upper bound — matches formal CC math)
-    @variable(model, σ[t = 1:n_periods])
-    for t in 1:n_periods
-        JuMP.set_lower_bound(σ[t], sigma_min)
-    end
+    # σ ≥ σ_min > 0 (SINGLE scalar; no upper bound — matches formal CC math).
+    @variable(model, σ >= sigma_min)
 
-    # Binary permutation matrices — unchanged from weak CC
-    a = Any[]
-    for t in 1:n_periods
-        push!(a, @variable(model, [1:n, 1:n], Bin, base_name = "a_$t"))
-    end
+    # ONE binary permutation matrix sorting the cost-weighted aggregate shed.
+    @variable(model, a[1:n, 1:n], Bin, base_name = "a_agg")
 
-    # Rescaled weight changes
+    # Rescaled weight changes Δw_z = σ·Δw.
     @variable(model, Δw_z[1:m])
 
-    # Rescaled pshed (linear expression). By block-diagonality, only k with
-    # t(k) == t(j) contributes — we still sum over all k since J[j,k] ≈ 0 off-block.
+    # Rescaled pshed (linear expression). With a SINGLE global σ this is EXACTLY
+    # pshed_z[j] = σ·pshed_new[j] regardless of Jacobian block structure:
+    # Σ_k J[j,k]·Δw_z[k] = σ·Σ_k J[j,k]·Δw[k] (there is no per-period σ_t that
+    # could mismatch across a coupling entry). Block-diagonality is therefore no
+    # longer required for exactness of the rescaling.
     @expression(model, pshed_z[j = 1:m],
-        σ[((j - 1) ÷ n) + 1] * pshed_prev[j]
-        + sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
+        σ * pshed_prev[j] + sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
     )
 
-    # Rescaled u: u_z[t][i,j] = a[t][i,j] · pshed_z[offset+j] via indicator constraints
-    u_z = Any[]
-    for t in 1:n_periods
-        push!(u_z, @variable(model, [1:n, 1:n], lower_bound = 0, base_name = "u_z_$t"))
+    # Cost-weighted AGGREGATE rescaled shed: pshed_agg_z[i] = Σ_t λ_t·pshed_z[(t-1)n+i]
+    # (= σ·pshed_agg[i]). The single sort runs over these N aggregate values, so
+    # the period costs λ_t live entirely inside pshed_agg_z and the objective
+    # carries no explicit λ. (Replaces the per-period u_z[t]/σ_t sum-of-ratios.)
+    @expression(model, pshed_agg_z[i = 1:n],
+        sum(λ[t] * pshed_z[(t - 1) * n + i] for t in 1:n_periods))
+
+    # Rescaled u: u_z[i,j] = a[i,j] · pshed_agg_z[j] via indicator constraints.
+    @variable(model, u_z[1:n, 1:n], lower_bound = 0, base_name = "u_z_agg")
+
+    # Doubly stochastic on the binary a
+    for i in 1:n
+        @constraint(model, sum(a[i, j] for j in 1:n) == 1)
+    end
+    for j in 1:n
+        @constraint(model, sum(a[i, j] for i in 1:n) == 1)
     end
 
-    for t in 1:n_periods
-        offset = (t - 1) * n
-        # Doubly stochastic on the binary a (unchanged)
-        for i in 1:n
-            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)
-        end
-        for j in 1:n
-            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
-        end
-
-        # ---------------------------------------------------------------------
-        # Indicator constraints for u_z[t][i,j] = a[t][i,j] · pshed_z[offset+j]
-        # ---------------------------------------------------------------------
-        # An "indicator constraint" enforces a linear constraint conditionally
-        # on a binary indicator. JuMP / Gurobi natively support them via the
-        # `binary => {linear_constraint}` syntax (read as "if binary, then linear
-        # constraint must hold"). Gurobi handles the disjunction inside its
-        # branching tree using SOS1-style logic — no Big-M is added to the model.
-        #
-        # We encode the bilinear product `u_z = a · pshed_z` (with a∈{0,1},
-        # pshed_z ≥ 0) as two indicator constraints per (i,j):
-        #     a[t][i,j] == 1  →  u_z[t][i,j] == pshed_z[offset+j]
-        #     a[t][i,j] == 0  →  u_z[t][i,j] == 0
-        # When a=1, u_z takes pshed_z's value; when a=0, u_z is forced to 0.
-        # The doubly-stochastic constraint guarantees exactly one i per column
-        # has a=1, so `sorted_z_t[i] = sum_j u_z[t][i,j]` picks out a single
-        # pshed_z value — the load assigned to sort-position i.
-        #
-        # Why this is better than the prior McCormick formulation:
-        #   - McCormick required a finite upper bound on pshed_z, i.e. a
-        #     finite σ_max[t]. The chosen σ_max heuristic was too tight in some
-        #     bilevel iters (INFEASIBLE) and too loose in others (LP relaxation
-        #     too weak → Gurobi stuck at do-nothing incumbent).
-        #   - Indicator constraints add no Big-M and need no upper bound on
-        #     σ_t. The formulation matches the formal CC math exactly.
-        #   - LP relaxation tends to be tighter because Gurobi treats the
-        #     disjunction directly instead of through a loose linear envelope.
-        # ---------------------------------------------------------------------
-        for i in 1:n, j in 1:n
-            gj = offset + j
-            @constraint(model, a[t][i, j] => {u_z[t][i, j] == pshed_z[gj]})
-            @constraint(model, !a[t][i, j] => {u_z[t][i, j] == 0})
-        end
-
-        # Ascending sort on rescaled sorted values (ordering preserved by σ > 0)
-        sorted_z_t = @expression(model, [i = 1:n], sum(u_z[t][i, j] for j in 1:n))
-        for k in 1:(n - 1)
-            @constraint(model, sorted_z_t[k] <= sorted_z_t[k + 1])
-        end
-
-        # Formal-CC denominator normalization (LINEAR): Σ_{i∈bot40,j} u_z[t][i,j] = 1
-        @constraint(model, sum(u_z[t][i, j] for i in bottom_40_idx, j in 1:n) == 1)
+    # ---------------------------------------------------------------------
+    # Indicator constraints for u_z[i,j] = a[i,j] · pshed_agg_z[j]
+    # ---------------------------------------------------------------------
+    # `binary => {linear_constraint}` reads "if binary, then linear constraint
+    # must hold". Gurobi handles the disjunction inside its branching tree
+    # (SOS1-style) — no Big-M is added to the model. We encode the bilinear
+    # product `u_z = a · pshed_agg_z` (a∈{0,1}, pshed_agg_z ≥ 0) as:
+    #     a[i,j] == 1  →  u_z[i,j] == pshed_agg_z[j]
+    #     a[i,j] == 0  →  u_z[i,j] == 0
+    # The doubly-stochastic constraint puts exactly one a=1 per column, so
+    # sorted_z[i] = Σ_j u_z[i,j] picks the aggregate value at sort-position i.
+    # Indicator constraints add no Big-M and need no upper bound on σ /
+    # pshed_agg_z, so σ = 1/bot40 can grow unboundedly as bot40 → 0.
+    # ---------------------------------------------------------------------
+    for i in 1:n, j in 1:n
+        @constraint(model, a[i, j]  => {u_z[i, j] == pshed_agg_z[j]})
+        @constraint(model, !a[i, j] => {u_z[i, j] == 0})
     end
 
-    # Rescaled trust region
+    # Ascending sort on rescaled aggregate values (ordering preserved by σ > 0)
+    sorted_z = @expression(model, [i = 1:n], sum(u_z[i, j] for j in 1:n))
+    for k in 1:(n - 1)
+        @constraint(model, sorted_z[k] <= sorted_z[k + 1])
+    end
+
+    # Formal-CC denominator normalization (LINEAR): Σ_{i∈bot40,j} u_z[i,j] = 1
+    # (this is σ · bot40(pshed_agg) = 1).
+    @constraint(model, sum(u_z[i, j] for i in bottom_40_idx, j in 1:n) == 1)
+
+    # Rescaled trust region (single σ): Δw_z[j] ∈ [−Δ·σ, Δ·σ]
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
-        @constraint(model, Δw_z[j] >= -trust_radius * σ[t])
-        @constraint(model, Δw_z[j] <=  trust_radius * σ[t])
+        @constraint(model, Δw_z[j] >= -trust_radius * σ)
+        @constraint(model, Δw_z[j] <=  trust_radius * σ)
     end
 
     # Rescaled weight bounds
     for j in 1:m
         lid_idx = ((j - 1) % n_per_period) + 1
         load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
-        t = ((j - 1) ÷ n) + 1
         if load_id in critical_ids
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= 100.0 * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= 100.0 * σ)
         else
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] >= w_min * σ[t])
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= w_max * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] >= w_min * σ)
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= w_max * σ)
         end
     end
 
@@ -800,21 +785,19 @@ function palma_ratio_minimization_formal_cc(
             offset = (t - 1) * n
             sum_prev = sum(weights_prev[offset + i] for i in 1:n)
             @constraint(model,
-                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ[t])
+                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ)
         end
     end
 
-    # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇒ pshed_z ∈ [ε·σ_t, pd·σ_t]
+    # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇒ pshed_z ∈ [ε·σ, pd·σ]
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
-        @constraint(model, pshed_z[j] >= ε * σ[t])
-        @constraint(model, pshed_z[j] <= pd[j] * σ[t])
+        @constraint(model, pshed_z[j] >= ε * σ)
+        @constraint(model, pshed_z[j] <= pd[j] * σ)
     end
 
-    # Linear objective: min Σ_t λ_t · Σ_{i∈top10,j} u_z[t][i,j]
-    @objective(model, Min,
-        sum(λ[t] * sum(u_z[t][i, j] for i in top_10_idx, j in 1:n)
-            for t in 1:n_periods))
+    # Linear objective: min Σ_{i∈top10,j} u_z[i,j]   (= σ·top10(pshed_agg); no λ —
+    # the period costs already live inside pshed_agg_z).
+    @objective(model, Min, sum(u_z[i, j] for i in top_10_idx, j in 1:n))
 
     solve_time = @elapsed optimize!(model)
     status = termination_status(model)
@@ -828,25 +811,20 @@ function palma_ratio_minimization_formal_cc(
             @warn "[Palma formal CC] Solver hit $status with an incumbent — returning suboptimal solution"
         end
 
-        σ_val   = value.(σ)
+        σ_val    = value(σ)                   # single global σ
         Δw_z_val = value.(Δw_z)
-        Δw_val   = similar(Δw_z_val)
-        for k in 1:m
-            t = ((k - 1) ÷ n) + 1
-            Δw_val[k] = Δw_z_val[k] / σ_val[t]
-        end
+        Δw_val   = Δw_z_val ./ σ_val
 
         weights_new     = weights_prev .+ Δw_val
         pshed_new_val   = pshed_prev   .+ dpshed_dw * Δw_val
 
-        a_vals = [value.(a[t]) for t in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            append!(sorted_val, a_vals[t] * pshed_new_val[offset+1:offset+n])
-        end
+        # Cost-weighted aggregate per-load shed + its single sort.
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        a_val      = value.(a)
+        sorted_val = a_val * pshed_agg_val
 
-        actual_palma = palma_ratio(pshed_new_val)
+        actual_palma = palma_ratio(pshed_agg_val)
 
         return (
             weights_new   = weights_new,
@@ -855,20 +833,18 @@ function palma_ratio_minimization_formal_cc(
             palma_ratio   = actual_palma,
             status        = status,
             solve_time    = solve_time,
-            permutation   = a_vals,
+            permutation   = a_val,
             sorted_values = sorted_val,
         )
     elseif status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
         @warn "[Palma formal CC] Solver hit $status with NO incumbent — returning no-progress"
         Δw_val = zeros(m)
         pshed_new_val = copy(pshed_prev)
-        actual_palma = palma_ratio(pshed_new_val)
-        a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            append!(sorted_val, sort(pshed_new_val[offset+1:offset+n]))
-        end
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        actual_palma = palma_ratio(pshed_agg_val)
+        a_val = Matrix{Float64}(I, n, n)
+        sorted_val = sort(pshed_agg_val)
         return (
             weights_new   = copy(weights_prev),
             pshed_new     = pshed_new_val,
@@ -876,7 +852,7 @@ function palma_ratio_minimization_formal_cc(
             palma_ratio   = actual_palma,
             status        = status,
             solve_time    = solve_time,
-            permutation   = a_vals,
+            permutation   = a_val,
             sorted_values = sorted_val,
         )
     else
