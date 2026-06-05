@@ -73,8 +73,10 @@ N_BERNOULLI_SAMPLES = 2000
 # (15), evening peak (18), descent (20), late-night start (22).
  # SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle (was [4,6,8,12,15,18,20,22] for T=8)
  # SELECTED_HOURS  = [4, 12, 15, 18, 22]   # T=5: trough, midday, pre-peak, evening peak, descent
- SELECTED_HOURS    = [4, 18, 22]            # T=3: trough, evening peak, descent
+ #SELECTED_HOURS    = [4, 18, 22]            # T=3: trough, evening peak, descent
  # SELECTED_HOURS  = [4, 18]                # T=2: trough vs evening peak
+ SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8: trough, ramp, midday, pre-peak, evening peak, descent (defense; original MILP method tractable here)
+
  #SELECTED_HOURS    = [4, 18, 8]
 # ENV override (e.g. SELECTED_HOURS="4,12,18,22" for T=4); falls back to the line above.
 if haskey(ENV, "SELECTED_HOURS")

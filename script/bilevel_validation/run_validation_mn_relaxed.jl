@@ -55,11 +55,13 @@ CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
 ITERATIONS = 20
-FAIR_FUNC = "efficiciency"  # "min_max", "palma", or "efficiency"
+FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 
 # Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
- SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+ #SELECTED_HOURS    = collect(0:23)   # T=24 full diurnal cycle
+ SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8: trough, ramp, midday, pre-peak, evening peak, descent (defense; original MILP method tractable here)
+
  #SELECTED_HOURS    = [4, 18, 8]
 
  N_PERIODS         = length(SELECTED_HOURS)
