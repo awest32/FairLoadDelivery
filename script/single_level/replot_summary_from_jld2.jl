@@ -91,7 +91,17 @@ end
 function replot_one(path::String)
     isfile(path) || (@warn "missing $path"; return)
     d = JLD2.load(path)
-    per_load_agg = d["per_load_agg"]
+    # UNWEIGHTED per-load aggregate (Σ_t pshed, NO cost weighting), rebuilt from
+    # the per-period tensor so these standalone figures match the post-hoc
+    # comparison plots and the "uncosted" Palma labels below are actually uncosted.
+    # The saved `per_load_agg` is COST-WEIGHTED (Σ_t ρ_t·pshed); using it would put
+    # every figure in ρ-weighted units. Older JLD2s without the tensor fall back.
+    per_load_agg = if haskey(d, "per_load_period_shed")
+        plps = d["per_load_period_shed"]            # alpha × load × period (unweighted)
+        [sum(plps[i, j, t] for t in axes(plps, 3)) for i in axes(plps, 1), j in axes(plps, 2)]
+    else
+        d["per_load_agg"]
+    end
     alphas       = d["alphas"]
     load_labels  = d["load_labels"]
     fair_func    = d["fair_func"]

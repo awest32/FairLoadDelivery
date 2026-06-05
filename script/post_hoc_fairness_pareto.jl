@@ -21,7 +21,12 @@ using LinearAlgebra
 using Statistics
 using Plots
 using Dates
-using FairLoadDelivery: gini_index
+# Import the module name only (qualified access below). Do NOT pull `gini_index`
+# into Main: it is also `include`d as a top-level def by run_validation_mn.jl et al.
+# (via other_fair_funcs.jl), and a Main binding here makes that include fail with
+# "function FairLoadDelivery.gini_index must be explicitly imported to be extended"
+# when both scripts run in the same REPL session.
+import FairLoadDelivery
 
 include(joinpath(@__DIR__, "figure_defaults.jl"))
 
@@ -162,7 +167,7 @@ function shed_norms(v::AbstractVector{<:Real})
         Linf  = norm(finite, Inf),
         CoV   = m > 1e-9 ? s / m : NaN,
         Palma = _palma_ratio_safe(finite),
-        Gini  = gini_index(Float64.(finite)),
+        Gini  = FairLoadDelivery.gini_index(Float64.(finite)),
     )
 end
 
@@ -171,13 +176,29 @@ end
 # ============================================================
 function load_trade_off_curve(path::String)
     saved        = JLD2.load(path)
-    per_load_agg = saved["per_load_agg"]
     alphas       = saved["alphas"]
     n_α          = length(alphas)
+    # Build the per-load aggregate UNWEIGHTED (Σ_t pshed, NO cost weighting), so
+    # the post-hoc Palma + total-shed are computed on the same physical aggregate
+    # as the bilevel markers (`_aggregate_norms`, also unweighted). NB: the saved
+    # `per_load_agg` is COST-WEIGHTED (Σ_t ρ_t·pshed) for the trade-off's own
+    # internal x-axis — using it here would put the trade-off curve in ρ-weighted
+    # units (~10× larger) while the bilevel star stays in raw kW, so the star
+    # appears to shed far less than the efficient point. Recompute from the
+    # per-period tensor instead.
+    n_loads = haskey(saved, "per_load_period_shed") ?
+        size(saved["per_load_period_shed"], 2) : size(saved["per_load_agg"], 2)
     L1    = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α)
     CoV   = zeros(n_α); Palma = zeros(n_α); Gini = zeros(n_α)
     for i in 1:n_α
-        nm = shed_norms(collect(per_load_agg[i, :]))
+        if haskey(saved, "per_load_period_shed")
+            plps = saved["per_load_period_shed"]   # alpha × load × period (unweighted)
+            v = [sum(plps[i, j, t] for t in axes(plps, 3)) for j in 1:n_loads]
+        else
+            # Older JLD2 without the per-period tensor: best effort on per_load_agg.
+            v = collect(saved["per_load_agg"][i, :])
+        end
+        nm = shed_norms(v)
         L1[i] = nm.L1; L2[i] = nm.L2; Linf[i] = nm.Linf
         CoV[i] = nm.CoV; Palma[i] = nm.Palma; Gini[i] = nm.Gini
     end
@@ -327,7 +348,7 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
             idx = length(xs) == 1 ? [1] : [1, length(xs)]
             for i in idx
                 annotate!(p, xs[i], ys[i] + yoff,
-                    text("ν=$(round(αs[i], digits=2))", 14, :center, st.color))
+                    Plots.text("ν=$(round(αs[i], digits=2))", 14, :center, st.color))
             end
         end
     end
@@ -456,8 +477,10 @@ end
 # ============================================================
 # RUN
 # ============================================================
+# Output subfolder is env-overridable (POSTHOC_SUBDIR) so a fresh comparison can
+# be written alongside an earlier one instead of overwriting it.
 out_dir = joinpath(RESULTS_ROOT, Dates.format(now(), "yyyy-mm-dd"),
-                   "post_hoc_fairness")
+                   get(ENV, "POSTHOC_SUBDIR", "post_hoc_fairness"))
 mkpath(out_dir)
 
 sweeps   = Dict{String,NamedTuple}()
