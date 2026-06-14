@@ -54,8 +54,8 @@ case = "6_bus" #"13_bus"#"6_bus"
 CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
-ITERATIONS = 20
-FAIR_FUNC = "palma"  # "min_max", "palma", or "efficiency"
+ITERATIONS = parse(Int, get(ENV, "ITERATIONS", "20"))  # env-overridable for smoke runs
+FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")  # "min_max", "palma", "gini", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 
 # Multi-period setup: per-load Hamilton & Aliprantis (PECI 2023) schedules.
@@ -63,6 +63,10 @@ pshed_type = "absolute"  # "absolute" or "proportional"
  SELECTED_HOURS    = [4, 6, 8, 12, 15, 18, 20, 22]   # T=8: trough, ramp, midday, pre-peak, evening peak, descent (defense; original MILP method tractable here)
 
  #SELECTED_HOURS    = [4, 18, 8]
+# ENV override (e.g. SELECTED_HOURS="4,18" for T=2 smoke); falls back to the line above.
+if haskey(ENV, "SELECTED_HOURS")
+    SELECTED_HOURS = parse.(Int, split(ENV["SELECTED_HOURS"], ","))
+end
 
  N_PERIODS         = length(SELECTED_HOURS)
 PEAK_STRESS       = 1.0
@@ -152,9 +156,10 @@ for k in 1:ITERATIONS
 
     local dpshed, pshed_val, pshed_nw_ids, weight_vals, weight_ids, refs
     try
-        # Switch-topology integer warm-start (skipped for Palma — see
-        # run_validation_mn.jl for the CC σ-degeneracy reasoning).
-        if FAIR_FUNC != "palma"
+        # Switch-topology integer warm-start (skipped for Palma AND Gini — both
+        # use the CC σ machinery that topology-fixing degenerates; see
+        # run_validation_mn.jl for the reasoning).
+        if FAIR_FUNC != "palma" && FAIR_FUNC != "gini"
             t_int = @elapsed mld_int_mn = FairLoadDelivery.solve_mn_mc_mld_switch_integer(mn_new, gurobi_solver;
                 peak_time_costs=PEAK_TIME_COSTS)
             timing[:integer_warmstart_s] = t_int
@@ -204,6 +209,14 @@ for k in 1:ITERATIONS
                     critical_ids=critical_id, weight_ids=weight_ids,
                     peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
                     time_limit=60*10, timings=upper_timings)
+            elseif FAIR_FUNC == "gini"
+                # Cost-weighted AGGREGATE Gini formal-CC MILP — parity with the
+                # aggregate-shed gini_trade_off_mn.jl (single sort, single σ).
+                pshed_new, fair_weight_vals, status = lin_gini_w_grad_input(
+                    dpshed, pshed_val, weight_vals, pd_all;
+                    critical_ids=critical_id, weight_ids=weight_ids,
+                    peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
+                    time_limit=60*10, timings=upper_timings)
             elseif FAIR_FUNC == "efficiency"
                 pshed_new, fair_weight_vals, status = efficient_load_shed(
                     dpshed, pshed_val, weight_vals;
@@ -211,7 +224,7 @@ for k in 1:ITERATIONS
                     peak_time_costs=PEAK_TIME_COSTS, n_loads=n_loads,
                     timings=upper_timings)
             else
-                error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"efficiency\".")
+                error("FAIR_FUNC=\"$FAIR_FUNC\" not wired up; supported: \"min_max\", \"palma\", \"gini\", \"efficiency\".")
             end
         end
         timing[:upper_level_total_s] = t_upper
