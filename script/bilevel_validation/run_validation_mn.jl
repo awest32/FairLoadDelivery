@@ -56,7 +56,7 @@ case = "6_bus" #"13_bus"#"6_bus"
 CASE_FILE = joinpath(@__DIR__,"../../data/pmd_opendss/$CASE.dss")
 #CASE_FILE = joinpath(@__DIR__, "../../data/ieee_13_aw_edit/$CASE.dss")
 LS_PERCENT = 0.8
-ITERATIONS = 20
+ITERATIONS = parse(Int, get(ENV, "ITERATIONS", "20"))  # env-overridable for smoke runs (e.g. ITERATIONS=2)
 FAIR_FUNC = get(ENV, "FAIR_FUNC", "palma")  # "min_max", "palma", "gini", or "efficiency"
 pshed_type = "absolute"  # "absolute" or "proportional"
 N_ROUNDS = 1

@@ -869,26 +869,35 @@ end
         dpshed_dw, pshed_prev, weights_prev, pd; ...
     )
 
-Formal-CC MILP for **Gini index** of absolute pshed,
-reusing the per-period permutation + indicator-constraint infrastructure from
+Formal-CC MILP for the **Gini index of the cost-weighted AGGREGATE shed**
+`pshed_agg[i] = Σ_t λ_t·pshed_{t,i}` — the Gini single-sort analogue of
 [`palma_ratio_minimization_formal_cc`](@ref).
 
-Sorted Gini reduces to a single ratio on the sorted pshed (ascending):
+This is the bilevel upper level that achieves OBJECTIVE PARITY with the
+single-level `gini_trade_off_mn.jl`: both optimize ONE Gini over the per-load
+cost-weighted aggregate `Σ_t λ_t·pshed_{t,i}` (ONE sort, ONE σ, ONE permutation),
+exactly as Palma does on both sides — NOT a per-period `Σ_t λ_t·gini(pshed_t)`,
+which would be a different functional that does not match the aggregate-shed
+trade-off.
 
-    G_t = Σ_i (2i − n − 1) · pshed_{(i),t} / (n · Σ_i pshed_{i,t})
+Gini of the aggregate reduces to a single ratio on the sorted aggregate
+(ascending):
 
-Charnes-Cooper rescaling with `σ_t = 1 / (n · Σ_i pshed_{i,t})` and
-`pshed_z[j] = σ_t · pshed[j]` linearizes both the numerator and the normalization:
+    G = Σ_i (2i − n − 1) · pshed_agg_(i) / (n · Σ_i pshed_agg_i)
 
-  * sorted_z_t[i] = Σ_j u_z[t][i,j]    (u_z = a · pshed_z via indicator constraints)
-  * normalization: `n · Σ_j pshed_z[j] = 1`         (linear in σ_t and Δw_z)
-  * objective:    `min Σ_t λ_t · Σ_{i,j} (2i − n − 1) · u_z[t][i,j]`
+Charnes-Cooper with a SINGLE global σ = 1 / (n · Σ_i pshed_agg_i):
 
-Unlike Palma, Gini does **not** collapse to a top-vs-bottom subset ratio — every
-sorted position contributes with coefficient `2i − n − 1`. The infrastructure
-(permutation matrices, indicator constraints, block-diagonality guard, σ-rescaled
-trust region / weight bounds / weight budget / pshed bounds) is otherwise
-identical to the Palma formal-CC formulation.
+  * `Δw → Δw_z = σ·Δw`,  `pshed_z = σ·pshed_new` (linear in Δw_z, σ)
+  * `pshed_agg_z[i] = Σ_t λ_t·pshed_z[(t-1)n+i] = σ·pshed_agg[i]`
+  * `u_z = a·pshed_agg_z` (binary × continuous, indicator constraints)
+  * normalization:  `n · Σ_i pshed_agg_z[i] = 1`   (= σ·n·Σpshed_agg = 1, LINEAR)
+  * objective:  `min Σ_i (2i−n−1)·Σ_j u_z[i,j]`     (= σ·Gini-numerator = Gini, no λ)
+
+Infrastructure (single σ unbounded above, ONE permutation, rescaled trust region
+/ weight bounds / weight budget / pshed bounds, block-diagonality guard as info
+only) is IDENTICAL to `palma_ratio_minimization_formal_cc`; only the
+normalization (full-sum instead of bot40) and the objective coefficients
+(`2i−n−1` instead of the top10 indicator) differ.
 """
 function gini_index_minimization_formal_cc(
     dpshed_dw::Matrix{Float64},
@@ -917,7 +926,7 @@ function gini_index_minimization_formal_cc(
     n_periods = m ÷ n_per_period
     n = n_per_period
 
-    # Critical-load clamping + small numerical drift cleanup — same as Palma formal CC
+    # Input preconditioning — identical to palma_ratio_minimization_formal_cc.
     for j in 1:m
         lid_idx = ((j - 1) % n_per_period) + 1
         load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
@@ -941,7 +950,7 @@ function gini_index_minimization_formal_cc(
         end
     end
 
-    # Block-diagonal Jacobian guard
+    # Block-diagonal Jacobian guard (info only under single-σ rescaling).
     n_off_block_diag = 0
     max_off_block_diag = 0.0
     for j in 1:m, k in 1:m
@@ -954,19 +963,18 @@ function gini_index_minimization_formal_cc(
         end
     end
     if n_off_block_diag > 0
-        @warn "[Gini formal CC] Jacobian off-block-diagonal entries exceed $block_tol: $n_off_block_diag entries, max=$max_off_block_diag. Formal CC assumes block-diagonality — solution may be inexact."
+        @info "[Gini agg formal CC] Jacobian has $n_off_block_diag off-block-diagonal entries > $block_tol (max=$max_off_block_diag) — harmless under single-σ rescaling."
     else
-        @info "[Gini formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
+        @info "[Gini agg formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
     end
 
-    # Gini sort coefficients: (2i − n − 1) for i = 1..n. Symmetric about zero,
-    # negative on small sorted positions and positive on large.
+    # Gini sort coefficients (2i − n − 1) over the aggregate sort positions.
     gini_coef = Float64[2 * i - n - 1 for i in 1:n]
 
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods
 
-    @info "[Gini formal CC] T=$n_periods, N=$n, m=$m (indicator-constraint form, σ unbounded above)"
+    @info "[Gini agg formal CC] T=$n_periods, N=$n, m=$m (cost-weighted aggregate sort, single σ unbounded above, $(n^2) binaries)"
 
     model = JuMP.Model(solver)
     silent && set_silent(model)
@@ -976,81 +984,75 @@ function gini_index_minimization_formal_cc(
         set_optimizer_attribute(model, "TimeLimit",    time_limit)
         set_optimizer_attribute(model, "MIPFocus",     1)
         set_optimizer_attribute(model, "NumericFocus", 2)
+        # NB: NonConvex=2 NOT needed — formal CC is a MILP.
         if !silent
             set_optimizer_attribute(model, "OutputFlag", 1)
         end
     end
 
-    # σ_t ≥ σ_min > 0 (no upper bound, matches formal CC math)
-    @variable(model, σ[t = 1:n_periods])
-    for t in 1:n_periods
-        JuMP.set_lower_bound(σ[t], sigma_min)
-    end
+    # σ ≥ σ_min > 0 (SINGLE scalar; no upper bound — matches formal CC math).
+    @variable(model, σ >= sigma_min)
 
-    # Binary permutation matrices per period
-    a = Any[]
-    for t in 1:n_periods
-        push!(a, @variable(model, [1:n, 1:n], Bin, base_name = "a_$t"))
-    end
+    # ONE binary permutation matrix sorting the cost-weighted aggregate shed.
+    @variable(model, a[1:n, 1:n], Bin, base_name = "a_agg")
 
+    # Rescaled weight changes Δw_z = σ·Δw.
     @variable(model, Δw_z[1:m])
 
-    # Rescaled pshed (linear in σ, Δw_z); block-diagonality means only same-t k contributes
+    # Rescaled pshed (linear; with a SINGLE global σ this is exactly σ·pshed_new).
     @expression(model, pshed_z[j = 1:m],
-        σ[((j - 1) ÷ n) + 1] * pshed_prev[j]
-        + sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
+        σ * pshed_prev[j] + sum(dpshed_dw[j, k] * Δw_z[k] for k in 1:m)
     )
 
-    # u_z[t][i,j] = a[t][i,j] · pshed_z[offset+j] via indicator constraints
-    u_z = Any[]
-    for t in 1:n_periods
-        push!(u_z, @variable(model, [1:n, 1:n], lower_bound = 0, base_name = "u_z_$t"))
+    # Cost-weighted AGGREGATE rescaled shed: pshed_agg_z[i] = Σ_t λ_t·pshed_z[(t-1)n+i]
+    # (= σ·pshed_agg[i]). The single sort runs over these N aggregate values, so
+    # the period costs λ_t live entirely inside pshed_agg_z and the objective
+    # carries no explicit λ.
+    @expression(model, pshed_agg_z[i = 1:n],
+        sum(λ[t] * pshed_z[(t - 1) * n + i] for t in 1:n_periods))
+
+    # Rescaled u: u_z[i,j] = a[i,j] · pshed_agg_z[j] via indicator constraints.
+    @variable(model, u_z[1:n, 1:n], lower_bound = 0, base_name = "u_z_agg")
+
+    for i in 1:n
+        @constraint(model, sum(a[i, j] for j in 1:n) == 1)
+    end
+    for j in 1:n
+        @constraint(model, sum(a[i, j] for i in 1:n) == 1)
     end
 
-    for t in 1:n_periods
-        offset = (t - 1) * n
-        for i in 1:n
-            @constraint(model, sum(a[t][i, j] for j in 1:n) == 1)
-        end
-        for j in 1:n
-            @constraint(model, sum(a[t][i, j] for i in 1:n) == 1)
-        end
-
-        # u_z = a · pshed_z (binary × continuous via indicator)
-        for i in 1:n, j in 1:n
-            gj = offset + j
-            @constraint(model, a[t][i, j] => {u_z[t][i, j] == pshed_z[gj]})
-            @constraint(model, !a[t][i, j] => {u_z[t][i, j] == 0})
-        end
-
-        # Ascending sort on rescaled values (ordering preserved by σ > 0)
-        sorted_z_t = @expression(model, [i = 1:n], sum(u_z[t][i, j] for j in 1:n))
-        for k in 1:(n - 1)
-            @constraint(model, sorted_z_t[k] <= sorted_z_t[k + 1])
-        end
-
-        # Gini denominator normalization (LINEAR) on absolute pshed:
-        # σ_t = 1 / (n · Σ_j pshed_j)  ⇒  n · Σ_j pshed_z[t,j] = 1
-        @constraint(model, n * sum(pshed_z[offset + j] for j in 1:n) == 1)
+    # Indicator encoding of u_z = a · pshed_agg_z (no Big-M, no σ upper bound).
+    for i in 1:n, j in 1:n
+        @constraint(model, a[i, j]  => {u_z[i, j] == pshed_agg_z[j]})
+        @constraint(model, !a[i, j] => {u_z[i, j] == 0})
     end
 
-    # Rescaled trust region
+    # Ascending sort on rescaled aggregate values (ordering preserved by σ > 0).
+    sorted_z = @expression(model, [i = 1:n], sum(u_z[i, j] for j in 1:n))
+    for k in 1:(n - 1)
+        @constraint(model, sorted_z[k] <= sorted_z[k + 1])
+    end
+
+    # Gini denominator normalization (LINEAR): n·Σ_i pshed_agg_z[i] = 1
+    # (= σ · n·Σ_i pshed_agg[i] = 1). This is the Gini analogue of Palma's
+    # bot40-sum normalization, using the FULL aggregate sum instead.
+    @constraint(model, n * sum(pshed_agg_z[i] for i in 1:n) == 1)
+
+    # Rescaled trust region (single σ): Δw_z[j] ∈ [−Δ·σ, Δ·σ]
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
-        @constraint(model, Δw_z[j] >= -trust_radius * σ[t])
-        @constraint(model, Δw_z[j] <=  trust_radius * σ[t])
+        @constraint(model, Δw_z[j] >= -trust_radius * σ)
+        @constraint(model, Δw_z[j] <=  trust_radius * σ)
     end
 
-    # Rescaled weight bounds (identical to Palma formal CC)
+    # Rescaled weight bounds
     for j in 1:m
         lid_idx = ((j - 1) % n_per_period) + 1
         load_id = isempty(weight_ids) ? lid_idx : weight_ids[lid_idx]
-        t = ((j - 1) ÷ n) + 1
         if load_id in critical_ids
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= 100.0 * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= 100.0 * σ)
         else
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] >= w_min * σ[t])
-            @constraint(model, weights_prev[j] * σ[t] + Δw_z[j] <= w_max * σ[t])
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] >= w_min * σ)
+            @constraint(model, weights_prev[j] * σ + Δw_z[j] <= w_max * σ)
         end
     end
 
@@ -1060,59 +1062,46 @@ function gini_index_minimization_formal_cc(
             offset = (t - 1) * n
             sum_prev = sum(weights_prev[offset + i] for i in 1:n)
             @constraint(model,
-                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ[t])
+                sum(Δw_z[offset + i] for i in 1:n) <= (weight_budget - sum_prev) * σ)
         end
     end
 
-    # pshed_z bounds: pshed ∈ [ε, pd] ⇒ pshed_z ∈ [ε · σ_t, pd · σ_t]
+    # Rescaled pshed bounds: pshed ∈ [ε, pd] ⇒ pshed_z ∈ [ε·σ, pd·σ]
     for j in 1:m
-        t = ((j - 1) ÷ n) + 1
-        @constraint(model, pshed_z[j] >= ε * σ[t])
-        @constraint(model, pshed_z[j] <= pd[j] * σ[t])
+        @constraint(model, pshed_z[j] >= ε * σ)
+        @constraint(model, pshed_z[j] <= pd[j] * σ)
     end
 
-    # Linear Gini objective: min Σ_t λ_t · Σ_{i,j} (2i − n − 1) · u_z[t][i,j]
+    # Linear Gini objective: min Σ_i (2i−n−1)·Σ_j u_z[i,j]  (= σ·Gini-num = Gini; no λ).
     @objective(model, Min,
-        sum(λ[t] *
-            sum(gini_coef[i] * u_z[t][i, j] for i in 1:n, j in 1:n)
-            for t in 1:n_periods))
+        sum(gini_coef[i] * sum(u_z[i, j] for j in 1:n) for i in 1:n))
 
     solve_time = @elapsed optimize!(model)
     status = termination_status(model)
-    @info "[Gini formal CC] Solver status: $status (solve_time=$(round(solve_time, digits=2))s)"
+    @info "[Gini agg formal CC] Solver status: $status (solve_time=$(round(solve_time, digits=2))s)"
 
     has_solution = (status in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.ALMOST_OPTIMAL,
                                MOI.ALMOST_LOCALLY_SOLVED, MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]) && has_values(model)
 
     if has_solution
         if status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
-            @warn "[Gini formal CC] Solver hit $status with an incumbent — returning suboptimal solution"
+            @warn "[Gini agg formal CC] Solver hit $status with an incumbent — returning suboptimal solution"
         end
 
-        σ_val    = value.(σ)
+        σ_val    = value(σ)                   # single global σ
         Δw_z_val = value.(Δw_z)
-        Δw_val   = similar(Δw_z_val)
-        for k in 1:m
-            t = ((k - 1) ÷ n) + 1
-            Δw_val[k] = Δw_z_val[k] / σ_val[t]
-        end
+        Δw_val   = Δw_z_val ./ σ_val
 
         weights_new     = weights_prev .+ Δw_val
         pshed_new_val   = pshed_prev   .+ dpshed_dw * Δw_val
 
-        a_vals = [value.(a[t]) for t in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            append!(sorted_val, a_vals[t] * pshed_new_val[offset+1:offset+n])
-        end
+        # Cost-weighted aggregate per-load shed + its single sort.
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        a_val      = value.(a)
+        sorted_val = a_val * pshed_agg_val
 
-        # Post-hoc Gini per-period on absolute pshed, summed cost-weighted
-        actual_gini = 0.0
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            actual_gini += λ[t] * gini_index(pshed_new_val[offset+1:offset+n])
-        end
+        actual_gini = gini_index(pshed_agg_val)
 
         return (
             weights_new   = weights_new,
@@ -1121,24 +1110,18 @@ function gini_index_minimization_formal_cc(
             gini_index    = actual_gini,
             status        = status,
             solve_time    = solve_time,
-            permutation   = a_vals,
+            permutation   = a_val,
             sorted_values = sorted_val,
         )
     elseif status in [MOI.TIME_LIMIT, MOI.ITERATION_LIMIT]
-        @warn "[Gini formal CC] Solver hit $status with NO incumbent — returning no-progress"
+        @warn "[Gini agg formal CC] Solver hit $status with NO incumbent — returning no-progress"
         Δw_val = zeros(m)
         pshed_new_val = copy(pshed_prev)
-        actual_gini = 0.0
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            actual_gini += λ[t] * gini_index(pshed_new_val[offset+1:offset+n])
-        end
-        a_vals = [Matrix{Float64}(I, n, n) for _ in 1:n_periods]
-        sorted_val = Float64[]
-        for t in 1:n_periods
-            offset = (t - 1) * n
-            append!(sorted_val, sort(pshed_new_val[offset+1:offset+n]))
-        end
+        pshed_agg_val = [sum(λ[t] * pshed_new_val[(t - 1) * n + i] for t in 1:n_periods)
+                         for i in 1:n]
+        actual_gini = gini_index(pshed_agg_val)
+        a_val = Matrix{Float64}(I, n, n)
+        sorted_val = sort(pshed_agg_val)
         return (
             weights_new   = copy(weights_prev),
             pshed_new     = pshed_new_val,
@@ -1146,11 +1129,11 @@ function gini_index_minimization_formal_cc(
             gini_index    = actual_gini,
             status        = status,
             solve_time    = solve_time,
-            permutation   = a_vals,
+            permutation   = a_val,
             sorted_values = sorted_val,
         )
     else
-        error("[Gini formal CC] Solver failed with status: $status (solve_time=$(round(solve_time, digits=2))s)")
+        error("[Gini agg formal CC] Solver failed with status: $status (solve_time=$(round(solve_time, digits=2))s)")
     end
 end
 
@@ -1266,10 +1249,11 @@ end
         ...
     ) -> (pshed_new, weights_new, status)
 
-Bilevel-facing wrapper for [`gini_index_minimization_formal_cc`](@ref). Mirrors
-[`lin_palma_reformulated`](@ref) — same trust region, weight bounds, time limit,
-and timings dict — so the bilevel iteration can dispatch on `FAIR_FUNC` and call
-Gini in exactly the same shape as Palma.
+Bilevel-facing wrapper for [`gini_index_minimization_formal_cc`](@ref) (the
+cost-weighted AGGREGATE Gini, single sort — parity with `gini_trade_off_mn.jl`).
+Mirrors [`lin_palma_reformulated`](@ref) — same trust region, weight bounds, time
+limit, and timings dict — so the bilevel iteration can dispatch on `FAIR_FUNC`
+and call Gini in exactly the same shape as Palma.
 """
 function lin_gini_w_grad_input(
     dpshed_dw::Matrix{Float64},
@@ -1298,7 +1282,7 @@ function lin_gini_w_grad_input(
 
     if timings !== nothing
         timings[:solve_time_s] = result.solve_time
-        timings[:formulation]  = "gini_formal_cc_milp"
+        timings[:formulation]  = "gini_aggregate_formal_cc_milp"
         timings[:status]       = string(result.status)
     end
 
