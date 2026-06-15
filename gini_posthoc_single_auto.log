@@ -1,0 +1,19 @@
+=== GINI only auto-scale (cost-wtd) ===
+  sweep gini_integer [2026-06-15 13:00]: 2026-06-15\gini_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep gini_relaxed [2026-06-15 13:36]: 2026-06-15\gini_relaxed_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  bilevel gini [2026-06-14 05:41]: 2026-06-14\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\gini_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_gini_absolute.jld2
+
+[autoscale] per-metric panels:
+  → 2026-06-15\post_hoc_single_costwtd_auto\pareto_case6_absolute_gini_integer_autoscale.svg
+  → 2026-06-15\post_hoc_single_costwtd_auto\pareto_case6_absolute_gini_relaxed_autoscale.svg
+EXIT_G=0
+=== PALMA only auto-scale (cost-wtd) ===
+  sweep palma_integer [2026-06-05 08:44]: 2026-06-05\palma_trade_off_mn\palma_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep palma_relaxed [2026-06-05 09:20]: 2026-06-05\palma_relaxed_trade_off_mn\palma_sweep_mn_more_meshed_6_bus_absolute.jld2
+  trimmed palma_relaxed: 12 → 11 α points (dropped α=1 endpoint)
+  bilevel palma [2026-06-05 05:26]: 2026-06-05\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\palma_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_palma_absolute.jld2
+
+[autoscale] per-metric panels:
+  → 2026-06-15\post_hoc_single_costwtd_auto\pareto_case6_absolute_palma_integer_autoscale.svg
+  → 2026-06-15\post_hoc_single_costwtd_auto\pareto_case6_absolute_palma_relaxed_autoscale.svg
+EXIT_P=0

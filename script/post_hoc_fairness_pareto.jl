@@ -44,7 +44,35 @@ CASE_KEY   = "case6"
 PSHED_TYPE = "absolute"
 SHOW_BILEVEL = true
 PLOT_ZOOM    = false   # skip the bilevel-star-framed zoom fronts
-PALMA_ONLY   = true    # restrict to the Palma front + Palma bilevel marker; output to *_palmaonly
+PALMA_ONLY   = false   # false: render all fronts (Palma + Gini) + their bilevel markers
+
+# Optional ENV filter on which fairness functions to plot (sweeps + bilevel markers).
+#   FAIR_FUNCS="palma,gini" → Palma+Gini only (drops min-max)
+#   FAIR_FUNCS="gini"       → Gini alone
+# Unset → all defined styles.
+const _WANT_FF = let v = strip(get(ENV, "FAIR_FUNCS", ""))
+    isempty(v) ? nothing : Set(String.(strip.(split(v, ","))))
+end
+
+# WEIGHT_BY_COST=true → metrics computed on the COST-WEIGHTED per-load aggregate
+# Σ_t λ_t·pshed_{t,j} (λ = PEAK_TIME_COSTS), i.e. the quantity the trade-off /
+# bilevel actually OPTIMIZE. This makes the fairness curve monotone (the uncosted
+# default diverges from the optimized objective — see the Palma ν-spike artifact).
+# Both axes are then in cost-weighted terms. Default false = uncosted physical kW.
+const WEIGHT_BY_COST = get(ENV, "WEIGHT_BY_COST", "false") == "true"
+
+# SHARED_SCALE=true → render the per-metric (Gini, Palma, CoV) figures for integer
+# AND relaxed on a COMMON x/y axis (limits unioned across both variants), so the
+# two are directly comparable. Outputs only those metric panels (one per
+# metric×variant), into POSTHOC_SUBDIR. Default false = the normal per-variant
+# auto-scaled figure set.
+const SHARED_SCALE = get(ENV, "SHARED_SCALE", "false") == "true"
+
+# Optional ENV filter restricting which metric panels are emitted in SHARED_SCALE
+# mode. METRICS="gini" or "palma" or "gini,palma". Unset → gini,palma,cov.
+const _WANT_METRICS = let v = strip(get(ENV, "METRICS", ""))
+    isempty(v) ? nothing : Set(lowercase.(String.(strip.(split(v, ",")))))
+end
 
 # Manual bilevel-JLD2 overrides — keyed by BILEVEL_STYLES.key. Use when the
 # latest run on disk is wrong (e.g. T mismatch with the single-level sweeps,
@@ -60,7 +88,7 @@ RESULTS_ROOT = joinpath(@__DIR__, "../results")
 # overlay as scatter markers. Linestyle distinguishes fair-func (palma
 # vs min-max). Integer and relaxed panels are rendered separately, so
 # each fair-func uses the same full-intensity color across both variants.
-const SWEEP_STYLES = [
+const _ALL_SWEEP_STYLES = [
     # 2026-06-04 T=8 comparison: the Palma trade-off was rerun at T=8 (results
     # 2026-06-03, N_PERIODS=8) so the Palma sweep is re-enabled. The min-max
     # trade-off only exists at T=24 on disk, which would contaminate a T=8
@@ -71,6 +99,12 @@ const SWEEP_STYLES = [
     (key = "palma_relaxed",   label = "Single-level Palma (relaxed)",
      fair_func = "palma",   relaxed = true,
      linestyle = :solid, color = RGB(0.20, 0.40, 0.85)),
+    (key = "gini_integer",    label = "Single-level Gini (integer)",
+     fair_func = "gini",    relaxed = false,
+     linestyle = :solid, color = RGB(0.20, 0.60, 0.30)),
+    (key = "gini_relaxed",    label = "Single-level Gini (relaxed)",
+     fair_func = "gini",    relaxed = true,
+     linestyle = :solid, color = RGB(0.20, 0.60, 0.30)),
     # (key = "min_max_integer", label = "Single-level min-max (integer)",
     #  fair_func = "min_max", relaxed = false,
     #  linestyle = :dash,  color = RGB(0.85, 0.30, 0.20)),
@@ -78,8 +112,10 @@ const SWEEP_STYLES = [
     #  fair_func = "min_max", relaxed = true,
     #  linestyle = :dash,  color = RGB(0.85, 0.30, 0.20)),
 ]
+const SWEEP_STYLES = _WANT_FF === nothing ? _ALL_SWEEP_STYLES :
+    filter(s -> s.fair_func in _WANT_FF, _ALL_SWEEP_STYLES)
 
-const BILEVEL_STYLES = [
+const _ALL_BILEVEL_STYLES = [
     (key = "palma",      label = "Bi-level Palma",      marker = :star5,
      color = :black),
     (key = "gini",       label = "Bi-level Gini",       marker = :diamond,
@@ -87,6 +123,8 @@ const BILEVEL_STYLES = [
     (key = "min_max",    label = "Bi-level min-max",    marker = :star8,
      color = :black),
 ]
+const BILEVEL_STYLES = _WANT_FF === nothing ? _ALL_BILEVEL_STYLES :
+    filter(s -> s.key in _WANT_FF, _ALL_BILEVEL_STYLES)
 
 # ============================================================
 # JLD2 LOCATORS
@@ -126,6 +164,19 @@ function _trade_off_jld2(fair_func::String, relaxed::Bool)
              if isdir(joinpath(date_dir, sub)) &&
                 (relaxed ? startswith(sub, "palma_relaxed_trade_off_mn") :
                            startswith(sub, "palma_trade_off_mn"))]
+        end)
+    elseif fair_func == "gini"
+        # Gini mirrors Palma: relaxed sweep in gini_relaxed_trade_off_mn,
+        # integer in gini_trade_off_mn, same inner filename.
+        return _latest_matching(d -> begin
+            date_dir = joinpath(RESULTS_ROOT, d)
+            isdir(date_dir) || return String[]
+            [joinpath(date_dir, sub,
+                      "gini_sweep_mn_$(tags.trade_off)_$(PSHED_TYPE).jld2")
+             for sub in readdir(date_dir)
+             if isdir(joinpath(date_dir, sub)) &&
+                (relaxed ? startswith(sub, "gini_relaxed_trade_off_mn") :
+                           startswith(sub, "gini_trade_off_mn"))]
         end)
     end
     return nothing
@@ -190,10 +241,17 @@ function load_trade_off_curve(path::String)
         size(saved["per_load_period_shed"], 2) : size(saved["per_load_agg"], 2)
     L1    = zeros(n_α); L2 = zeros(n_α); Linf = zeros(n_α)
     CoV   = zeros(n_α); Palma = zeros(n_α); Gini = zeros(n_α)
+    # Cost weights (λ) for WEIGHT_BY_COST mode; nothing ⇒ unweighted.
+    λ = (WEIGHT_BY_COST && haskey(saved, "PEAK_TIME_COSTS")) ? saved["PEAK_TIME_COSTS"] : nothing
+    if WEIGHT_BY_COST && λ === nothing
+        @warn "WEIGHT_BY_COST set but no PEAK_TIME_COSTS in $(basename(path)) — using unweighted"
+    end
     for i in 1:n_α
         if haskey(saved, "per_load_period_shed")
-            plps = saved["per_load_period_shed"]   # alpha × load × period (unweighted)
-            v = [sum(plps[i, j, t] for t in axes(plps, 3)) for j in 1:n_loads]
+            plps = saved["per_load_period_shed"]   # alpha × load × period
+            v = [λ === nothing ? sum(plps[i, j, t] for t in axes(plps, 3)) :
+                                 sum(λ[t] * plps[i, j, t] for t in axes(plps, 3))
+                 for j in 1:n_loads]
         else
             # Older JLD2 without the per-period tensor: best effort on per_load_agg.
             v = collect(saved["per_load_agg"][i, :])
@@ -208,12 +266,15 @@ function load_trade_off_curve(path::String)
             n_periods = saved["N_PERIODS"], source = path)
 end
 
-"Aggregate a (T × n_loads) shed matrix into per-load totals, ignoring NaNs."
-function _aggregate_norms(matrix::AbstractMatrix)
+"Aggregate a (T × n_loads) shed matrix into per-load totals, ignoring NaNs.
+ With `λ` (length T) each period is weighted — Σ_t λ_t·shed_{t,j} — giving the
+ cost-weighted metric; empty λ ⇒ unweighted Σ_t shed_{t,j}."
+function _aggregate_norms(matrix::AbstractMatrix; λ::AbstractVector = Float64[])
     n_loads = size(matrix, 2)
+    w = isempty(λ) ? ones(size(matrix, 1)) : λ
     v = zeros(n_loads)
     for t in axes(matrix, 1), j in 1:n_loads
-        x = matrix[t, j]; isnan(x) || (v[j] += x)
+        x = matrix[t, j]; isnan(x) || (v[j] += w[t] * x)
     end
     nm = shed_norms(v)
     return (total_shed = nm.L1, L1 = nm.L1, L2 = nm.L2,
@@ -222,7 +283,11 @@ end
 
 function load_bilevel_point(path::String)
     saved = JLD2.load(path)
-    int_norms = _aggregate_norms(saved["pshed_matrix"])
+    λ = (WEIGHT_BY_COST && haskey(saved, "PEAK_TIME_COSTS")) ? saved["PEAK_TIME_COSTS"] : Float64[]
+    if WEIGHT_BY_COST && isempty(λ)
+        @warn "WEIGHT_BY_COST set but no PEAK_TIME_COSTS in $(basename(path)) — bilevel marker unweighted"
+    end
+    int_norms = _aggregate_norms(saved["pshed_matrix"]; λ = λ)
     # The bilevel pipeline saves the final relaxed MLD (Step 3, pre-rounding)
     # alongside the rounded integer solution. Older JLD2s predate this
     # instrumentation or may have an all-NaN matrix on non-convergence —
@@ -231,7 +296,7 @@ function load_bilevel_point(path::String)
     if haskey(saved, "relaxed_pshed_matrix")
         rlx_mat = saved["relaxed_pshed_matrix"]
         if any(!isnan, rlx_mat)
-            rlx_norms = _aggregate_norms(rlx_mat)
+            rlx_norms = _aggregate_norms(rlx_mat; λ = λ)
         end
     end
     return (int = int_norms, rlx = rlx_norms,
@@ -270,7 +335,9 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
                        legend_position::Symbol = :topleft,
                        zoom::Bool = false,
                        bilevel_alpha::Real = 1.0,
-                       bilevel_label_suffix::AbstractString = "")
+                       bilevel_label_suffix::AbstractString = "",
+                       xlim_override = nothing,
+                       ylim_override = nothing)
     # Collect xs/ys across both sweeps and bilevel points for axis limits.
     xs_all = Float64[]; ys_all = Float64[]
     sweep_data = Dict{String,Tuple{Vector{Float64},Vector{Float64},Vector{Float64}}}()
@@ -308,6 +375,9 @@ function _pareto_panel(sweeps::Dict, bilevels::Dict, norm_field::Symbol,
         xlim = (minimum(xs_all) - xpad, maximum(xs_all) + xpad)
         ylim = (minimum(ys_all) - ypad, maximum(ys_all) + ypad)
     end
+    # Caller-supplied shared limits (SHARED_SCALE mode) override the auto-fit.
+    xlim_override === nothing || (xlim = xlim_override)
+    ylim_override === nothing || (ylim = ylim_override)
     xticks_vec = collect(range(xlim[1], xlim[2]; length = 4))
 
     p = plot(;
@@ -399,11 +469,13 @@ function build_palma_figure(sweeps::Dict, bilevels::Dict, out_path::String;
                                zoom::Bool = false,
                                legend_position::Symbol = :topright,
                                bilevel_alpha::Real = 1.0,
-                               bilevel_label_suffix::AbstractString = "")
+                               bilevel_label_suffix::AbstractString = "",
+                               xlim_override = nothing, ylim_override = nothing)
     panel = _pareto_panel(sweeps, bilevels, :Palma,
         "Palma ratio of load shed (unitless)";
         show_legend = true, legend_position = legend_position, zoom = zoom,
-        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix,
+        xlim_override = xlim_override, ylim_override = ylim_override)
     fig = plot(panel;
         size = (900, 760),
         left_margin = 13Plots.mm, right_margin = 16Plots.mm,
@@ -417,11 +489,13 @@ function build_cov_figure(sweeps::Dict, bilevels::Dict, out_path::String;
                           zoom::Bool = false,
                           legend_position::Symbol = :topright,
                           bilevel_alpha::Real = 1.0,
-                          bilevel_label_suffix::AbstractString = "")
+                          bilevel_label_suffix::AbstractString = "",
+                          xlim_override = nothing, ylim_override = nothing)
     panel = _pareto_panel(sweeps, bilevels, :CoV,
         "CoV of load shed (unitless)";
         show_legend = true, legend_position = legend_position, zoom = zoom,
-        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix,
+        xlim_override = xlim_override, ylim_override = ylim_override)
     fig = plot(panel;
         size = (900, 760),
         left_margin = 13Plots.mm, right_margin = 16Plots.mm,
@@ -435,11 +509,13 @@ function build_gini_figure(sweeps::Dict, bilevels::Dict, out_path::String;
                            zoom::Bool = false,
                            legend_position::Symbol = :topright,
                            bilevel_alpha::Real = 1.0,
-                           bilevel_label_suffix::AbstractString = "")
+                           bilevel_label_suffix::AbstractString = "",
+                           xlim_override = nothing, ylim_override = nothing)
     panel = _pareto_panel(sweeps, bilevels, :Gini,
         "Gini index of load shed (unitless)";
         show_legend = true, legend_position = legend_position, zoom = zoom,
-        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix)
+        bilevel_alpha = bilevel_alpha, bilevel_label_suffix = bilevel_label_suffix,
+        xlim_override = xlim_override, ylim_override = ylim_override)
     fig = plot(panel;
         size = (900, 760),
         left_margin = 13Plots.mm, right_margin = 16Plots.mm,
@@ -653,7 +729,56 @@ function _render_variant(variant_tag::String, want_relaxed::Bool)
     return fig_summary
 end
 
-fig_integer = _render_variant("integer", false)
-fig_relaxed = _render_variant("relaxed", true)
-fig_integer === nothing || display(fig_integer)
-fig_relaxed === nothing || display(fig_relaxed)
+if SHARED_SCALE || _WANT_METRICS !== nothing
+    # Per-metric single panels (one per metric × variant). SHARED_SCALE → integer
+    # and relaxed share common x/y limits (unioned across both) for direct
+    # comparison; otherwise each variant auto-scales independently.
+    function _global_limits(norm_field)
+        xs = Float64[]; ys = Float64[]
+        for sw in values(sweeps)
+            x, y, _ = _drop_nan(sw.total_shed, getfield(sw, norm_field), sw.alphas)
+            append!(xs, x); append!(ys, y)
+        end
+        for bi in values(bilevels)
+            for sub in (bi.int, bi.rlx)
+                sub === nothing && continue
+                bx = sub.total_shed; by = getfield(sub, norm_field)
+                (isfinite(bx) && isfinite(by)) && (push!(xs, bx); push!(ys, by))
+            end
+        end
+        xpad = 0.20 * (maximum(xs) - minimum(xs) + eps())
+        ypad = 0.28 * (maximum(ys) - minimum(ys) + eps())
+        return (minimum(xs) - xpad, maximum(xs) + xpad),
+               (minimum(ys) - ypad, maximum(ys) + ypad)
+    end
+
+    metric_builders = [(:Gini, build_gini_figure, "gini"),
+                       (:Palma, build_palma_figure, "palma"),
+                       (:CoV,   build_cov_figure,   "cov")]
+    _WANT_METRICS === nothing ||
+        (metric_builders = filter(mb -> mb[3] in _WANT_METRICS, metric_builders))
+    scale_tag = SHARED_SCALE ? "sharedscale" : "autoscale"
+    println("\n[$(scale_tag)] per-metric panels:")
+    for (mf, builder, tag) in metric_builders
+        xl, yl = SHARED_SCALE ? _global_limits(mf) : (nothing, nothing)
+        for (variant_tag, want_relaxed) in [("integer", false), ("relaxed", true)]
+            keep = Set(st.key for st in SWEEP_STYLES if st.relaxed == want_relaxed)
+            sweeps_subset = Dict(k => v for (k, v) in sweeps if k in keep)
+            isempty(sweeps_subset) && continue
+            bilevels_subset = _bilevels_for_variant(want_relaxed)
+            bi_lbl = want_relaxed ? " (relaxed)" : " (integer)"
+            out = joinpath(out_dir,
+                "pareto_$(CASE_KEY)_$(PSHED_TYPE)_$(tag)_$(variant_tag)_$(scale_tag).svg")
+            builder(sweeps_subset, bilevels_subset, out;
+                bilevel_label_suffix = bi_lbl,
+                xlim_override = xl, ylim_override = yl)
+            lim_msg = SHARED_SCALE ? "   xlim=$(round.(xl, digits=2)) ylim=$(round.(yl, digits=3))" : ""
+            println("  → $(relpath(out, RESULTS_ROOT))$(lim_msg)")
+        end
+    end
+else
+    fig_integer = _render_variant("integer", false)
+    fig_relaxed = _render_variant("relaxed", true)
+    fig_integer === nothing || display(fig_integer)
+    fig_relaxed === nothing || display(fig_relaxed)
+end

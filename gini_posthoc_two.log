@@ -1,0 +1,48 @@
+=== PALMA+GINI (no min-max) ===
+  sweep palma_integer [2026-06-05 08:44]: 2026-06-05\palma_trade_off_mn\palma_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep palma_relaxed [2026-06-05 09:20]: 2026-06-05\palma_relaxed_trade_off_mn\palma_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep gini_integer [2026-06-15 13:00]: 2026-06-15\gini_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep gini_relaxed [2026-06-15 13:36]: 2026-06-15\gini_relaxed_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  trimmed palma_relaxed: 12 → 11 α points (dropped α=1 endpoint)
+  bilevel palma [2026-06-05 05:26]: 2026-06-05\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\palma_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_palma_absolute.jld2
+  bilevel gini [2026-06-14 05:41]: 2026-06-14\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\gini_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_gini_absolute.jld2
+
+[integer] figures written to:
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_integer.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_integer_palma.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_integer_gini.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_integer_cov.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_integer_palma_gini_cov.svg  (3-panel: Palma | Gini | CoV)
+    bilevel palma: total=439.71  L∞=108.12  Palma=1.937  Gini=0.354  CoV=0.688
+    bilevel gini: total=418.73  L∞=96.27  Palma=2.164  Gini=0.373  CoV=0.709
+
+[relaxed] figures written to:
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_relaxed.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_relaxed_palma.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_relaxed_gini.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_relaxed_cov.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_palma_gini\pareto_case6_absolute_relaxed_palma_gini_cov.svg  (3-panel: Palma | Gini | CoV)
+    bilevel palma: total=155.4  L∞=44.93  Palma=2.476  Gini=0.391  CoV=0.775
+    bilevel gini: total=157.7  L∞=52.22  Palma=6.277  Gini=0.486  CoV=0.957
+EXIT_PG=0
+=== GINI ONLY ===
+  sweep gini_integer [2026-06-15 13:00]: 2026-06-15\gini_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  sweep gini_relaxed [2026-06-15 13:36]: 2026-06-15\gini_relaxed_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+  bilevel gini [2026-06-14 05:41]: 2026-06-14\bilevel_validation_mn\case6_unbalanced_switch_more_meshed_good4integer\gini_absolute\bilevel_mn_case6_unbalanced_switch_more_meshed_good4integer_gini_absolute.jld2
+
+[integer] figures written to:
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_integer.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_integer_palma.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_integer_gini.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_integer_cov.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_integer_palma_gini_cov.svg  (3-panel: Palma | Gini | CoV)
+    bilevel gini: total=418.73  L∞=96.27  Palma=2.164  Gini=0.373  CoV=0.709
+
+[relaxed] figures written to:
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_relaxed.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_relaxed_palma.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_relaxed_gini.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_relaxed_cov.svg
+  → C:\Users\awest\github\FairLoadDelivery\script\../results\2026-06-15\post_hoc_gini_only\pareto_case6_absolute_relaxed_palma_gini_cov.svg  (3-panel: Palma | Gini | CoV)
+    bilevel gini: total=157.7  L∞=52.22  Palma=6.277  Gini=0.486  CoV=0.957
+EXIT_G=0

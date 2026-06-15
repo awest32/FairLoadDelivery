@@ -10,25 +10,29 @@ ONE Gini coefficient:
 
     cost-weighted aggregate SHED per load:  Υ^agg_j = Σ_t λ_t · pshed_{t,j}
     sort the length-n vector Υ^agg ONCE  →  sorted[1..n] (ascending)
-    gini_num   = Σ_i (2i − n − 1) · sorted[i]        ← Gini NUMERATOR
+    cumsum     = Σ_{i=1}^{n-1}(sum of i LARGEST) = Σ_k (k−1)·sorted[k]   ← top cumulative
     denom      = n · Σ_j Υ^agg_j                      ← Gini DENOMINATOR (n·Σshed)
-    fairness   = Gini = gini_num / denom
-    objective  = α · (σ · gini_num)  +  (1 − α) · eff_total
+    fairness   = Gini = −(n−1)/n + 2·cumsum / denom   ← Lorenz/cumulative form
+    objective  = α · (−(n−1)/n + 2·σ·cumsum)  +  (1 − α) · eff_total
 
 Like the Palma trade-off, this is a SINGLE sort over the per-load cost-weighted
 aggregate Υ^agg (NOT per period), structurally mirroring `palma_trade_off_mn.jl`.
-The difference from Palma is ONLY the fairness functional over the sorted vector:
-Gini does not collapse to a top10/bot40 subset ratio — EVERY sorted position
-contributes with coefficient `(2i − n − 1)`, and the denominator is the whole-
-vector sum `n·Σ_j Υ^agg_j` rather than the bottom-40% sum. (This is exactly the
-post-hoc `FairLoadDelivery.gini_index`, since
-gini_index(x) = Σ_i(2i−n−1)x_(i) / (n·Σx).)
+The fairness functional is the Lorenz/cumulative Gini (martin_using_2025). Written
+with the TOP (descending) cumulative `cumsum = Σ_{i=1}^{n-1}(sum of the i largest
+sorted) = Σ_k (k−1)·sorted[k]` (coefficients 0,1,…,n−1), it is exactly
+    Gini = −(n−1)/n + 2·cumsum / (n·Σ sorted) = FairLoadDelivery.gini_index,
+algebraically equal to the small-first paper form
+`1 − 1/n − 2·(Σ_i Σ_{j≤i} sorted[j])/(n·Σ)`. We use the TOP cumulative because
+MINIMIZING Gini ⇔ MINIMIZING σ·cumsum — a nonnegative product driven toward 0, so
+its McCormick relaxation is bounded below WITHOUT a σ upper bound, exactly like
+Palma's `min σ·top_sum`. (The small-first cumulative is MAXIMIZED when Gini is
+minimized → unbounded relaxation → integer sweep frozen at the warm start.)
 
 Charnes-Cooper "weak" form, ONE σ over the aggregate:
 
-    σ free, lower-bounded
+    σ free, lower-bounded (NO upper bound needed)
     σ · denom = 1                                ← bilinear constraint
-    σ · gini_num in the objective                ← bilinear
+    min σ · cumsum in the objective              ← bilinear; nonneg & MINIMIZED ⇒ bounded
 
 both via Gurobi `NonConvex=2`. As in the Palma trade-off, pshed is a VARIABLE
 here (not a fixed `pshed_prev`), so σ·pshed is genuinely bilinear and the single-
@@ -134,7 +138,7 @@ REP_PERIODS = filter(t -> t <= N_PERIODS, REP_PERIODS_FULL)
 isempty(REP_PERIODS) && (REP_PERIODS = collect(1:N_PERIODS))
 
 # Gini sweep: each solve is a multi-period bilinear MIP (one σ·denom = 1 + bilinear
-# σ·gini_num objective), like the Palma trade-off.
+# σ·cumsum objective), like the Palma trade-off.
 alpha_points = parse(Int, get(ENV, "ALPHA_POINTS", "12"))
 alphas = collect(LinRange(0.0, 1.0, alpha_points))
 
@@ -196,13 +200,13 @@ Gini sorted-weighting:
 
     cost-weighted aggregate per load:  Υ^agg_j = Σ_t λ_t · (·)_{t,j}
     sort the length-n vector Υ^agg ONCE  →  sorted[1..n] (ascending)
-    gini_num = Σ_i (2i − n − 1) · sorted[i]      ← Gini NUMERATOR
+    cumsum   = Σ_k (k−1)·sorted[k]               ← TOP cumulative (≥ 0)
     denom    = n · Σ_j Υ^agg_j                    ← Gini DENOMINATOR
-    fairness = Gini = gini_num / denom,   one σ,   σ·denom = 1
+    fairness = Gini = −(n−1)/n + 2·cumsum/denom,  one σ,   σ·denom = 1 (min σ·cumsum)
 
 `u` is the McCormick BILINEAR term `u[i,j] = a[i,j]·Υ^agg_j` that linearizes the
 SINGLE n×n sort. ONE σ for the whole horizon (Charnes-Cooper weak form):
-σ·denom=1 (constraint) and σ·gini_num (objective) are bilinear → Gurobi
+σ·denom=1 (constraint) and σ·cumsum (objective) are bilinear → Gurobi
 `NonConvex=2`.
 
 The Gini permutation `a` stays BINARY even when the MLD is LP-relaxed
@@ -229,11 +233,6 @@ function add_gini_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
     end
     total_demand_all = sum(sum(P_period[nw]) for nw in nw_ids_int)
     @assert total_demand_all > 0 "Aggregate demand is zero; Gini is undefined."
-
-    # Gini sort coefficients (2i − n − 1): symmetric about zero, negative on small
-    # sorted positions, positive on large. Σ_i (2i−n−1)·sorted[i] is the Gini
-    # numerator (matches FairLoadDelivery.gini_index).
-    gini_coef = Float64[2 * i - n - 1 for i in 1:n]
 
     # Cost-weighted aggregate shed/served per load: Υ^agg_j = Σ_t λ_t·(·)_{t,j}.
     pshed_agg = JuMP.@expression(model, [k = 1:n],
@@ -271,8 +270,16 @@ function add_gini_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
         JuMP.@constraint(model, sorted[k] <= sorted[k + 1])
     end
 
-    # Gini numerator (full sorted weighting) + denominator (n·Σ).
-    gini_num = JuMP.@expression(model, sum(gini_coef[i] * sorted[i] for i in 1:n))
+    # Lorenz/cumulative Gini, TOP-cumulative decomposition. With sorted ascending,
+    # the top cumulative cumsum = Σ_{i=1}^{n-1}(sum of the i LARGEST sorted values)
+    # = Σ_k (k−1)·sorted[k] (coefficients 0,1,…,n−1, weighting LARGE values). Then
+    #     Gini = −(n−1)/n + 2·cumsum / denom,   denom = n·Σ sorted.
+    # MINIMIZING Gini ⇔ MINIMIZING σ·cumsum, a nonnegative product driven toward 0,
+    # so its McCormick relaxation is bounded below WITHOUT a σ upper bound — exactly
+    # like Palma's min σ·top_sum. (The small-first cumulative Σ_i (n−i)·sorted[i] is
+    # the algebraically-equal paper form, but minimizing Gini MAXIMIZES it →
+    # unbounded relaxation → integer sweep frozen at the warm start.)
+    cumsum   = JuMP.@expression(model, sum((k - 1) * sorted[k] for k in 1:n))
     denom    = JuMP.@expression(model, n * sum(Υ_agg[j] for j in 1:n))
 
     # Weak Charnes-Cooper: σ free, σ·denom=1 (NonConvex=2).
@@ -289,11 +296,10 @@ function add_gini_machinery_cw_aggregate!(pm; nw_ids_int::Vector{Int},
     return (
         n = n, T = T, load_ids = load_ids, nw_ids_int = nw_ids_int,
         P_period = P_period, P_agg = P_agg, total_demand_all = total_demand_all,
-        gini_coef = gini_coef,
         pshed_agg = pshed_agg, pserved_agg = pserved_agg,
         Υ_agg = Υ_agg,
         a = a, u = u, sorted = sorted,
-        gini_num = gini_num, denom = denom, σ = σ,
+        cumsum = cumsum, denom = denom, σ = σ,
         eff_total = eff_total,
     )
 end
@@ -301,17 +307,19 @@ end
 """
 Set the multinetwork objective:
 
-    min  α · (σ · gini_num)  +  (1 − α) · eff_total
+    min  α · (−(n−1)/n + 2·σ·cumsum)  +  (1 − α) · eff_total
 
-The fairness part `σ · gini_num` is the cost-weighted aggregate Gini
-`gini_num/denom`, with `gini_num = Σ_i (2i−n−1)·sorted[i]` and
-`denom = n·Σ_j Υ^agg_j` over the single per-load cost-weighted aggregate
-`Υ^agg_j = Σ_t λ_t·pshed_{t,j}`. At the CC optimum `σ·gini_num = gini_num/denom =
-Gini(Υ^agg)`. The efficiency term is the UNCOSTED total-shed fraction.
+The fairness part is the Lorenz/cumulative Gini `−(n−1)/n + 2·cumsum/denom`, with
+the TOP cumulative `cumsum = Σ_k (k−1)·sorted[k]` and `denom = n·Σ_j Υ^agg_j` over
+the single per-load cost-weighted aggregate `Υ^agg_j = Σ_t λ_t·pshed_{t,j}`. At the
+CC optimum `σ·denom = 1`, so the fairness part equals `Gini(Υ^agg)`. Because `cumsum`
+is nonnegative and MINIMIZED, `σ·cumsum` is bounded below (McCormick under-estimator
+≥ 0) — no σ upper bound needed, exactly like Palma's `min σ·top_sum`. The efficiency
+term is the UNCOSTED total-shed fraction.
 """
 function set_gini_alpha_objective_cw!(pm, gini::NamedTuple; alpha::Float64)
     @assert 0.0 <= alpha <= 1.0 "alpha must be in [0, 1]"
-    fairness_part = alpha * (gini.σ * gini.gini_num)
+    fairness_part = alpha * (-(gini.n - 1.0) / gini.n + 2.0 * gini.σ * gini.cumsum)
     eff_part      = (1.0 - alpha) * gini.eff_total
     JuMP.@objective(pm.model, Min, fairness_part + eff_part)
 end
@@ -326,7 +334,7 @@ mld_mn = _PMD.instantiate_mc_model(mn_data, _PMD.LinDist3FlowPowerModel, build_f
     multinetwork  = true,
     ref_extensions = [FairLoadDelivery.ref_add_load_blocks!])
 
-# Weak CC: ONE σ·denom=1 (constraint) and σ·gini_num (objective) are bilinear.
+# Weak CC: ONE σ·denom=1 (constraint) and σ·cumsum (objective) are bilinear.
 # Gurobi NonConvex=2 spatially branches. A single aggregate σ is tractable and
 # feasible for integer shedding (only needs Σ Υ^agg > 0). Expect possible
 # TIME_LIMIT returns at non-zero gap; the script accepts feasible incumbents.
@@ -433,8 +441,11 @@ for (idx, alpha) in enumerate(alphas)
     flush(stdout)
     println("alpha=$alpha  status=$status")
     flush(stdout)
-    if JuMP.primal_status(mld_mn.model) != MOI.FEASIBLE_POINT
-        @warn "non-feasible at alpha=$alpha — skipping; total_shed/max_shed/gini left as NaN"
+    # Accept any feasible incumbent (OPTIMAL, TIME_LIMIT, or LOCALLY_SOLVED with a
+    # solution) — `has_values` mirrors the bilevel's acceptance logic, so a
+    # time-limited α with a valid incumbent is recorded instead of dropped to NaN.
+    if !JuMP.has_values(mld_mn.model)
+        @warn "no incumbent at alpha=$alpha (status=$status) — skipping; metrics left as NaN"
         continue
     end
 
@@ -467,11 +478,11 @@ for (idx, alpha) in enumerate(alphas)
     per_load_agg[idx, :] .= pshed_agg_unw
     gini_unweighted_log[idx] = gini_value(pshed_agg_unw)
 
-    model_fair = JuMP.value(gini.σ) * JuMP.value(gini.gini_num)
+    model_fair = -(gini.n - 1.0) / gini.n + 2.0 * JuMP.value(gini.σ) * JuMP.value(gini.cumsum)
     flush(stdout)
     println("  agg total_shed = $(round(sum(agg_vals), digits=3))   ",
             "cost-wtd Gini(Υ^agg) (post-hoc) = $(round(gini_cost_weighted_log[idx], digits=4))   ",
-            "model(σ·gini_num) = $(round(model_fair, digits=4))   ",
+            "model(−(n−1)/n+2σ·cumsum) = $(round(model_fair, digits=4))   ",
             "uncosted-agg-served-Gini (diag) = $(round(gini_served_log[idx], digits=4))")
     flush(stdout)
 

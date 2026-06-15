@@ -1,0 +1,10 @@
+
+======================================================================
+  BILEVEL VALIDATION SUMMARY REPORT
+======================================================================
+  Case: case6_unbalanced_switch_more_meshed_good4integer
+  Fairness Function: palma
+  Iterations: 20
+
+  TOTALS: 0 checks, 0 passed, 0 failed
+======================================================================

@@ -12,7 +12,15 @@
       "Bash(powershell -NoProfile -Command \"Get-Content -Path 'C:\\\\Users\\\\awest\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-awest-github-FairLoadDelivery\\\\032c6c08-b44d-4288-a196-a332b00a5d0d\\\\tasks\\\\bk2wkjym8.output' -Wait -Tail 0 | Select-String -Pattern '--- Iteration \\\\d|----- Period \\\\d|Step \\\\d:|Multi-period validation complete|Results block complete|Heatmap →|Report →|Σ pshed|MethodError|StackOverflow|^ERROR:|Stacktrace|UndefVarError|ArgumentError|BoundsError|cannot find|TerminationStatus|not converged'\")",
       "Bash(FAIR_FUNC=palma julia *)",
       "Bash(FAIR_FUNC=min_max julia *)",
-      "PowerShell(Copy-Item *)"
+      "PowerShell(Copy-Item *)",
+      "Bash(ls results/2026-06-05/)",
+      "Bash(ls results/2026-06-05/bilevel_validation_mn/)",
+      "Bash(ls results/2026-06-05/bilevel_validation_mn_relaxed/)",
+      "Bash(grep -vE '^[+-] *$')",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Post-hoc/replot: unweighted aggregate comparison + plotting fixes *)",
+      "Bash(SMOKE=true ALPHA_POINTS=3 TIME_LIMIT_ALPHA=25 julia --project=. script/single_level/gini_trade_off_mn.jl)",
+      "Bash(echo \"EXIT=$?\")"
     ]
   }
 }

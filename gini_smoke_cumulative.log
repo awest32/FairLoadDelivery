@@ -1,0 +1,420 @@
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Set parameter NonConvex to value 2
+Set parameter MIPGap to value 0.01
+Set parameter TimeLimit to value 45
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 2
+Set parameter Username
+Set parameter LicenseID to value 2813843
+Academic license - for non-commercial use only - expires 2027-04-27
+Set parameter MIPGap to value 0.01
+Set parameter TimeLimit to value 300
+Set parameter MIPFocus to value 1
+Set parameter MIPGap to value 0.01
+Set parameter MIPFocus to value 1
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  300
+MIPGap  0.01
+MIPFocus  1
+
+Optimize a model with 2272 rows, 1310 columns and 5552 nonzeros
+Model fingerprint: 0x3e2ecc13
+Model has 66 quadratic constraints
+Variable types: 1230 continuous, 80 integer (80 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 2e+01]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [9e-02, 4e-01]
+  Bounds range     [1e+00, 2e+01]
+  RHS range        [7e-01, 2e+01]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R122 by 4.345047923
+
+Presolve removed 1722 rows and 982 columns
+Presolve time: 0.06s
+Presolved: 550 rows, 328 columns, 1740 nonzeros
+Presolved model has 24 quadratic constraint(s)
+Variable types: 303 continuous, 25 integer (25 binary)
+
+Root relaxation: objective 9.168647e+00, 174 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    9.16865    0    9          -    9.16865      -     -    0s
+Another try with MIP start
+     0     0   10.29069    0   11          -   10.29069      -     -    0s
+     0     0   10.68614    0   12          -   10.68614      -     -    0s
+     0     0   10.99349    0    5          -   10.99349      -     -    0s
+     0     0   11.36231    0    6          -   11.36231      -     -    0s
+     0     0   12.60447    0    8          -   12.60447      -     -    0s
+H    0     0                      21.4449705   12.60447  41.2%     -    0s
+     0     0   12.60447    0    8   21.44497   12.60447  41.2%     -    0s
+H    0     0                      21.2431214   12.60447  40.7%     -    0s
+     0     0   13.53517    0    4   21.24312   13.53517  36.3%     -    0s
+     0     0   13.97075    0    6   21.24312   13.97075  34.2%     -    0s
+     0     0   13.97075    0    9   21.24312   13.97075  34.2%     -    0s
+H    0     0                      20.4578726   13.97075  31.7%     -    0s
+H    0     0                      15.7039339   13.97075  11.0%     -    0s
+     0     2   13.97075    0    3   15.70393   13.97075  11.0%     -    0s
+
+Cutting planes:
+  Cover: 2
+  Implied bound: 12
+  Clique: 2
+  MIR: 4
+  Flow cover: 4
+  RLT: 5
+  Relax-and-lift: 4
+
+Explored 24 nodes (1108 simplex iterations) in 0.18 seconds (0.08 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 15.7039 20.4579 21.2431 21.445 
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 1.570393388292e+01, best bound 1.570393388292e+01, gap 0.0000%
+
+User-callback calls 1029, time in user-callback 0.00 sec
+Set parameter NumericFocus to value 2
+Set parameter NonConvex to value 2
+Set parameter MIPGap to value 0.01
+Set parameter MIPFocus to value 1
+Set parameter TimeLimit to value 45
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  45
+MIPGap  0.01
+MIPFocus  1
+NonConvex  2
+NumericFocus  2
+
+Optimize a model with 2541 rows, 1473 columns and 6587 nonzeros
+Model fingerprint: 0xf3eaa9c0
+Model has 67 quadratic constraints
+Variable types: 1312 continuous, 161 integer (161 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 6e+02]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [7e-03, 7e-03]
+  Bounds range     [1e-08, 2e+01]
+  RHS range        [7e-01, 6e+02]
+  QRHS range       [1e+00, 1e+00]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R122 by 4.345047923
+
+Presolve removed 1142 rows and 630 columns
+Presolve time: 0.02s
+Presolved: 1426 rows, 885 columns, 4682 nonzeros
+Presolved model has 20 SOS constraint(s)
+Presolved model has 54 quadratic constraint(s)
+Variable types: 744 continuous, 141 integer (141 binary)
+
+Root relaxation: objective 1.866294e-01, 435 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.18663    0   45          -    0.18663      -     -    0s
+Another try with MIP start
+H    0     0                       0.3436937    0.18663  45.7%     -    0s
+     0     0    0.22399    0   40    0.34369    0.22399  34.8%     -    0s
+     0     0    0.22399    0   40    0.34369    0.22399  34.8%     -    0s
+     0     0    0.23024    0   41    0.34369    0.23024  33.0%     -    0s
+     0     0    0.28239    0   41    0.34369    0.28239  17.8%     -    0s
+     0     0    0.28239    0   38    0.34369    0.28239  17.8%     -    0s
+     0     0    0.28239    0   27    0.34369    0.28239  17.8%     -    0s
+     0     2    0.28239    0   27    0.34369    0.28239  17.8%     -    0s
+
+Cutting planes:
+  Learned: 1
+  Cover: 3
+  Implied bound: 28
+  Clique: 2
+  MIR: 6
+  StrongCG: 1
+  Flow cover: 16
+  RLT: 7
+  Relax-and-lift: 5
+
+Explored 200 nodes (5747 simplex iterations) in 0.46 seconds (0.27 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 0.343694 
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 3.436936533759e-01, best bound 3.436936533759e-01, gap 0.0000%
+
+User-callback calls 1392, time in user-callback 0.00 sec
+Load profile assignments for more_meshed_6_bus:
+  (name = "l5", bus = 1, n_phases = 1, balanced = true, phases = [(1, -1)])
+  (name = "l6", bus = 1, n_phases = 1, balanced = true, phases = [(1, 1)])
+  (name = "l7", bus = 1, n_phases = 1, balanced = true, phases = [(1, 0)])
+  (name = "l1", bus = 4, n_phases = 1, balanced = true, phases = [(1, -1)])
+  (name = "l2", bus = 4, n_phases = 1, balanced = true, phases = [(3, -1)])
+  (name = "l3", bus = 4, n_phases = 1, balanced = true, phases = [(2, 0)])
+  (name = "l4", bus = 5, n_phases = 1, balanced = true, phases = [(2, 0)])
+  (name = "l9", bus = 6, n_phases = 3, balanced = true, phases = [(1, 1), (1, -1), (1, 0)])
+  (name = "l8", bus = 7, n_phases = 3, balanced = true, phases = [(2, -1), (2, 0), (2, 1)])
+Warmstart: solving pure-efficiency multi-period MLD (no Gini machinery)…
+  efficiency-warmstart status=OPTIMAL
+  warm cost-wtd agg total=1166.86   σ_start=9.5e-5
+alpha=0.0  status=OPTIMAL
+  agg total_shed = 1166.856   cost-wtd Gini(Υ^agg) (post-hoc) = 0.625   model(−(n−1)/n+2σ·cumsum) = 0.625   uncosted-agg-served-Gini (diag) = 0.4824
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  45
+MIPGap  0.01
+MIPFocus  1
+GomoryPasses  0
+NonConvex  2
+NumericFocus  2
+
+Optimize a model with 2541 rows, 1473 columns and 6587 nonzeros
+Model fingerprint: 0x6db8991a
+Model has 72 quadratic objective terms
+Model has 67 quadratic constraints
+Variable types: 1312 continuous, 161 integer (161 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 6e+02]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-03, 4e-03]
+  QObjective range [2e+00, 2e+01]
+  Bounds range     [1e-08, 2e+01]
+  RHS range        [7e-01, 6e+02]
+  QRHS range       [1e+00, 1e+00]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R122 by 4.345047923
+Loaded MIP start from previous solve with objective 0.484369
+
+Presolve removed 1142 rows and 630 columns
+Presolve time: 0.03s
+Presolved: 1571 rows, 959 columns, 5043 nonzeros
+Presolved model has 20 SOS constraint(s)
+Presolved model has 54 quadratic constraint(s)
+Presolved model has 72 bilinear constraint(s)
+Warning: Model contains variables with very large bounds participating
+         in product terms.
+         Presolve was not able to compute smaller bounds for these variables.
+         Consider bounding these variables or reformulating the model.
+
+
+Solving non-convex MIQCP
+
+Variable types: 818 continuous, 141 integer (141 binary)
+
+Root relaxation: objective -3.511297e-01, 431 iterations, 0.01 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.35113    0   44    0.48437   -0.35113   172%     -    0s
+     0     0   -0.35113    0   55    0.48437   -0.35113   172%     -    0s
+     0     0   -0.35113    0   55    0.48437   -0.35113   172%     -    0s
+     0     0   -0.34022    0   39    0.48437   -0.34022   170%     -    0s
+     0     0   -0.34022    0   40    0.48437   -0.34022   170%     -    0s
+     0     0   -0.31908    0   40    0.48437   -0.31908   166%     -    0s
+     0     2   -0.31908    0   38    0.48437   -0.31908   166%     -    0s
+H   80    62                       0.4728356   -0.24992   153%  59.7    0s
+  1884    10    0.39796   38    -    0.47284    0.39796  15.8%  34.8    5s
+H 1961    13                       0.4665436    0.40273  13.7%  33.9    5s
+* 1961    13              34       0.4665436    0.40273  13.7%  33.9    5s
+
+Cutting planes:
+  Cover: 2
+  Implied bound: 26
+  Flow cover: 36
+  RLT: 3
+  Relax-and-lift: 4
+
+Explored 2081 nodes (69898 simplex iterations) in 5.41 seconds (2.04 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: 0.466544 0.472836 0.484369 
+
+Sub-optimal termination (unable to solve some node relaxations)
+Warning: max constraint violation (4.4368e-05) exceeds tolerance
+Best objective 4.665435758226e-01, best bound 4.325661917821e-01, gap 7.2828%
+
+User-callback calls 5601, time in user-callback 0.00 sec
+alpha=0.5  status=LOCALLY_SOLVED
+  agg total_shed = 1972.152   cost-wtd Gini(Υ^agg) (post-hoc) = 0.3454   model(−(n−1)/n+2σ·cumsum) = 0.3454   uncosted-agg-served-Gini (diag) = 0.7438
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Non-default parameters:
+TimeLimit  45
+MIPGap  0.01
+MIPFocus  1
+GomoryPasses  0
+NonConvex  2
+NumericFocus  2
+
+Optimize a model with 2541 rows, 1473 columns and 6587 nonzeros
+Model fingerprint: 0xb9855269
+Model has 72 quadratic objective terms
+Model has 67 quadratic constraints
+Variable types: 1312 continuous, 161 integer (161 binary)
+Coefficient statistics:
+  Matrix range     [9e-09, 6e+02]
+  QMatrix range    [1e+00, 5e+02]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [4e+00, 3e+01]
+  Bounds range     [1e-08, 2e+01]
+  RHS range        [7e-01, 6e+02]
+  QRHS range       [1e+00, 1e+00]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R122 by 4.345047923
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 1136 rows and 630 columns
+Presolve time: 0.03s
+Presolved: 1577 rows, 959 columns, 4995 nonzeros
+Presolved model has 20 SOS constraint(s)
+Presolved model has 54 quadratic constraint(s)
+Presolved model has 72 bilinear constraint(s)
+Warning: Model contains variables with very large bounds participating
+         in product terms.
+         Presolve was not able to compute smaller bounds for these variables.
+         Consider bounding these variables or reformulating the model.
+
+
+Solving non-convex MIQCP
+
+Variable types: 818 continuous, 141 integer (141 binary)
+
+Root relaxation: objective -8.888889e-01, 411 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.88889    0   43          -   -0.88889      -     -    0s
+Another try with MIP start
+H    0     0                       0.6250445   -0.88889   242%     -    0s
+     0     0   -0.88889    0   68    0.62504   -0.88889   242%     -    0s
+     0     0   -0.88889    0   64    0.62504   -0.88889   242%     -    0s
+     0     0   -0.88889    0   39    0.62504   -0.88889   242%     -    0s
+     0     0   -0.88889    0   45    0.62504   -0.88889   242%     -    0s
+     0     0   -0.88889    0   47    0.62504   -0.88889   242%     -    0s
+     0     2   -0.88889    0   47    0.62504   -0.88889   242%     -    0s
+H  202   115                       0.5595231   -0.67121   220%  38.8    1s
+H  643   274                       0.3360561   -0.50743   251%  42.7    2s
+H  881   234                       0.3346060   -0.40451   221%  43.4    3s
+*  881   234              19       0.3346060   -0.40451   221%  43.4    3s
+H 1078   170                       0.2802572   -0.33944   221%  42.2    3s
+* 1078   170              32       0.2802572   -0.33944   221%  42.2    3s
+H 1155   123                       0.2524717   -0.29155   215%  41.0    3s
+* 1155   123              32       0.2524717   -0.27745   210%  41.0    3s
+
+Cutting planes:
+  Learned: 4
+  Cover: 8
+  Implied bound: 41
+  Clique: 5
+  MIR: 11
+  StrongCG: 1
+  Flow cover: 68
+  RLT: 10
+  Relax-and-lift: 20
+
+Explored 1345 nodes (55515 simplex iterations) in 4.15 seconds (1.76 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 6: 0.252472 0.280257 0.334606 ... 0.625045
+
+Sub-optimal termination (unable to solve some node relaxations)
+Warning: max constraint violation (1.8844e-05) exceeds tolerance
+Best objective 2.524716524563e-01, best bound 2.455123797855e-01, gap 2.7565%
+
+User-callback calls 3903, time in user-callback 0.00 sec
+alpha=1.0  status=LOCALLY_SOLVED
+  agg total_shed = 2477.516   cost-wtd Gini(Υ^agg) (post-hoc) = 0.2525   model(−(n−1)/n+2σ·cumsum) = 0.2525   uncosted-agg-served-Gini (diag) = 0.8889
+[ PowerModelsDistribution | Info ] : Circuit has been reset with the 'clear' on line 1 in 'case6_unbalanced_switch_more_meshed_good4integer.dss'
+[ PowerModelsDistribution | Info ] : Command 'calcvoltagebases' on line 56 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : Command 'solve' on line 58 in 'case6_unbalanced_switch_more_meshed_good4integer.dss' is not supported, skipping.
+[ PowerModelsDistribution | Info ] : basemva=100 is the default value, you may want to adjust sbase_default for better convergence
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpb does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadad does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadac does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpa does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.ohline does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadbc does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadec does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+┌ PowerModelsDistribution | Warning ] : basefreq=60.0 on line.quadpe does not match circuit basefreq=50.0
+└ @ PowerModelsDistribution C:\Users\awest\.julia\packages\PowerModelsDistribution\EOTxp\src\data_model\transformations\dss2eng.jl:422
+[ Main | Info ] : LOAD_SCALE_FACTORS (agg_scales per period): [0.839, 1.072]
+Saved trade-off sweep data → C:\Users\awest\github\FairLoadDelivery\script\single_level\../../results/2026-06-15/gini_trade_off_mn\gini_sweep_mn_more_meshed_6_bus_absolute.jld2
+Done. Results written to: C:\Users\awest\github\FairLoadDelivery\script\single_level\../../results/2026-06-15/gini_trade_off_mn
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT
+GKS: String is too long in routine TEXT

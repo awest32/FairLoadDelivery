@@ -880,10 +880,11 @@ exactly as Palma does on both sides — NOT a per-period `Σ_t λ_t·gini(pshed_
 which would be a different functional that does not match the aggregate-shed
 trade-off.
 
-Gini of the aggregate reduces to a single ratio on the sorted aggregate
-(ascending):
+Gini of the aggregate, in the Lorenz/cumulative form (martin_using_2025) on the
+sorted aggregate (ascending), with the TOP cumulative
+cumsum = Σ_{i=1}^{n-1}(sum of the i largest) = Σ_k (k−1)·pshed_agg_(k):
 
-    G = Σ_i (2i − n − 1) · pshed_agg_(i) / (n · Σ_i pshed_agg_i)
+    G = −(n−1)/n + 2·cumsum / (n · Σ_i pshed_agg_i)
 
 Charnes-Cooper with a SINGLE global σ = 1 / (n · Σ_i pshed_agg_i):
 
@@ -891,13 +892,19 @@ Charnes-Cooper with a SINGLE global σ = 1 / (n · Σ_i pshed_agg_i):
   * `pshed_agg_z[i] = Σ_t λ_t·pshed_z[(t-1)n+i] = σ·pshed_agg[i]`
   * `u_z = a·pshed_agg_z` (binary × continuous, indicator constraints)
   * normalization:  `n · Σ_i pshed_agg_z[i] = 1`   (= σ·n·Σpshed_agg = 1, LINEAR)
-  * objective:  `min Σ_i (2i−n−1)·Σ_j u_z[i,j]`     (= σ·Gini-numerator = Gini, no λ)
+  * sorted_z_i = Σ_j u_z[i,j] (ascending),  cumsum_z = Σ_k (k−1)·sorted_z_k
+  * objective:  `min −(n−1)/n + 2·cumsum_z`   (= Gini; no λ)
+
+cumsum_z is nonnegative and MINIMIZED — the same minimize-friendly top-cumulative
+Lorenz form used in the single-level `gini_trade_off_mn.jl`, so the two report Gini
+under one expression. (Equivalent to the classic Σ_i(2i−n−1)·pshed_agg_(i)/(n·Σ)
+here, since the normalization fixes Σ sorted_z = 1/n.)
 
 Infrastructure (single σ unbounded above, ONE permutation, rescaled trust region
 / weight bounds / weight budget / pshed bounds, block-diagonality guard as info
 only) is IDENTICAL to `palma_ratio_minimization_formal_cc`; only the
-normalization (full-sum instead of bot40) and the objective coefficients
-(`2i−n−1` instead of the top10 indicator) differ.
+normalization (full-sum instead of bot40) and the cumulative Gini objective
+(instead of the top10 indicator) differ.
 """
 function gini_index_minimization_formal_cc(
     dpshed_dw::Matrix{Float64},
@@ -967,9 +974,6 @@ function gini_index_minimization_formal_cc(
     else
         @info "[Gini agg formal CC] Jacobian is block-diagonal (max off-block-diag = $max_off_block_diag)"
     end
-
-    # Gini sort coefficients (2i − n − 1) over the aggregate sort positions.
-    gini_coef = Float64[2 * i - n - 1 for i in 1:n]
 
     λ = isempty(peak_time_costs) ? ones(n_periods) : peak_time_costs
     @assert length(λ) == n_periods
@@ -1072,9 +1076,13 @@ function gini_index_minimization_formal_cc(
         @constraint(model, pshed_z[j] <= pd[j] * σ)
     end
 
-    # Linear Gini objective: min Σ_i (2i−n−1)·Σ_j u_z[i,j]  (= σ·Gini-num = Gini; no λ).
-    @objective(model, Min,
-        sum(gini_coef[i] * sum(u_z[i, j] for j in 1:n) for i in 1:n))
+    # Linear Gini objective (Lorenz/cumulative, TOP form): with the normalization
+    # n·Σ pshed_agg_z = 1, Gini = −(n−1)/n + 2·cumsum_z, where the top cumulative
+    # cumsum_z = Σ_k (k−1)·sorted_z[k] = Σ_{i=1}^{n-1}(sum of i largest sorted_z).
+    # Nonnegative and MINIMIZED — matches the single-level gini_trade_off_mn.jl
+    # expression (formal CC is a MILP, so bounded either way).
+    cumsum_z = @expression(model, sum((k - 1) * sorted_z[k] for k in 1:n))
+    @objective(model, Min, -(n - 1.0) / n + 2.0 * cumsum_z)
 
     solve_time = @elapsed optimize!(model)
     status = termination_status(model)

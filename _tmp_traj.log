@@ -1,0 +1,14 @@
+┌ Warning: type PowerModelsDistribution.LoadModel does not exist in workspace; reconstructing
+└ @ JLD2 C:\Users\awest\.julia\packages\JLD2\qcxKY\src\data\reconstructing_datatypes.jl:472
+┌ Warning: type PowerModelsDistribution.ConnConfig does not exist in workspace; reconstructing
+└ @ JLD2 C:\Users\awest\.julia\packages\JLD2\qcxKY\src\data\reconstructing_datatypes.jl:472
+┌ Warning: type PowerModelsDistribution.LoadModel does not exist in workspace; reconstructing
+└ @ JLD2 C:\Users\awest\.julia\packages\JLD2\qcxKY\src\data\reconstructing_datatypes.jl:472
+┌ Warning: type PowerModelsDistribution.ConnConfig does not exist in workspace; reconstructing
+└ @ JLD2 C:\Users\awest\.julia\packages\JLD2\qcxKY\src\data\reconstructing_datatypes.jl:472
+
+== RELAXED palma bilevel  (completed_iters=?) ==
+  keys: relaxed_bus_pshed_matrix, N_PERIODS, math_switch, PEAK_TIME_COSTS, relaxed_mn_objective, bus_labels, iter_timings, SELECTED_HOURS, CASE, LOAD_SCALE_FACTORS, pd_ref_matrix, CENTER_AT_NOMINAL, LS_PERCENT, math_load, math_branch, FAIR_FUNC, mn_relaxed_solution_per_period, load_labels, final_fair_weights, relaxed_pshed_matrix, math_bus, load_block_sets, PEAK_STRESS, period_labels, final_weight_ids, pshed_type, relaxed_bus_status_matrix, bus_pd_matrix
+
+== INTEGER palma bilevel  (completed_iters=?) ==
+  keys: pshed_type, relaxed_bus_pshed_matrix, N_PERIODS, period_max, PEAK_TIME_COSTS, relaxed_mn_objective, bus_labels, iter_timings, math_switch, mn_ac_solution_per_period, SELECTED_HOURS, bus_status_matrix, CASE, LOAD_SCALE_FACTORS, pd_ref_matrix, CENTER_AT_NOMINAL, pshed_matrix, LS_PERCENT, math_load, mn_rounded_solution_per_period, math_branch, FAIR_FUNC, mn_relaxed_solution_per_period, load_labels, final_fair_weights, period_total, relaxed_pshed_matrix, math_bus, load_block_sets, PEAK_STRESS, rounded_objectives, period_labels, bus_pshed_matrix, final_weight_ids, relaxed_bus_status_matrix, bus_pd_matrix
